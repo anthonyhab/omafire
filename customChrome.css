@@ -496,6 +496,85 @@ sidebar-pins-promo {
     border-bottom-color: var(--omarchy-border) !important;
 }
 
+/* Hyprland owns window lifecycle and geometry. The compositor shortcuts are
+ * the close/maximize/minimize affordances; do not reserve headerbar space for
+ * GNOME-style CSD buttons. */
+:root[customtitlebar] .titlebar-buttonbox-container,
+#nav-bar .titlebar-buttonbox-container,
+#TabsToolbar .titlebar-buttonbox-container,
+#toolbar-menubar .titlebar-buttonbox-container,
+.titlebar-buttonbox-container {
+    display: none !important;
+}
+
+.titlebar-button.titlebar-close,
+.titlebar-button.titlebar-min,
+.titlebar-button.titlebar-max,
+.titlebar-button.titlebar-restore {
+    display: none !important;
+}
+
+/* Navigation controls are a compact icon rail, not a row of GNOME button
+ * cards. Preserve a quiet hover/active signal without consuming extra space. */
+#nav-bar {
+    --gnome-toolbar-padding: 2px !important;
+    --gnome-toolbar-spacing: 2px !important;
+    --gnome-button-size: 30px !important;
+    --gnome-button-background: transparent !important;
+    --gnome-button-hover-background: var(--omarchy-hover) !important;
+    --gnome-button-active-background: var(--omarchy-active) !important;
+}
+
+#nav-bar toolbarbutton:not(
+        #urlbar-zoom-button,
+        .subviewbutton,
+        .titlebar-button,
+        #urlbar-searchmode-switcher,
+        .searchmode-switcher-close
+    ) {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin-inline: 1px !important;
+    min-height: 30px !important;
+    min-width: 30px !important;
+    padding: 0 !important;
+}
+
+#nav-bar toolbarbutton:not(
+        #urlbar-zoom-button,
+        .subviewbutton,
+        .titlebar-button,
+        #urlbar-searchmode-switcher,
+        .searchmode-switcher-close
+    ):hover {
+    background: var(--omarchy-hover) !important;
+}
+
+#nav-bar toolbarbutton:not(
+        #urlbar-zoom-button,
+        .subviewbutton,
+        .titlebar-button,
+        #urlbar-searchmode-switcher,
+        .searchmode-switcher-close
+    ):active,
+#nav-bar toolbarbutton:not(
+        #urlbar-zoom-button,
+        .subviewbutton,
+        .titlebar-button,
+        #urlbar-searchmode-switcher,
+        .searchmode-switcher-close
+    )[open] {
+    background: var(--omarchy-active) !important;
+}
+
+#nav-bar > toolbarbutton > .toolbarbutton-icon,
+#nav-bar > toolbaritem > toolbarbutton > .toolbarbutton-icon {
+    height: 20px !important;
+    width: 20px !important;
+}
+
 #navigator-toolbox .toolbarbutton-icon,
 #navigator-toolbox .toolbarbutton-text,
 .menu-iconic-left,

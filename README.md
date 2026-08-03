@@ -13,7 +13,9 @@
 This theme follows latest GNOME Adwaita style.
 
 > [!WARNING]
-> ### Disclaimer:
+>
+> ### Disclaimer
+>
 > Be aware that this theme might do things that are not supported by upstream Firefox. If you face an issue while using this theme, report it here first or test if it is reproducible in vanilla Firefox.
 >
 > If you are a software distribution maintainer, please do not ship these changes by default to your users unless you make it extremely clear that they are using a modified version of the Firefox UI.
@@ -63,15 +65,17 @@ First you need to grab a fresh copy of the theme repository by cloning it with g
 
 1. Clone this repo and enter folder:
 
-	```sh
-	git clone https://github.com/rafaelmardojai/firefox-gnome-theme.git
-	cd firefox-gnome-theme
-	```
-2. Checkout a git branch or tag if needed, otherwise use `master` and ignore this step.
-	```sh
-	git checkout beta # Set beta branch
-	git checkout v78.1 # Set v78.1 tag
-	```
+ ```sh
+ git clone https://github.com/rafaelmardojai/firefox-gnome-theme.git
+ cd firefox-gnome-theme
+ ```
+
+1. Checkout a git branch or tag if needed, otherwise use `master` and ignore this step.
+
+ ```sh
+ git checkout beta # Set beta branch
+ git checkout v78.1 # Set v78.1 tag
+ ```
 
 This theme provides two installation scripts in addition to the curled one.
 
@@ -99,15 +103,17 @@ Here are some examples of how to use it:
 ```
 
 #### Script options
+
 - `-f <firefox_folder_path>` *optional*
-	- Set custom Firefox folder path, for example `~/.mozilla/icecat/`.
-	- Default: `~/.mozilla/firefox/`
+  - Set custom Firefox folder path, for example `~/.mozilla/icecat/`.
+  - Default: `~/.mozilla/firefox/`
 
 - `-p <profile_name>` *optional*
-	- Set custom profile name, for example `e0j6yb0p.default-nightly`.
-	- Default: All the profiles found in the firefox folder
+  - Set custom profile name, for example `e0j6yb0p.default-nightly`.
+  - Default: All the profiles found in the firefox folder
 
 ### Advanced notes
+
 <details>
     <summary>Expand</summary>
 
@@ -116,16 +122,18 @@ If you want to checkout the theme version tag matching you Firefox version you c
 ```sh
 git checkout v$(firefox --version | cut -d ' ' -f 3 | cut -d '.' -f 1) # Using Firefox version
 ```
+
 </details>
 
 ## Package managers
 
 ### Arch Linux
 
-1. Install the [AUR package](https://aur.archlinux.org/packages/firefox-gnome-theme) `firefox-gnome-theme` 
+1. Install the [AUR package](https://aur.archlinux.org/packages/firefox-gnome-theme) `firefox-gnome-theme`
 2. Follow the instructions at `cat /usr/share/doc/firefox-gnome-theme/INSTALL.md`
 
 ## Manual installation
+
 <details>
     <summary>Expand</summary>
 
@@ -174,20 +182,22 @@ git checkout v$(firefox --version | cut -d ' ' -f 3 | cut -d '.' -f 1) # Using F
 10. Open Firefox customization panel and move the new tab button to headerbar.
 
 11. Be happy with your new gnomish Firefox.
+
 </details>
 
 ## Required Firefox preferences
+
 We provide a **user.js** configuration file in `configuration/user.js` that enables some preferences required by this theme to work.
 
 You should already have this file installed if you followed one of the installation methods, but in any case be sure this preferences are enabled under `about:config`:
 
 - `toolkit.legacyUserProfileCustomizations.stylesheets`
 
-	This preference is required to load the custom CSS in Firefox, otherwise the theme wouldn't work.
+ This preference is required to load the custom CSS in Firefox, otherwise the theme wouldn't work.
 
 - `svg.context-properties.content.enabled`
 
-	This preference is required to recolor the icons, otherwise you will get black icons everywhere.
+ This preference is required to recolor the icons, otherwise you will get black icons everywhere.
 
 > For other non essential preferences checkout `configuration/user.js`.
 
@@ -196,11 +206,13 @@ You should already have this file installed if you followed one of the installat
 You can follow the installation script steps again to update the theme.
 
 ## Uninstalling
+
 1. Go to your profile folder. (Go to `about:support` in Firefox > Application Basics > Profile Directory > Open Directory)
 2. Remove `chrome` folder.
 3. Remove the unwanted preferences from your `user.js` inside your profile folder. The install script append the needed prefs in that file, you can check what preferences does it append by checking `configuration/user.js` in this repo.
 
 ## Enabling optional features
+
 Optional features can be enabled by creating new `boolean` preferences in `about:config`.
 
 1. Go to the `about:config` page
@@ -212,85 +224,83 @@ Optional features can be enabled by creating new `boolean` preferences in `about
 
 - **Hide single tab** `gnomeTheme.hideSingleTab`
 
-	Hide the tab bar when only one tab is open.
+ Hide the tab bar when only one tab is open.
 
-	> **Note:** You should move the new tab button out of the tabbar or it will be hidden when there is only one tab. You can rearrange the toolbars doing a right-click on any toolbar and selecting "Customize Toolbar…".
+ > **Note:** You should move the new tab button out of the tabbar or it will be hidden when there is only one tab. You can rearrange the toolbars doing a right-click on any toolbar and selecting "Customize Toolbar…".
 
 - **Normal width tabs** `gnomeTheme.normalWidthTabs`
 
-	Use normal width tabs as default Firefox.
+ Use normal width tabs as default Firefox.
 
 - **Swap tab close button position** `gnomeTheme.swapTabClose`
 
-	By default the tab close buttons follows the position of the window controls, this preference reverts that behavior.
+ By default the tab close buttons follows the position of the window controls, this preference reverts that behavior.
 
 - **Bookmarks toolbar under tabs** `gnomeTheme.bookmarksToolbarUnderTabs`
 
-	Move Bookmarks toolbar under tabs.
+ Move Bookmarks toolbar under tabs.
 
 - **Active tab contrast** `gnomeTheme.activeTabContrast`
 
-	Add more contrast to the active tab.
+ Add more contrast to the active tab.
 
 - **Close only selected tabs** `gnomeTheme.closeOnlySelectedTabs`
 
-	Show the close button on the selected tab only.
+ Show the close button on the selected tab only.
 
 - **System icons** `gnomeTheme.systemIcons`
 
-	Use system theme icons instead of Adwaita icons included by theme.
+ Use system theme icons instead of Adwaita icons included by theme.
 
-	> **Note:** This feature has a [known color bug](#icons-color-broken-with-system-icons).
-
+ > **Note:** This feature has a [known color bug](#icons-color-broken-with-system-icons).
 
 - **No themed Icons** `gnomeTheme.noThemedIcons`
 
-	Use default Firefox icons instead of the included icons.
-
+ Use default Firefox icons instead of the included icons.
 
 - **Symbolic tab icons** `gnomeTheme.symbolicTabIcons`
 
-	Make all tab icons look kinda like symbolic icons.
+ Make all tab icons look kinda like symbolic icons.
 
 - **Hide WebRTC indicator** `gnomeTheme.hideWebrtcIndicator`
 
-	Hide redundant WebRTC indicator since GNOME provides their own privacy icons in the top right.
+ Hide redundant WebRTC indicator since GNOME provides their own privacy icons in the top right.
 
 - **Hide unified extensions button** `gnomeTheme.hideUnifiedExtensions`
 
-	Hide unified extensions button from the navbar, you can also use `extensions.unifiedExtensions.enabled` instead, which is only going to work till Firefox 111.
+ Hide unified extensions button from the navbar, you can also use `extensions.unifiedExtensions.enabled` instead, which is only going to work till Firefox 111.
 
 - **Drag window from headerbar buttons** `gnomeTheme.dragWindowHeaderbarButtons`
 
-	Allow dragging the window from headerbar buttons.
+ Allow dragging the window from headerbar buttons.
 
-	> **Note:** This feature is BUGGED. It can activate the button with unpleasant behavior.
+ > **Note:** This feature is BUGGED. It can activate the button with unpleasant behavior.
 
 - **Tabs as headerbar** `gnomeTheme.tabsAsHeaderbar`
 
-	Place the tabs on the top of the window, and use the tabs bar to hold the window controls, like Firefox's standard tab bar.
-	
-	> **Note:** Enabling with `gnomeTheme.hideSingleTab` will replace the single tab with a title bar.
+ Place the tabs on the top of the window, and use the tabs bar to hold the window controls, like Firefox's standard tab bar.
+
+ > **Note:** Enabling with `gnomeTheme.hideSingleTab` will replace the single tab with a title bar.
 
 - **OLED black theme** `gnomeTheme.oledBlack`
 
-	Change the dark theme into the black variant.
-	
+ Change the dark theme into the black variant.
+
 - **Show "List All Tabs" button on overflow** `gnomeTheme.allTabsButtonOnOverflow`
 
-	Show the `List All Tabs` button when the tabs bar is overflowing (when you have too many tabs that the width of the tabs no longer shrinks when new tabs are added).
+ Show the `List All Tabs` button when the tabs bar is overflowing (when you have too many tabs that the width of the tabs no longer shrinks when new tabs are added).
 
 - **Show "List All Tabs" button** `gnomeTheme.allTabsButton`
 
-	Show the `List All Tabs` button all the time, like stock Firefox.
-    
+ Show the `List All Tabs` button all the time, like stock Firefox.
+
 - **Align tab title and icon to left** `gnomeTheme.tabAlignLeft`
 
-	Align the tab title and favicon to left of tab in place of center.
-	
+ Align the tab title and favicon to left of tab in place of center.
+
 - **Bookmarks bar in fullscreen** `gnomeTheme.bookmarksOnFullscreen`
 
-	 Show the bookmarks bar while in fullscreen.
+  Show the bookmarks bar while in fullscreen.
 
 ### Extensions support
 
@@ -301,25 +311,29 @@ We also have optional features to enable support for some Firefox extensions.
 
 - **Adaptive Tab Bar Colour support** `gnomeTheme.extensions.adaptiveTabBarColour`
 
-	> **Note:** Adaptive Tab Bar Colour presently hard-codes the colours for the home page (both normal as well as private windows). When navigating from the home page to any other page, the colour of the UI might momentarily switch to the original firefox home page colour before switching back to the expected colour (this is especially noticeable in private windows). This only happens when navigating from the homepage to another page, subsequent navigations should be unaffected.
-	
+ > **Note:** Adaptive Tab Bar Colour presently hard-codes the colours for the home page (both normal as well as private windows). When navigating from the home page to any other page, the colour of the UI might momentarily switch to the original firefox home page colour before switching back to the expected colour (this is especially noticeable in private windows). This only happens when navigating from the homepage to another page, subsequent navigations should be unaffected.
+
 ## Known bugs
 
 ### CSD have sharp corners
+
 See upstream [bug](https://bugzilla.mozilla.org/show_bug.cgi?id=1408360).
 
-#### Wayland fix:
+#### Wayland fix
+
 1. Go to the `about:config` page
 2. Search for the `layers.acceleration.force-enabled` preference and set it to true.
 3. Now restart Firefox, and it should look good!
 
-#### X11 fix:
+#### X11 fix
+
 1. Go to the `about:config` page
 2. Type `mozilla.widget.use-argb-visuals`
 3. Set it as a `boolean` and click on the add button
 4. Now restart Firefox, and it should look good!
 
 ### Icons color broken with System icons
+
 Icons might appear black where they should be white on some systems. I have no idea why, but you can adjust them directly in the `system-icons.css` file, look for `--gnome-icons-hack-filter` & `--gnome-window-icons-hack-filter` vars and play with css filters.
 
 ## Development
@@ -348,7 +362,9 @@ Feel free to use any parts of my code to develop your own themes, I don't force
 any specific license on your code.
 
 ## Credits
+
 Developed by **[Rafael Mardojai CM](https://github.com/rafaelmardojai)** and [contributors](https://github.com/rafaelmardojai/firefox-gnome-theme/graphs/contributors). Based on **[Luna Kurame](https://github.com/lunakurame/firefox-gnome-theme)**'s original work.
 
 ## Donate
+
 If you want to support development, consider donating via [PayPal](https://paypal.me/RafaelMardojaiCM). Also consider donating upstream, [Firefox](https://donate.mozilla.org/) & [GNOME](https://www.gnome.org/donate/).

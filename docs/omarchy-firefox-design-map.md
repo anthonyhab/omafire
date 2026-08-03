@@ -34,7 +34,7 @@ still needs a focused pass so future work does not restart the same audit.
 
 | Area | State | Notes |
 | --- | --- | --- |
-| Chrome surfaces and text | Done (base states) | Flat Pywal-derived surfaces and readable neutral foregrounds. |
+| Chrome surfaces and text | Done (base states) | Flat Pywal-derived surfaces and readable neutral foregrounds; navigation controls are now a compact icon rail. |
 | URL bar layout | Done (base/focus states) | Flexible input, explicit control rhythm, identity/search spacing, and native breakout outline replaced by Hyprland border tokens. |
 | URL autocomplete | Done | Readable URLs/actions, flat panel, dynamic border, no shadow. |
 | Horizontal tabs | Done | Selected tab is an accent line/subtle surface rather than a full bright card. |
@@ -46,7 +46,7 @@ still needs a focused pass so future work does not restart the same audit.
 | Find bar | Checked | Dark field, readable controls, dynamic border color. |
 | Library/downloads window | Patched and checked | `places.xhtml` had white/gray surfaces; it now has a dark Omarchy fallback and styled tree rows/search. |
 | Pywalfox integration | Checked | Real extension and matching native host work in the Firefox VM. |
-| Hyprland geometry | Done | Rounding and active/inactive border width/color/gradient generation is live. |
+| Hyprland geometry | Done | Rounding and active/inactive border width/color/gradient generation is live; compositor-owned window controls are removed from Firefox chrome. |
 | Startup layer count | Done | The Omarchy layer is inline; no extra stylesheet import was retained. |
 | Firefox VM foundation | Done | Persistent `omarchy-firefox-test` base includes Firefox 153. |
 | Real-profile test sync | Done | Toolbar state, vertical-tab state, extensions, and non-sensitive profile settings are copied without browsing data or credentials. |
@@ -82,7 +82,7 @@ means the surface was inspected but still needs a focused styling pass.
 | Reader mode and PDF viewer | Pending | Check toolbar, sidebars, menus, and content backgrounds. |
 | Print preview, save page, file chooser, certificate dialogs | Pending | Native dialogs may be outside userChrome scope; classify separately. |
 | DevTools, Picture-in-Picture, fullscreen, find-in-page | Pending | Check separate windows, overlays, and focus/inactive borders. |
-| Window inactive state and multi-window layout | Partial | Active/inactive border tokens are implemented; capture both states. |
+| Window inactive state and multi-window layout | Partial | Active/inactive border tokens are implemented and Firefox CSD close/minimize/maximize controls are hidden; capture both states. |
 | Dynamic Hyprland radius/border changes | Checked synthetically | Repeat with a nonzero live Hyprland border when needed. |
 
 ## Repeatable test workflow
