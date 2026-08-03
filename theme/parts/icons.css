@@ -512,11 +512,18 @@ button.close::before {
 		list-style-image: var(--gnome-icon-edit-find-symbolic) !important;
 	}
 	#trust-icon-container {
+		/* Firefox's native secure shield keeps the trust panel's proportions. */
 		&.secure {
-			list-style-image: var(--gnome-icon-shield-safe-symbolic) !important;
+			list-style-image: url("chrome://browser/skin/trust-icon-active.svg") !important;
+			> #trust-icon {
+				list-style-image: url("chrome://browser/skin/trust-icon-active.svg") !important;
+			}
 		}
 		&.insecure {
 			list-style-image: var(--gnome-icon-shield-danger-symbolic) !important;
+			> #trust-icon {
+				list-style-image: var(--gnome-icon-shield-danger-symbolic) !important;
+			}
 		}
 	}	
 	.urlbar-input-container[pageproxystate="valid"] > #tracking-protection-icon-container > #tracking-protection-icon-box > #tracking-protection-icon {
