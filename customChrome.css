@@ -1,0 +1,431 @@
+/* Local cohesion overrides for the GNOME theme.
+ * Pywalfox supplies the --lwt-* values; keep chrome surfaces derived from them
+ * instead of the stock Adwaita fallback palette.
+ */
+
+@namespace xul "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+
+:root[lwtheme-brighttext] {
+    color-scheme: dark;
+}
+
+:root[lwtheme]:not([lwtheme-brighttext]) {
+    color-scheme: light;
+}
+
+:root {
+    /* Keep Firefox's native theme aliases on the Pywalfox palette. */
+    --toolbar-bgcolor: var(--lwt-accent-color) !important;
+    --toolbar-color: var(--lwt-text-color) !important;
+    --toolbar-background-color: var(--lwt-accent-color) !important;
+    --toolbar-text-color: var(--lwt-text-color) !important;
+    --toolbar-field-background-color: var(
+        --lwt-toolbar-field-background-color
+    ) !important;
+    --toolbar-field-color: var(--lwt-toolbar-field-color) !important;
+    --toolbar-field-text-color: var(--lwt-toolbar-field-color) !important;
+    --toolbar-field-text-color-focus: var(--lwt-toolbar-field-color) !important;
+    --toolbar-field-focus-background-color: var(
+        --lwt-toolbar-field-background-color
+    ) !important;
+    --toolbar-field-focus-color: var(--lwt-toolbar-field-color) !important;
+    --urlbar-box-text-color: var(--lwt-toolbar-field-color) !important;
+    --urlbar-box-text-color-hover: var(--lwt-toolbar-field-color) !important;
+    --urlbarview-text-color-selected: var(--lwt-text-color) !important;
+    --urlbarView-secondary-text-color: color-mix(
+        in srgb,
+        var(--lwt-text-color) 73%,
+        transparent
+    ) !important;
+    --link-color: var(--lwt-text-color) !important;
+    --link-color-hover: var(--lwt-text-color) !important;
+    --toolbarbutton-icon-fill: var(--lwt-text-color) !important;
+    --tab-selected-textcolor: var(--lwt-text-color) !important;
+
+    /* Keep Firefox's popup pair tied to the same live theme surface. */
+    --arrowpanel-background: color-mix(
+        in srgb,
+        var(--lwt-accent-color),
+        var(--lwt-text-color) 10%
+    ) !important;
+    --arrowpanel-color: var(--lwt-text-color) !important;
+    --arrowpanel-border-color: var(
+        --lwt-toolbar-field-border-color
+    ) !important;
+
+    /* Internal Firefox surfaces that do not automatically inherit LWT colors. */
+    --panel-background: var(--arrowpanel-background) !important;
+    --panel-color: var(--arrowpanel-color) !important;
+    --panel-border-color: var(--arrowpanel-border-color) !important;
+    --sidebar-background-color: var(--lwt-sidebar-background-color) !important;
+    --sidebar-text-color: var(
+        --lwt-sidebar-text-color,
+        var(--lwt-text-color)
+    ) !important;
+    --input-bgcolor: var(--lwt-toolbar-field-background-color) !important;
+    --input-color: var(--lwt-toolbar-field-color) !important;
+    --input-border-color: var(--lwt-toolbar-field-border-color) !important;
+
+    /* Bridge the GNOME theme tokens to Firefox Theme API values. */
+    --gnome-window-background: var(--lwt-accent-color) !important;
+    --gnome-window-color: var(--lwt-text-color) !important;
+    --gnome-view-background: var(--lwt-accent-color) !important;
+    --gnome-view-color: var(--lwt-text-color) !important;
+    --gnome-sidebar-background: var(--lwt-sidebar-background-color) !important;
+    --gnome-secondary-sidebar-background: color-mix(
+        in srgb,
+        var(--lwt-sidebar-background-color),
+        var(--lwt-sidebar-text-color) 5%
+    ) !important;
+    --gnome-sidebar-text-color: var(
+        --lwt-sidebar-text-color,
+        var(--lwt-text-color)
+    ) !important;
+
+    --gnome-headerbar-background: var(--toolbar-bgcolor) !important;
+    --gnome-toolbar-background: var(--toolbar-bgcolor) !important;
+    --gnome-toolbar-icon-fill: var(--toolbarbutton-icon-fill) !important;
+    --gnome-toolbar-border-color: var(
+        --lwt-toolbar-field-border-color
+    ) !important;
+    --gnome-border-color: color-mix(
+        in srgb,
+        var(--lwt-text-color) 15%,
+        transparent
+    ) !important;
+
+    --gnome-menu-background: color-mix(
+        in srgb,
+        var(--lwt-accent-color),
+        var(--lwt-text-color) 10%
+    ) !important;
+    --gnome-menu-color: var(--lwt-text-color) !important;
+    --gnome-menu-border-color: var(
+        --lwt-toolbar-field-border-color
+    ) !important;
+    --gnome-menu-separator-color: var(
+        --lwt-toolbar-field-border-color
+    ) !important;
+
+    --gnome-entry-background: var(
+        --lwt-toolbar-field-background-color
+    ) !important;
+    --gnome-entry-color: var(--lwt-toolbar-field-color) !important;
+    --gnome-inactive-entry-color: var(--lwt-toolbar-field-color) !important;
+    --gnome-entry-focused-border-color: var(--lwt-tab-line-color) !important;
+    --gnome-focus-border-color: var(--lwt-tab-line-color) !important;
+    --gnome-selection-bg: color-mix(
+        in srgb,
+        var(--lwt-tab-line-color) 30%,
+        transparent
+    ) !important;
+
+    --gnome-accent-bg: var(--lwt-tab-line-color) !important;
+    --gnome-accent: var(--lwt-tab-line-color) !important;
+    --gnome-selected-background: color-mix(
+        in srgb,
+        var(--lwt-tab-line-color) 25%,
+        transparent
+    ) !important;
+    --gnome-hover-color: color-mix(
+        in srgb,
+        var(--lwt-text-color) 10%,
+        transparent
+    ) !important;
+    --gnome-active-color: color-mix(
+        in srgb,
+        var(--lwt-text-color) 18%,
+        transparent
+    ) !important;
+    --gnome-selected-color: color-mix(
+        in srgb,
+        var(--lwt-tab-line-color) 22%,
+        transparent
+    ) !important;
+    --gnome-selected-hover-color: color-mix(
+        in srgb,
+        var(--lwt-tab-line-color) 30%,
+        transparent
+    ) !important;
+    --gnome-selected-active-color: color-mix(
+        in srgb,
+        var(--lwt-tab-line-color) 38%,
+        transparent
+    ) !important;
+
+    --gnome-card-background: color-mix(
+        in srgb,
+        var(--lwt-accent-color),
+        var(--lwt-text-color) 8%
+    ) !important;
+    --gnome-card-shade-color: var(
+        --lwt-toolbar-field-border-color
+    ) !important;
+
+    --gnome-tabbar-background: var(--toolbar-bgcolor) !important;
+    --gnome-tabbar-tab-hover-background: color-mix(
+        in srgb,
+        var(--toolbar-bgcolor),
+        var(--toolbar-color) 10%
+    ) !important;
+    --gnome-tabbar-tab-active-background: var(
+        --lwt-selected-tab-background-color,
+        var(--lwt-tab-line-color)
+    ) !important;
+    --gnome-tabbar-tab-active-background-contrast: color-mix(
+        in srgb,
+        var(--gnome-tabbar-tab-active-background),
+        var(--lwt-text-color) 20%
+    ) !important;
+    --gnome-tabbar-tab-active-hover-background: color-mix(
+        in srgb,
+        var(--gnome-tabbar-tab-active-background),
+        var(--toolbar-color) 10%
+    ) !important;
+}
+
+/* Main navigation surfaces and chrome text. */
+#navigator-toolbox,
+#toolbar-menubar,
+#TabsToolbar,
+#nav-bar,
+#PersonalToolbar {
+    background: var(--toolbar-bgcolor) !important;
+    color: var(--toolbar-color) !important;
+}
+
+#navigator-toolbox {
+    border-bottom-color: var(--lwt-toolbar-field-border-color) !important;
+}
+
+#navigator-toolbox .toolbarbutton-icon,
+#navigator-toolbox .toolbarbutton-text,
+.menu-iconic-left,
+.menuitem-iconic {
+    color: var(--lwt-text-color) !important;
+    fill: var(--lwt-text-color) !important;
+    -moz-context-properties: fill, fill-opacity !important;
+}
+
+/* URL bar field: use the same live Pywalfox field colors as Firefox itself. */
+#urlbar,
+#urlbar-background,
+#urlbar-input-container,
+#urlbar .urlbar-input,
+#urlbar .urlbar-input-box {
+    background-color: var(--lwt-toolbar-field-background-color) !important;
+    color: var(--lwt-toolbar-field-color) !important;
+    border-color: var(--lwt-toolbar-field-border-color) !important;
+}
+
+#urlbar .urlbarView-url,
+#urlbar .urlbarView-explanation {
+    color: var(--lwt-text-color) !important;
+}
+
+#urlbar[breakout][breakout-extend] {
+    background-color: var(--lwt-toolbar-field-background-color) !important;
+    color: var(--lwt-toolbar-field-color) !important;
+    border-color: var(--lwt-tab-line-color) !important;
+}
+
+#urlbar[focused] #urlbar-background,
+#urlbar[breakout][breakout-extend] #urlbar-background {
+    outline-color: var(--lwt-tab-line-color) !important;
+}
+
+/* Use Firefox's paired sidebar text/highlight colors for the launcher and tabs. */
+#sidebar-main,
+#vertical-tabs,
+#tabbrowser-arrowscrollbox[orient="vertical"],
+#sidebar-box,
+#sidebar,
+.sidebar-panel {
+    color: var(--lwt-sidebar-text-color, var(--lwt-text-color)) !important;
+}
+
+#sidebar-main {
+    --gnome-toolbar-icon-fill: var(
+        --lwt-sidebar-text-color,
+        var(--lwt-text-color)
+    ) !important;
+    --gnome-hover-color: color-mix(
+        in srgb,
+        var(--lwt-sidebar-text-color, var(--lwt-text-color)) 10%,
+        transparent
+    ) !important;
+    --gnome-active-color: color-mix(
+        in srgb,
+        var(--lwt-sidebar-text-color, var(--lwt-text-color)) 18%,
+        transparent
+    ) !important;
+    --gnome-selected-color: color-mix(
+        in srgb,
+        var(--lwt-sidebar-highlight-background-color, var(--lwt-tab-line-color)) 25%,
+        transparent
+    ) !important;
+}
+
+/* Keep the sidebar and viewport flush; disable the native rounded-content card. */
+#browser:has(#sidebar-container:not([hidden])) #sidebar-box,
+#browser:has(#tabbrowser-tabbox[sidebar-shown]) #sidebar-box {
+    padding: 0 !important;
+}
+
+#browser:has(#sidebar-container:not([hidden])) #sidebar-container,
+#browser:has(#sidebar-container:not([hidden])) #sidebar-main,
+#browser:has(#sidebar-container:not([hidden])) #sidebar-box,
+#browser:has(#sidebar-container:not([hidden])) #sidebar,
+#browser:has(#tabbrowser-tabbox[sidebar-shown]) #sidebar-box,
+#browser:has(#tabbrowser-tabbox[sidebar-shown]) #sidebar {
+    background: var(--lwt-sidebar-background-color) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+#browser:has(#sidebar-container:not([hidden])) #tabbrowser-tabbox,
+#tabbrowser-tabbox[sidebar-shown] {
+    background-color: var(--lwt-sidebar-background-color) !important;
+}
+
+#browser:has(#sidebar-container:not([hidden]))
+    #tabbrowser-tabbox
+    .browserContainer,
+#tabbrowser-tabbox[sidebar-shown] .browserContainer {
+    background: var(--lwt-accent-color) !important;
+    overflow: visible !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+/* No visible protruding seam at the edge of the vertical launcher. */
+#sidebar-launcher-splitter {
+    display: none !important;
+}
+
+#sidebar-launcher-splitter,
+#sidebar-splitter {
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    flex: 0 0 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    margin: 0 !important;
+    outline: 0 !important;
+}
+
+/* Low-risk Firefox Theme API crack fixes. */
+menupopup,
+panel {
+    --panel-background: var(--arrowpanel-background) !important;
+    --panel-color: var(--arrowpanel-color) !important;
+    --panel-border-color: var(--arrowpanel-border-color) !important;
+    background-color: var(--panel-background) !important;
+    color: var(--panel-color) !important;
+    border-color: var(--panel-border-color) !important;
+}
+
+menuitem,
+menu {
+    color: var(--arrowpanel-color) !important;
+}
+
+#sidebar-header,
+.sidebar-panel,
+treechildren {
+    background-color: var(--lwt-sidebar-background-color) !important;
+    color: var(--lwt-sidebar-text-color, var(--lwt-text-color)) !important;
+}
+
+treechildren::-moz-tree-row(selected) {
+    background-color: var(
+        --lwt-sidebar-highlight-background-color,
+        var(--lwt-tab-line-color)
+    ) !important;
+}
+
+treechildren::-moz-tree-cell-text(selected) {
+    color: var(
+        --lwt-sidebar-highlight-text-color,
+        var(--lwt-sidebar-text-color, var(--lwt-text-color))
+    ) !important;
+}
+
+treechildren::-moz-tree-row(hover) {
+    background-color: color-mix(
+        in srgb,
+        var(--lwt-sidebar-background-color),
+        var(--lwt-sidebar-text-color, var(--lwt-text-color)) 10%
+    ) !important;
+}
+
+findbar {
+    background-color: var(--toolbar-bgcolor) !important;
+    color: var(--toolbar-color) !important;
+    border-top-color: var(--lwt-toolbar-field-border-color) !important;
+}
+
+.findbar-textbox {
+    background-color: var(--lwt-toolbar-field-background-color) !important;
+    color: var(--lwt-toolbar-field-color) !important;
+    border-color: var(--lwt-toolbar-field-border-color) !important;
+}
+
+.findbar-closebutton {
+    color: var(--toolbar-color) !important;
+    fill: var(--toolbar-color) !important;
+    -moz-context-properties: fill, fill-opacity !important;
+}
+
+tooltip {
+    background-color: var(--arrowpanel-background) !important;
+    color: var(--arrowpanel-color) !important;
+    border-color: var(--arrowpanel-border-color) !important;
+}
+
+/* Replace the GNOME theme's fixed white foreground on accent buttons. */
+#appMenu-popup .panel-banner-item[notificationid="update-restart"],
+button.popup-notification-primary-button:not(#hack),
+#editBookmarkPanelDoneButton,
+#tracking-action-block,
+.button.connect-device {
+    color: var(
+        --lwt-sidebar-highlight-text-color,
+        var(--lwt-text-color)
+    ) !important;
+}
+
+/* Keep selected in-content rows paired with their dynamic highlight color. */
+richlistbox#items {
+    --in-content-item-selected: var(
+        --lwt-sidebar-highlight-background-color,
+        var(--lwt-tab-line-color)
+    ) !important;
+    --in-content-item-selected-text: var(
+        --lwt-sidebar-highlight-text-color,
+        var(--lwt-text-color)
+    ) !important;
+}
+
+@-moz-document url("chrome://browser/content/places/places.xhtml") {
+    :root {
+        --in-content-page-background: var(--lwt-accent-color) !important;
+        --in-content-text-color: var(--lwt-text-color) !important;
+        --in-content-box-background: var(--toolbar-bgcolor) !important;
+        --in-content-border-color: var(
+            --lwt-toolbar-field-border-color
+        ) !important;
+        --in-content-primary-button-background: var(--lwt-tab-line-color) !important;
+    }
+
+    tree {
+        background-color: var(--lwt-sidebar-background-color) !important;
+        color: var(--lwt-sidebar-text-color, var(--lwt-text-color)) !important;
+    }
+
+    #detailsPane {
+        background-color: var(--toolbar-bgcolor) !important;
+        border-top-color: var(--lwt-toolbar-field-border-color) !important;
+    }
+}
