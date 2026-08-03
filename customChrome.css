@@ -184,6 +184,304 @@
     ) !important;
 }
 
+/* Pywal semantic palette
+ *
+ * Pywalfox's accent is useful as an accent, but it is not automatically a
+ * readable foreground. Keep the live hue for focus/selection and derive
+ * neutral foregrounds and low-contrast surfaces for the rest of the chrome.
+ */
+:root {
+    --omarchy-surface: var(--lwt-accent-color, #fafafa);
+    --omarchy-accent: var(--lwt-text-color, #7c3aed);
+    --omarchy-fg: color-mix(
+        in srgb,
+        #17151c 88%,
+        var(--omarchy-accent) 12%
+    );
+    --omarchy-muted: color-mix(
+        in srgb,
+        var(--omarchy-fg) 62%,
+        var(--omarchy-surface) 38%
+    );
+    --omarchy-field: color-mix(
+        in srgb,
+        var(--omarchy-surface) 97%,
+        var(--omarchy-accent) 3%
+    );
+    --omarchy-panel: color-mix(
+        in srgb,
+        var(--omarchy-surface) 96%,
+        var(--omarchy-accent) 4%
+    );
+    --omarchy-border: color-mix(
+        in srgb,
+        var(--omarchy-fg) 16%,
+        transparent
+    );
+    --omarchy-hover: color-mix(
+        in srgb,
+        var(--omarchy-accent) 9%,
+        transparent
+    );
+    --omarchy-active: color-mix(
+        in srgb,
+        var(--omarchy-accent) 16%,
+        transparent
+    );
+    --omarchy-selection: color-mix(
+        in srgb,
+        var(--omarchy-accent) 14%,
+        transparent
+    );
+
+    --toolbar-bgcolor: var(--omarchy-surface) !important;
+    --toolbar-color: var(--omarchy-fg) !important;
+    --toolbar-background-color: var(--omarchy-surface) !important;
+    --toolbar-text-color: var(--omarchy-fg) !important;
+    --toolbar-field-background-color: var(--omarchy-field) !important;
+    --toolbar-field-color: var(--omarchy-fg) !important;
+    --toolbar-field-text-color: var(--omarchy-fg) !important;
+    --toolbar-field-text-color-focus: var(--omarchy-fg) !important;
+    --toolbar-field-focus-background-color: var(--omarchy-field) !important;
+    --toolbar-field-focus-color: var(--omarchy-fg) !important;
+    --urlbar-box-text-color: var(--omarchy-fg) !important;
+    --urlbar-box-text-color-hover: var(--omarchy-fg) !important;
+    --urlbarview-text-color-selected: var(--omarchy-fg) !important;
+    --urlbarView-secondary-text-color: var(--omarchy-muted) !important;
+    --link-color: var(--omarchy-accent) !important;
+    --link-color-hover: var(--omarchy-accent) !important;
+    --toolbarbutton-icon-fill: var(--omarchy-fg) !important;
+    --tab-selected-textcolor: var(--omarchy-fg) !important;
+
+    --arrowpanel-background: var(--omarchy-panel) !important;
+    --arrowpanel-color: var(--omarchy-fg) !important;
+    --arrowpanel-border-color: var(--omarchy-border) !important;
+    --panel-background: var(--omarchy-panel) !important;
+    --panel-color: var(--omarchy-fg) !important;
+    --panel-border-color: var(--omarchy-border) !important;
+    --sidebar-background-color: var(--omarchy-surface) !important;
+    --sidebar-text-color: var(--omarchy-fg) !important;
+    --input-bgcolor: var(--omarchy-field) !important;
+    --input-color: var(--omarchy-fg) !important;
+    --input-border-color: var(--omarchy-border) !important;
+
+    --gnome-window-background: var(--omarchy-surface) !important;
+    --gnome-window-color: var(--omarchy-fg) !important;
+    --gnome-view-background: var(--omarchy-surface) !important;
+    --gnome-view-color: var(--omarchy-fg) !important;
+    --gnome-sidebar-background: var(--omarchy-surface) !important;
+    --gnome-secondary-sidebar-background: var(--omarchy-field) !important;
+    --gnome-sidebar-text-color: var(--omarchy-fg) !important;
+    --gnome-view-selected-background: var(--omarchy-selection) !important;
+    --gnome-view-selected-hover-background: var(--omarchy-active) !important;
+    --gnome-view-selected-active-background: color-mix(
+        in srgb,
+        var(--omarchy-accent) 24%,
+        transparent
+    ) !important;
+    --gnome-headerbar-background: var(--omarchy-surface) !important;
+    --gnome-toolbar-background: var(--omarchy-surface) !important;
+    --gnome-toolbar-icon-fill: var(--omarchy-fg) !important;
+    --gnome-toolbar-border-color: var(--omarchy-border) !important;
+    --gnome-border-color: var(--omarchy-border) !important;
+    --gnome-menu-background: var(--omarchy-panel) !important;
+    --gnome-menu-color: var(--omarchy-fg) !important;
+    --gnome-menu-border-color: var(--omarchy-border) !important;
+    --gnome-menu-separator-color: var(--omarchy-border) !important;
+    --gnome-entry-background: var(--omarchy-field) !important;
+    --gnome-entry-color: var(--omarchy-fg) !important;
+    --gnome-inactive-entry-color: var(--omarchy-muted) !important;
+    --gnome-entry-focused-border-color: var(--omarchy-accent) !important;
+    --gnome-entry-error-focused-border-color: color-mix(
+        in srgb,
+        var(--omarchy-accent) 50%,
+        transparent
+    ) !important;
+    --gnome-focus-border-color: var(--omarchy-accent) !important;
+    --gnome-selection-bg: var(--omarchy-selection) !important;
+    --gnome-accent-bg: var(--omarchy-accent) !important;
+    --gnome-accent: var(--omarchy-accent) !important;
+    --gnome-selected-background: var(--omarchy-selection) !important;
+    --gnome-hover-color: var(--omarchy-hover) !important;
+    --gnome-active-color: var(--omarchy-active) !important;
+    --gnome-selected-color: var(--omarchy-selection) !important;
+    --gnome-selected-hover-color: var(--omarchy-active) !important;
+    --gnome-selected-active-color: color-mix(
+        in srgb,
+        var(--omarchy-accent) 24%,
+        transparent
+    ) !important;
+    --gnome-card-background: var(--omarchy-panel) !important;
+    --gnome-card-shade-color: var(--omarchy-border) !important;
+    --gnome-card-shadow: none !important;
+    --gnome-menu-shadow: none !important;
+    --gnome-tabbar-background: var(--omarchy-surface) !important;
+    --gnome-tabbar-tab-hover-background: var(--omarchy-hover) !important;
+    --gnome-tabbar-tab-active-background: var(--omarchy-selection) !important;
+    --gnome-tabbar-tab-active-background-contrast: var(--omarchy-active) !important;
+    --gnome-tabbar-tab-active-hover-background: var(--omarchy-active) !important;
+    --gnome-tabbar-tab-active-border-bottom-color: var(--omarchy-accent) !important;
+}
+
+:root[lwtheme-brighttext] {
+    --omarchy-fg: color-mix(
+        in srgb,
+        #f7f5f8 88%,
+        var(--omarchy-accent) 12%
+    );
+    --omarchy-muted: color-mix(
+        in srgb,
+        var(--omarchy-fg) 62%,
+        var(--omarchy-surface) 38%
+    );
+    --omarchy-field: color-mix(
+        in srgb,
+        var(--omarchy-surface) 92%,
+        #ffffff 8%
+    );
+    --omarchy-panel: color-mix(
+        in srgb,
+        var(--omarchy-surface) 94%,
+        #ffffff 6%
+    );
+    --omarchy-border: color-mix(
+        in srgb,
+        var(--omarchy-fg) 22%,
+        transparent
+    );
+}
+
+/* Omarchy/Cascade layer
+ *
+ * Keep Firefox GNOME as the compatibility foundation, but centralize the
+ * small Omarchy simplifications here so there is no extra startup import.
+ * Cascade's useful cues are shared geometry, icon-only collapsed tabs, and
+ * one native popup surface rather than stacked containers.
+ */
+:root {
+    --gnome-button-radius: var(--omarchy-radius-container, 0px) !important;
+    --gnome-entry-radius: var(
+        --omarchy-radius-input,
+        var(--omarchy-radius-container, 0px)
+    ) !important;
+    --gnome-card-radius: var(--omarchy-radius-container, 0px) !important;
+    --gnome-menu-radius: var(--omarchy-radius-container, 0px) !important;
+    --gnome-popover-radius: var(--omarchy-radius-container, 0px) !important;
+    --gnome-dialog-radius: var(--omarchy-radius-container, 0px) !important;
+}
+
+#mainPopupSet > menupopup,
+#mainPopupSet > panel {
+    --panel-background: var(--arrowpanel-background) !important;
+    --panel-shadow: none !important;
+    --arrowpanel-shadow: none !important;
+    --panel-color: var(--arrowpanel-color) !important;
+    --panel-border-color: var(--arrowpanel-border-color) !important;
+    --panel-border-radius: var(--omarchy-radius-container, 0px) !important;
+    --arrowpanel-border-radius: var(
+        --omarchy-radius-container,
+        0px
+    ) !important;
+    background-color: transparent !important;
+    color: var(--panel-color) !important;
+    border-color: transparent !important;
+}
+
+#mainPopupSet menuitem,
+#mainPopupSet menu {
+    color: var(--arrowpanel-color) !important;
+}
+
+/* Reuse Hyprland's live border width and active color/gradient. The popup
+ * shell remains transparent; its native content part receives the shell
+ * border so menus do not grow a second shadow/container. */
+#mainPopupSet > menupopup::part(content),
+#mainPopupSet > panel::part(content) {
+    border-style: solid !important;
+    border-width: var(--omarchy-border-width, 0px) !important;
+    border-color: var(--omarchy-border-active-color, transparent) !important;
+    border-image-source: var(--omarchy-border-active-source, none) !important;
+    border-image-slice: 1 !important;
+    border-radius: var(--omarchy-radius-container, 0px) !important;
+    box-shadow: none !important;
+}
+
+:root:-moz-window-inactive #mainPopupSet > menupopup::part(content),
+:root:-moz-window-inactive #mainPopupSet > panel::part(content) {
+    border-color: var(--omarchy-border-inactive-color, transparent) !important;
+    border-image-source: var(--omarchy-border-inactive-source, none) !important;
+}
+
+/* Keep the active horizontal tab as a small accent line instead of a full
+ * bright card. Vertical-tab rules below remain more specific. */
+#tabbrowser-tabs .tabbrowser-tab .tab-background {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+#tabbrowser-tabs .tabbrowser-tab[selected] .tab-background {
+    background: color-mix(
+        in srgb,
+        var(--omarchy-accent) 12%,
+        var(--omarchy-surface)
+    ) !important;
+    border-block-end: var(--omarchy-border-width, 0px) solid
+        var(--omarchy-accent) !important;
+}
+
+#tabbrowser-tabs .tabbrowser-tab:not([selected]):hover .tab-background {
+    background: var(--omarchy-hover) !important;
+}
+
+/* The vertical-tab pinning tour is a Firefox shadow component. Supplying
+ * these inherited palette tokens removes its hard-coded violet card without
+ * reaching into the component's shadow DOM. */
+#sidebar-main,
+sidebar-pins-promo {
+    --color-violet-0: var(--omarchy-fg) !important;
+    --color-violet-10: var(--omarchy-panel) !important;
+    --color-violet-50: var(--omarchy-border) !important;
+    --color-violet-60: var(--omarchy-panel) !important;
+    --color-violet-70: var(--omarchy-fg) !important;
+}
+
+/* Collapsed vertical tabs are an icon rail, not a miniature button grid. */
+#tabbrowser-tabs[orient="vertical"]:not([expanded]) .tab-close-button {
+    display: none !important;
+}
+
+#tabbrowser-tabs[orient="vertical"]:not([expanded]) .tabbrowser-tab {
+    padding-block: 2px !important;
+}
+
+#tabbrowser-tabs[orient="vertical"]:not([expanded]) .tab-background {
+    background-color: transparent !important;
+    border: 0 !important;
+    border-inline-start: 1px solid transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin-block: 0 !important;
+}
+
+#tabbrowser-tabs[orient="vertical"]:not([expanded])
+    .tabbrowser-tab[selected]
+    .tab-background {
+    background-color: color-mix(
+        in srgb,
+        var(--omarchy-accent) 14%,
+        transparent
+    ) !important;
+    border-inline-start-color: var(--omarchy-accent) !important;
+}
+
+#tabbrowser-tabs[orient="vertical"]:not([expanded])
+    .tabbrowser-tab:not([selected]):hover
+    .tab-background {
+    background-color: color-mix(in srgb, currentColor 10%, transparent) !important;
+}
+
 /* Main navigation surfaces and chrome text. */
 #navigator-toolbox,
 #toolbar-menubar,
@@ -195,43 +493,192 @@
 }
 
 #navigator-toolbox {
-    border-bottom-color: var(--lwt-toolbar-field-border-color) !important;
+    border-bottom-color: var(--omarchy-border) !important;
 }
 
 #navigator-toolbox .toolbarbutton-icon,
 #navigator-toolbox .toolbarbutton-text,
 .menu-iconic-left,
 .menuitem-iconic {
-    color: var(--lwt-text-color) !important;
-    fill: var(--lwt-text-color) !important;
+    color: var(--omarchy-fg) !important;
+    fill: var(--omarchy-fg) !important;
     -moz-context-properties: fill, fill-opacity !important;
 }
 
 /* URL bar field: use the same live Pywalfox field colors as Firefox itself. */
 #urlbar,
-#urlbar-background,
+.urlbar-background,
 #urlbar-input-container,
 #urlbar .urlbar-input,
 #urlbar .urlbar-input-box {
-    background-color: var(--lwt-toolbar-field-background-color) !important;
-    color: var(--lwt-toolbar-field-color) !important;
-    border-color: var(--lwt-toolbar-field-border-color) !important;
+    background-color: var(--omarchy-field) !important;
+    color: var(--omarchy-fg) !important;
+    border-color: var(--omarchy-border) !important;
 }
 
-#urlbar .urlbarView-url,
+/* Give the URL bar a deliberate control rhythm instead of inheriting the
+ * GNOME zero-padding reset. Keep the input flexible; controls keep space. */
+#urlbar {
+    --urlbar-height: 36px !important;
+    --urlbar-toolbar-height: 36px !important;
+    --urlbar-icon-padding: 6px !important;
+    padding-inline: 4px !important;
+}
+
+#urlbar-input-container {
+    align-items: center !important;
+    padding-inline: 6px !important;
+}
+
+#urlbar-input-container > * {
+    margin-inline: 2px !important;
+}
+
+#urlbar .urlbar-input-box {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    padding-inline: 4px !important;
+}
+
+#urlbar .urlbar-input {
+    min-width: 0 !important;
+    padding-inline: 4px !important;
+}
+
+#urlbar-searchmode-switcher,
+#urlbar-search-mode-indicator,
+#urlbar-label-box,
+#urlbar-zoom-button {
+    background: var(--omarchy-hover) !important;
+    border: 0 !important;
+    border-radius: var(--omarchy-radius-input, 0px) !important;
+    flex-shrink: 0 !important;
+    margin-inline: 2px !important;
+    min-height: 26px !important;
+    padding-inline: 7px !important;
+}
+
+#urlbar-searchmode-switcher .toolbarbutton-icon,
+#urlbar-search-mode-indicator .toolbarbutton-icon {
+    height: 18px !important;
+    width: 18px !important;
+}
+
+#urlbar-go-button {
+    flex-shrink: 0 !important;
+    height: 28px !important;
+    margin-inline: 4px !important;
+    padding: 6px !important;
+    width: 28px !important;
+}
+
+#urlbar #identity-box[pageproxystate="invalid"] {
+    align-items: center !important;
+    background: var(--omarchy-hover) !important;
+    border-radius: var(--omarchy-radius-input, 0px) !important;
+    display: flex !important;
+    flex-shrink: 0 !important;
+    margin-inline: 2px 6px !important;
+    min-width: 32px !important;
+    padding-inline: 6px !important;
+}
+
+#urlbar #identity-box[pageproxystate="invalid"] > .identity-box-button {
+    margin: 0 !important;
+    padding-inline: 4px !important;
+}
+
+#page-action-buttons {
+    align-items: center !important;
+    gap: 2px !important;
+    margin-inline: 4px !important;
+}
+
+.urlbar-page-action {
+    margin-inline: 2px !important;
+}
+
+#urlbar .urlbarView-url {
+    color: var(--omarchy-accent) !important;
+}
+
 #urlbar .urlbarView-explanation {
-    color: var(--lwt-text-color) !important;
+    color: var(--omarchy-muted) !important;
 }
 
 #urlbar[breakout][breakout-extend] {
-    background-color: var(--lwt-toolbar-field-background-color) !important;
-    color: var(--lwt-toolbar-field-color) !important;
-    border-color: var(--lwt-tab-line-color) !important;
+    background-color: var(--omarchy-field) !important;
+    color: var(--omarchy-fg) !important;
+    border: 0 !important;
+    border-color: var(--omarchy-accent) !important;
+    outline: var(--omarchy-border-width, 0px) solid
+        var(--omarchy-border-active-color, transparent) !important;
+    outline-offset: 0 !important;
 }
 
-#urlbar[focused] #urlbar-background,
-#urlbar[breakout][breakout-extend] #urlbar-background {
-    outline-color: var(--lwt-tab-line-color) !important;
+:root:-moz-window-inactive #urlbar[breakout][breakout-extend] {
+    outline-color: var(--omarchy-border-inactive-color, transparent) !important;
+}
+
+#urlbar[focused] .urlbar-background,
+#urlbar[breakout][breakout-extend] .urlbar-background {
+    outline: none !important;
+}
+
+/* Keep autocomplete readable: accent belongs to URLs and focus, not every
+ * line of text. The result list is one flat, bordered surface. */
+.urlbarView {
+    background: var(--omarchy-panel) !important;
+    border-style: solid !important;
+    border-width: var(--omarchy-border-width, 0px) !important;
+    border-color: var(--omarchy-border-active-color, transparent) !important;
+    border-image-source: var(--omarchy-border-active-source, none) !important;
+    border-image-slice: 1 !important;
+    border-radius: var(--omarchy-radius-container, 0px) !important;
+    box-shadow: none !important;
+    color: var(--omarchy-fg) !important;
+}
+
+.urlbarView-body-outer {
+    background: transparent !important;
+    padding: 5px 7px !important;
+}
+
+.urlbarView-row {
+    color: var(--omarchy-fg) !important;
+}
+
+.urlbarView-row[selected],
+.urlbarView-row[selected]:hover {
+    background: var(--omarchy-selection) !important;
+    color: var(--omarchy-fg) !important;
+}
+
+.urlbarView-row:not([selected]):hover,
+.urlbarView-row:not([selected]):active {
+    background: var(--omarchy-hover) !important;
+}
+
+.urlbarView-row-inner,
+.urlbarView-no-wrap {
+    border-radius: 0 !important;
+}
+
+.urlbarView-title {
+    color: var(--omarchy-fg) !important;
+}
+
+.urlbarView-url {
+    color: var(--omarchy-accent) !important;
+}
+
+.urlbarView-action {
+    color: var(--omarchy-muted) !important;
+}
+
+:root:-moz-window-inactive .urlbarView {
+    border-color: var(--omarchy-border-inactive-color, transparent) !important;
+    border-image-source: var(--omarchy-border-inactive-source, none) !important;
 }
 
 /* Use Firefox's paired sidebar text/highlight colors for the launcher and tabs. */
@@ -241,29 +688,14 @@
 #sidebar-box,
 #sidebar,
 .sidebar-panel {
-    color: var(--lwt-sidebar-text-color, var(--lwt-text-color)) !important;
+    color: var(--omarchy-fg) !important;
 }
 
 #sidebar-main {
-    --gnome-toolbar-icon-fill: var(
-        --lwt-sidebar-text-color,
-        var(--lwt-text-color)
-    ) !important;
-    --gnome-hover-color: color-mix(
-        in srgb,
-        var(--lwt-sidebar-text-color, var(--lwt-text-color)) 10%,
-        transparent
-    ) !important;
-    --gnome-active-color: color-mix(
-        in srgb,
-        var(--lwt-sidebar-text-color, var(--lwt-text-color)) 18%,
-        transparent
-    ) !important;
-    --gnome-selected-color: color-mix(
-        in srgb,
-        var(--lwt-sidebar-highlight-background-color, var(--lwt-tab-line-color)) 25%,
-        transparent
-    ) !important;
+    --gnome-toolbar-icon-fill: var(--omarchy-fg) !important;
+    --gnome-hover-color: var(--omarchy-hover) !important;
+    --gnome-active-color: var(--omarchy-active) !important;
+    --gnome-selected-color: var(--omarchy-selection) !important;
 }
 
 /* Keep the sidebar and viewport flush; disable the native rounded-content card. */
@@ -278,14 +710,14 @@
 #browser:has(#sidebar-container:not([hidden])) #sidebar,
 #browser:has(#tabbrowser-tabbox[sidebar-shown]) #sidebar-box,
 #browser:has(#tabbrowser-tabbox[sidebar-shown]) #sidebar {
-    background: var(--lwt-sidebar-background-color) !important;
+    background: var(--omarchy-surface) !important;
     border-radius: 0 !important;
     box-shadow: none !important;
 }
 
 #browser:has(#sidebar-container:not([hidden])) #tabbrowser-tabbox,
 #tabbrowser-tabbox[sidebar-shown] {
-    background-color: var(--lwt-sidebar-background-color) !important;
+    background-color: var(--omarchy-surface) !important;
 }
 
 #browser:has(#sidebar-container:not([hidden]))
@@ -316,60 +748,35 @@
 }
 
 /* Low-risk Firefox Theme API crack fixes. */
-menupopup,
-panel {
-    --panel-background: var(--arrowpanel-background) !important;
-    --panel-color: var(--arrowpanel-color) !important;
-    --panel-border-color: var(--arrowpanel-border-color) !important;
-    background-color: var(--panel-background) !important;
-    color: var(--panel-color) !important;
-    border-color: var(--panel-border-color) !important;
-}
-
-menuitem,
-menu {
-    color: var(--arrowpanel-color) !important;
-}
-
 #sidebar-header,
 .sidebar-panel,
 treechildren {
-    background-color: var(--lwt-sidebar-background-color) !important;
-    color: var(--lwt-sidebar-text-color, var(--lwt-text-color)) !important;
+    background-color: var(--omarchy-surface) !important;
+    color: var(--omarchy-fg) !important;
 }
 
 treechildren::-moz-tree-row(selected) {
-    background-color: var(
-        --lwt-sidebar-highlight-background-color,
-        var(--lwt-tab-line-color)
-    ) !important;
+    background-color: var(--omarchy-selection) !important;
 }
 
 treechildren::-moz-tree-cell-text(selected) {
-    color: var(
-        --lwt-sidebar-highlight-text-color,
-        var(--lwt-sidebar-text-color, var(--lwt-text-color))
-    ) !important;
+    color: var(--omarchy-fg) !important;
 }
 
 treechildren::-moz-tree-row(hover) {
-    background-color: color-mix(
-        in srgb,
-        var(--lwt-sidebar-background-color),
-        var(--lwt-sidebar-text-color, var(--lwt-text-color)) 10%
-    ) !important;
+    background-color: var(--omarchy-hover) !important;
 }
 
 findbar {
     background-color: var(--toolbar-bgcolor) !important;
     color: var(--toolbar-color) !important;
-    border-top-color: var(--lwt-toolbar-field-border-color) !important;
+    border-top-color: var(--omarchy-border) !important;
 }
 
 .findbar-textbox {
-    background-color: var(--lwt-toolbar-field-background-color) !important;
-    color: var(--lwt-toolbar-field-color) !important;
-    border-color: var(--lwt-toolbar-field-border-color) !important;
+    background-color: var(--omarchy-field) !important;
+    color: var(--omarchy-fg) !important;
+    border-color: var(--omarchy-border) !important;
 }
 
 .findbar-closebutton {
@@ -390,42 +797,148 @@ button.popup-notification-primary-button:not(#hack),
 #editBookmarkPanelDoneButton,
 #tracking-action-block,
 .button.connect-device {
-    color: var(
-        --lwt-sidebar-highlight-text-color,
-        var(--lwt-text-color)
-    ) !important;
+    color: var(--omarchy-fg) !important;
 }
 
 /* Keep selected in-content rows paired with their dynamic highlight color. */
 richlistbox#items {
-    --in-content-item-selected: var(
-        --lwt-sidebar-highlight-background-color,
-        var(--lwt-tab-line-color)
-    ) !important;
-    --in-content-item-selected-text: var(
-        --lwt-sidebar-highlight-text-color,
-        var(--lwt-text-color)
-    ) !important;
+    --in-content-item-selected: var(--omarchy-selection) !important;
+    --in-content-item-selected-text: var(--omarchy-fg) !important;
 }
 
 @-moz-document url("chrome://browser/content/places/places.xhtml") {
-    :root {
-        --in-content-page-background: var(--lwt-accent-color) !important;
-        --in-content-text-color: var(--lwt-text-color) !important;
-        --in-content-box-background: var(--toolbar-bgcolor) !important;
-        --in-content-border-color: var(
-            --lwt-toolbar-field-border-color
-        ) !important;
-        --in-content-primary-button-background: var(--lwt-tab-line-color) !important;
+    /* Library windows do not receive Pywalfox's browser-window LWT aliases.
+     * Keep their fallback on the same dark Omarchy palette in dark sessions. */
+    @media (prefers-color-scheme: dark) {
+        :root {
+            color-scheme: dark !important;
+            --omarchy-surface: #171820 !important;
+            --omarchy-panel: #1d1e2b !important;
+            --omarchy-field: #222331 !important;
+            --omarchy-fg: #eee4ef !important;
+            --omarchy-muted: #b8afc0 !important;
+            --omarchy-accent: #c4a7e7 !important;
+            --omarchy-border: #514b63 !important;
+            --omarchy-hover: #2b2938 !important;
+            --omarchy-selection: #3a3450 !important;
+            --toolbar-bgcolor: var(--omarchy-surface) !important;
+            --toolbar-color: var(--omarchy-fg) !important;
+        }
     }
 
-    tree {
-        background-color: var(--lwt-sidebar-background-color) !important;
-        color: var(--lwt-sidebar-text-color, var(--lwt-text-color)) !important;
+    :root {
+        --in-content-page-background: var(--omarchy-surface) !important;
+        --in-content-text-color: var(--omarchy-fg) !important;
+        --in-content-box-background: var(--toolbar-bgcolor) !important;
+        --in-content-border-color: var(--omarchy-border) !important;
+        --in-content-primary-button-background: var(--omarchy-accent) !important;
+    }
+
+    body,
+    #places,
+    #placesView,
+    #contentView,
+    #placesViewsBox,
+    #placesToolbar,
+    #placesList,
+    #placeContent,
+    #downloadsListBox,
+    #detailsPane,
+    #placesView > splitter {
+        background-color: var(--omarchy-surface) !important;
+        color: var(--omarchy-fg) !important;
+    }
+
+    #placesView #placeContent,
+    #placesView #downloadsListBox,
+    #placesView > #contentView,
+    #placesView > #contentView > #placesViewsBox,
+    #placesView > #placesList {
+        background-color: var(--omarchy-surface) !important;
+        color: var(--omarchy-fg) !important;
+    }
+
+    #placesView treechildren::-moz-tree-row,
+    #placesView treechildren::-moz-tree-cell {
+        background-color: var(--omarchy-surface) !important;
+        color: var(--omarchy-fg) !important;
+    }
+
+    #placesView treechildren::-moz-tree-row(selected) {
+        background-color: var(--omarchy-selection) !important;
+    }
+
+    #placesView treechildren::-moz-tree-cell-text {
+        color: var(--omarchy-fg) !important;
+    }
+
+    #placesView > splitter {
+        border-color: var(--omarchy-border) !important;
+    }
+
+    #placesView > splitter + #contentView {
+        background-color: var(--omarchy-surface) !important;
+    }
+
+    #placesView > splitter + #contentView > #placesViewsBox {
+        background-color: var(--omarchy-surface) !important;
+    }
+
+    #placesView > splitter + #contentView > #placesViewsBox > tree,
+    #placesView > splitter + #contentView > #placesViewsBox > richlistbox {
+        background-color: var(--omarchy-surface) !important;
+        color: var(--omarchy-fg) !important;
+    }
+
+    #placesView > splitter + #contentView > #placesViewsBox > treechildren {
+        background-color: var(--omarchy-surface) !important;
+    }
+
+    #detailsPane {
+        background-color: var(--omarchy-surface) !important;
+        color: var(--omarchy-fg) !important;
+    }
+
+    #placesToolbar {
+        border-bottom: var(--omarchy-border-width, 0px) solid
+            var(--omarchy-border) !important;
+    }
+
+    #placesList,
+    #placeContent {
+        --sidebar-background-color: var(--omarchy-surface) !important;
+        --sidebar-text-color: var(--omarchy-fg) !important;
+    }
+
+    #searchFilter {
+        --input-background-color: var(--omarchy-field) !important;
+        --input-text-color: var(--omarchy-fg) !important;
+        --input-border-color: var(--omarchy-border) !important;
+        background: var(--omarchy-field) !important;
+        color: var(--omarchy-fg) !important;
+        border-color: var(--omarchy-border) !important;
+    }
+
+    tree,
+    treechildren,
+    richlistbox {
+        background-color: var(--omarchy-surface) !important;
+        color: var(--omarchy-fg) !important;
     }
 
     #detailsPane {
         background-color: var(--toolbar-bgcolor) !important;
-        border-top-color: var(--lwt-toolbar-field-border-color) !important;
+        border-top-color: var(--omarchy-border) !important;
+    }
+
+    treechildren::-moz-tree-row(selected),
+    richlistitem[selected] {
+        background-color: var(--omarchy-selection) !important;
+        color: var(--omarchy-fg) !important;
+    }
+
+    treechildren::-moz-tree-cell-text,
+    richlistitem {
+        color: var(--omarchy-fg) !important;
     }
 }

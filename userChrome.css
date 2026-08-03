@@ -1,4 +1,7 @@
 
+/* Omarchy geometry is generated from the active Hyprland radius setting. */
+@import "omarchy-radius.css";
+
 /* Import theme */
 @import "theme/gnome-theme.css";
 
