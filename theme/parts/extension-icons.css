@@ -1,0 +1,44 @@
+/* Omarchy custom extension icons
+ *
+ * Keep these overrides separate from icons.css: that file is generated from
+ * the GNOME icon set and must remain safe to regenerate.
+ */
+
+@media not -moz-pref("gnomeTheme.noThemedIcons") {
+    /* Privacy and security */
+    [data-extensionid="uBlock0@raymondhill.net"] .toolbarbutton-icon {
+        list-style-image: url("../icons/custom/ublock.svg") !important;
+    }
+
+    /* Password managers */
+    [data-extensionid="{446900e4-71c2-419f-a6a7-df9c091e268b}"]
+        .toolbarbutton-icon {
+        list-style-image: url("../icons/custom/bitwarden.svg") !important;
+    }
+
+    [data-extensionid="78272b6fa58f4a1abaac99321d503a20@proton.me"]
+        .toolbarbutton-icon {
+        list-style-image: url("../icons/custom/proton-pass.svg") !important;
+    }
+
+    [data-extensionid="{d634138d-c276-4fc8-924b-40a0ea21d284}"]
+        .toolbarbutton-icon {
+        list-style-image: url("../icons/custom/1password.svg") !important;
+    }
+
+    /* Theme and appearance */
+    [data-extensionid="darkreader@alexhulbert.com"] .toolbarbutton-icon {
+        list-style-image: url("../icons/custom/moon.svg") !important;
+    }
+
+    [data-extensionid="pywalfox@frewacom.org"] .toolbarbutton-icon {
+        list-style-image: url("../icons/custom/pywalfox.svg") !important;
+    }
+
+    [data-extensionid="vimium-c@gdh1995.cn"] .toolbarbutton-icon {
+        list-style-image: url("../icons/custom/vimium.svg") !important;
+    }
+}
+
+/* Privacy Badger's old override was intentionally not carried over: it used a
+ * profile-specific moz-extension UUID and would break on another profile. */
