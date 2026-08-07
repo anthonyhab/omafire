@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 
-THEMEDIRECTORY=$(cd "$(dirname $0)" && cd .. && pwd)
+THEMEDIRECTORY=$(cd "$(dirname "$0")" && cd .. && pwd -P)
 FIREFOXFOLDER="${XDG_CONFIG_HOME:-$HOME/.config}/mozilla/firefox"
 PROFILENAME=""
 
 
 # Get options.
-while getopts 'f:p:t:' flag; do
+while getopts 'f:p:h' flag; do
 	case "${flag}" in
 	f) FIREFOXFOLDER="${OPTARG}" ;;
 	p) PROFILENAME="${OPTARG}" ;;
-	*)
+	h | *)
 		echo "Gnome Theme Install Script:"
 		echo "  -f <firefox_folder_path>. Set custom Firefox folder path."
 		echo "  -p <profile_name>. Set custom profile name."
@@ -38,18 +38,85 @@ function _sed(){
   sed "$@"
 }
 
+should_skip_payload_path() {
+	case "$1" in
+		.git|.git/*|.pi-subagents|.pi-subagents/*|\
+		.omarchy-favicon-contrast-enabled|\
+		customChrome.css|customContent.css|generated-gtk-colors.css|\
+		omarchy-radius.css|PKGBUILD)
+			return 0
+			;;
+	esac
+	return 1
+}
+
+copy_payload_file() {
+	local relative_path="$1"
+	local target_root="$2"
+	local source="$THEMEDIRECTORY/$relative_path"
+	local target="$target_root/$relative_path"
+
+	should_skip_payload_path "$relative_path" && return 0
+	[ -e "$source" ] || [ -L "$source" ] || return 0
+	mkdir -p "$(dirname "$target")"
+	cp -fPp "$source" "$target"
+}
+
+copy_theme_payload() {
+	local target_root="$1"
+	local relative_path source target_root_physical
+	target_root_physical=$(cd "$target_root" && pwd -P)
+
+	# The installed copy may update preferences by invoking its own installer.
+	# In that case source and destination are already the same payload.
+	[[ $target_root_physical == "$THEMEDIRECTORY" ]] && return 0
+
+	if git -C "$THEMEDIRECTORY" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+		while IFS= read -r -d '' relative_path; do
+			copy_payload_file "$relative_path" "$target_root"
+		done < <(git -C "$THEMEDIRECTORY" ls-files -z)
+		return
+	fi
+
+	while IFS= read -r -d '' source; do
+		relative_path=${source#"$THEMEDIRECTORY"/}
+		copy_payload_file "$relative_path" "$target_root"
+	done < <(
+		find "$THEMEDIRECTORY" \
+			\( -path "$THEMEDIRECTORY/.git" -o -path "$THEMEDIRECTORY/.pi-subagents" \) -prune -o \
+			\( -type f -o -type l \) -print0
+	)
+}
+
+next_backup_path() {
+	local base=$1
+	local candidate=$base
+	local index=1
+	while [[ -e $candidate || -L $candidate ]]; do
+		candidate=$base.$index
+		((index++))
+	done
+	printf '%s\n' "$candidate"
+}
+
+escape_sed_bre() {
+	printf '%s\n' "$1" | sed 's/[][\\.*^$\/]/\\&/g'
+}
+
 function saveProfile(){
 	local PROFILE_PATH="$1"
+	local backup_path escaped_key
 
 	cd "$FIREFOXFOLDER/$PROFILE_PATH" || { echo "FAIL, Firefox profile path was not found."; exit 1; }
 	# Create a chrome directory if it doesn't exist.
 	mkdir -p chrome
 	cd chrome || { echo "FAIL, couldn't create chrome dir in $PWD, please check if there's something else named 'chrome'."; exit 1; }
 
-	# Copy theme repo inside
-	echo "Copying repo in $PWD" >&2
+	# Copy only maintained payload files. User overrides, generated state,
+	# profile markers, agent artifacts, and VCS metadata stay where they are.
+	echo "Copying maintained theme files into $PWD" >&2
 	[ -e ./firefox-gnome-theme ] || mkdir firefox-gnome-theme
-	cp -fR "$THEMEDIRECTORY/." "$PWD/firefox-gnome-theme/" || { echo "FAIL, couldn't copy to $PWD/chrome, please check if there's something named 'chrome' or 'chrome/firefox-gnome-theme', that is not a dir."; exit 1; }
+	copy_theme_payload "$PWD/firefox-gnome-theme" || { echo "FAIL, couldn't copy the maintained theme payload into $PWD/chrome/firefox-gnome-theme."; exit 1; }
 
 	# Create single-line user CSS files if non-existent or empty.
 	if [ -s userChrome.css ]; then
@@ -100,18 +167,17 @@ function saveProfile(){
 	done < <(grep "user_pref" chrome/firefox-gnome-theme/configuration/user.js | cut -d'"' -f 2)
 
 	if [ ! -f "user.js" ]; then
-		mv chrome/firefox-gnome-theme/configuration/user.js .
+		cp chrome/firefox-gnome-theme/configuration/user.js .
 	else
-		cp user.js user.js.bak
-		OLDIFS=$IFS
-		IFS='/'
+		backup_path=$(next_backup_path user.js.bak)
+		cp -p user.js "$backup_path"
 		for t in "${theme_prefs_unvalued[@]}"; do
-			_sed -i "/$t/d" "user.js"
+			escaped_key=$(escape_sed_bre "$t")
+			_sed -i "/^[[:space:]]*user_pref(\"$escaped_key\"[[:space:]]*,/d" user.js
 		done
 		for f in "${theme_prefs[@]}"; do
-			echo "$f" >> "user.js"
+			echo "$f" >> user.js
 		done
-		IFS=$OLDIFS
 	fi
 	echo "Done." >&2
 	cd ..
@@ -124,33 +190,24 @@ if [ ! -f "${PROFILES_FILE}" ]; then
 fi
 echo "'profiles.ini' found in ${FIREFOXFOLDER}"
 
-PROFILES_PATHS=($(grep -E "^Path=" "${PROFILES_FILE}" | tr -d '\n' | _sed -e 's/\s\+/SPACECHARACTER/g' | _sed 's/Path=/::/g' ))
-PROFILES_PATHS+=::
-
 PROFILES_ARRAY=()
-if [ "${PROFILENAME}" != "" ];
-	then
-		echo "Using ${PROFILENAME} profile"
-		PROFILES_ARRAY+=${PROFILENAME}
+if [[ -n $PROFILENAME ]]; then
+	echo "Using ${PROFILENAME} profile"
+	PROFILES_ARRAY+=("$PROFILENAME")
 else
-	echo "Finding all available profiles";
-	while [[ "$PROFILES_PATHS" ]]; do
-		PROFILES_ARRAY+=( "${PROFILES_PATHS%%::*}" )
-		PROFILES_PATHS=${PROFILES_PATHS#*::}
-	done
+	echo "Finding all available profiles"
+	while IFS= read -r profile_path; do
+		[[ -n $profile_path ]] && PROFILES_ARRAY+=("$profile_path")
+	done < <(grep -E '^Path=' "$PROFILES_FILE" | cut -d= -f2-)
 fi
 
-
-if [ ${#PROFILES_ARRAY[@]} -eq 0 ]; then
-	echo "FAIL, no Firefox profile found in $PROFILES_FILE".;
-
+if ((${#PROFILES_ARRAY[@]} == 0)); then
+	echo "FAIL, no Firefox profile found in $PROFILES_FILE."
 else
-	for i in "${PROFILES_ARRAY[@]}"
-	do
-		if [[ -n "$i" ]];
-		then
-			echo "Installing theme for $(sed 's/SPACECHARACTER/ /g' <<< $i) profile.";
-			saveProfile "$(sed 's/SPACECHARACTER/ /g' <<< $i)"
-		fi;
+	for profile_path in "${PROFILES_ARRAY[@]}"; do
+		if [[ -n $profile_path ]]; then
+			echo "Installing theme for $profile_path profile."
+			saveProfile "$profile_path"
+		fi
 	done
 fi
