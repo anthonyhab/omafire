@@ -18,7 +18,7 @@
     // threshold avoids destroying orange Hacker News or Firefox's colorful
     // default icon while still catching nearly invisible white-on-light icons.
     const CONTRAST_TARGET = 2.25;
-    const CACHE_VERSION = "v3";
+    const CACHE_VERSION = "v4";
     const MAX_SOURCE_CACHE = 96;
     const MAX_DECISION_CACHE = 256;
 
@@ -76,12 +76,15 @@
             return null;
         }
 
-        const hex = value.trim().match(/^#([0-9a-f]{3,8})$/i);
+        const hex = value
+            .trim()
+            .match(/^#([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i);
         if (hex) {
             const digits = hex[1].length;
-            const expanded = digits <= 4
-                ? hex[1].split("").map(digit => digit + digit).join("")
-                : hex[1];
+            let expanded = hex[1];
+            if (digits <= 4) {
+                expanded = expanded.split("").map(digit => digit + digit).join("");
+            }
             const hasAlpha = expanded.length === 8;
             const color = {
                 r: Number.parseInt(expanded.slice(0, 2), 16),
@@ -98,21 +101,20 @@
         if (modern) {
             const component = part => {
                 const number = Number.parseFloat(part);
-                return Number.isFinite(number)
-                    ? Math.max(0, Math.min(255, part.endsWith("%") ? number * 2.55 : number * 255))
-                    : 0;
+                if (!Number.isFinite(number)) {
+                    return 0;
+                }
+                const scaled = part.endsWith("%") ? number * 2.55 : number * 255;
+                return Math.max(0, Math.min(255, scaled));
             };
-            const alpha = modern[4] === undefined
-                ? 1
-                : Math.max(
-                      0,
-                      Math.min(
-                          1,
-                          modern[4].endsWith("%")
-                              ? Number.parseFloat(modern[4]) / 100
-                              : Number.parseFloat(modern[4]),
-                      ),
-                  );
+            let alpha = 1;
+            if (modern[4] !== undefined) {
+                alpha = Number.parseFloat(modern[4]);
+                if (modern[4].endsWith("%")) {
+                    alpha /= 100;
+                }
+                alpha = Math.max(0, Math.min(1, alpha));
+            }
             const color = {
                 r: component(modern[1]),
                 g: component(modern[2]),
@@ -139,22 +141,21 @@
 
         const channel = part => {
             const number = Number.parseFloat(part);
-            return Number.isFinite(number)
-                ? Math.max(0, Math.min(255, part.endsWith("%") ? number * 2.55 : number))
-                : 0;
+            if (!Number.isFinite(number)) {
+                return 0;
+            }
+            const scaled = part.endsWith("%") ? number * 2.55 : number;
+            return Math.max(0, Math.min(255, scaled));
         };
 
-        const alpha = parts[3] === undefined
-            ? 1
-            : Math.max(
-                  0,
-                  Math.min(
-                      1,
-                      parts[3].endsWith("%")
-                          ? Number.parseFloat(parts[3]) / 100
-                          : Number.parseFloat(parts[3]),
-                  ),
-              );
+        let alpha = 1;
+        if (parts[3] !== undefined) {
+            alpha = Number.parseFloat(parts[3]);
+            if (parts[3].endsWith("%")) {
+                alpha /= 100;
+            }
+            alpha = Math.max(0, Math.min(1, alpha));
+        }
 
         const color = {
             r: channel(parts[0]),
@@ -317,7 +318,7 @@
         return promise;
     };
 
-    const hueRotateLuminance = (red, green, blue) => {
+    const hueRotateColor = (red, green, blue) => {
         // This is the SVG color-matrix used by CSS hue-rotate(), rather than
         // an HSL approximation. Keeping the scorer and the rendered filter
         // identical prevents false-positive contrast decisions.
@@ -354,38 +355,47 @@
                     (0.072 + 0.928 * cosine + 0.072 * sine) * b,
             ),
         );
-        return relativeLuminance(rotatedRed * 255, rotatedGreen * 255, rotatedBlue * 255);
+        return {
+            r: rotatedRed * 255,
+            g: rotatedGreen * 255,
+            b: rotatedBlue * 255,
+        };
     };
 
-    const transformedLuminance = (icon, index, mode) => {
+    const transformedColor = (icon, index, mode) => {
         if (mode === "dark") {
-            return 0;
+            return { r: 0, g: 0, b: 0 };
         }
         if (mode === "light") {
-            return 1;
+            return { r: 255, g: 255, b: 255 };
         }
         if (mode === "invert") {
-            return relativeLuminance(
-                255 - icon.red[index],
-                255 - icon.green[index],
-                255 - icon.blue[index],
-            );
+            return {
+                r: 255 - icon.red[index],
+                g: 255 - icon.green[index],
+                b: 255 - icon.blue[index],
+            };
         }
         if (mode === "hue") {
-            return hueRotateLuminance(
+            return hueRotateColor(
                 icon.red[index],
                 icon.green[index],
                 icon.blue[index],
             );
         }
-        return relativeLuminance(
-            icon.red[index],
-            icon.green[index],
-            icon.blue[index],
-        );
+        return {
+            r: icon.red[index],
+            g: icon.green[index],
+            b: icon.blue[index],
+        };
     };
 
-    const score = (icon, backgroundLuminance, mode) => {
+    const score = (icon, background, mode) => {
+        const backgroundLuminance = relativeLuminance(
+            background.r,
+            background.g,
+            background.b,
+        );
         let visible = 0;
         let poor = 0;
         let weightedContrast = 0;
@@ -396,8 +406,16 @@
                 continue;
             }
 
-            const composited = transformedLuminance(icon, index, mode) * alpha + backgroundLuminance * (1 - alpha);
-            const contrast = contrastRatio(composited, backgroundLuminance);
+            const transformed = transformedColor(icon, index, mode);
+            const composited = {
+                r: transformed.r * alpha + background.r * (1 - alpha),
+                g: transformed.g * alpha + background.g * (1 - alpha),
+                b: transformed.b * alpha + background.b * (1 - alpha),
+            };
+            const contrast = contrastRatio(
+                relativeLuminance(composited.r, composited.g, composited.b),
+                backgroundLuminance,
+            );
             visible += alpha;
             poor += contrast < CONTRAST_TARGET ? alpha : 0;
             weightedContrast += Math.min(contrast, 10) * alpha;
@@ -417,36 +435,43 @@
         (1 - result.badFraction) * 10 + Math.min(result.average, 10);
 
     const chooseFilter = (icon, background) => {
-        const backgroundLuminance = relativeLuminance(
-            background.r,
-            background.g,
-            background.b,
-        );
-        const cacheKey = `${CACHE_VERSION}|${icon.hash}|${Math.round(backgroundLuminance * 1000)}`;
+        const backgroundKey = [background.r, background.g, background.b]
+            .map(channel => Math.round(channel / 4) * 4)
+            .join(",");
+        const cacheKey = `${CACHE_VERSION}|${icon.hash}|${backgroundKey}`;
         const cached = lruGet(decisionCache, cacheKey);
         if (cached) {
             return cached;
         }
 
         const candidates = [
-            { name: "original", result: score(icon, backgroundLuminance, "original") },
-            { name: "invert", result: score(icon, backgroundLuminance, "invert") },
-            { name: "hue", result: score(icon, backgroundLuminance, "hue") },
-            { name: "dark", result: score(icon, backgroundLuminance, "dark") },
-            { name: "light", result: score(icon, backgroundLuminance, "light") },
+            { name: "original", result: score(icon, background, "original") },
+            { name: "invert", result: score(icon, background, "invert") },
+            { name: "hue", result: score(icon, background, "hue") },
+            { name: "dark", result: score(icon, background, "dark") },
+            { name: "light", result: score(icon, background, "light") },
         ];
-        const colorfulCandidates = candidates
-            .slice(1, 3)
-            .filter(candidate => candidate.result.average >= CONTRAST_TARGET);
-        const monochromeCandidates = candidates.slice(3);
+        const isLegible = candidate =>
+            candidate.result.average >= CONTRAST_TARGET &&
+            candidate.result.badFraction <= 0.35;
+        const colorfulCandidates = candidates.slice(1, 3).filter(isLegible);
+        const monochromeCandidates = candidates.slice(3).filter(isLegible);
         const original = candidates[0];
         let choice = original;
 
-        if (original.result.average < CONTRAST_TARGET) {
+        if (!isLegible(original)) {
             // Preserve color whenever inversion or hue rotation can solve the
             // problem. Only flatten to black/white as a last resort.
-            choice = (colorfulCandidates.length ? colorfulCandidates : monochromeCandidates)
-                .sort((first, second) => scoreValue(second.result) - scoreValue(first.result))[0];
+            let eligible = colorfulCandidates;
+            if (!eligible.length) {
+                eligible = monochromeCandidates;
+            }
+            if (!eligible.length) {
+                eligible = candidates.slice(1);
+            }
+            choice = eligible.sort(
+                (first, second) => scoreValue(second.result) - scoreValue(first.result),
+            )[0];
         }
 
         lruSet(decisionCache, cacheKey, choice.name, MAX_DECISION_CACHE);
@@ -454,7 +479,9 @@
     };
 
     const setDecision = (tab, decision) => {
-        if (tab.getAttribute("data-favicon-contrast") !== decision) {
+        if (decision === "original") {
+            tab.removeAttribute("data-favicon-contrast");
+        } else if (tab.getAttribute("data-favicon-contrast") !== decision) {
             tab.setAttribute("data-favicon-contrast", decision);
         }
     };
@@ -538,9 +565,6 @@
     const style = document.createElementNS(HTML_NS, "style");
     style.id = "favicon-contrast-runtime-style";
     style.textContent = `
-        tab[data-favicon-contrast="original"] .tab-icon-image {
-            filter: none !important;
-        }
         tab[data-favicon-contrast="dark"] .tab-icon-image {
             filter: brightness(0) saturate(100%) !important;
         }
@@ -567,6 +591,12 @@
         if (event.type === "TabAttrModified") {
             if (!event.detail?.changed?.includes("image")) {
                 return;
+            }
+            const source = iconSource(event.target);
+            if (source) {
+                // The image URL can be reused for new pixels (notably blob and
+                // extension resources), so an image mutation invalidates it.
+                sourceCache.delete(source.key);
             }
         }
         scheduleTab(event.target);
