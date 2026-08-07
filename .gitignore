@@ -1,3 +1,9 @@
+.claude/
+.entire/
+.omp/
+.opencode/
+.pi/
+.pi-subagents/
 customChrome.css
 customContent.css
 PKGBUILD
