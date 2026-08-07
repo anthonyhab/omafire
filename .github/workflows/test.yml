@@ -1,41 +1,58 @@
 name: Test
 
-on: [push]
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    name: Smoke test
+    name: Static checks and fresh-profile smoke test
     steps:
-      - name: Setup - Install Firefox.deb
+      - name: Check out this branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Install validation dependencies
         run: |
           sudo add-apt-repository ppa:mozillateam/ppa
-          echo '
-          Package: *
-          Pin: release o=LP-PPA-mozillateam
-          Pin-Priority: 1001
-          ' | sudo tee /etc/apt/preferences.d/mozilla-firefox
-          echo 'Unattended-Upgrade::Allowed-Origins:: "LP-PPA-mozillateam:${distro_codename}";' | sudo tee /etc/apt/apt.conf.d/51unattended-upgrades-firefox
-          sudo apt update
-          sudo apt install firefox
+          printf '%s\n' \
+            'Package: *' \
+            'Pin: release o=LP-PPA-mozillateam' \
+            'Pin-Priority: 1001' \
+            | sudo tee /etc/apt/preferences.d/mozilla-firefox
+          sudo apt-get update
+          sudo apt-get install --yes firefox shellcheck
 
-      - name: Setup 1 - create a Firefox profile
-        run: firefox --headless --createprofile test
+      - name: Run branch-local static checks
+        run: ./scripts/check-omarchy.sh
 
-      - name: Test 1 - Run a web installer as in README
-        run: curl -s -o- https://raw.githubusercontent.com/rafaelmardojai/firefox-gnome-theme/master/scripts/install-by-curl.sh | bash
+      - name: Install this checkout into a fresh profile
+        env:
+          FIREFOX_HOME: ${{ runner.temp }}/firefox
+        run: |
+          mkdir -p "$FIREFOX_HOME/test.default"
+          cat > "$FIREFOX_HOME/profiles.ini" <<'EOF'
+          [Profile0]
+          Name=test
+          IsRelative=1
+          Path=test.default
+          Default=1
+          EOF
+          ./scripts/install.sh -f "$FIREFOX_HOME" -p test.default
+          test -f "$FIREFOX_HOME/test.default/chrome/firefox-gnome-theme/omarchy-chrome.css"
+          grep -Fq 'firefox-gnome-theme/userChrome.css' \
+            "$FIREFOX_HOME/test.default/chrome/userChrome.css"
 
-      - name: Teardown 1
-        run: rm -rf ls "${XDG_CONFIG_HOME:-$HOME/.config}/mozilla/firefox"
-
-      - name: Setup 2 - create a new Firefox profile
-        run: firefox --headless --createprofile test
-
-      - name: Setup 2 - checkout the repo
-        uses: actions/checkout@v3
-
-      - name: Test 2 - Run a regular installer
-        run: ./scripts/install.sh
-
-      - name: Teardown 2
-        run: rm -rf ls "${XDG_CONFIG_HOME:-$HOME/.config}/mozilla/firefox"
+      - name: Start Firefox from the fresh profile
+        env:
+          PROFILE: ${{ runner.temp }}/firefox/test.default
+          SCREENSHOT: ${{ runner.temp }}/firefox-smoke.png
+        run: |
+          timeout 45s firefox --headless --no-remote --profile "$PROFILE" \
+            --screenshot "$SCREENSHOT" about:blank
+          test -s "$SCREENSHOT"
