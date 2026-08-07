@@ -22,6 +22,32 @@ This theme follows latest GNOME Adwaita style.
 
 ![Screenshot of the theme](screenshot.png)
 
+## Omarchy overlay in this branch
+
+This branch keeps Firefox GNOME as its compatibility base and adds a maintained
+Omarchy layer for Pywalfox colors, compact Hyprland-owned window chrome,
+horizontal and vertical tabs, privileged Firefox pages, and optional state
+cues. The overlay was validated against Firefox `153.0.3`; Firefox-internal
+selectors can change between releases.
+
+Install **this checkout**, rather than the upstream release archive or curl
+command documented below:
+
+```sh
+./scripts/install.sh -f "$HOME/.mozilla/firefox" -p "<profile-name>"
+```
+
+A checkout already located directly at `<profile>/chrome` is the development
+layout and does not need to be copied. Pywalfox supplies the live palette. The
+optional [`scripts/generate-omarchy-radius.sh`](scripts/generate-omarchy-radius.sh)
+bridges Omarchy/Noctalia geometry. It writes beside the active direct or
+`firefox-gnome-theme/` entrypoint; `FIREFOX_PROFILE_DIR` selects a profile and
+`FIREFOX_THEME_DIR` is an explicit destination override.
+[`docs/favicon-contrast.md`](docs/favicon-contrast.md) documents the separately
+installed JavaScript favicon helper. The upstream
+installation sections below describe the base theme and do not install this
+overlay unless they are run from this branch's checkout.
+
 ## Description
 
 This is a bunch of CSS code to make Firefox look closer to GNOME's native apps.
@@ -207,9 +233,21 @@ You can follow the installation script steps again to update the theme.
 
 ## Uninstalling
 
-1. Go to your profile folder. (Go to `about:support` in Firefox > Application Basics > Profile Directory > Open Directory)
-2. Remove `chrome` folder.
-3. Remove the unwanted preferences from your `user.js` inside your profile folder. The install script append the needed prefs in that file, you can check what preferences does it append by checking `configuration/user.js` in this repo.
+1. Open the profile directory from `about:support` → **Application Basics** →
+   **Profile Directory**.
+2. Remove only `chrome/firefox-gnome-theme`. Do **not** remove the whole
+   `chrome` directory; it can contain unrelated user styles and scripts.
+3. Remove the exact `@import "firefox-gnome-theme/userChrome.css";` and
+   `@import "firefox-gnome-theme/userContent.css";` lines from the profile's
+   `chrome/userChrome.css` and `chrome/userContent.css` files.
+4. Remove only this theme's preference keys from the profile `user.js`; the
+   owned key list is in `configuration/user.js`. Preserve every unrelated
+   preference and any `user.js` backup.
+
+A development checkout located directly at `<profile>/chrome` should be moved
+or removed as a repository checkout, not by deleting unrelated profile files.
+The optional favicon helper has its own safe disable/purge commands in
+[`docs/favicon-contrast.md`](docs/favicon-contrast.md#uninstalling).
 
 ## Enabling optional features
 
