@@ -7,5 +7,17 @@
         --newtab-primary-action-background: var(--gnome-accent) !important;
 
         background-color: var(--gnome-window-background) !important;
+        font-family: monospace !important;
+    }
+
+    /* Colors come from the Pywalfox extension's live LWT theme; only flatten
+     * the geometry here so cards/search match the shell's sharp, flat shape
+     * instead of Activity Stream's default rounded/shadowed cards. */
+    .search-wrapper #searchbox,
+    .top-site-outer .tile,
+    .card-outer {
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        border: 1px solid var(--gnome-border-color) !important;
     }
 }

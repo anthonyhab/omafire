@@ -13,6 +13,8 @@ dialog {
 
 /* Dialog box */
 .dialogBox {
+	background: var(--gnome-menu-background) !important;
+	color: var(--gnome-window-color) !important;
 	border-radius: var(--gnome-dialog-radius) !important;
 	margin-top: 0 !important;
 }
@@ -22,6 +24,20 @@ dialog {
 
 .dialogOverlay[topmost="true"]:not(.dialogOverlay-window-modal-dialog-subdialog), #window-modal-dialog::backdrop {
 	background-color: rgba(0, 0, 0, .5) !important;
+}
+
+/* Tab-embedded prompts (extension permission/removal, HTTP auth, etc.) render
+ * their visible card as .dialogBox inside .dialogOverlay, not as a separate
+ * window[role="dialog"]. Without an explicit surface here they inherit the
+ * hosted page's light color-scheme for the background while chrome CSS still
+ * supplies a bright foreground meant for a dark surface, producing washed-out,
+ * near-unreadable text. Give the overlay its own scheme and paint the card
+ * with the same dark Omarchy tokens as real dialog windows. */
+:root[lwtheme-brighttext] .dialogOverlay {
+	color-scheme: dark;
+}
+:root[lwtheme]:not([lwtheme-brighttext]) .dialogOverlay {
+	color-scheme: light;
 }
 
 /* Modal dialogs */

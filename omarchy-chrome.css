@@ -1,0 +1,2063 @@
+/* Local cohesion overrides for the GNOME theme.
+ * Pywalfox supplies the --lwt-* values; keep chrome surfaces derived from them
+ * instead of the stock Adwaita fallback palette.
+ */
+
+@namespace xul "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+
+:root[lwtheme-brighttext] {
+    color-scheme: dark;
+}
+
+:root[lwtheme]:not([lwtheme-brighttext]) {
+    color-scheme: light;
+}
+
+/* Pywal semantic palette
+ *
+ * Pywalfox's accent is useful as an accent, but it is not automatically a
+ * readable foreground. Keep the live hue for focus/selection and derive
+ * neutral foregrounds and low-contrast surfaces for the rest of the chrome.
+ */
+:root {
+    /* Omarchy shell rhythm. Keep these centralized: Firefox's internal
+     * widgets otherwise collapse back to unrelated GNOME dimensions. */
+    --omarchy-ui-font: monospace;
+    --omarchy-ui-font-size: 12px;
+    --omarchy-ui-label-size: 13px;
+    --omarchy-nav-row-height: 44px;
+    --omarchy-nav-control-size: 32px;
+    --omarchy-urlbar-height: 36px;
+    --omarchy-tabs-row-height: 40px;
+    --omarchy-tabs-control-size: 32px;
+    --omarchy-control-gap: 4px;
+    --omarchy-focus-accent: var(
+        --omarchy-border-active-color,
+        var(--omarchy-accent)
+    );
+
+    --omarchy-surface: var(--lwt-accent-color, #fafafa);
+    --omarchy-accent: var(--lwt-text-color, #7c3aed);
+    --omarchy-fg: color-mix(
+        in srgb,
+        #17151c 88%,
+        var(--omarchy-accent) 12%
+    );
+    --omarchy-muted: color-mix(
+        in srgb,
+        var(--omarchy-fg) 62%,
+        var(--omarchy-surface) 38%
+    );
+    --omarchy-field: color-mix(
+        in srgb,
+        var(--omarchy-surface) 97%,
+        var(--omarchy-accent) 3%
+    );
+    --omarchy-panel: color-mix(
+        in srgb,
+        var(--omarchy-surface) 96%,
+        var(--omarchy-accent) 4%
+    );
+    --omarchy-border: color-mix(
+        in srgb,
+        var(--omarchy-fg) 16%,
+        transparent
+    );
+    --omarchy-separator: color-mix(
+        in srgb,
+        var(--omarchy-fg) 12%,
+        transparent
+    );
+    --omarchy-control-border: color-mix(
+        in srgb,
+        var(--omarchy-fg) 40%,
+        transparent
+    );
+    --omarchy-control-hover-border: color-mix(
+        in srgb,
+        var(--omarchy-fg) 25%,
+        transparent
+    );
+    --omarchy-hover: color-mix(
+        in srgb,
+        var(--omarchy-fg) 8%,
+        transparent
+    );
+    --omarchy-active: color-mix(
+        in srgb,
+        var(--omarchy-fg) 22%,
+        transparent
+    );
+    /* Omarchy's shell states are foreground washes: 8% hover, 18% selected,
+     * and 22% pressed. Keep them opaque here so every Firefox surface renders
+     * the same visible state regardless of its parent background. */
+    --omarchy-control-hover: color-mix(
+        in srgb,
+        var(--omarchy-surface) 92%,
+        var(--omarchy-fg) 8%
+    );
+    --omarchy-control-selected: color-mix(
+        in srgb,
+        var(--omarchy-surface) 82%,
+        var(--omarchy-fg) 18%
+    );
+    --omarchy-control-active: color-mix(
+        in srgb,
+        var(--omarchy-surface) 78%,
+        var(--omarchy-fg) 22%
+    );
+    --omarchy-tab-selected-hover: var(--omarchy-control-active);
+    --omarchy-selection: color-mix(
+        in srgb,
+        var(--omarchy-fg) 18%,
+        transparent
+    );
+
+    --toolbar-bgcolor: var(--omarchy-surface) !important;
+    --toolbar-color: var(--omarchy-fg) !important;
+    --toolbar-background-color: var(--omarchy-surface) !important;
+    --toolbar-text-color: var(--omarchy-fg) !important;
+    --toolbar-field-background-color: var(--omarchy-field) !important;
+    --toolbar-field-color: var(--omarchy-fg) !important;
+    --toolbar-field-text-color: var(--omarchy-fg) !important;
+    --toolbar-field-text-color-focus: var(--omarchy-fg) !important;
+    --toolbar-field-focus-background-color: var(--omarchy-field) !important;
+    --toolbar-field-focus-color: var(--omarchy-fg) !important;
+    --urlbar-box-text-color: var(--omarchy-fg) !important;
+    --urlbar-box-text-color-hover: var(--omarchy-fg) !important;
+    --urlbarview-text-color-selected: var(--omarchy-fg) !important;
+    --urlbarView-secondary-text-color: var(--omarchy-muted) !important;
+    --link-color: var(--omarchy-accent) !important;
+    --link-color-hover: var(--omarchy-accent) !important;
+    --toolbarbutton-icon-fill: var(--omarchy-fg) !important;
+    --tab-selected-textcolor: var(--omarchy-fg) !important;
+
+    --arrowpanel-background: var(--omarchy-panel) !important;
+    --arrowpanel-color: var(--omarchy-fg) !important;
+    --arrowpanel-border-color: var(--omarchy-border) !important;
+    --panel-background: var(--omarchy-panel) !important;
+    --panel-color: var(--omarchy-fg) !important;
+    --panel-border-color: var(--omarchy-border) !important;
+    --sidebar-background-color: var(--omarchy-surface) !important;
+    --sidebar-text-color: var(--omarchy-fg) !important;
+    --input-bgcolor: var(--omarchy-field) !important;
+    --input-color: var(--omarchy-fg) !important;
+    --input-border-color: var(--omarchy-border) !important;
+
+    --gnome-window-background: var(--omarchy-surface) !important;
+    --gnome-window-color: var(--omarchy-fg) !important;
+    --gnome-view-background: var(--omarchy-surface) !important;
+    --gnome-view-color: var(--omarchy-fg) !important;
+    --gnome-sidebar-background: var(--omarchy-surface) !important;
+    --gnome-secondary-sidebar-background: var(--omarchy-field) !important;
+    --gnome-sidebar-text-color: var(--omarchy-fg) !important;
+    --gnome-view-selected-background: var(--omarchy-selection) !important;
+    --gnome-view-selected-hover-background: var(--omarchy-active) !important;
+    --gnome-view-selected-active-background: var(--omarchy-active) !important;
+    --gnome-headerbar-background: var(--omarchy-surface) !important;
+    --gnome-toolbar-background: var(--omarchy-surface) !important;
+    --gnome-toolbar-icon-fill: var(--omarchy-fg) !important;
+    --gnome-toolbar-border-color: var(--omarchy-border) !important;
+    --gnome-border-color: var(--omarchy-border) !important;
+    --gnome-menu-background: var(--omarchy-panel) !important;
+    --gnome-menu-color: var(--omarchy-fg) !important;
+    --gnome-menu-border-color: var(--omarchy-border) !important;
+    --gnome-menu-separator-color: var(--omarchy-border) !important;
+    --gnome-entry-background: var(--omarchy-field) !important;
+    --gnome-entry-color: var(--omarchy-fg) !important;
+    --gnome-inactive-entry-color: var(--omarchy-muted) !important;
+    --gnome-entry-focused-border-color: var(--omarchy-focus-accent) !important;
+    --gnome-entry-error-focused-border-color: color-mix(
+        in srgb,
+        var(--omarchy-accent) 50%,
+        transparent
+    ) !important;
+    --gnome-focus-border-color: var(--omarchy-focus-accent) !important;
+    --gnome-selection-bg: var(--omarchy-selection) !important;
+    --gnome-accent-bg: var(--omarchy-accent) !important;
+    --gnome-accent: var(--omarchy-accent) !important;
+    --gnome-selected-background: var(--omarchy-selection) !important;
+    --gnome-hover-color: var(--omarchy-hover) !important;
+    --gnome-active-color: var(--omarchy-active) !important;
+    --gnome-selected-color: var(--omarchy-selection) !important;
+    --gnome-selected-hover-color: var(--omarchy-active) !important;
+    --gnome-selected-active-color: var(--omarchy-active) !important;
+    --gnome-card-background: var(--omarchy-panel) !important;
+    --gnome-card-shade-color: var(--omarchy-border) !important;
+    --gnome-card-shadow: none !important;
+    --gnome-menu-shadow: none !important;
+    --gnome-tabbar-background: var(--omarchy-surface) !important;
+    --gnome-tabbar-tab-hover-background: var(--omarchy-hover) !important;
+    --gnome-tabbar-tab-active-background: var(--omarchy-selection) !important;
+    --gnome-tabbar-tab-active-background-contrast: var(--omarchy-active) !important;
+    --gnome-tabbar-tab-active-hover-background: var(--omarchy-active) !important;
+    --gnome-tabbar-tab-active-border-bottom-color: var(--omarchy-focus-accent) !important;
+}
+
+:root[lwtheme-brighttext] {
+    --omarchy-fg: color-mix(
+        in srgb,
+        #f7f5f8 88%,
+        var(--omarchy-accent) 12%
+    );
+    --omarchy-muted: color-mix(
+        in srgb,
+        var(--omarchy-fg) 62%,
+        var(--omarchy-surface) 38%
+    );
+    --omarchy-field: color-mix(
+        in srgb,
+        var(--omarchy-surface) 92%,
+        #ffffff 8%
+    );
+    --omarchy-panel: color-mix(
+        in srgb,
+        var(--omarchy-surface) 94%,
+        #ffffff 6%
+    );
+    --omarchy-border: color-mix(
+        in srgb,
+        var(--omarchy-fg) 22%,
+        transparent
+    );
+}
+
+/* Match the shell's fontconfig-driven typography rather than Firefox's
+ * platform sans. Primary chrome labels use the shell subtitle step. */
+#navigator-toolbox,
+#mainPopupSet > menupopup,
+#mainPopupSet > panel {
+    font-family: var(--omarchy-ui-font) !important;
+    font-size: var(--omarchy-ui-font-size) !important;
+}
+
+:is(#urlbar-input, .tab-label) {
+    font-family: var(--omarchy-ui-font) !important;
+    font-size: var(--omarchy-ui-label-size) !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab[selected] .tab-label {
+    font-weight: 700 !important;
+}
+
+/* Omarchy/Cascade layer
+ *
+ * Keep Firefox GNOME as the compatibility foundation, but centralize the
+ * maintained Omarchy simplifications here so the cascade has one clear owner.
+ * Cascade's useful cues are shared geometry, icon-only collapsed tabs, and
+ * one native popup surface rather than stacked containers.
+ */
+:root {
+    --gnome-button-radius: var(--omarchy-radius-container, 0px) !important;
+    --gnome-entry-radius: var(
+        --omarchy-radius-input,
+        var(--omarchy-radius-container, 0px)
+    ) !important;
+    --gnome-card-radius: var(--omarchy-radius-container, 0px) !important;
+    --gnome-menu-radius: var(--omarchy-radius-container, 0px) !important;
+    --gnome-popover-radius: var(--omarchy-radius-container, 0px) !important;
+    --gnome-dialog-radius: var(--omarchy-radius-container, 0px) !important;
+}
+
+#mainPopupSet > menupopup,
+#mainPopupSet > panel {
+    --panel-background: var(--arrowpanel-background) !important;
+    --panel-shadow: none !important;
+    --arrowpanel-shadow: none !important;
+    --panel-color: var(--arrowpanel-color) !important;
+    --panel-border-color: var(--arrowpanel-border-color) !important;
+    --panel-border-radius: var(--omarchy-radius-container, 0px) !important;
+    --arrowpanel-border-radius: var(
+        --omarchy-radius-container,
+        0px
+    ) !important;
+    background-color: transparent !important;
+    color: var(--panel-color) !important;
+    border-color: transparent !important;
+}
+
+#mainPopupSet menuitem,
+#mainPopupSet menu {
+    color: var(--arrowpanel-color) !important;
+}
+
+/* Reuse Hyprland's live border width and active color/gradient. The popup
+ * shell remains transparent; its native content part receives the shell
+ * border so menus do not grow a second shadow/container. */
+#mainPopupSet > menupopup::part(content),
+#mainPopupSet > panel::part(content) {
+    border-style: solid !important;
+    border-width: var(--omarchy-border-width, 0px) !important;
+    border-color: var(--omarchy-border-active-color, transparent) !important;
+    border-image-source: var(--omarchy-border-active-source, none) !important;
+    border-image-slice: 1 !important;
+    border-radius: var(--omarchy-radius-container, 0px) !important;
+    box-shadow: none !important;
+}
+
+:root:-moz-window-inactive #mainPopupSet > menupopup::part(content),
+:root:-moz-window-inactive #mainPopupSet > panel::part(content) {
+    border-color: var(--omarchy-border-inactive-color, transparent) !important;
+    border-image-source: var(--omarchy-border-inactive-source, none) !important;
+}
+
+/* Keep the active horizontal tab as a small accent line instead of a full
+ * bright card. Vertical-tab rules below remain more specific. */
+#tabbrowser-tabs .tabbrowser-tab .tab-background {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+#tabbrowser-tabs .tabbrowser-tab[selected] .tab-background {
+    background: var(--omarchy-control-selected) !important;
+    border-block-end: max(1px, var(--omarchy-border-width, 0px)) solid
+        var(--omarchy-focus-accent) !important;
+}
+
+#tabbrowser-tabs .tabbrowser-tab:not([selected]):hover .tab-background {
+    background: var(--omarchy-hover) !important;
+}
+
+/* Horizontal tabs need their own flat layout pass. The GNOME base intentionally
+ * makes tabs full-width cards; that is especially noisy when vertical tabs are
+ * switched off. Keep a compact normal-width strip with one shared surface. */
+#tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab,
+#tabbrowser-tabs[orient="horizontal"] .tab-stack,
+#tabbrowser-tabs[orient="horizontal"] .tab-content {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"]
+    .tabbrowser-tab:not([pinned]):not(
+        tab-split-view-wrapper > .tabbrowser-tab
+    ) {
+    flex: 0 0 200px !important;
+    max-width: 200px !important;
+    min-width: 200px !important;
+    padding: 0 !important;
+    width: 200px !important;
+}
+
+/* Firefox 153 treats a split pair as one tab-strip item backed by a two-column
+ * grid. Give that wrapper the same 200px slot as an ordinary tab, while its
+ * child tabs divide the slot instead of inheriting the fixed-tab width. */
+#tabbrowser-tabs[orient="horizontal"] tab-split-view-wrapper:not([dragtarget]) {
+    align-items: stretch !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-sizing: border-box !important;
+    flex: 0 0 200px !important;
+    height: var(--omarchy-tabs-row-height) !important;
+    margin-block: 0 !important;
+    max-height: var(--omarchy-tabs-row-height) !important;
+    max-width: 200px !important;
+    min-height: var(--omarchy-tabs-row-height) !important;
+    min-width: 200px !important;
+    padding: 0 !important;
+    width: 200px !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"]
+    tab-split-view-wrapper
+    > .tabbrowser-tab {
+    flex: 1 1 0 !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    width: auto !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"]
+    tab-group[collapsed]
+    > tab-split-view-wrapper:not([hasactivetab]) {
+    flex: 0 0 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    max-height: 0 !important;
+    max-width: 0 !important;
+    min-height: 0 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    width: 0 !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab > .tab-stack {
+    max-width: none !important;
+    min-width: 0 !important;
+    width: auto !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab[selected] .tab-background {
+    background: var(--omarchy-control-selected) !important;
+    border-block-end: 0 !important;
+    box-shadow: inset 0 -1px var(--omarchy-focus-accent) !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"]
+    .tabbrowser-tab[selected]:hover
+    .tab-background {
+    background: var(--omarchy-tab-selected-hover) !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"]
+    .tabbrowser-tab:not([selected]):hover
+    .tab-background {
+    background: var(--omarchy-control-hover) !important;
+    box-shadow: inset 0 0 0 1px var(--omarchy-control-hover-border) !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] .tab-content::before {
+    display: none !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] .tab-close-button:hover {
+    background: var(--omarchy-control-hover) !important;
+    border: 1px solid var(--omarchy-control-hover-border) !important;
+    border-radius: 0 !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] .tab-close-button:active {
+    background: var(--omarchy-control-active) !important;
+}
+
+/* The vertical-tab pinning tour is a Firefox shadow component. Supplying
+ * these inherited palette tokens removes its hard-coded violet card without
+ * reaching into the component's shadow DOM. */
+#sidebar-main,
+sidebar-pins-promo {
+    --color-violet-0: var(--omarchy-fg) !important;
+    --color-violet-10: var(--omarchy-panel) !important;
+    --color-violet-50: var(--omarchy-border) !important;
+    --color-violet-60: var(--omarchy-panel) !important;
+    --color-violet-70: var(--omarchy-fg) !important;
+}
+
+/* Collapsed vertical tabs are an icon rail, not a miniature button grid. */
+#tabbrowser-tabs[orient="vertical"]:not([expanded]) .tab-close-button {
+    display: none !important;
+}
+
+#tabbrowser-tabs[orient="vertical"]:not([expanded]) .tabbrowser-tab {
+    padding-block: 2px !important;
+}
+
+#tabbrowser-tabs[orient="vertical"]:not([expanded]) .tab-background {
+    background-color: transparent !important;
+    border: 0 !important;
+    border-inline-start: 1px solid transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin-block: 0 !important;
+}
+
+#tabbrowser-tabs[orient="vertical"]:not([expanded])
+    .tabbrowser-tab[selected]
+    .tab-background {
+    background-color: var(--omarchy-control-selected) !important;
+    border-inline-start-color: var(--omarchy-focus-accent) !important;
+}
+
+#tabbrowser-tabs[orient="vertical"]:not([expanded])
+    .tabbrowser-tab:not([selected]):hover
+    .tab-background {
+    background-color: var(--omarchy-control-hover) !important;
+}
+
+/* Main navigation surfaces and chrome text. */
+#navigator-toolbox,
+#toolbar-menubar,
+#TabsToolbar,
+#nav-bar,
+#PersonalToolbar {
+    background: var(--toolbar-bgcolor) !important;
+    color: var(--toolbar-color) !important;
+}
+
+#navigator-toolbox {
+    border-bottom-color: var(--omarchy-border) !important;
+}
+
+/* Hyprland owns window lifecycle and geometry. The compositor shortcuts are
+ * the close/maximize/minimize affordances; do not reserve headerbar space for
+ * GNOME-style CSD buttons. */
+:root[customtitlebar] .titlebar-buttonbox-container,
+#nav-bar .titlebar-buttonbox-container,
+#TabsToolbar .titlebar-buttonbox-container,
+#toolbar-menubar .titlebar-buttonbox-container,
+.titlebar-buttonbox-container {
+    display: none !important;
+}
+
+/* Firefox-GNOME can reassert display:flex on the empty navbar CSD wrapper.
+ * Collapse every dimension as well so its 8px side padding cannot survive as
+ * a blank trailing cell when Hyprland owns window controls. */
+#navigator-toolbox #nav-bar > .titlebar-buttonbox-container {
+    display: none !important;
+    flex: 0 0 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    max-height: 0 !important;
+    max-width: 0 !important;
+    min-height: 0 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    width: 0 !important;
+}
+
+.titlebar-button.titlebar-close,
+.titlebar-button.titlebar-min,
+.titlebar-button.titlebar-max,
+.titlebar-button.titlebar-restore {
+    display: none !important;
+}
+
+/* Navigation controls are a compact icon rail, not a row of GNOME button
+ * cards. Preserve a quiet hover/active signal without consuming extra space. */
+#nav-bar {
+    --omarchy-nav-height: var(--omarchy-nav-row-height);
+    --omarchy-nav-button-size: var(--omarchy-nav-control-size);
+    --omarchy-nav-icon-size: 18px;
+    --gnome-toolbar-padding: 4px 6px !important;
+    --gnome-toolbar-spacing: var(--omarchy-control-gap) !important;
+    --gnome-button-size: var(--omarchy-nav-button-size) !important;
+    --gnome-button-background: transparent !important;
+    --gnome-button-hover-background: var(--omarchy-control-hover) !important;
+    --gnome-button-active-background: var(--omarchy-control-active) !important;
+    min-height: var(--omarchy-nav-height) !important;
+    align-items: center !important;
+    column-gap: var(--omarchy-control-gap) !important;
+}
+
+/* Firefox puts almost every customizable widget inside this hbox. Align the
+ * hbox and its direct widget children; styling only #nav-bar's direct
+ * children misses the actual navigation tree. */
+#nav-bar-customization-target {
+    align-items: center !important;
+    column-gap: var(--omarchy-control-gap) !important;
+    min-width: 0 !important;
+}
+
+/* In collapsed vertical-tabs mode, center the first navbar cell over the
+ * native 46px tab rail. Keep the 32px control itself unchanged so hover and
+ * focus geometry still matches every other toolbar button. */
+:root:has(#tabbrowser-tabs[orient="vertical"]:not([expanded]))
+    #nav-bar-customization-target {
+    margin-inline-start: calc(
+        (var(--tab-collapsed-width) - var(--omarchy-nav-control-size)) / 2 -
+            var(--omarchy-control-gap)
+    ) !important;
+}
+
+#nav-bar-customization-target > toolbarbutton,
+#nav-bar-customization-target > toolbaritem,
+#nav-bar-customization-target > toolbarspring,
+#nav-bar > toolbarbutton,
+#nav-bar > toolbaritem,
+#nav-bar > toolbarspring {
+    align-self: center !important;
+}
+
+#nav-bar-customization-target > toolbaritem:not(#urlbar-container) {
+    align-items: center !important;
+    box-sizing: border-box !important;
+    height: var(--omarchy-nav-button-size) !important;
+    max-height: var(--omarchy-nav-button-size) !important;
+    min-height: var(--omarchy-nav-button-size) !important;
+    margin-inline: 0 !important;
+}
+
+/* Stop/reload is a toolbaritem around two mutually-exclusive buttons. Give
+ * the wrapper the same cell as every other navigation widget. */
+#nav-bar-customization-target > #stop-reload-button {
+    flex: 0 0 var(--omarchy-nav-button-size) !important;
+    max-width: var(--omarchy-nav-button-size) !important;
+    width: var(--omarchy-nav-button-size) !important;
+}
+
+#nav-bar-customization-target > #stop-reload-button > toolbarbutton {
+    flex: 0 0 var(--omarchy-nav-button-size) !important;
+    margin-inline: 0 !important;
+    max-width: var(--omarchy-nav-button-size) !important;
+    width: var(--omarchy-nav-button-size) !important;
+}
+
+/* Keep icon-only widgets on one fixed optical box. Bookmark items stay
+ * content-sized, while stop/reload and extension buttons share this rail. */
+#nav-bar-customization-target > toolbarbutton:not(
+        #urlbar-zoom-button,
+        .subviewbutton,
+        .titlebar-button,
+        #urlbar-searchmode-switcher,
+        .searchmode-switcher-close,
+        .bookmark-item
+    ),
+#nav-bar-customization-target
+    > toolbaritem:not(#urlbar-container)
+    > toolbarbutton:not(.subviewbutton, .titlebar-button),
+#nav-bar > toolbarbutton:not(
+        #urlbar-zoom-button,
+        .subviewbutton,
+        .titlebar-button,
+        #urlbar-searchmode-switcher,
+        .searchmode-switcher-close,
+        .bookmark-item
+    ),
+#nav-bar > toolbaritem:not(#urlbar-container)
+    > toolbarbutton:not(.subviewbutton, .titlebar-button) {
+    flex: 0 0 var(--omarchy-nav-button-size) !important;
+    max-width: var(--omarchy-nav-button-size) !important;
+    width: var(--omarchy-nav-button-size) !important;
+}
+
+#nav-bar toolbarbutton:not(
+        #urlbar-zoom-button,
+        .subviewbutton,
+        .titlebar-button,
+        #urlbar-searchmode-switcher,
+        .searchmode-switcher-close
+    ) {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    height: var(--omarchy-nav-button-size) !important;
+    max-height: var(--omarchy-nav-button-size) !important;
+    margin-block: 0 !important;
+    margin-inline: 0 !important;
+    min-height: var(--omarchy-nav-button-size) !important;
+    min-width: var(--omarchy-nav-button-size) !important;
+    padding: 0 !important;
+}
+
+#nav-bar toolbarbutton:not([disabled]):hover {
+    background-color: var(--omarchy-control-hover) !important;
+    background-image: none !important;
+    border: 1px solid var(--omarchy-control-hover-border) !important;
+}
+
+#nav-bar toolbarbutton:not([disabled]):is(:active, [open]) {
+    background-color: var(--omarchy-control-active) !important;
+    background-image: none !important;
+    border: 1px solid transparent !important;
+}
+
+#nav-bar toolbarbutton[disabled]:hover {
+    background: transparent !important;
+    background-image: none !important;
+}
+
+/* Omarchy uses accent only as a focus/edge cue. Firefox's keyboard focus can
+ * land on XUL toolbar buttons and anonymous tab-row controls, so restore a
+ * visible inset ring after flattening their native cards. */
+#navigator-toolbox
+    :is(toolbarbutton, .urlbar-page-action, .tab-close-button):is(
+        :focus-visible,
+        :-moz-focusring
+    ) {
+    background: var(--omarchy-control-hover) !important;
+    outline: 1px solid var(--omarchy-focus-accent) !important;
+    outline-offset: -1px !important;
+}
+
+/* Firefox applies family-specific toolbar hover shorthands after the generic
+ * button rule. Anchor the customization rail and menu button explicitly so
+ * native controls, extensions, and the hamburger resolve to one opaque state. */
+#nav-bar #nav-bar-customization-target toolbarbutton:not([disabled]):hover,
+#nav-bar #PanelUI-menu-button:not([disabled]):hover,
+#nav-bar #nav-bar-overflow-button:not([disabled]):hover {
+    background: var(--omarchy-control-hover) !important;
+    border: 1px solid var(--omarchy-control-hover-border) !important;
+    border-radius: 0 !important;
+}
+
+#nav-bar
+    #nav-bar-customization-target
+    toolbarbutton:not([disabled]):is(:active, [open]),
+#nav-bar #PanelUI-menu-button:not([disabled]):is(:active, [open]),
+#nav-bar #nav-bar-overflow-button:not([disabled]):is(:active, [open]) {
+    background: var(--omarchy-control-active) !important;
+    border: 1px solid transparent !important;
+    border-radius: 0 !important;
+}
+
+/* Native and extension buttons may paint a second hover tile on their icon or
+ * badge stack. Keep those layers transparent so only the outer cell owns
+ * interaction color. */
+#nav-bar
+    toolbarbutton:is(:hover, :active, [open])
+    :is(.toolbarbutton-icon, .toolbarbutton-badge-stack) {
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Extension buttons use a badge stack, so size the icon inside the stack as
+ * well as the native navigation icons. This keeps mixed toolbar buttons on
+ * one optical baseline instead of letting extension assets choose their own
+ * dimensions. */
+#nav-bar-customization-target > toolbarbutton:not(
+        #urlbar-zoom-button,
+        .subviewbutton,
+        .titlebar-button,
+        #urlbar-searchmode-switcher,
+        .searchmode-switcher-close,
+        .bookmark-item
+    ) .toolbarbutton-icon,
+#nav-bar-customization-target
+    > toolbaritem:not(#urlbar-container)
+    > toolbarbutton:not(.subviewbutton, .titlebar-button)
+    .toolbarbutton-icon,
+#nav-bar > toolbarbutton:not(
+        #urlbar-zoom-button,
+        .subviewbutton,
+        .titlebar-button,
+        #urlbar-searchmode-switcher,
+        .searchmode-switcher-close,
+        .bookmark-item
+    ) .toolbarbutton-icon,
+#nav-bar > toolbaritem:not(#urlbar-container)
+    > toolbarbutton:not(.subviewbutton, .titlebar-button)
+    .toolbarbutton-icon {
+    align-self: center !important;
+    box-sizing: border-box !important;
+    height: var(--omarchy-nav-icon-size) !important;
+    max-height: var(--omarchy-nav-icon-size) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: var(--omarchy-nav-icon-size) !important;
+    max-width: var(--omarchy-nav-icon-size) !important;
+}
+
+/* The badge stack is the extension button's inner hover surface. Make it
+ * fill the same cell as native controls, then keep its own paint transparent
+ * so every widget gets exactly one hover rectangle. */
+#nav-bar-customization-target > toolbarbutton:not(
+        #urlbar-zoom-button,
+        .subviewbutton,
+        .titlebar-button,
+        #urlbar-searchmode-switcher,
+        .searchmode-switcher-close,
+        .bookmark-item
+    ) > .toolbarbutton-badge-stack,
+#nav-bar-customization-target
+    > toolbaritem:not(#urlbar-container)
+    > toolbarbutton:not(.subviewbutton, .titlebar-button)
+    > .toolbarbutton-badge-stack,
+#nav-bar > toolbarbutton:not(
+        #urlbar-zoom-button,
+        .subviewbutton,
+        .titlebar-button,
+        #urlbar-searchmode-switcher,
+        .searchmode-switcher-close,
+        .bookmark-item
+    ) > .toolbarbutton-badge-stack,
+#nav-bar > toolbaritem:not(#urlbar-container)
+    > toolbarbutton:not(.subviewbutton, .titlebar-button)
+    > .toolbarbutton-badge-stack {
+    align-items: center !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    height: var(--omarchy-nav-button-size) !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    max-height: var(--omarchy-nav-button-size) !important;
+    max-width: var(--omarchy-nav-button-size) !important;
+    padding: 0 !important;
+    width: var(--omarchy-nav-button-size) !important;
+}
+
+#downloads-indicator-icon {
+    align-self: center !important;
+    height: var(--omarchy-nav-icon-size) !important;
+    width: var(--omarchy-nav-icon-size) !important;
+}
+
+#navigator-toolbox .toolbarbutton-icon,
+#navigator-toolbox .toolbarbutton-text,
+.menu-iconic-left,
+.menuitem-iconic {
+    color: var(--omarchy-fg) !important;
+    fill: var(--omarchy-fg) !important;
+    -moz-context-properties: fill, fill-opacity !important;
+}
+
+/* URL bar field: use the same live Pywalfox field colors as Firefox itself. */
+#urlbar,
+.urlbar-background,
+#urlbar .urlbar-input-container,
+#urlbar .urlbar-input,
+#urlbar .urlbar-input-box {
+    background-color: var(--omarchy-field) !important;
+    color: var(--omarchy-fg) !important;
+    border-color: var(--omarchy-border) !important;
+}
+
+/* Give the URL bar a deliberate control rhythm instead of inheriting the
+ * GNOME zero-padding reset. Keep the input flexible; controls keep space. */
+#urlbar-container {
+    --urlbar-container-height: var(--omarchy-urlbar-height) !important;
+    align-self: center !important;
+}
+
+#urlbar {
+    --urlbar-height: var(--omarchy-urlbar-height) !important;
+    --urlbar-toolbar-height: var(--omarchy-urlbar-height) !important;
+    --urlbar-icon-padding: 4px !important;
+    align-self: center !important;
+    box-sizing: border-box !important;
+    height: var(--omarchy-urlbar-height) !important;
+    margin: 0 !important;
+    max-height: var(--omarchy-urlbar-height) !important;
+    min-height: var(--omarchy-urlbar-height) !important;
+    padding-inline: 0 !important;
+}
+
+#urlbar .urlbar-input-container {
+    align-items: center !important;
+    box-sizing: border-box !important;
+    height: var(--omarchy-urlbar-height) !important;
+    max-height: var(--omarchy-urlbar-height) !important;
+    min-height: var(--omarchy-urlbar-height) !important;
+    padding-inline: 4px !important;
+}
+
+#urlbar .urlbar-input-container > * {
+    align-self: center !important;
+    margin-inline: 0 !important;
+}
+
+#urlbar .urlbar-input-box {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    padding-inline: 4px !important;
+}
+
+#urlbar .urlbar-input {
+    min-width: 0 !important;
+    padding-inline: 0 !important;
+}
+
+#urlbar-searchmode-switcher,
+#urlbar-search-mode-indicator,
+#urlbar-label-box,
+#urlbar-zoom-button {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: var(--omarchy-radius-input, 0px) !important;
+    flex-shrink: 0 !important;
+    margin-inline: 0 !important;
+    min-height: 26px !important;
+    padding-inline: 7px !important;
+}
+
+/* URL-bar controls use the same state tokens as toolbar widgets. Their
+ * search-mode/zoom elements are not all toolbarbuttons, so cover both the
+ * XUL buttons and the hbox/div page actions explicitly. */
+#urlbar-searchmode-switcher:hover,
+#urlbar-search-mode-indicator:hover,
+#urlbar-label-box:hover,
+#urlbar-zoom-button:hover,
+#urlbar .urlbar-page-action:hover,
+#urlbar #identity-box > .identity-box-button:hover {
+    background-color: var(--omarchy-control-hover) !important;
+    background-image: none !important;
+    border: 1px solid var(--omarchy-control-hover-border) !important;
+}
+
+#urlbar-searchmode-switcher:is(:active, [open]),
+#urlbar[searchmode] #urlbar-searchmode-switcher,
+#urlbar-search-mode-indicator:is(:active, [open]),
+#urlbar-label-box:active,
+#urlbar-zoom-button:is(:active, [open]),
+#urlbar .urlbar-page-action:is(:active, [open]),
+#urlbar #identity-box > .identity-box-button:is(:active, [open]) {
+    background-color: var(--omarchy-control-active) !important;
+    background-image: none !important;
+    border: 1px solid transparent !important;
+}
+
+#urlbar-searchmode-switcher .toolbarbutton-icon,
+#urlbar-search-mode-indicator .toolbarbutton-icon {
+    height: 18px !important;
+    width: 18px !important;
+}
+
+#urlbar-go-button {
+    flex-shrink: 0 !important;
+    height: var(--omarchy-nav-control-size) !important;
+    margin-inline: 0 !important;
+    padding: 7px !important;
+    width: var(--omarchy-nav-control-size) !important;
+}
+
+#urlbar #identity-box[pageproxystate="invalid"] {
+    align-items: center !important;
+    background: transparent !important;
+    border-radius: var(--omarchy-radius-input, 0px) !important;
+    display: flex !important;
+    flex-shrink: 0 !important;
+    margin-inline: 0 4px !important;
+    min-width: 32px !important;
+    padding-inline: 6px !important;
+}
+
+#urlbar #identity-box[pageproxystate="invalid"] > .identity-box-button {
+    margin: 0 !important;
+    padding-inline: 4px !important;
+}
+
+#page-action-buttons {
+    align-items: center !important;
+    gap: 2px !important;
+    margin-inline: 0 !important;
+}
+
+#urlbar .urlbar-page-action {
+    align-items: center !important;
+    box-sizing: border-box !important;
+    height: var(--omarchy-nav-control-size) !important;
+    margin-inline: 0 !important;
+    max-height: var(--omarchy-nav-control-size) !important;
+    min-height: var(--omarchy-nav-control-size) !important;
+    min-width: var(--omarchy-nav-control-size) !important;
+}
+
+#urlbar .urlbar-page-action > .urlbar-icon {
+    height: var(--omarchy-nav-icon-size) !important;
+    margin: 0 !important;
+    width: var(--omarchy-nav-icon-size) !important;
+}
+
+/* A saved page is a semantic state, not Firefox's stock yellow notification.
+ * Use the live Pywal toolbar accent; the solid glyph already carries state. */
+#urlbar #star-button[starred] {
+    color: var(--omarchy-accent) !important;
+    fill: var(--omarchy-accent) !important;
+    fill-opacity: 1 !important;
+}
+
+#urlbar .urlbarView-url {
+    color: var(--omarchy-accent) !important;
+}
+
+#urlbar .urlbarView-explanation {
+    color: var(--omarchy-muted) !important;
+}
+
+/* Inputs in the Omarchy shell retain a quiet 1px idle boundary. Firefox's
+ * field sits inside a roomier toolbar row, so keep that same framing here. */
+#urlbar > .urlbar-background {
+    border: 1px solid var(--omarchy-control-border) !important;
+    border-radius: 0 !important;
+    box-sizing: border-box !important;
+    height: var(--omarchy-urlbar-height) !important;
+    inset: 0 !important;
+    max-height: var(--omarchy-urlbar-height) !important;
+    min-height: var(--omarchy-urlbar-height) !important;
+    width: 100% !important;
+}
+
+#urlbar:hover > .urlbar-background {
+    border-color: var(--omarchy-control-hover-border) !important;
+}
+
+/* Firefox grows the breakout wrapper beyond the toolbar row. Keep that
+ * wrapper paint-free so focus cannot overlap the tab strip; draw the live
+ * Hyprland border on the row-sized background layer instead. */
+#urlbar[breakout][breakout-extend] {
+    background: transparent !important;
+    border: 0 !important;
+    color: var(--omarchy-fg) !important;
+    outline: none !important;
+}
+
+#urlbar:has(#urlbar-input:focus) > .urlbar-background,
+#urlbar:is([focused], :focus-within, [breakout][breakout-extend])
+    > .urlbar-background {
+    background: var(--omarchy-field) !important;
+    border: 1px solid transparent !important;
+    border-image: none !important;
+    box-shadow: none !important;
+    inset: 0 !important;
+    outline: none !important;
+}
+
+/* The input container is the topmost opaque URL-bar layer in Firefox 153.
+ * Repeat the inset edge there so it cannot be hidden behind that surface. */
+#urlbar:has(#urlbar-input:focus) > .urlbar-input-container,
+#urlbar:is([focused], :focus-within, [breakout][breakout-extend])
+    > .urlbar-input-container {
+    box-shadow: inset 0 0 0 1px var(--omarchy-focus-accent) !important;
+}
+
+:root:-moz-window-inactive
+    #urlbar:has(#urlbar-input:focus)
+    > .urlbar-input-container,
+:root:-moz-window-inactive
+    #urlbar:is([focused], :focus-within, [breakout][breakout-extend])
+    > .urlbar-input-container {
+    box-shadow: inset 0 0 0 1px var(
+            --omarchy-border-inactive-color,
+            transparent
+        ) !important;
+}
+
+/* Keep autocomplete readable: accent belongs to URLs and focus, not every
+ * line of text. The result list is one flat, bordered surface. */
+/* The URL results panel is positioned for Firefox's stock tabs-above-navbar
+ * order. Our horizontal tab row sits below the navbar, so move results past
+ * that row instead of covering tab labels and controls. */
+#navigator-toolbox:has(#tabbrowser-tabs[orient="horizontal"])
+    #urlbar
+    .urlbarView {
+    margin-top: var(--omarchy-nav-row-height) !important;
+}
+
+.urlbarView {
+    background: var(--omarchy-panel) !important;
+    border-style: solid !important;
+    border-width: var(--omarchy-border-width, 0px) !important;
+    border-color: var(--omarchy-border-active-color, transparent) !important;
+    border-image-source: var(--omarchy-border-active-source, none) !important;
+    border-image-slice: 1 !important;
+    border-radius: var(--omarchy-radius-container, 0px) !important;
+    box-shadow: none !important;
+    color: var(--omarchy-fg) !important;
+}
+
+.urlbarView-body-outer {
+    background: transparent !important;
+    padding: 5px 7px !important;
+}
+
+.urlbarView-row {
+    color: var(--omarchy-fg) !important;
+}
+
+.urlbarView-row[selected],
+.urlbarView-row[selected]:hover {
+    background: var(--omarchy-selection) !important;
+    color: var(--omarchy-fg) !important;
+}
+
+.urlbarView-row:not([selected]):hover {
+    background: var(--omarchy-hover) !important;
+}
+
+.urlbarView-row:not([selected]):active {
+    background: var(--omarchy-active) !important;
+}
+
+.urlbarView-row-inner,
+.urlbarView-no-wrap {
+    border-radius: 0 !important;
+}
+
+.urlbarView-title {
+    color: var(--omarchy-fg) !important;
+}
+
+.urlbarView-url {
+    color: var(--omarchy-accent) !important;
+}
+
+.urlbarView-action {
+    color: var(--omarchy-muted) !important;
+}
+
+:root:-moz-window-inactive .urlbarView {
+    border-color: var(--omarchy-border-inactive-color, transparent) !important;
+    border-image-source: var(--omarchy-border-inactive-source, none) !important;
+}
+
+/* Use Firefox's paired sidebar text/highlight colors for the launcher and tabs. */
+#sidebar-main,
+#vertical-tabs,
+#tabbrowser-arrowscrollbox[orient="vertical"],
+#sidebar-box,
+#sidebar,
+.sidebar-panel {
+    color: var(--omarchy-fg) !important;
+}
+
+#sidebar-main {
+    --gnome-toolbar-icon-fill: var(--omarchy-fg) !important;
+    --gnome-hover-color: var(--omarchy-hover) !important;
+    --gnome-active-color: var(--omarchy-active) !important;
+    --gnome-selected-color: var(--omarchy-selection) !important;
+}
+
+/* Keep the sidebar and viewport flush; disable the native rounded-content card. */
+#browser:has(#sidebar-container:not([hidden])) #sidebar-box,
+#browser:has(#tabbrowser-tabbox[sidebar-shown]) #sidebar-box {
+    padding: 0 !important;
+}
+
+#browser:has(#sidebar-container:not([hidden])) #sidebar-container,
+#browser:has(#sidebar-container:not([hidden])) #sidebar-main,
+#browser:has(#sidebar-container:not([hidden])) #sidebar-box,
+#browser:has(#sidebar-container:not([hidden])) #sidebar,
+#browser:has(#tabbrowser-tabbox[sidebar-shown]) #sidebar-box,
+#browser:has(#tabbrowser-tabbox[sidebar-shown]) #sidebar {
+    background: var(--omarchy-surface) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+#browser:has(#sidebar-container:not([hidden])) #tabbrowser-tabbox,
+#tabbrowser-tabbox[sidebar-shown] {
+    background-color: var(--omarchy-surface) !important;
+}
+
+#browser:has(#sidebar-container:not([hidden]))
+    #tabbrowser-tabbox
+    .browserContainer,
+#tabbrowser-tabbox[sidebar-shown] .browserContainer {
+    background: var(--lwt-accent-color) !important;
+    overflow: visible !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Keep Firefox's resize hit targets and keyboard focus cue while letting the
+ * splitter disappear into the flat sidebar until it is hovered or focused. */
+#sidebar-launcher-splitter,
+#sidebar-splitter {
+    --splitter-width: 4px;
+    background-color: transparent !important;
+    flex: 0 0 auto !important;
+    max-width: none !important;
+    min-width: 1px !important;
+    position: relative !important;
+    width: var(--splitter-width) !important;
+    z-index: var(--browser-area-z-index-sidebar-splitter) !important;
+}
+
+#sidebar-splitter {
+    -moz-user-focus: normal !important;
+    width: var(--space-medium, var(--splitter-width)) !important;
+}
+
+:is(#sidebar-launcher-splitter, #sidebar-splitter):hover {
+    background-color: var(--omarchy-focus-accent) !important;
+}
+
+#sidebar-splitter:focus-visible {
+    outline: 1px solid var(--omarchy-focus-accent) !important;
+    outline-offset: -1px !important;
+}
+
+/* Low-risk Firefox Theme API crack fixes. */
+#sidebar-header,
+.sidebar-panel,
+treechildren {
+    background-color: var(--omarchy-surface) !important;
+    color: var(--omarchy-fg) !important;
+}
+
+treechildren::-moz-tree-row(selected) {
+    background-color: var(--omarchy-selection) !important;
+}
+
+treechildren::-moz-tree-cell-text(selected) {
+    color: var(--omarchy-fg) !important;
+}
+
+treechildren::-moz-tree-row(hover) {
+    background-color: var(--omarchy-hover) !important;
+}
+
+findbar {
+    background-color: var(--toolbar-bgcolor) !important;
+    color: var(--toolbar-color) !important;
+    border-top-color: var(--omarchy-border) !important;
+}
+
+.findbar-textbox {
+    background-color: var(--omarchy-field) !important;
+    color: var(--omarchy-fg) !important;
+    border-color: var(--omarchy-border) !important;
+}
+
+.findbar-closebutton {
+    color: var(--toolbar-color) !important;
+    fill: var(--toolbar-color) !important;
+    -moz-context-properties: fill, fill-opacity !important;
+}
+
+tooltip {
+    background-color: var(--arrowpanel-background) !important;
+    color: var(--arrowpanel-color) !important;
+    border-color: var(--arrowpanel-border-color) !important;
+}
+
+/* Replace the GNOME theme's fixed white foreground on accent buttons. */
+#appMenu-popup .panel-banner-item[notificationid="update-restart"],
+button.popup-notification-primary-button:not(#hack),
+#editBookmarkPanelDoneButton,
+#tracking-action-block,
+.button.connect-device {
+    color: var(--omarchy-fg) !important;
+}
+
+/* Keep selected in-content rows paired with their dynamic highlight color. */
+richlistbox#items {
+    --in-content-item-selected: var(--omarchy-selection) !important;
+    --in-content-item-selected-text: var(--omarchy-fg) !important;
+}
+
+@-moz-document url("chrome://browser/content/places/places.xhtml") {
+    /* Library windows do not receive Pywalfox's browser-window LWT aliases.
+     * Keep their fallback on the same dark Omarchy palette in dark sessions. */
+    @media (prefers-color-scheme: dark) {
+        :root {
+            color-scheme: dark !important;
+            --omarchy-surface: #171820 !important;
+            --omarchy-panel: #1d1e2b !important;
+            --omarchy-field: #222331 !important;
+            --omarchy-fg: #eee4ef !important;
+            --omarchy-muted: #b8afc0 !important;
+            --omarchy-accent: #c4a7e7 !important;
+            --omarchy-border: #514b63 !important;
+            --omarchy-hover: #2b2938 !important;
+            --omarchy-selection: #3a3450 !important;
+            --toolbar-bgcolor: var(--omarchy-surface) !important;
+            --toolbar-color: var(--omarchy-fg) !important;
+        }
+    }
+
+    :root {
+        --in-content-page-background: var(--omarchy-surface) !important;
+        --in-content-text-color: var(--omarchy-fg) !important;
+        --in-content-box-background: var(--toolbar-bgcolor) !important;
+        --in-content-border-color: var(--omarchy-border) !important;
+        --in-content-primary-button-background: var(--omarchy-accent) !important;
+    }
+
+    body,
+    #places,
+    #placesView,
+    #contentView,
+    #placesViewsBox,
+    #placesToolbar,
+    #placesList,
+    #placeContent,
+    #downloadsListBox,
+    #detailsPane,
+    #placesView > splitter {
+        background-color: var(--omarchy-surface) !important;
+        color: var(--omarchy-fg) !important;
+    }
+
+    #placesView #placeContent,
+    #placesView #downloadsListBox,
+    #placesView > #contentView,
+    #placesView > #contentView > #placesViewsBox,
+    #placesView > #placesList {
+        background-color: var(--omarchy-surface) !important;
+        color: var(--omarchy-fg) !important;
+    }
+
+    #placesView treechildren::-moz-tree-row,
+    #placesView treechildren::-moz-tree-cell {
+        background-color: var(--omarchy-surface) !important;
+        color: var(--omarchy-fg) !important;
+    }
+
+    #placesView treechildren::-moz-tree-row(selected) {
+        background-color: var(--omarchy-selection) !important;
+    }
+
+    #placesView treechildren::-moz-tree-cell-text {
+        color: var(--omarchy-fg) !important;
+    }
+
+    #placesView > splitter {
+        border-color: var(--omarchy-border) !important;
+    }
+
+    #placesView > splitter + #contentView {
+        background-color: var(--omarchy-surface) !important;
+    }
+
+    #placesView > splitter + #contentView > #placesViewsBox {
+        background-color: var(--omarchy-surface) !important;
+    }
+
+    #placesView > splitter + #contentView > #placesViewsBox > tree,
+    #placesView > splitter + #contentView > #placesViewsBox > richlistbox {
+        background-color: var(--omarchy-surface) !important;
+        color: var(--omarchy-fg) !important;
+    }
+
+    #placesView > splitter + #contentView > #placesViewsBox > treechildren {
+        background-color: var(--omarchy-surface) !important;
+    }
+
+    #placesToolbar {
+        border-bottom: var(--omarchy-border-width, 0px) solid
+            var(--omarchy-border) !important;
+    }
+
+    #placesList,
+    #placeContent {
+        --sidebar-background-color: var(--omarchy-surface) !important;
+        --sidebar-text-color: var(--omarchy-fg) !important;
+    }
+
+    #searchFilter {
+        --input-background-color: var(--omarchy-field) !important;
+        --input-text-color: var(--omarchy-fg) !important;
+        --input-border-color: var(--omarchy-border) !important;
+        background: var(--omarchy-field) !important;
+        color: var(--omarchy-fg) !important;
+        border-color: var(--omarchy-border) !important;
+    }
+
+    tree,
+    treechildren,
+    richlistbox {
+        background-color: var(--omarchy-surface) !important;
+        color: var(--omarchy-fg) !important;
+    }
+
+    #detailsPane {
+        background-color: var(--toolbar-bgcolor) !important;
+        border-top-color: var(--omarchy-border) !important;
+    }
+
+    treechildren::-moz-tree-row(selected),
+    richlistitem[selected] {
+        background-color: var(--omarchy-selection) !important;
+        color: var(--omarchy-fg) !important;
+    }
+
+    treechildren::-moz-tree-cell-text,
+    richlistitem {
+        color: var(--omarchy-fg) !important;
+    }
+}
+
+/* Final chrome grid pass. Firefox's GNOME layer adds toolbar padding and
+ * horizontal-tab scroll affordances around the shared controls. Remove those
+ * outer offsets and give both rows one explicit rhythm. */
+#navigator-toolbox:has(#tabbrowser-tabs[orient="horizontal"]) {
+    border-bottom: 0 !important;
+}
+
+#navigator-toolbox:has(#tabbrowser-tabs[orient="horizontal"]) > #nav-bar {
+    box-sizing: border-box !important;
+    height: var(--omarchy-nav-row-height) !important;
+    max-height: var(--omarchy-nav-row-height) !important;
+    min-height: var(--omarchy-nav-row-height) !important;
+    padding: 4px 6px !important;
+}
+
+#navigator-toolbox:has(#tabbrowser-tabs[orient="horizontal"])
+    > #nav-bar
+    > #nav-bar-customization-target {
+    box-sizing: border-box !important;
+    height: var(--omarchy-urlbar-height) !important;
+    max-height: var(--omarchy-urlbar-height) !important;
+    min-height: var(--omarchy-urlbar-height) !important;
+}
+
+#TabsToolbar:has(#tabbrowser-tabs[orient="horizontal"]),
+#TabsToolbar:has(#tabbrowser-tabs[orient="horizontal"]) > .toolbar-items,
+#TabsToolbar:has(#tabbrowser-tabs[orient="horizontal"])
+    > #TabsToolbar-customization-target {
+    box-sizing: border-box !important;
+    height: var(--omarchy-tabs-row-height) !important;
+    max-height: var(--omarchy-tabs-row-height) !important;
+    min-height: var(--omarchy-tabs-row-height) !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* One baseline belongs to the row. Tab selection paints over this inset line
+ * instead of stacking another border above or below it. */
+#TabsToolbar:has(#tabbrowser-tabs[orient="horizontal"]) {
+    border: 0 !important;
+    box-shadow: inset 0 -1px var(--omarchy-separator) !important;
+}
+
+/* Firefox View is already a real toolbar cell. The GNOME compatibility
+ * offset duplicates that width and leaves a dead gutter before the first tab. */
+:root:not([privatebrowsingmode="temporary"]):not([firefoxviewhidden])
+    #TabsToolbar
+    :is(#firefox-view-button, #wrapper-firefox-view-button)
+    + #tabbrowser-tabs[orient="horizontal"] {
+    padding-inline-start: 0 !important;
+}
+
+#TabsToolbar:has(#tabbrowser-tabs[orient="horizontal"])
+    > .titlebar-spacer,
+#TabsToolbar:has(#tabbrowser-tabs[orient="horizontal"])
+    > .toolbar-items
+    > toolbartabstop {
+    display: none !important;
+}
+
+/* Keep overflow navigation discoverable. Firefox exposes these shadow buttons
+ * as parts; style the exported contract rather than unreachable light DOM. */
+#tabbrowser-arrowscrollbox[orient="horizontal"]::part(scrollbutton-up),
+#tabbrowser-arrowscrollbox[orient="horizontal"]::part(scrollbutton-down) {
+    align-items: center !important;
+    background: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    bottom: auto !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex: 0 0 var(--omarchy-tabs-control-size) !important;
+    height: var(--omarchy-tabs-row-height) !important;
+    inset: auto !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    max-height: var(--omarchy-tabs-row-height) !important;
+    max-width: var(--omarchy-tabs-control-size) !important;
+    min-height: var(--omarchy-tabs-row-height) !important;
+    min-width: var(--omarchy-tabs-control-size) !important;
+    opacity: 1 !important;
+    padding: 7px !important;
+    position: static !important;
+    visibility: visible !important;
+    width: var(--omarchy-tabs-control-size) !important;
+}
+
+/* Firefox 153's user-origin chrome sheet can also reach the exported
+ * anonymous buttons directly. Mirror the part geometry so the GNOME base's
+ * absolute fade affordance cannot hide or overlay the fixed tab cells. */
+#scrollbutton-up:has(~ scrollbox[orient="horizontal"]),
+scrollbox[orient="horizontal"] ~ #scrollbutton-down {
+    align-items: center !important;
+    background: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    bottom: auto !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex: 0 0 var(--omarchy-tabs-control-size) !important;
+    height: var(--omarchy-tabs-row-height) !important;
+    inset: auto !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    max-height: var(--omarchy-tabs-row-height) !important;
+    max-width: var(--omarchy-tabs-control-size) !important;
+    min-height: var(--omarchy-tabs-row-height) !important;
+    min-width: var(--omarchy-tabs-control-size) !important;
+    opacity: 1 !important;
+    padding: 7px !important;
+    position: static !important;
+    visibility: visible !important;
+    width: var(--omarchy-tabs-control-size) !important;
+}
+
+#scrollbutton-up:has(~ scrollbox[orient="horizontal"])
+    > .toolbarbutton-icon,
+scrollbox[orient="horizontal"]
+    ~ #scrollbutton-down
+    > .toolbarbutton-icon {
+    box-sizing: border-box !important;
+    display: flex !important;
+    height: 18px !important;
+    max-height: 18px !important;
+    max-width: 18px !important;
+    min-height: 18px !important;
+    min-width: 18px !important;
+    padding: 0 !important;
+    visibility: visible !important;
+    width: 18px !important;
+}
+
+#tabbrowser-arrowscrollbox[orient="horizontal"]::part(scrollbutton-up):hover,
+#tabbrowser-arrowscrollbox[orient="horizontal"]::part(scrollbutton-down):hover,
+#scrollbutton-up:has(~ scrollbox[orient="horizontal"]):hover,
+scrollbox[orient="horizontal"] ~ #scrollbutton-down:hover {
+    background: var(--omarchy-control-hover) !important;
+    box-shadow: inset 0 0 0 1px var(--omarchy-control-hover-border) !important;
+}
+
+/* Keep both directions discoverable at overflow boundaries. The host exposes
+ * its scroll position; dim the inactive direction instead of collapsing cells
+ * and moving the tab strip. */
+#tabbrowser-arrowscrollbox[orient="horizontal"][scrolledtostart]::part(
+        scrollbutton-up
+    ),
+#tabbrowser-arrowscrollbox[orient="horizontal"][scrolledtoend]::part(
+        scrollbutton-down
+    ) {
+    opacity: 0.35 !important;
+}
+
+#scrollbutton-up:has(~ scrollbox[orient="horizontal"])[disabled],
+scrollbox[orient="horizontal"] ~ #scrollbutton-down[disabled] {
+    display: flex !important;
+    opacity: 0.35 !important;
+}
+
+#TabsToolbar:has(#tabbrowser-tabs[orient="horizontal"])
+    > #TabsToolbar-customization-target,
+#tabbrowser-tabs[orient="horizontal"],
+#tabbrowser-tabs[orient="horizontal"] > arrowscrollbox,
+#tabbrowser-tabs[orient="horizontal"] > arrowscrollbox > scrollbox,
+#tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab,
+#tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab > .tab-stack,
+#tabbrowser-tabs[orient="horizontal"] .tab-content {
+    box-sizing: border-box !important;
+    height: var(--omarchy-tabs-row-height) !important;
+    max-height: var(--omarchy-tabs-row-height) !important;
+    min-height: var(--omarchy-tabs-row-height) !important;
+}
+
+/* A XUL stack does not stretch its background child like normal flexbox.
+ * Size the painted layer itself so it owns the full tab-row interaction area. */
+#tabbrowser-tabs[orient="horizontal"] .tab-background {
+    box-sizing: border-box !important;
+    height: var(--omarchy-tabs-row-height) !important;
+    margin: 0 !important;
+    max-height: var(--omarchy-tabs-row-height) !important;
+    min-height: var(--omarchy-tabs-row-height) !important;
+    outline: 0 !important;
+    outline-offset: 0 !important;
+    width: 100% !important;
+}
+
+/* Preserve a deliberate keyboard cue after removing Firefox's always-visible
+ * tab card outline. */
+#tabbrowser-tabs[orient="horizontal"][tablist-has-focus]
+    .tabbrowser-tab.tablist-keyboard-focus
+    .tab-background {
+    outline: 1px solid var(--omarchy-focus-accent) !important;
+    outline-offset: -1px !important;
+}
+
+#TabsToolbar:has(#tabbrowser-tabs[orient="horizontal"])
+    > #TabsToolbar-customization-target,
+#tabbrowser-tabs[orient="horizontal"],
+#tabbrowser-tabs[orient="horizontal"] > arrowscrollbox,
+#tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Firefox 153 may place Firefox View inside a customization wrapper, so the
+ * direct-child rule alone misses the live toolbar. Constrain both forms to
+ * one shared grid cell and stop the symbolic icon from collapsing to a sliver. */
+#TabsToolbar:has(#tabbrowser-tabs[orient="horizontal"])
+    :is(#wrapper-firefox-view-button, #firefox-view-button) {
+    box-sizing: border-box !important;
+    flex: 0 0 var(--omarchy-tabs-control-size) !important;
+    margin-inline: 0 !important;
+    max-width: var(--omarchy-tabs-control-size) !important;
+    min-width: var(--omarchy-tabs-control-size) !important;
+    padding-inline: 0 !important;
+    width: var(--omarchy-tabs-control-size) !important;
+}
+
+#TabsToolbar:has(#tabbrowser-tabs[orient="horizontal"])
+    #wrapper-firefox-view-button {
+    height: var(--omarchy-tabs-row-height) !important;
+    margin-block: 0 !important;
+    max-height: var(--omarchy-tabs-row-height) !important;
+    min-height: var(--omarchy-tabs-row-height) !important;
+    padding-block: 0 !important;
+}
+
+#TabsToolbar:has(#tabbrowser-tabs[orient="horizontal"])
+    #firefox-view-button {
+    background: transparent !important;
+    border-radius: 0 !important;
+    height: var(--omarchy-tabs-control-size) !important;
+    margin-block: calc(
+        (var(--omarchy-tabs-row-height) - var(--omarchy-tabs-control-size)) / 2
+    ) !important;
+    max-height: var(--omarchy-tabs-control-size) !important;
+    min-height: var(--omarchy-tabs-control-size) !important;
+    padding: 0 !important;
+}
+
+/* GNOME's toolbar icon rule paints a second 18px hover tile inside Firefox
+ * View. The button owns state paint; its glyph must remain transparent. */
+#TabsToolbar:has(#tabbrowser-tabs[orient="horizontal"])
+    #firefox-view-button
+    > .toolbarbutton-icon {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+#TabsToolbar:has(#tabbrowser-tabs[orient="horizontal"])
+    :is(
+        #firefox-view-button,
+        #new-tab-button,
+        #tabs-newtab-button,
+        #vertical-tabs-newtab-button,
+        #alltabs-button
+    ):hover {
+    background: var(--omarchy-control-hover) !important;
+    border: 1px solid var(--omarchy-control-hover-border) !important;
+    border-radius: 0 !important;
+}
+
+#TabsToolbar:has(#tabbrowser-tabs[orient="horizontal"])
+    :is(
+        #firefox-view-button,
+        #new-tab-button,
+        #tabs-newtab-button,
+        #vertical-tabs-newtab-button,
+        #alltabs-button
+    ):is(:active, [open]) {
+    background: var(--omarchy-control-active) !important;
+}
+
+#TabsToolbar:has(#tabbrowser-tabs[orient="horizontal"])
+    > #TabsToolbar-customization-target
+    > #firefox-view-button,
+#TabsToolbar:has(#tabbrowser-tabs[orient="horizontal"])
+    > #TabsToolbar-customization-target
+    > #new-tab-button,
+#TabsToolbar:has(#tabbrowser-tabs[orient="horizontal"])
+    > #TabsToolbar-customization-target
+    > #alltabs-button,
+#tabbrowser-tabs[orient="horizontal"] #tabs-newtab-button,
+#tabbrowser-tabs[orient="horizontal"] #vertical-tabs-newtab-button {
+    box-sizing: border-box !important;
+    flex: 0 0 var(--omarchy-tabs-control-size) !important;
+    height: var(--omarchy-tabs-control-size) !important;
+    max-height: var(--omarchy-tabs-control-size) !important;
+    min-height: var(--omarchy-tabs-control-size) !important;
+    max-width: var(--omarchy-tabs-control-size) !important;
+    min-width: var(--omarchy-tabs-control-size) !important;
+    margin: calc(
+            (var(--omarchy-tabs-row-height) - var(--omarchy-tabs-control-size)) /
+                2
+        )
+        0 !important;
+    padding: 0 !important;
+}
+
+#TabsToolbar:has(#tabbrowser-tabs[orient="horizontal"])
+    > #TabsToolbar-customization-target
+    > #firefox-view-button
+    .toolbarbutton-icon,
+#TabsToolbar:has(#tabbrowser-tabs[orient="horizontal"])
+    > #TabsToolbar-customization-target
+    > #new-tab-button
+    .toolbarbutton-icon,
+#TabsToolbar:has(#tabbrowser-tabs[orient="horizontal"])
+    > #TabsToolbar-customization-target
+    > #alltabs-button
+    .toolbarbutton-icon,
+#tabbrowser-tabs[orient="horizontal"] #tabs-newtab-button .toolbarbutton-icon,
+#tabbrowser-tabs[orient="horizontal"]
+    #vertical-tabs-newtab-button
+    .toolbarbutton-icon,
+#TabsToolbar:has(#tabbrowser-tabs[orient="horizontal"])
+    #firefox-view-button
+    .toolbarbutton-icon {
+    box-sizing: border-box !important;
+    height: 18px !important;
+    max-height: 18px !important;
+    max-width: 18px !important;
+    min-height: 18px !important;
+    min-width: 18px !important;
+    padding: 0 !important;
+    transform: none !important;
+    width: 18px !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab,
+:root[dir]
+    #tabbrowser-tabs[orient="horizontal"]
+    #tabbrowser-arrowscrollbox
+    > .tabbrowser-tab {
+    border: 0 !important;
+    border-width: 0 !important;
+    margin-inline: 0 !important;
+    padding: 0 !important;
+    padding-inline: 0 !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] .tab-content,
+#tabbrowser-tabs[orient="horizontal"]
+    .tabbrowser-tab:not([pinned])
+    .tab-content {
+    align-items: center !important;
+    display: flex !important;
+    gap: 8px !important;
+    justify-content: flex-start !important;
+    margin: 0 !important;
+    padding: 0 8px !important;
+    padding-inline: 8px !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] .tab-icon-stack {
+    box-sizing: border-box !important;
+    flex: 0 0 16px !important;
+    height: 16px !important;
+    margin: 0 !important;
+    max-height: 16px !important;
+    max-width: 16px !important;
+    min-height: 16px !important;
+    min-width: 16px !important;
+    padding: 0 !important;
+    width: 16px !important;
+}
+
+/* The GNOME base pads colorful favicons by 4px while the stack itself is only
+ * 16px wide. Reset the actual image so branded backgrounds cannot spill out
+ * of the grid cell. */
+#tabbrowser-tabs[orient="horizontal"]
+    .tab-icon-stack
+    :is(.tab-icon-image, .tab-icon-pending, .tab-throbber, .tab-throbber-fallback) {
+    box-sizing: border-box !important;
+    height: 16px !important;
+    margin: 0 !important;
+    max-height: 16px !important;
+    max-width: 16px !important;
+    min-height: 16px !important;
+    min-width: 16px !important;
+    padding: 0 !important;
+    width: 16px !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] .tab-label-container {
+    flex: 1 1 auto !important;
+    margin: 0 !important;
+    max-width: none !important;
+    min-width: 0 !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] .tab-label {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] .tab-close-button {
+    border-radius: 0 !important;
+    box-sizing: border-box !important;
+    flex: 0 0 24px !important;
+    height: 24px !important;
+    margin: 0 !important;
+    margin-inline-start: auto !important;
+    max-height: 24px !important;
+    max-width: 24px !important;
+    min-height: 24px !important;
+    min-width: 24px !important;
+    padding: 4px !important;
+    width: 24px !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] #tabbrowser-arrowscrollbox-periphery {
+    align-items: center !important;
+    display: flex !important;
+    flex: 0 0 var(--omarchy-tabs-control-size) !important;
+    height: var(--omarchy-tabs-row-height) !important;
+    max-height: var(--omarchy-tabs-row-height) !important;
+    max-width: var(--omarchy-tabs-control-size) !important;
+    min-height: var(--omarchy-tabs-row-height) !important;
+    min-width: var(--omarchy-tabs-control-size) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Firefox 153 keeps a 5px lead-in before whichever horizontal tab container
+ * is active. Remove it from the regular or pinned container without making
+ * those two containers overlap each other. */
+#tabbrowser-tabs[orient="horizontal"]
+    > #pinned-tabs-container:empty
+    ~ #tabbrowser-arrowscrollbox,
+#tabbrowser-tabs[orient="horizontal"] > #pinned-tabs-container:not(:empty) {
+    margin-inline-start: -5px !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] #tabs-newtab-button {
+    display: flex !important;
+    visibility: visible !important;
+}
+
+/* The GNOME base owns all-tabs visibility through allTabsButton,
+ * allTabsButtonOnOverflow, and browser.tabs.tabmanager.enabled. Geometry is
+ * set above, but those preference gates remain authoritative. */
+
+/* Keep one discoverable new-tab action. The in-strip control scrolls with
+ * overflowing tabs, so hand ownership to Firefox's fixed external control in
+ * that state instead of rendering two plus buttons side by side. */
+#tabbrowser-tabs[orient="horizontal"][overflow]
+    #tabbrowser-arrowscrollbox-periphery {
+    display: none !important;
+    flex: 0 0 0 !important;
+    max-width: 0 !important;
+    min-width: 0 !important;
+    width: 0 !important;
+}
+
+#navigator-toolbox
+    #TabsToolbar:has(#tabbrowser-tabs[orient="horizontal"])
+    #tabbrowser-tabs:not([overflow])
+    ~ #new-tab-button {
+    display: none !important;
+    flex: 0 0 0 !important;
+    margin: 0 !important;
+    max-width: 0 !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    visibility: collapse !important;
+    width: 0 !important;
+}
+
+#navigator-toolbox
+    #TabsToolbar:has(#tabbrowser-tabs[orient="horizontal"])
+    #tabbrowser-tabs[overflow]
+    ~ #new-tab-button {
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex: 0 0 var(--omarchy-tabs-control-size) !important;
+    height: var(--omarchy-tabs-control-size) !important;
+    margin: calc(
+            (var(--omarchy-tabs-row-height) - var(--omarchy-tabs-control-size)) /
+                2
+        )
+        0 !important;
+    max-height: var(--omarchy-tabs-control-size) !important;
+    max-width: var(--omarchy-tabs-control-size) !important;
+    min-height: var(--omarchy-tabs-control-size) !important;
+    min-width: var(--omarchy-tabs-control-size) !important;
+    padding: 0 !important;
+    visibility: visible !important;
+    width: var(--omarchy-tabs-control-size) !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] #tabs-newtab-button .toolbarbutton-icon {
+    display: none !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] #tabs-newtab-button::before {
+    color: var(--omarchy-fg) !important;
+    content: "+" !important;
+    display: block !important;
+    font-size: 24px !important;
+    font-weight: 300 !important;
+    line-height: var(--omarchy-tabs-control-size) !important;
+    text-align: center !important;
+    width: var(--omarchy-tabs-control-size) !important;
+}
+
+@-moz-document url("chrome://browser/content/browser.xhtml"),
+    url("chrome://browser/content/browser/browser.xhtml"),
+    url("chrome://browser/content/places/places.xhtml") {
+    /* Unified Omarchy interaction contract.
+     *
+     * Firefox mixes native XUL focus attributes, HTML pseudo-classes, and modern
+     * moz-* shadow controls. Normalize the tokens first, then make exactly one
+     * painted layer own each state: fields use one inset edge, while buttons and
+     * rows use a foreground wash plus an inset keyboard-focus edge. */
+    :root {
+        --focus-outline-color: var(--omarchy-focus-accent) !important;
+        --focus-outline-width: 1px !important;
+        --focus-outline: var(--focus-outline-width) solid
+            var(--focus-outline-color) !important;
+        --focus-outline-inset: calc(-1 * var(--focus-outline-width)) !important;
+
+        --gnome-button-background: transparent !important;
+        --gnome-button-hover-background: var(--omarchy-control-hover) !important;
+        --gnome-button-active-background: var(--omarchy-control-active) !important;
+        --gnome-button-checked-background: var(
+            --omarchy-control-selected
+        ) !important;
+        --gnome-button-checked-hover-background: var(
+            --omarchy-control-active
+        ) !important;
+        --gnome-button-checked-active-background: var(
+            --omarchy-control-active
+        ) !important;
+
+        --button-background-color: transparent !important;
+        --button-background-color-hover: var(--omarchy-control-hover) !important;
+        --button-background-color-active: var(--omarchy-control-active) !important;
+        --button-background-color-ghost: transparent !important;
+        --button-background-color-ghost-hover: var(
+            --omarchy-control-hover
+        ) !important;
+        --button-background-color-ghost-active: var(
+            --omarchy-control-active
+        ) !important;
+        --button-background-color-selected: var(
+            --omarchy-control-selected
+        ) !important;
+        --button-background-color-menu-hover: var(
+            --omarchy-control-hover
+        ) !important;
+        --button-background-color-menu-active: var(
+            --omarchy-control-active
+        ) !important;
+        --panel-item-hover-bgcolor: var(--omarchy-control-hover) !important;
+        --panel-item-active-bgcolor: var(--omarchy-control-active) !important;
+
+        --input-text-background-color: var(--omarchy-field) !important;
+        --input-text-color: var(--omarchy-fg) !important;
+        --input-text-border-color: var(--omarchy-control-border) !important;
+        --input-text-border: 1px solid var(--input-text-border-color) !important;
+        --input-text-border-radius: 0px !important;
+    }
+
+    /* moz-input-search carries the public class on its host and paints the real
+     * field inside its shadow tree. Clear the host so the inner #input is not
+     * surrounded by the doubled white/accent rectangle seen in Synced Tabs. */
+    .tabsFilter,
+    .tabsFilter:is(:focus, :focus-within, [focused]) {
+        background: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        outline: 0 !important;
+    }
+
+    :is(
+            input[type="text"]:not(.tree-input, .input-field),
+            input[type="password"]:not(.input-field),
+            input#input:not(.input-field),
+            #searchbar,
+            .findbar-textbox,
+            .popup-notification-body input
+        ) {
+        appearance: none !important;
+        background: var(--omarchy-field) !important;
+        border: 1px solid var(--omarchy-control-border) !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        color: var(--omarchy-fg) !important;
+        outline: 0 !important;
+    }
+
+    :is(
+            input[type="text"]:not(.tree-input, .input-field),
+            input[type="password"]:not(.input-field),
+            input#input:not(.input-field),
+            .findbar-textbox,
+            .popup-notification-body input
+        ):is(:focus, :focus-visible, [focused]),
+    #searchbar:focus-within {
+        border-color: transparent !important;
+        box-shadow: inset 0 0 0 1px var(--omarchy-focus-accent) !important;
+        outline: 0 !important;
+    }
+
+    :is(
+            input[type="text"]:not(.tree-input, .input-field),
+            input[type="password"]:not(.input-field),
+            input#input:not(.input-field),
+            .findbar-textbox,
+            .popup-notification-body input
+        )[status="notfound"]:is(:focus, :focus-visible, [focused]) {
+        border-color: transparent !important;
+        box-shadow: inset 0 0 0 1px var(
+                --gnome-entry-error-focused-border-color
+            ) !important;
+    }
+
+    /* Menu rows, panel actions, and list-like toolbar buttons share one state
+     * ladder: 8% hover, 18% selected/open, and 22% pressed. */
+    :is(
+            #mainPopupSet menu,
+            #mainPopupSet menuitem,
+            panelview .subviewbutton,
+            panelview .toolbarbutton-1,
+            .widget-overflow-list .toolbarbutton-1,
+            .all-tabs-item
+        ):not([disabled="true"], [disabled]):is(:hover, [_moz-menuactive]) {
+        background: var(--omarchy-control-hover) !important;
+    }
+
+    :is(
+            #mainPopupSet menu,
+            #mainPopupSet menuitem,
+            panelview .subviewbutton,
+            panelview .toolbarbutton-1,
+            .widget-overflow-list .toolbarbutton-1,
+            .all-tabs-item
+        ):not([disabled="true"], [disabled]):is([selected], [checked], [open]) {
+        background: var(--omarchy-control-selected) !important;
+    }
+
+    :is(
+            #mainPopupSet menu,
+            #mainPopupSet menuitem,
+            panelview .subviewbutton,
+            panelview .toolbarbutton-1,
+            .widget-overflow-list .toolbarbutton-1,
+            .all-tabs-item
+        ):not([disabled="true"], [disabled]):active {
+        background: var(--omarchy-control-active) !important;
+    }
+
+    :is(
+            #mainPopupSet menu,
+            #mainPopupSet menuitem,
+            panelview .subviewbutton,
+            panelview .toolbarbutton-1,
+            .widget-overflow-list .toolbarbutton-1,
+            .all-tabs-item
+        ):is(:focus-visible, :-moz-focusring) {
+        outline: 1px solid var(--omarchy-focus-accent) !important;
+        outline-offset: -1px !important;
+    }
+
+    /* Compact binary controls keep their semantic shape but use the same edge and
+     * selected color as the rest of the shell instead of a stock platform ring. */
+    :is(input[type="checkbox"], checkbox:not(.treenode-checkbox) > .checkbox-check) {
+        border-radius: 0 !important;
+    }
+
+    :is(
+            input[type="checkbox"]:not(:checked),
+            checkbox:not(.treenode-checkbox) > .checkbox-check:not([checked])
+        ) {
+        box-shadow: inset 0 0 0 1px var(--omarchy-control-border) !important;
+    }
+
+    :is(
+            input[type="checkbox"]:not(:checked):hover,
+            checkbox:not(.treenode-checkbox) > .checkbox-check:not([checked]):hover
+        ) {
+        box-shadow: inset 0 0 0 1px var(
+                --omarchy-control-hover-border
+            ) !important;
+    }
+
+    :is(
+            input[type="checkbox"]:checked,
+            checkbox:not(.treenode-checkbox) > .checkbox-check[checked],
+            input[type="radio"][aria-checked="true"],
+            radio > .radio-check[selected]
+        ) {
+        background-color: var(--omarchy-focus-accent) !important;
+    }
+
+    :is(
+            input[type="checkbox"],
+            input[type="radio"],
+            checkbox:not(.treenode-checkbox) > .checkbox-check,
+            radio > .radio-check
+        ):is(:focus-visible, :-moz-focusring),
+    :is(checkbox, radio):is(:focus-visible, :-moz-focusring)
+        > :is(.checkbox-check, .radio-check) {
+        outline: 1px solid var(--omarchy-focus-accent) !important;
+        outline-offset: 2px !important;
+    }
+}

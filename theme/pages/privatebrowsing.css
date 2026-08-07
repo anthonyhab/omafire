@@ -20,11 +20,16 @@
     .info-border {
         background: var(--gnome-card-background) !important;
         box-shadow: var(--gnome-card-shadow) !important;
+        border-radius: 0 !important;
         padding: 0 !important;
 
         .info {
             background: none !important;
             box-shadow: none !important;
         }
+    }
+
+    body {
+        font-family: monospace !important;
     }
 }

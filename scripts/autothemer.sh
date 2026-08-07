@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-THEME_DIR="$(dirname "$SCRIPT_DIR")"
+THEME_DIR=${FIREFOX_THEME_DIR:-$(dirname "$SCRIPT_DIR")}
+if [[ ! -d "$THEME_DIR" ]]; then
+    echo "Error: Firefox theme directory not found: $THEME_DIR" >&2
+    exit 1
+fi
+THEME_DIR=$(cd "$THEME_DIR" && pwd)
 GTK_THEME=$(gsettings get org.gnome.desktop.interface gtk-theme | sed "s/^'//;s/'$//")
 COLOR_SCHEME=$(gsettings get org.gnome.desktop.interface color-scheme | sed "s/^'//;s/'$//")
 
@@ -180,25 +185,41 @@ HEX_TO_RGBA() {
     echo "rgba($r, $g, $b, 0.8)"
 }
 
-write_colors_to_custom_css() {
+OUTPUT_FILE="$THEME_DIR/generated-gtk-colors.css"
+if ! OUTPUT_TEMP=$(mktemp "$THEME_DIR/.generated-gtk-colors.css.XXXXXX"); then
+    echo "Error: Could not create a temporary output beside $OUTPUT_FILE" >&2
+    exit 1
+fi
+trap 'rm -f -- "$OUTPUT_TEMP"' EXIT
+printf '%s\n\n' '@namespace xul url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");' > "$OUTPUT_TEMP"
+
+write_colors_to_generated_css() {
     local mode="$1"
     local bg="$2"
     local text="$3"
-    local accent="$4"
-    local sidebar="$5"
-    local view="$6"
-    local backdrop_bg="$7"
-    
-    local css_file="$THEME_DIR/customChrome.css"
-    TEXT_RGBA=$(HEX_TO_RGBA "$text")
-    
-    if [[ "$mode" == "light" ]]; then
-        cat > "$css_file" << EOF
-@namespace xul url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
+    local sidebar="$4"
+    local view="$5"
+    local backdrop_bg="$6"
+    local text_rgba
 
+    if [[ -z "$bg" || -z "$text" ]]; then
+        echo "Error: $mode theme did not expose background and text colors" >&2
+        return 1
+    fi
+    if [[ ! "$text" =~ ^#[0-9a-fA-F]{6}$ ]]; then
+        echo "Error: Unsupported $mode text color: $text" >&2
+        return 1
+    fi
+    sidebar=${sidebar:-$bg}
+    view=${view:-$bg}
+    backdrop_bg=${backdrop_bg:-$bg}
+    text_rgba=$(HEX_TO_RGBA "$text") || return 1
+
+    if [[ "$mode" == "light" ]]; then
+        cat >> "$OUTPUT_TEMP" << EOF
 :root {
 	--gnome-window-background: $bg;
-	--gnome-window-color: $TEXT_RGBA;
+	--gnome-window-color: $text_rgba;
 	--gnome-view-background: $view;
 	--gnome-sidebar-background: $sidebar;
 	--gnome-headerbar-background: $bg;
@@ -206,11 +227,11 @@ write_colors_to_custom_css() {
 }
 EOF
     else
-        cat >> "$css_file" << EOF
+        cat >> "$OUTPUT_TEMP" << EOF
 @media (prefers-color-scheme: dark) {
 	:root {
 		--gnome-window-background: $bg;
-		--gnome-window-color: $TEXT_RGBA;
+		--gnome-window-color: $text_rgba;
 		--gnome-view-background: $view;
 		--gnome-sidebar-background: $sidebar;
 		--gnome-headerbar-background: $bg;
@@ -220,7 +241,7 @@ EOF
 EOF
     fi
 
-    echo "Applied $mode colors to: $css_file"
+    echo "Prepared $mode colors for: $OUTPUT_FILE"
 }
 
 echo "Theme: $GTK_THEME"
@@ -231,7 +252,7 @@ echo ""
 
 if [[ -n "$LIGHT_THEME" ]]; then
     echo "Extracting colors from: $LIGHT_THEME ($LIGHT_CSS)"
-    IFS='|' read -r BG_L TEXT_L ACCENT_L SIDEBAR_L VIEW_L BACKDROP_BG_L BACKDROP_TEXT_L < <(
+    IFS='|' read -r BG_L TEXT_L _ACCENT_L SIDEBAR_L VIEW_L BACKDROP_BG_L _BACKDROP_TEXT_L < <(
         EXTRACT_COLORS "$LIGHT_CSS" | tr '\n' '|'
     )
     echo "  Background: $BG_L"
@@ -239,12 +260,14 @@ if [[ -n "$LIGHT_THEME" ]]; then
     echo "  Sidebar:   $SIDEBAR_L"
     echo "  Backdrop:  $BACKDROP_BG_L"
     echo ""
-    write_colors_to_custom_css "light" "$BG_L" "$TEXT_L" "$ACCENT_L" "$SIDEBAR_L" "$VIEW_L" "$BACKDROP_BG_L"
+    if ! write_colors_to_generated_css "light" "$BG_L" "$TEXT_L" "$SIDEBAR_L" "$VIEW_L" "$BACKDROP_BG_L"; then
+        exit 1
+    fi
 fi
 
 if [[ -n "$DARK_THEME" ]]; then
     echo "Extracting colors from: $DARK_THEME ($DARK_CSS)"
-    IFS='|' read -r BG_D TEXT_D ACCENT_D SIDEBAR_D VIEW_D BACKDROP_BG_D BACKDROP_TEXT_D < <(
+    IFS='|' read -r BG_D TEXT_D _ACCENT_D SIDEBAR_D VIEW_D BACKDROP_BG_D _BACKDROP_TEXT_D < <(
         EXTRACT_COLORS "$DARK_CSS" | tr '\n' '|'
     )
     echo "  Background: $BG_D"
@@ -252,7 +275,13 @@ if [[ -n "$DARK_THEME" ]]; then
     echo "  Sidebar:   $SIDEBAR_D"
     echo "  Backdrop:  $BACKDROP_BG_D"
     echo ""
-    write_colors_to_custom_css "dark" "$BG_D" "$TEXT_D" "$ACCENT_D" "$SIDEBAR_D" "$VIEW_D" "$BACKDROP_BG_D"
+    if ! write_colors_to_generated_css "dark" "$BG_D" "$TEXT_D" "$SIDEBAR_D" "$VIEW_D" "$BACKDROP_BG_D"; then
+        exit 1
+    fi
 fi
 
+chmod 0644 "$OUTPUT_TEMP"
+mv -f -- "$OUTPUT_TEMP" "$OUTPUT_FILE"
+trap - EXIT
+echo "Wrote $OUTPUT_FILE"
 echo "Done! Restart Firefox to see changes."

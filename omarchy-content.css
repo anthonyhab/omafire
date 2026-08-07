@@ -1,0 +1,811 @@
+/* Omarchy styling for Firefox-owned content documents.
+ *
+ * Browser chrome variables do not cross into privileged content pages, so
+ * bridge those pages separately while keeping ordinary web content untouched.
+ */
+
+/* Firefox View's background and text theme values can describe conflicting
+ * schemes. Pair each neutral surface with its own foreground, then retain the
+ * live action hue only after mixing it toward the readable foreground. */
+@-moz-document url("about:firefoxview"),
+    url("chrome://browser/content/firefoxview/firefoxview.html") {
+    @media not (forced-colors) {
+        :root {
+            color-scheme: light !important;
+            --omarchy-content-surface: #fafafa;
+            --omarchy-content-fg: #17151c;
+            --omarchy-content-muted: color-mix(
+                in srgb,
+                var(--omarchy-content-fg) 68%,
+                transparent
+            );
+            --omarchy-content-panel: color-mix(
+                in srgb,
+                var(--omarchy-content-surface) 94%,
+                var(--omarchy-content-fg) 6%
+            );
+            --omarchy-content-field: color-mix(
+                in srgb,
+                var(--omarchy-content-surface) 97%,
+                var(--omarchy-content-fg) 3%
+            );
+            --omarchy-content-border: color-mix(
+                in srgb,
+                var(--omarchy-content-fg) 18%,
+                transparent
+            );
+            --omarchy-content-hover: color-mix(
+                in srgb,
+                var(--omarchy-content-surface) 92%,
+                var(--omarchy-content-fg) 8%
+            );
+            --omarchy-content-active: color-mix(
+                in srgb,
+                var(--omarchy-content-surface) 78%,
+                var(--omarchy-content-fg) 22%
+            );
+            --omarchy-content-selected: color-mix(
+                in srgb,
+                var(--omarchy-content-surface) 82%,
+                var(--omarchy-content-fg) 18%
+            );
+            --omarchy-content-accent-raw: var(
+                --newtab-primary-action-background,
+                AccentColor
+            );
+            --omarchy-content-accent: color-mix(
+                in srgb,
+                var(--omarchy-content-accent-raw) 35%,
+                var(--omarchy-content-fg) 65%
+            );
+            --omarchy-content-focus: var(--omarchy-content-accent);
+
+            --fxview-background-color: var(
+                --omarchy-content-surface
+            ) !important;
+            --fxview-background-color-secondary: var(
+                --omarchy-content-panel
+            ) !important;
+            --fxview-element-background-hover: var(
+                --omarchy-content-hover
+            ) !important;
+            --fxview-element-background-active: var(
+                --omarchy-content-active
+            ) !important;
+            --fxview-text-primary-color: var(
+                --omarchy-content-fg
+            ) !important;
+            --fxview-text-secondary-color: var(
+                --omarchy-content-muted
+            ) !important;
+            --fxview-text-color-hover: var(--omarchy-content-fg) !important;
+            --fxview-primary-action-background: var(
+                --omarchy-content-accent
+            ) !important;
+            --fxview-border: var(--omarchy-content-border) !important;
+            --fxview-card-padding-inline: 0px !important;
+
+            --background-color-canvas: var(
+                --omarchy-content-surface
+            ) !important;
+            --background-color-box: var(--omarchy-content-panel) !important;
+            --card-background-color: var(--omarchy-content-panel) !important;
+            --card-border: 1px solid var(--omarchy-content-border) !important;
+            --card-border-radius: 0px !important;
+            --card-box-shadow: none !important;
+            --text-color: var(--omarchy-content-fg) !important;
+            --text-color-deemphasized: var(
+                --omarchy-content-muted
+            ) !important;
+            --link-color: var(--omarchy-content-accent) !important;
+            --focus-outline-color: var(--omarchy-content-focus) !important;
+            --focus-outline-width: 1px !important;
+            --focus-outline: var(--focus-outline-width) solid
+                var(--focus-outline-color) !important;
+            --focus-outline-inset: calc(
+                -1 * var(--focus-outline-width)
+            ) !important;
+            --button-background-color: transparent !important;
+            --button-background-color-hover: var(
+                --omarchy-content-hover
+            ) !important;
+            --button-background-color-active: var(
+                --omarchy-content-active
+            ) !important;
+            --button-background-color-ghost-hover: var(
+                --omarchy-content-hover
+            ) !important;
+            --button-background-color-ghost-active: var(
+                --omarchy-content-active
+            ) !important;
+            --button-background-color-selected: var(
+                --omarchy-content-selected
+            ) !important;
+            --button-background-color-menu-hover: var(
+                --omarchy-content-hover
+            ) !important;
+            --button-background-color-menu-active: var(
+                --omarchy-content-active
+            ) !important;
+            --input-text-background-color: var(
+                --omarchy-content-field
+            ) !important;
+            --input-text-color: var(--omarchy-content-fg) !important;
+            --input-text-border-color: var(
+                --omarchy-content-border
+            ) !important;
+            --input-text-border-radius: 0px !important;
+            --border-radius-xsmall: 0px !important;
+            --border-radius-small: 0px !important;
+            --border-radius-medium: 0px !important;
+            --border-radius-large: 0px !important;
+
+            scrollbar-color: var(--omarchy-content-muted) transparent;
+            scrollbar-width: thin;
+        }
+
+        :root[lwt-newtab-brighttext] {
+            color-scheme: dark !important;
+            --omarchy-content-surface: #171820;
+            --omarchy-content-fg: #f7f5f8;
+        }
+
+        body {
+            background: var(--omarchy-content-surface) !important;
+            color: var(--omarchy-content-fg) !important;
+            font-family: monospace !important;
+        }
+
+        input#input:not(.input-field) {
+            background: var(--omarchy-content-field) !important;
+            border: 1px solid var(--omarchy-content-border) !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            color: var(--omarchy-content-fg) !important;
+            outline: 0 !important;
+        }
+
+        input#input:not(.input-field):focus {
+            border-color: transparent !important;
+            box-shadow: inset 0 0 0 1px var(
+                    --omarchy-content-focus
+                ) !important;
+            outline: 0 !important;
+        }
+
+        input#input.with-icon[type="search"]:focus {
+            padding-inline-start: calc(
+                2 * var(--space-medium) + var(--input-text-icon-size) + 1px
+            ) !important;
+            padding-inline-end: calc(var(--space-xxsmall) + 1px) !important;
+        }
+
+        card-container,
+        fxview-tab-row,
+        opentabs-tab-row {
+            color: var(--omarchy-content-fg) !important;
+        }
+    }
+}
+
+/* Built-in sidebar documents are separate privileged pages. In particular,
+ * contentTheme.js chooses their color-scheme from sidebar_text rather than the
+ * sidebar background, which can turn a dark Pywal sidebar into a light island. */
+@-moz-document url-prefix("chrome://browser/content/sidebar/"),
+    url("chrome://browser/content/places/bookmarksSidebar.xhtml"),
+    url("chrome://browser/content/places/historySidebar.xhtml"),
+    url("chrome://browser/content/syncedtabs/sidebar.xhtml"),
+    url("chrome://global/content/megalist/megalist.html") {
+    @media not (forced-colors) {
+        :root {
+            color-scheme: light !important;
+            /* Sidebar theme data can report a light surface even while the
+             * Omarchy window is dark. Use a paired system-scheme palette so
+             * surface and foreground can never diverge. */
+            --omarchy-content-surface: #fafafa;
+            --omarchy-content-fg: #17151c;
+            --omarchy-content-muted: color-mix(
+                in srgb,
+                var(--omarchy-content-fg) 68%,
+                transparent
+            );
+            --omarchy-content-panel: color-mix(
+                in srgb,
+                var(--omarchy-content-surface) 94%,
+                var(--omarchy-content-fg) 6%
+            );
+            --omarchy-content-hover: color-mix(
+                in srgb,
+                var(--omarchy-content-surface) 92%,
+                var(--omarchy-content-fg) 8%
+            );
+            --omarchy-content-active: color-mix(
+                in srgb,
+                var(--omarchy-content-surface) 78%,
+                var(--omarchy-content-fg) 22%
+            );
+            --omarchy-content-selected: color-mix(
+                in srgb,
+                var(--omarchy-content-surface) 82%,
+                var(--omarchy-content-fg) 18%
+            );
+            --omarchy-content-border: color-mix(
+                in srgb,
+                var(--omarchy-content-fg) 18%,
+                transparent
+            );
+            --omarchy-content-accent-raw: AccentColor;
+            --omarchy-content-focus: color-mix(
+                in srgb,
+                var(--omarchy-content-accent-raw) 35%,
+                var(--omarchy-content-fg) 65%
+            );
+
+            /* Firefox-GNOME's sidebar shadow styles consume their own token
+             * family, so bridge both the native and GNOME variable names. */
+            --gnome-window-background: var(
+                --omarchy-content-surface
+            ) !important;
+            --gnome-window-color: var(--omarchy-content-fg) !important;
+            --gnome-view-background: var(
+                --omarchy-content-surface
+            ) !important;
+            --gnome-view-color: var(--omarchy-content-fg) !important;
+            --gnome-sidebar-background: var(
+                --omarchy-content-surface
+            ) !important;
+            --gnome-secondary-sidebar-background: var(
+                --omarchy-content-panel
+            ) !important;
+            --gnome-sidebar-text-color: var(
+                --omarchy-content-fg
+            ) !important;
+            --gnome-card-background: var(--omarchy-content-panel) !important;
+            --gnome-card-shade-color: var(
+                --omarchy-content-border
+            ) !important;
+            --gnome-card-shadow: none !important;
+            --gnome-entry-background: var(--omarchy-content-panel) !important;
+            --gnome-entry-color: var(--omarchy-content-fg) !important;
+            --gnome-accent: var(--omarchy-content-focus) !important;
+            --gnome-accent-bg: var(--omarchy-content-focus) !important;
+            --gnome-focus-border-color: var(
+                --omarchy-content-focus
+            ) !important;
+
+            --sidebar-background-color: var(
+                --omarchy-content-surface
+            ) !important;
+            --sidebar-text-color: var(--omarchy-content-fg) !important;
+            --sidebar-box-color: var(--omarchy-content-fg) !important;
+            --sidebar-box-background: var(--omarchy-content-panel) !important;
+            --sidebar-box-border-color: color-mix(
+                in srgb,
+                var(--omarchy-content-fg) 12%,
+                transparent
+            ) !important;
+            --sidebar-box-border-width: max(
+                1px,
+                var(--omarchy-border-width, 0px)
+            ) !important;
+            --sidebar-box-border: var(--sidebar-box-border-width) solid
+                var(--sidebar-box-border-color) !important;
+
+            --background-color-canvas: var(
+                --omarchy-content-surface
+            ) !important;
+            --background-color-box: var(--omarchy-content-panel) !important;
+            --card-background-color: var(--omarchy-content-panel) !important;
+            --card-border: 1px solid var(--omarchy-content-border) !important;
+            --card-border-radius: 0px !important;
+            --card-box-shadow: none !important;
+            --text-color: var(--omarchy-content-fg) !important;
+            --text-color-deemphasized: var(
+                --omarchy-content-muted
+            ) !important;
+            --text-color-disabled: var(--omarchy-content-muted) !important;
+            --link-color: var(--omarchy-content-focus) !important;
+            --color-accent-primary: var(--omarchy-content-focus) !important;
+            --focus-outline-color: var(--omarchy-content-focus) !important;
+            --focus-outline-width: 1px !important;
+            --focus-outline: var(--focus-outline-width) solid
+                var(--focus-outline-color) !important;
+            --focus-outline-inset: calc(
+                -1 * var(--focus-outline-width)
+            ) !important;
+            --font-size-root: 14px !important;
+            --button-background-color: transparent !important;
+            --button-text-color: var(--omarchy-content-fg) !important;
+            --button-text-color-disabled: var(
+                --omarchy-content-muted
+            ) !important;
+            --button-background-color-hover: var(
+                --omarchy-content-hover
+            ) !important;
+            --button-background-color-active: var(
+                --omarchy-content-active
+            ) !important;
+            --button-background-color-ghost-hover: var(
+                --omarchy-content-hover
+            ) !important;
+            --button-background-color-ghost-active: var(
+                --omarchy-content-active
+            ) !important;
+            --button-background-color-selected: var(
+                --omarchy-content-selected
+            ) !important;
+            --button-background-color-menu-hover: var(
+                --omarchy-content-hover
+            ) !important;
+            --button-background-color-menu-active: var(
+                --omarchy-content-active
+            ) !important;
+            --input-text-background-color: var(
+                --omarchy-content-panel
+            ) !important;
+            --input-text-color: var(--omarchy-content-fg) !important;
+            --input-text-border-color: var(
+                --omarchy-content-border
+            ) !important;
+            --input-text-border: 1px solid var(
+                    --input-text-border-color
+                ) !important;
+            --input-text-border-radius: 0px !important;
+            --checkbox-background-color: transparent !important;
+            --checkbox-background-color-hover: var(
+                --omarchy-content-hover
+            ) !important;
+            --checkbox-background-color-active: var(
+                --omarchy-content-active
+            ) !important;
+            --checkbox-background-color-checked: var(
+                --omarchy-content-focus
+            ) !important;
+            --checkbox-background-color-checked-hover: var(
+                --omarchy-content-focus
+            ) !important;
+            --checkbox-background-color-checked-active: var(
+                --omarchy-content-focus
+            ) !important;
+            --checkbox-border-color: var(
+                --omarchy-content-border
+            ) !important;
+            --checkbox-border-color-checked: var(
+                --omarchy-content-focus
+            ) !important;
+            --border-radius-xsmall: 0px !important;
+            --border-radius-small: 0px !important;
+            --border-radius-medium: 0px !important;
+            --border-radius-large: 0px !important;
+
+            background: var(--omarchy-content-surface) !important;
+            color: var(--omarchy-content-fg) !important;
+            scrollbar-color: var(--omarchy-content-muted) transparent;
+            scrollbar-width: thin;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                color-scheme: dark !important;
+                --omarchy-content-surface: #121212;
+                --omarchy-content-fg: #f7f5f8;
+            }
+        }
+
+        body,
+        sidebar-customize,
+        sidebar-history,
+        sidebar-bookmarks,
+        sidebar-opentabs,
+        .sidebar-panel {
+            background: var(--omarchy-content-surface) !important;
+            color: var(--omarchy-content-fg) !important;
+            font-family: monospace !important;
+            font-size: 14px !important;
+            line-height: 1.3 !important;
+        }
+
+        .sidebar-panel {
+            border-radius: 0 !important;
+        }
+
+        /* Firefox-GNOME's broad entry rule also reaches privileged shadow
+         * trees. Restore Megalist's intentionally unboxed readonly fields;
+         * otherwise fixed-height password rows overflow and Firefox paints a
+         * second built-in reveal button beside Megalist's own action. */
+        input.input-field[type] {
+            appearance: none !important;
+            background: transparent !important;
+            border: 0 !important;
+            box-shadow: none !important;
+            box-sizing: content-box !important;
+            height: auto !important;
+            max-height: none !important;
+            min-height: 0 !important;
+            margin: 0 !important;
+            outline: 0 !important;
+            padding: 0 !important;
+        }
+
+        input.input-field[type]::-moz-reveal {
+            background: none !important;
+            height: 0 !important;
+            margin: 0 !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+            width: 0 !important;
+        }
+
+        /* Firefox's UA-important reveal pseudo cannot be removed outright from
+         * this nested shadow input. Clip only its trailing glyph; Megalist's
+         * separate reveal button is the functional, reauthentication-aware one. */
+        input.input-field[type="password"] {
+            clip-path: inset(0 1.5em 0 0) !important;
+        }
+
+        :root[dir="rtl"] input.input-field[type="password"] {
+            clip-path: inset(0 0 0 1.5em) !important;
+        }
+
+        /* Use one real border for modern sidebar search fields. The GNOME
+         * compatibility layer's 2px outline plus Firefox's own border produced
+         * the doubled focus rectangle visible at high zoom. */
+        input#input:not(.input-field) {
+            background: var(--omarchy-content-panel) !important;
+            border: 1px solid var(--omarchy-content-border) !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            color: var(--omarchy-content-fg) !important;
+            outline: 0 !important;
+        }
+
+        input#input:not(.input-field):focus {
+            border-color: transparent !important;
+            box-shadow: inset 0 0 0 1px var(
+                    --omarchy-content-focus
+                ) !important;
+            outline: 0 !important;
+        }
+
+        input#input.with-icon[type="search"]:focus {
+            padding-inline-start: calc(
+                2 * var(--space-medium) + var(--input-text-icon-size) + 1px
+            ) !important;
+            padding-inline-end: calc(var(--space-xxsmall) + 1px) !important;
+        }
+
+        moz-input-search:focus-within {
+            border: 0 !important;
+            box-shadow: none !important;
+            outline: 0 !important;
+        }
+
+        .search-container {
+            border-color: var(--omarchy-content-border) !important;
+            outline: 0 !important;
+        }
+
+        .search-container:focus-within {
+            border-color: var(--omarchy-content-focus) !important;
+            outline: 0 !important;
+        }
+
+        moz-card {
+            --card-gap: 8px !important;
+            --card-padding: 10px !important;
+            --card-heading-padding-inline: 10px !important;
+        }
+
+        /* User styles are evaluated inside Firefox's card shadow tree; target
+         * the internal heading directly so long device names wrap instead of
+         * collapsing into a nearly useless ellipsis at enlarged zoom. */
+        #heading {
+            overflow: visible !important;
+            text-overflow: clip !important;
+            white-space: normal !important;
+        }
+
+        .sidebar-panel :is(moz-checkbox, moz-radio) {
+            color: var(--omarchy-content-fg) !important;
+        }
+
+        .sidebar-panel :is(moz-checkbox, moz-radio)[disabled] {
+            color: var(--omarchy-content-muted) !important;
+        }
+
+        /* Firefox-GNOME gives this first setting an ID-specific light-theme
+         * foreground; beat that narrow rule after correcting the dark panel. */
+        .sidebar-panel #vertical-tabs {
+            color: var(--omarchy-content-fg) !important;
+        }
+
+        /* Legacy Places sidebars still use a native XUL tree whose viewport
+         * paints Field independently of the dark document root. */
+        :is(tree, treechildren, .sidebar-placesTree) {
+            background: var(--omarchy-content-surface) !important;
+            color: var(--omarchy-content-fg) !important;
+        }
+
+        treechildren::-moz-tree-cell-text {
+            color: var(--omarchy-content-fg) !important;
+        }
+
+        treechildren::-moz-tree-row(selected) {
+            background-color: var(--omarchy-content-active) !important;
+        }
+
+        treechildren::-moz-tree-cell-text(selected) {
+            color: var(--omarchy-content-fg) !important;
+        }
+
+        sidebar-tab-row[selected] {
+            background-color: var(--omarchy-content-selected) !important;
+            box-shadow: inset 1px 0 var(--omarchy-content-focus) !important;
+            color: var(--omarchy-content-fg) !important;
+        }
+
+        :root[dir="rtl"] sidebar-tab-row[selected] {
+            box-shadow: inset -1px 0 var(--omarchy-content-focus) !important;
+        }
+
+        a {
+            color: var(--omarchy-content-focus) !important;
+        }
+    }
+}
+
+/* Built-in PDF.js viewer. It already ships design-token CSS custom properties
+ * for its own dark theme (chrome://pdf.js/content/web/viewer.css) — retarget
+ * those instead of overriding its layout selectors directly, since that
+ * surface is version-fragile and the token indirection is the supported seam. */
+@-moz-document url-prefix("resource://pdf.js/web/viewer.html"),
+    url-prefix("chrome://pdf.js/content/web/viewer.html") {
+    @media not (forced-colors) {
+        :root {
+            --main-color: #f7f5f8 !important;
+            --body-bg-color: #171820 !important;
+            --toolbar-bg-color: #171820 !important;
+            --toolbar-border-color: color-mix(
+                in srgb,
+                #f7f5f8 16%,
+                transparent
+            ) !important;
+            --field-color: #f7f5f8 !important;
+            --field-bg-color: #1d1e2b !important;
+            --field-border-color: color-mix(
+                in srgb,
+                #f7f5f8 25%,
+                transparent
+            ) !important;
+            --sidebar-narrow-bg-color: #171820 !important;
+            --sidebar-toolbar-bg-color: #171820 !important;
+        }
+    }
+}
+
+/* Reader Mode already ships its own explicit light/sepia/dark/contrast content
+ * theme the user picks from the "Aa" menu — that choice is a reading-comfort
+ * preference (e.g. sepia for reduced blue light), not a branding accident, so
+ * the article surface itself is intentionally left alone here. Only the
+ * "auto" (system-following) scheme and the toolbar chrome around it are
+ * bridged, since those are UI chrome rather than a deliberate reading choice. */
+@-moz-document url-prefix("about:reader") {
+    @media not (forced-colors) {
+        body.auto {
+            background-color: #171820 !important;
+            color: #f7f5f8 !important;
+        }
+
+        .toolbar-container,
+        .dropdown-popup {
+            background-color: #171820 !important;
+            border-color: color-mix(
+                in srgb,
+                #f7f5f8 16%,
+                transparent
+            ) !important;
+        }
+
+        .dropdown-popup .dropdown-item {
+            color: #f7f5f8 !important;
+        }
+    }
+}
+
+/* about:addons and about:preferences are built on the same shared in-content
+ * ("acorn") design system as the built-in sidebar above — the same
+ * --in-content-*/--card-*/--button-*/--checkbox-* tokens apply. Reuse that
+ * proven bridge rather than the page's own light/dark in-content theme, which
+ * does not follow the live Omarchy/Pywalfox palette. */
+@-moz-document url("about:addons"),
+    url("about:preferences"),
+    url-prefix("about:preferences#") {
+    @media not (forced-colors) {
+        :root {
+            color-scheme: light !important;
+            --omarchy-content-surface: #fafafa;
+            --omarchy-content-fg: #17151c;
+            --omarchy-content-muted: color-mix(
+                in srgb,
+                var(--omarchy-content-fg) 68%,
+                transparent
+            );
+            --omarchy-content-panel: color-mix(
+                in srgb,
+                var(--omarchy-content-surface) 94%,
+                var(--omarchy-content-fg) 6%
+            );
+            --omarchy-content-field: color-mix(
+                in srgb,
+                var(--omarchy-content-surface) 97%,
+                var(--omarchy-content-fg) 3%
+            );
+            --omarchy-content-border: color-mix(
+                in srgb,
+                var(--omarchy-content-fg) 18%,
+                transparent
+            );
+            --omarchy-content-hover: color-mix(
+                in srgb,
+                var(--omarchy-content-surface) 92%,
+                var(--omarchy-content-fg) 8%
+            );
+            --omarchy-content-active: color-mix(
+                in srgb,
+                var(--omarchy-content-surface) 78%,
+                var(--omarchy-content-fg) 22%
+            );
+            --omarchy-content-selected: color-mix(
+                in srgb,
+                var(--omarchy-content-surface) 82%,
+                var(--omarchy-content-fg) 18%
+            );
+            --omarchy-content-accent-raw: AccentColor;
+            --omarchy-content-focus: color-mix(
+                in srgb,
+                var(--omarchy-content-accent-raw) 35%,
+                var(--omarchy-content-fg) 65%
+            );
+
+            --in-content-page-background: var(
+                --omarchy-content-surface
+            ) !important;
+            --in-content-text-color: var(--omarchy-content-fg) !important;
+            --in-content-deemphasized-text: var(
+                --omarchy-content-muted
+            ) !important;
+            --in-content-box-background: var(
+                --omarchy-content-panel
+            ) !important;
+            --in-content-box-background-odd: var(
+                --omarchy-content-panel
+            ) !important;
+            --in-content-box-background-hover: var(
+                --omarchy-content-hover
+            ) !important;
+            --in-content-box-background-active: var(
+                --omarchy-content-active
+            ) !important;
+            --in-content-border-color: var(
+                --omarchy-content-border
+            ) !important;
+            --in-content-item-hover: var(--omarchy-content-hover) !important;
+            --in-content-item-selected: var(
+                --omarchy-content-selected
+            ) !important;
+            --in-content-item-selected-text: var(
+                --omarchy-content-fg
+            ) !important;
+            --in-content-primary-button-background: var(
+                --omarchy-content-focus
+            ) !important;
+            --in-content-primary-button-background-hover: var(
+                --omarchy-content-focus
+            ) !important;
+            --in-content-primary-button-text-color: var(
+                --omarchy-content-surface
+            ) !important;
+            --in-content-link-color: var(--omarchy-content-focus) !important;
+
+            --background-color-canvas: var(
+                --omarchy-content-surface
+            ) !important;
+            --background-color-box: var(--omarchy-content-panel) !important;
+            --card-background-color: var(--omarchy-content-panel) !important;
+            --card-border: 1px solid var(--omarchy-content-border) !important;
+            --card-border-radius: 0px !important;
+            --card-box-shadow: none !important;
+            --text-color: var(--omarchy-content-fg) !important;
+            --text-color-deemphasized: var(
+                --omarchy-content-muted
+            ) !important;
+            --text-color-disabled: var(--omarchy-content-muted) !important;
+            --link-color: var(--omarchy-content-focus) !important;
+            --color-accent-primary: var(--omarchy-content-focus) !important;
+            --focus-outline-color: var(--omarchy-content-focus) !important;
+            --focus-outline-width: 1px !important;
+            --focus-outline: var(--focus-outline-width) solid
+                var(--focus-outline-color) !important;
+            --button-background-color: var(
+                --omarchy-content-panel
+            ) !important;
+            --button-text-color: var(--omarchy-content-fg) !important;
+            --button-background-color-hover: var(
+                --omarchy-content-hover
+            ) !important;
+            --button-background-color-active: var(
+                --omarchy-content-active
+            ) !important;
+            --button-background-color-ghost-hover: var(
+                --omarchy-content-hover
+            ) !important;
+            --button-background-color-ghost-active: var(
+                --omarchy-content-active
+            ) !important;
+            --input-text-background-color: var(
+                --omarchy-content-field
+            ) !important;
+            --input-text-color: var(--omarchy-content-fg) !important;
+            --input-text-border-color: var(
+                --omarchy-content-border
+            ) !important;
+            --input-text-border-radius: 0px !important;
+            --checkbox-background-color: transparent !important;
+            --checkbox-background-color-hover: var(
+                --omarchy-content-hover
+            ) !important;
+            --checkbox-background-color-active: var(
+                --omarchy-content-active
+            ) !important;
+            --checkbox-background-color-checked: var(
+                --omarchy-content-focus
+            ) !important;
+            --checkbox-border-color: var(
+                --omarchy-content-border
+            ) !important;
+            --checkbox-border-color-checked: var(
+                --omarchy-content-focus
+            ) !important;
+            --border-radius-xsmall: 0px !important;
+            --border-radius-small: 0px !important;
+            --border-radius-medium: 0px !important;
+            --border-radius-large: 0px !important;
+
+            scrollbar-color: var(--omarchy-content-muted) transparent;
+            scrollbar-width: thin;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                color-scheme: dark !important;
+                --omarchy-content-surface: #171820;
+                --omarchy-content-fg: #f7f5f8;
+            }
+        }
+
+        body,
+        #categories,
+        #category-general,
+        .main-content {
+            background: var(--omarchy-content-surface) !important;
+            color: var(--omarchy-content-fg) !important;
+            font-family: monospace !important;
+        }
+
+        /* about:addons cards and about:preferences groupboxes both consume
+         * these shared component tokens; flatten their geometry instead of
+         * inheriting Firefox's rounded acorn cards. */
+        moz-card,
+        addon-card,
+        .card,
+        groupbox {
+            --card-gap: 8px !important;
+            --card-padding: 12px !important;
+            border-radius: 0 !important;
+        }
+
+        a {
+            color: var(--omarchy-content-focus) !important;
+        }
+    }
+}

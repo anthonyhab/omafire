@@ -6,4 +6,7 @@
 .pi-subagents/
 customChrome.css
 customContent.css
+.omarchy-favicon-contrast-enabled
+generated-gtk-colors.css
+omarchy-radius.css
 PKGBUILD
