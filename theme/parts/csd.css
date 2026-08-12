@@ -50,18 +50,18 @@
 
 		/* Window buttons style */
 		.titlebar-button {
-			background: var(--gnome-button-background) !important;
+			background: var(--omarchy-base-button-background) !important;
 			border-radius: 100% !important;
 			height: 24px !important;
-			transition: background var(--gnome-animation-time);
+			transition: background var(--omarchy-base-animation-time);
 			width: 24px !important;
 
 			&:not([disabled]):hover {
-				background: var(--gnome-button-hover-background) !important;
+				background: var(--omarchy-base-button-hover-background) !important;
 			}
 
 			&:not([disabled]):active {
-				background: var(--gnome-button-active-background) !important;
+				background: var(--omarchy-base-button-active-background) !important;
 			}
 
 			&::-moz-window-inactive {
@@ -83,7 +83,7 @@
 				margin: 0 !important;			
 				
 				& > .toolbarbutton-icon {					
-					@media not -moz-pref("gnomeTheme.noThemedIcons") {
+					@media not -moz-pref("omarchyTheme.noThemedIcons") {
 						background: none !important;
 						appearance: none !important;
 						height: 16px !important;
@@ -112,7 +112,7 @@
 }
 
 /* OPTIONAL: Allow draging the window from headerbar buttons */
-@media -moz-pref("gnomeTheme.dragWindowHeaderbarButtons") {
+@media -moz-pref("omarchyTheme.dragWindowHeaderbarButtons") {
 	:root[customtitlebar] #nav-bar *,
 	:root[customtitlebar] #titlebar .titlebar-button {
 		-moz-window-dragging: drag;

@@ -5,35 +5,35 @@
 /* Override vars */
 :root {
 	--space-above-tabbar: 0 !important;
-	--tab-inner-inline-margin: var(--gnome-toolbar-padding) !important;
-	--tab-pinned-margin-inline-expanded: calc(var(--gnome-toolbar-padding)  / 2) !important;
-	--tab-min-height: var(--gnome-button-size) !important;
-	--tab-border-radius: var(--gnome-button-radius) !important;
-	--tab-hover-background-color: var(--gnome-hover-color) !important;
-	--tab-selected-bgcolor: var(--gnome-selected-color) !important;
-	--tab-pinned-container-margin-inline-expanded: calc(var(--gnome-toolbar-padding) / 2) !important;
-	--tabstrip-inner-border: 1px solid var(--gnome-border-color) !important;
+	--tab-inner-inline-margin: var(--omarchy-base-toolbar-padding) !important;
+	--tab-pinned-margin-inline-expanded: calc(var(--omarchy-base-toolbar-padding)  / 2) !important;
+	--tab-min-height: var(--omarchy-base-button-size) !important;
+	--tab-border-radius: var(--omarchy-base-button-radius) !important;
+	--tab-hover-background-color: var(--omarchy-base-hover-color) !important;
+	--tab-selected-bgcolor: var(--omarchy-base-selected-color) !important;
+	--tab-pinned-container-margin-inline-expanded: calc(var(--omarchy-base-toolbar-padding) / 2) !important;
+	--tabstrip-inner-border: 1px solid var(--omarchy-base-border-color) !important;
 	--tab-height-with-margin-padding: calc(var(--tab-min-height) + 5px) !important;
 
-	--gnome-tabbar-tab-close-overlay-bg: var(--gnome-tabbar-tab-hover-background);
+	--omarchy-base-tabbar-tab-close-overlay-bg: var(--omarchy-base-tabbar-tab-hover-background);
 
 	@media not -moz-pref("sidebar.verticalTabs") {
 		/* We need the hardcoded tab colors in horizontal tabs, beacuse of the close button overlay */
-		--tab-hover-background-color: var(--gnome-tabbar-tab-hover-background) !important;
-		--tab-selected-bgcolor: var(--gnome-tabbar-tab-active-background) !important;
+		--tab-hover-background-color: var(--omarchy-base-tabbar-tab-hover-background) !important;
+		--tab-selected-bgcolor: var(--omarchy-base-tabbar-tab-active-background) !important;
 	}
 
 	@media -moz-pref("sidebar.verticalTabs") {
-		--tab-block-margin: calc(var(--gnome-toolbar-padding)  / 2) !important;
+		--tab-block-margin: calc(var(--omarchy-base-toolbar-padding)  / 2) !important;
 	}
 
 }
 
 /* Tabsbar */
 #TabsToolbar {
-	background-color: var(--gnome-tabbar-background) !important;
+	background-color: var(--omarchy-base-tabbar-background) !important;
 	border-bottom: 0 !important;
-	padding: 0 calc(var(--gnome-toolbar-padding) / 2) !important;
+	padding: 0 calc(var(--omarchy-base-toolbar-padding) / 2) !important;
 	position: relative;
 	z-index: 1;
 
@@ -42,7 +42,7 @@
 	--toolbarbutton-active-background: transparent !important;
 	--toolbarbutton-hover-background: transparent !important;
 	/* Tabs scroll fade */
-	--gnome-tabbar-fade-background: var(--gnome-tabbar-background);
+	--omarchy-base-tabbar-fade-background: var(--omarchy-base-tabbar-background);
 
 	/* Remove tabbar's window controls */
 	.titlebar-buttonbox-container {
@@ -56,17 +56,17 @@
 
 	/* Tabsbar buttons */
 	.toolbarbutton-1 {
-		border-radius: var(--gnome-button-radius) !important;
-		margin: 0px calc(var(--gnome-toolbar-spacing) / 2) var(--gnome-toolbar-padding) !important;
-		min-height: var(--gnome-button-size) !important;
-		min-width: var(--gnome-button-size) !important;
-		transition: background var(--gnome-animation-time);
+		border-radius: var(--omarchy-base-button-radius) !important;
+		margin: 0px calc(var(--omarchy-base-toolbar-spacing) / 2) var(--omarchy-base-toolbar-padding) !important;
+		min-height: var(--omarchy-base-button-size) !important;
+		min-width: var(--omarchy-base-button-size) !important;
+		transition: background var(--omarchy-base-animation-time);
 
 		&:not([disabled]):not(:active):not([open]):hover {
-			background-color: var(--gnome-tabbar-tab-hover-background) !important;
+			background-color: var(--omarchy-base-tabbar-tab-hover-background) !important;
 		}
 		&:active, &[open] {
-			background-color: var(--gnome-tabbar-tab-active-background) !important;
+			background-color: var(--omarchy-base-tabbar-tab-active-background) !important;
 		}
 	}
 }
@@ -78,7 +78,7 @@
 		&, arrowscrollbox {
 			height: auto !important;
 			min-height: auto !important;
-			--tab-min-height: var(--gnome-button-size) !important;
+			--tab-min-height: var(--omarchy-base-button-size) !important;
 		}
 	}
 
@@ -88,7 +88,7 @@
 		grid-gap: 0 !important;
 
 		#vertical-tabs-newtab-button {
-			margin-block: calc(var(--gnome-toolbar-spacing) / 2) var(--gnome-toolbar-spacing) !important;
+			margin-block: calc(var(--omarchy-base-toolbar-spacing) / 2) var(--omarchy-base-toolbar-spacing) !important;
 		}
 	}
 }
@@ -100,18 +100,18 @@
 	}
 
 	&[orient="vertical"] {
-		--gnome-undershoot-top: inset 0 1px color-mix(in srgb, var(--gnome-shade-color) 75%, transparent);
-		--gnome-undershoot-bottom: inset 0 -1px color-mix(in srgb, var(--gnome-shade-color) 75%, transparent);
+		--omarchy-base-undershoot-top: inset 0 1px color-mix(in srgb, var(--omarchy-base-shade-color) 75%, transparent);
+		--omarchy-base-undershoot-bottom: inset 0 -1px color-mix(in srgb, var(--omarchy-base-shade-color) 75%, transparent);
 
 		&[overflowing] {
 			&:not([scrolledtostart]) {
-				box-shadow: var(--gnome-undershoot-top);
+				box-shadow: var(--omarchy-base-undershoot-top);
 			}
 			&:not([scrolledtoend]) {
-				box-shadow: var(--gnome-undershoot-bottom);
+				box-shadow: var(--omarchy-base-undershoot-bottom);
 			}
 			&:not([scrolledtostart], [scrolledtoend]) {
-				box-shadow: var(--gnome-undershoot-top),  var(--gnome-undershoot-bottom);
+				box-shadow: var(--omarchy-base-undershoot-top),  var(--omarchy-base-undershoot-bottom);
 			}
 		}
 	}
@@ -153,11 +153,11 @@ scrollbox[orient="horizontal"] ~ #scrollbutton-down:not([disabled])::after {
 	pointer-events: none;
 }
 #scrollbutton-up:has(~ scrollbox[orient="horizontal"]):not([disabled])::after {
-	background: linear-gradient(to right, var(--gnome-tabbar-fade-background) 10px, transparent);
+	background: linear-gradient(to right, var(--omarchy-base-tabbar-fade-background) 10px, transparent);
 	left: 0;
 }
 scrollbox[orient="horizontal"] ~ #scrollbutton-down:not([disabled])::after {
-	background: linear-gradient(to left, var(--gnome-tabbar-fade-background) 10px, transparent);
+	background: linear-gradient(to left, var(--omarchy-base-tabbar-fade-background) 10px, transparent);
 	right: 0;
 }
 spacer[part=overflow-start-indicator], spacer[part=overflow-end-indicator] {
@@ -169,21 +169,21 @@ spacer[part=overflow-start-indicator], spacer[part=overflow-end-indicator] {
 /* Tabs */
 .tabbrowser-tab {
 	&[selected="true"] {
-		--gnome-tabbar-tab-close-overlay-bg: var(--gnome-tabbar-tab-active-background);
+		--omarchy-base-tabbar-tab-close-overlay-bg: var(--omarchy-base-tabbar-tab-active-background);
 		&:hover {
-			--gnome-tabbar-tab-close-overlay-bg: var(--gnome-tabbar-tab-active-hover-background) !important;
+			--omarchy-base-tabbar-tab-close-overlay-bg: var(--omarchy-base-tabbar-tab-active-hover-background) !important;
 		}
 	}
-	@media -moz-pref("gnomeTheme.closeOnlySelectedTabs") {
-		--gnome-tabbar-tab-close-overlay-bg: unset;
+	@media -moz-pref("omarchyTheme.closeOnlySelectedTabs") {
+		--omarchy-base-tabbar-tab-close-overlay-bg: unset;
 	}
 
 	/* OPTIONAL: Add more contrast to the active tab */
-	@media -moz-pref("gnomeTheme.activeTabContrast") {
+	@media -moz-pref("omarchyTheme.activeTabContrast") {
 		&[selected="true"], &:hover {
-			--tab-hover-background-color: var(--gnome-tabbar-tab-active-background-contrast) !important;
-			--tab-selected-bgcolor: var(--gnome-tabbar-tab-active-background-contrast) !important;
-			--gnome-tabbar-tab-close-overlay-bg: var(--gnome-tabbar-tab-active-background-contrast) !important;
+			--tab-hover-background-color: var(--omarchy-base-tabbar-tab-active-background-contrast) !important;
+			--tab-selected-bgcolor: var(--omarchy-base-tabbar-tab-active-background-contrast) !important;
+			--omarchy-base-tabbar-tab-close-overlay-bg: var(--omarchy-base-tabbar-tab-active-background-contrast) !important;
 		}
 	}
 
@@ -199,13 +199,13 @@ spacer[part=overflow-start-indicator], spacer[part=overflow-end-indicator] {
 
 		/* Not in collapsed tab-group */
 		:not([collapsed]) > & {
-			padding: 0px calc(var(--gnome-toolbar-spacing) / 2 - 1px) var(--gnome-toolbar-padding) !important;
+			padding: 0px calc(var(--omarchy-base-toolbar-spacing) / 2 - 1px) var(--omarchy-base-toolbar-padding) !important;
 			&:not([hidden=true]):last-of-type {
-				padding-right: calc(var(--gnome-toolbar-spacing) / 2) !important;
+				padding-right: calc(var(--omarchy-base-toolbar-spacing) / 2) !important;
 			}
 
 			/* Full width tabs */
-			@media not -moz-pref("gnomeTheme.normalWidthTabs") {
+			@media not -moz-pref("omarchyTheme.normalWidthTabs") {
 				&:not([pinned]) {
 					&:not([style^="max-width"]),
 					&[style^="max-width: 100px !important;"] {
@@ -223,47 +223,47 @@ spacer[part=overflow-start-indicator], spacer[part=overflow-end-indicator] {
 
 	/* Vertical tabs only */
 	#tabbrowser-tabs[orient="vertical"] & {
-		padding-block: calc(var(--gnome-toolbar-spacing) / 2) !important;
+		padding-block: calc(var(--omarchy-base-toolbar-spacing) / 2) !important;
 	}
 }
 
 /* Tab background */
 .tab-background {
 	box-shadow: none !important;
-	transition: background var(--gnome-tab-animation-time) linear !important;
+	transition: background var(--omarchy-base-tab-animation-time) linear !important;
 	margin-block: 0 !important;
 
 	/* Selected */
 	tab[selected] & {
-		background-color: var(--gnome-selected-color) !important;
+		background-color: var(--omarchy-base-selected-color) !important;
 	}
 
 	/* Selected hover */
 	tab[selected]:hover & {
-		background-color: var(--gnome-selected-hover-color) !important;
+		background-color: var(--omarchy-base-selected-hover-color) !important;
 		@media not -moz-pref("sidebar.verticalTabs") {
-			background-color: var(--gnome-tabbar-tab-active-hover-background) !important;
+			background-color: var(--omarchy-base-tabbar-tab-active-hover-background) !important;
 		}
 	}
 
 	/* Use raised button colors for pinned tabs in vertical */
 	#tabbrowser-tabs[orient="vertical"] tab[pinned] & {
-		background-color: var(--gnome-button-background) !important;
+		background-color: var(--omarchy-base-button-background) !important;
 		&[selected] {
-			background-color: var(--gnome-button-checked-background) !important;
+			background-color: var(--omarchy-base-button-checked-background) !important;
 		}
 
 		tab:hover & {
-			background-color: var(--gnome-button-hover-background) !important;
+			background-color: var(--omarchy-base-button-hover-background) !important;
 			&[selected] {
-				background-color: var(--gnome-button-checked-hover-background) !important;
+				background-color: var(--omarchy-base-button-checked-hover-background) !important;
 			}
 		}
 	}
 
 	/* Add solid bg on tabs dnd */
 	#tabbrowser-tabs[movingtab] tab:is([multiselected], [selected]) & {
-		background-color: var(--gnome-tabbar-background) !important;
+		background-color: var(--omarchy-base-tabbar-background) !important;
 		background-image: linear-gradient(var(--tab-selected-bgcolor), var(--tab-selected-bgcolor)) !important;
 	}
 }
@@ -309,7 +309,7 @@ spacer[part=overflow-start-indicator], spacer[part=overflow-end-indicator] {
 
 		/* Close button overlay */
 		&:not([pinned])::before {
-			background: linear-gradient(to left, var(--gnome-tabbar-tab-close-overlay-bg) 50%, transparent);
+			background: linear-gradient(to left, var(--omarchy-base-tabbar-tab-close-overlay-bg) 50%, transparent);
 			border-radius: 0 4px 4px 0;
 			bottom: 2px;
 			content: "";
@@ -317,7 +317,7 @@ spacer[part=overflow-start-indicator], spacer[part=overflow-end-indicator] {
 			opacity: 0;
 			position: absolute;
 			right: 2px;
-			transition: all var(--gnome-tab-animation-time) linear;
+			transition: all var(--omarchy-base-tab-animation-time) linear;
 			width: 55px;
 			z-index: 99;
 		}
@@ -330,8 +330,8 @@ spacer[part=overflow-start-indicator], spacer[part=overflow-end-indicator] {
 		}
 
 		/* Left close button */
-		@media (-moz-gtk-csd-reversed-placement) and (not -moz-pref("gnomeTheme.swapTabClose")),
-			(-moz-pref("gnomeTheme.swapTabClose")) and (not (-moz-gtk-csd-reversed-placement)) {
+		@media (-moz-gtk-csd-reversed-placement) and (not -moz-pref("omarchyTheme.swapTabClose")),
+			(-moz-pref("omarchyTheme.swapTabClose")) and (not (-moz-gtk-csd-reversed-placement)) {
 				/* Rearrange and fix alignment */
 				.tab-audio-button {
 					order: 3 !important;
@@ -367,7 +367,7 @@ spacer[part=overflow-start-indicator], spacer[part=overflow-end-indicator] {
 
 		/* Fix alignment when audio button is prestent */
 		tab:is([muted], [soundplaying]) & {
-			@media (not (-moz-gtk-csd-reversed-placement)) and (not -moz-pref("gnomeTheme.swapTabClose")) {
+			@media (not (-moz-gtk-csd-reversed-placement)) and (not -moz-pref("omarchyTheme.swapTabClose")) {
 				margin-inline-end: 0 !important;
 			}
 		}
@@ -389,18 +389,18 @@ spacer[part=overflow-start-indicator], spacer[part=overflow-end-indicator] {
 	background-image: none !important;
 	background-color: transparent !important;
 	background-size: 24px;
-	transition: all var(--gnome-animation-time) ease-out !important;
+	transition: all var(--omarchy-base-animation-time) ease-out !important;
 
 	&:hover {
-		background-color: var(--gnome-hover-color) !important;
+		background-color: var(--omarchy-base-hover-color) !important;
 	}
 	&:active {
-		background-color: var(--gnome-active-color) !important;
+		background-color: var(--omarchy-base-active-color) !important;
 	}
 
 	/* Set solid bg when in no expanded vertical tabs */
 	#tabbrowser-tabs[orient="vertical"]:not([expanded]) & {
-		background-color: var(--gnome-window-background) !important;
+		background-color: var(--omarchy-base-window-background) !important;
 	}
 }
 
@@ -416,10 +416,10 @@ spacer[part=overflow-start-indicator], spacer[part=overflow-end-indicator] {
 
 /* Tab close button */
 .tab-close-button {
-	fill: var(--gnome-window-color) !important;
+	fill: var(--omarchy-base-window-color) !important;
 	fill-opacity: 1 !important;
 	height: 16px !important;
-	list-style-image: var(--gnome-icon-window-close-symbolic) !important;
+	list-style-image: var(--omarchy-base-icon-window-close-symbolic) !important;
 	width: 16px !important;
 	-moz-context-properties: fill, fill-opacity !important;
 
@@ -436,7 +436,7 @@ spacer[part=overflow-start-indicator], spacer[part=overflow-end-indicator] {
 		}
 		/* Show close button on tab hover */
 		tab:hover & {
-			@media not -moz-pref("gnomeTheme.closeOnlySelectedTabs") {
+			@media not -moz-pref("omarchyTheme.closeOnlySelectedTabs") {
 				visibility: visible !important;
 				opacity: 1 !important;
 			}
@@ -459,9 +459,9 @@ spacer[part=overflow-start-indicator], spacer[part=overflow-end-indicator] {
 
 	&:not([crashed]) {
 		padding: 2px !important;
-		background: var(--gnome-button-background) !important;
+		background: var(--omarchy-base-button-background) !important;
 		&:hover {
-			background: var(--gnome-button-hover-background) !important;
+			background: var(--omarchy-base-button-hover-background) !important;
 		}
 	}
 
@@ -484,7 +484,7 @@ spacer[part=overflow-start-indicator], spacer[part=overflow-end-indicator] {
 			margin-inline-start: auto;
 			margin-inline-end: 2px;
 
-			@media -moz-pref("gnomeTheme.tabAlignLeft") {
+			@media -moz-pref("omarchyTheme.tabAlignLeft") {
 				/* OPTIONAL: Align tab items left */
 				margin-inline-start: 0 !important;
 				padding: 0 5px !important;
@@ -500,7 +500,7 @@ spacer[part=overflow-start-indicator], spacer[part=overflow-end-indicator] {
 		}
 
 		.tab-icon-image {
-			transition: opacity var(--gnome-animation-time) ease-out !important;
+			transition: opacity var(--omarchy-base-animation-time) ease-out !important;
 		}
 		&::before {
 			margin: 4px;
@@ -516,35 +516,35 @@ spacer[part=overflow-start-indicator], spacer[part=overflow-end-indicator] {
 		border-style: solid !important;
 	}
 	tab:not(:first-of-type, [selected], :hover) {
-		--gnome-tabbar-tab-separator-hack0: var(--gnome-tabbar-background);
-		--gnome-tabbar-tab-separator-hack1: linear-gradient(
+		--omarchy-base-tabbar-tab-separator-hack0: var(--omarchy-base-tabbar-background);
+		--omarchy-base-tabbar-tab-separator-hack1: linear-gradient(
 			to bottom,
-			var(--gnome-tabbar-tab-separator-hack0) 0,
-			var(--gnome-tabbar-tab-separator-hack0) 3px,
-			var(--gnome-tabbar-tab-separator-color) 3px,
-			var(--gnome-tabbar-tab-separator-color) 31px,
-			var(--gnome-tabbar-tab-separator-hack0) 31px,
-			var(--gnome-tabbar-tab-separator-hack0) 40px
+			var(--omarchy-base-tabbar-tab-separator-hack0) 0,
+			var(--omarchy-base-tabbar-tab-separator-hack0) 3px,
+			var(--omarchy-base-tabbar-tab-separator-color) 3px,
+			var(--omarchy-base-tabbar-tab-separator-color) 31px,
+			var(--omarchy-base-tabbar-tab-separator-hack0) 31px,
+			var(--omarchy-base-tabbar-tab-separator-hack0) 40px
 		) 1;
-		border-image: var(--gnome-tabbar-tab-separator-hack1);
+		border-image: var(--omarchy-base-tabbar-tab-separator-hack1);
 	}
 	tab[selected] ~ tab:not([hidden="true"]) {
 		border-image: none;
 	}
 	tab[selected] ~ tab:not([hidden="true"]) ~ tab:not([hidden="true"]) {
-		border-image: var(--gnome-tabbar-tab-separator-hack1);
+		border-image: var(--omarchy-base-tabbar-tab-separator-hack1);
 	}
 	tab:hover ~ tab:not([hidden="true"]) {
 		border-image: none !important;
 	}
 	tab:hover ~ tab:not([hidden="true"]) ~ tab:not([hidden="true"]) {
-		border-image: var(--gnome-tabbar-tab-separator-hack1) !important;
+		border-image: var(--omarchy-base-tabbar-tab-separator-hack1) !important;
 	}
 	tab:hover ~ tab[selected] ~ tab:not([hidden="true"]) {
 		border-image: none !important;
 	}
 	tab:hover ~ tab[selected] ~ tab:not([hidden="true"]) ~ tab:not([hidden="true"]) {
-		border-image: var(--gnome-tabbar-tab-separator-hack1) !important;
+		border-image: var(--omarchy-base-tabbar-tab-separator-hack1) !important;
 	}
 	tab-group[collapsed] + tab {
 		border-image: none !important;
@@ -555,7 +555,7 @@ spacer[part=overflow-start-indicator], spacer[part=overflow-end-indicator] {
 tab-split-view-wrapper {
 	padding: 0 !important;
 	margin-block: 0 !important;
-	margin-bottom: var(--gnome-toolbar-padding) !important;
+	margin-bottom: var(--omarchy-base-toolbar-padding) !important;
 
 	/* Horizontal tabs only */
 	#tabbrowser-tabs[orient="horizontal"] & {
@@ -567,7 +567,7 @@ tab-split-view-wrapper {
 			}
 
 			/* Full width tabs */
-			@media not -moz-pref("gnomeTheme.normalWidthTabs") {
+			@media not -moz-pref("omarchyTheme.normalWidthTabs") {
 				&:not([style^="max-width"]) {
 					max-width: 100% !important;
 					--tab-min-width-pref: 131px !important;
@@ -582,8 +582,8 @@ tab-split-view-wrapper {
 tab-group {
 	#tabbrowser-tabs[orient="horizontal"] & {
 		.tab-group-line {
-			margin-block-end: calc(var(--gnome-toolbar-padding) * -1) !important;
-			margin-inline: calc((var(--gnome-toolbar-spacing) / 2) * -1) !important;
+			margin-block-end: calc(var(--omarchy-base-toolbar-padding) * -1) !important;
+			margin-inline: calc((var(--omarchy-base-toolbar-spacing) / 2) * -1) !important;
 		}
 	}
 }
@@ -598,7 +598,7 @@ tab-group {
 
 	#tabbrowser-tabs[orient="vertical"]:not([expanded]) & {
 		tab-group[collapsed] & {
-			margin-block: var(--gnome-toolbar-padding) !important;
+			margin-block: var(--omarchy-base-toolbar-padding) !important;
 		}
 	}
 }
@@ -626,12 +626,12 @@ tab-group {
 	#tabbrowser-tabs[orient="vertical"][expanded] & {
 		align-items: center !important;
 		display: flex;
-		margin-block: var(--gnome-toolbar-padding) !important;
+		margin-block: var(--omarchy-base-toolbar-padding) !important;
 
 		&::before {
 			-moz-context-properties: fill;
 			fill: currentColor !important;
-			background: var(--gnome-icon-pan-end-symbolic) no-repeat;
+			background: var(--omarchy-base-icon-pan-end-symbolic) no-repeat;
 			background-size: contain;
 			content: "";
 			display: block;
@@ -640,7 +640,7 @@ tab-group {
 			width: 16px;
 		}
 		tab-group:not([collapsed]) &::before {
-			background-image: var(--gnome-icon-pan-down-symbolic);
+			background-image: var(--omarchy-base-icon-pan-down-symbolic);
 		}
 	}
 }
@@ -710,28 +710,28 @@ tab-group {
 	--identity-icon-color: var(--identity-tab-color) !important;
 }
 .identity-color-blue {
-  --identity-tab-color: var(--gnome-tabbar-identity-color-blue)  !important;
+  --identity-tab-color: var(--omarchy-base-tabbar-identity-color-blue)  !important;
 }
 .identity-color-turquoise {
-	--identity-tab-color: var(--gnome-tabbar-identity-color-turquoise) !important;
+	--identity-tab-color: var(--omarchy-base-tabbar-identity-color-turquoise) !important;
 }
 .identity-color-green {
-	--identity-tab-color: var(--gnome-tabbar-identity-color-green) !important;
+	--identity-tab-color: var(--omarchy-base-tabbar-identity-color-green) !important;
 }
 .identity-color-yellow {
-	--identity-tab-color: var(--gnome-tabbar-identity-color-yellow) !important;
+	--identity-tab-color: var(--omarchy-base-tabbar-identity-color-yellow) !important;
 }
 .identity-color-orange {
-	--identity-tab-color: var(--gnome-tabbar-identity-color-orange) !important;
+	--identity-tab-color: var(--omarchy-base-tabbar-identity-color-orange) !important;
 }
 .identity-color-red {
-	--identity-tab-color: var(--gnome-tabbar-identity-color-red) !important;
+	--identity-tab-color: var(--omarchy-base-tabbar-identity-color-red) !important;
 }
 .identity-color-pink {
-	--identity-tab-color: var(--gnome-tabbar-identity-color-pink) !important;
+	--identity-tab-color: var(--omarchy-base-tabbar-identity-color-pink) !important;
 }
 .identity-color-purple {
-	--identity-tab-color: var(--gnome-tabbar-identity-color-purple) !important;
+	--identity-tab-color: var(--omarchy-base-tabbar-identity-color-purple) !important;
 }
 
 /* Needs attetion tab indicator */
@@ -741,11 +741,11 @@ tab-group {
 	background-position: center bottom !important;
 	transition-property: background-size;
 	transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-	transition-duration: calc(var(--gnome-animation-time) / 2);
+	transition-duration: calc(var(--omarchy-base-animation-time) / 2);
 }
 .tabbrowser-tab:is([image], [pinned]) > .tab-stack > .tab-content[attention]:not([selected]),
 .tabbrowser-tab > .tab-stack > .tab-content[pinned][titlechanged]:not([selected]) {
-	background-image: radial-gradient(var(--gnome-tabbar-tab-needs-attetion), var(--gnome-tabbar-tab-needs-attetion) 10px) !important;
+	background-image: radial-gradient(var(--omarchy-base-tabbar-tab-needs-attetion), var(--omarchy-base-tabbar-tab-needs-attetion) 10px) !important;
 	background-size: clamp(20%, 50%, 7rem) 2px !important;
 }
 .tab-label[attention]:not([selected]) {
@@ -766,11 +766,11 @@ tab-group {
 
 /* Tabs manager menu */
 #alltabs-button {
-	@media not -moz-pref("gnomeTheme.allTabsButton") {
+	@media not -moz-pref("omarchyTheme.allTabsButton") {
 		visibility: collapse;
 	}
 
-	@media -moz-pref("browser.tabs.tabmanager.enabled"), -moz-pref("gnomeTheme.allTabsButtonOnOverflow") {
+	@media -moz-pref("browser.tabs.tabmanager.enabled"), -moz-pref("omarchyTheme.allTabsButtonOnOverflow") {
 		#tabbrowser-tabs[overflow] ~ & {
 			visibility: visible;
 		}
@@ -784,7 +784,7 @@ tab-group {
 /* Firefox View */
 #TabsToolbar #firefox-view-button .toolbarbutton-icon {
 	box-shadow: none !important;
-	fill: var(--gnome-toolbar-icon-fill) !important;
+	fill: var(--omarchy-base-toolbar-icon-fill) !important;
 	height: 16px !important;
 	opacity: 1 !important;
 	width: 16px !important;
@@ -798,7 +798,7 @@ tab-group {
 }
 
 /* OPTIONAL: Hide single tab */
-@media -moz-pref("gnomeTheme.hideSingleTab") and (not -moz-pref("sidebar.verticalTabs")) {
+@media -moz-pref("omarchyTheme.hideSingleTab") and (not -moz-pref("sidebar.verticalTabs")) {
 	#tabbrowser-tabs:not(:has(tab[pinned]:not([hidden="true"]))):not(:has(tab:not([hidden="true"]) ~ tab:not([hidden="true"]))) {
 		:is(tab, tab ~ toolbarbutton, tab ~ #tabbrowser-arrowscrollbox-periphery) {
 			visibility: collapse;
@@ -810,7 +810,7 @@ tab-group {
 }
 
 /* OPTIONAL: Use tabs as headerbar */
-@media -moz-pref("gnomeTheme.tabsAsHeaderbar") and (not -moz-pref("sidebar.verticalTabs")) {
+@media -moz-pref("omarchyTheme.tabsAsHeaderbar") and (not -moz-pref("sidebar.verticalTabs")) {
 	/* Rearrange bars */
 	#navigator-toolbox #TabsToolbar {
 		order: 0;
@@ -824,7 +824,7 @@ tab-group {
 	#navigator-toolbox #PersonalToolbar {
 		order: 4;
 	}
-	@media -moz-pref("gnomeTheme.bookmarksToolbarUnderTabs") {
+	@media -moz-pref("omarchyTheme.bookmarksToolbarUnderTabs") {
 		#navigator-toolbox #PersonalToolbar {
 			order: 2 !important;
 		}
@@ -838,7 +838,7 @@ tab-group {
 		}
 
 		.toolbarbutton-1 {
-			margin-top: var(--gnome-toolbar-padding) !important;
+			margin-top: var(--omarchy-base-toolbar-padding) !important;
 		}
 	}
 
@@ -847,7 +847,7 @@ tab-group {
 		/* Invert padding */
 		:not([collapsed]) > .tabbrowser-tab, .tabbrowser-tab {
 			padding-bottom: 0px !important;
-			padding-top: var(--gnome-toolbar-padding) !important;
+			padding-top: var(--omarchy-base-toolbar-padding) !important;
 		}
 
 		/* Move tab group line to top */
@@ -857,7 +857,7 @@ tab-group {
 		tab-group {
 			.tab-group-line {
 				margin-block-end: 0 !important;
-				margin-block-start: calc(var(--gnome-toolbar-padding) * -1) !important;
+				margin-block-start: calc(var(--omarchy-base-toolbar-padding) * -1) !important;
 				top: 0 !important;
 			}
 		}
@@ -865,16 +865,16 @@ tab-group {
 		/* Tabs separators */
 		:root[dir="ltr"] & {
 			tab:not(:first-of-type, [selected], :hover) {
-				--gnome-tabbar-tab-separator-hack1: linear-gradient(
+				--omarchy-base-tabbar-tab-separator-hack1: linear-gradient(
 					to bottom,
-					var(--gnome-tabbar-tab-separator-hack0) 0,
-					var(--gnome-tabbar-tab-separator-hack0) 9px,
-					var(--gnome-tabbar-tab-separator-color) 9px,
-					var(--gnome-tabbar-tab-separator-color) 37px,
-					var(--gnome-tabbar-tab-separator-hack0) 37px,
-					var(--gnome-tabbar-tab-separator-hack0) 40px
+					var(--omarchy-base-tabbar-tab-separator-hack0) 0,
+					var(--omarchy-base-tabbar-tab-separator-hack0) 9px,
+					var(--omarchy-base-tabbar-tab-separator-color) 9px,
+					var(--omarchy-base-tabbar-tab-separator-color) 37px,
+					var(--omarchy-base-tabbar-tab-separator-hack0) 37px,
+					var(--omarchy-base-tabbar-tab-separator-hack0) 40px
 				) 1;
-				border-image: var(--gnome-tabbar-tab-separator-hack1);
+				border-image: var(--omarchy-base-tabbar-tab-separator-hack1);
 			}
 		}
 
@@ -901,12 +901,12 @@ tab-group {
 	/* Force displaying controls in tab-bar */
 	:root[customtitlebar]:not([inDOMFullscreen]) #TabsToolbar .titlebar-buttonbox-container {
 		display: flex !important;
-		padding-top: var(--gnome-toolbar-padding) !important;
+		padding-top: var(--omarchy-base-toolbar-padding) !important;
 		visibility: visible !important;
 	}
 
 	/* Blend single tab into whole bar */
-	@media -moz-pref("gnomeTheme.hideSingleTab") {
+	@media -moz-pref("omarchyTheme.hideSingleTab") {
 		#tabbrowser-tabs:not(:has(tab[pinned]:not([hidden="true"]))):not(:has(tab:not([hidden="true"]) ~ tab:not([hidden="true"]))) :is(
 			tab,
 			tab ~ toolbarbutton,
@@ -925,7 +925,7 @@ tab-group {
 			opacity: 0 !important;
 		}
 		#tabbrowser-tabs:not(:has(tab[pinned]:not([hidden="true"]))):not(:has(tab:not([hidden="true"]) ~ tab:not([hidden="true"]))) .tab-content::before {
-			--gnome-tabbar-tab-close-overlay-bg: unset !important;
+			--omarchy-base-tabbar-tab-close-overlay-bg: unset !important;
 		}
 		:root[dir="ltr"] #tabbrowser-tabs:not(:has(tab[pinned]:not([hidden="true"]))):not(:has(tab:not([hidden="true"]) ~ tab:not([hidden="true"]))) .tab-label-container[textoverflow="true"] {
 			margin-inline-end: -16px;

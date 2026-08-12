@@ -12,27 +12,27 @@ link[href="chrome://global/content/elements/moz-input-common.css"] ~ #input,
 .tabsFilter,
 .popup-notification-body input {
 	-moz-appearance: none !important;
-	background: var(--gnome-entry-background) !important;
+	background: var(--omarchy-base-entry-background) !important;
 	outline: 2px solid transparent !important;
 	border: 0 !important;
-	border-radius: var(--gnome-entry-radius) !important;
+	border-radius: var(--omarchy-base-entry-radius) !important;
 	box-shadow: none !important;
-	color: var(--gnome-entry-color) !important;
-	height: var(--gnome-entry-height) !important;
-	max-height: var(--gnome-entry-height) !important;
+	color: var(--omarchy-base-entry-color) !important;
+	height: var(--omarchy-base-entry-height) !important;
+	max-height: var(--omarchy-base-entry-height) !important;
 	margin: 0 !important;
 	padding: 6px 9px !important;
 	box-sizing: border-box;
 	transition-property: outline, outline-offset;
-	transition-duration: var(--gnome-animation-time);
+	transition-duration: var(--omarchy-base-animation-time);
 	
 	/* Error */
 	&[status="notfound"] {
-		color: var(--gnome-error) !important;
+		color: var(--omarchy-base-error) !important;
 	}
 
 	&:-moz-window-inactive {
-		color: var(--gnome-inactive-entry-color) !important;
+		color: var(--omarchy-base-inactive-entry-color) !important;
 		outline: 2px solid transparent !important;    
 	}
 }
@@ -48,12 +48,12 @@ link[href="chrome://global/content/elements/moz-input-common.css"] ~ #input:focu
 .findbar-textbox:focus,
 .tabsFilter[focused],
 .popup-notification-body input:focus {
-	outline: 2px solid var(--gnome-entry-focused-border-color) !important;
+	outline: 2px solid var(--omarchy-base-entry-focused-border-color) !important;
 	outline-offset: -2px;
 
 	/* Error */
 	&[status="notfound"] {
-		outline-color: var(--gnome-entry-error-focused-border-color) !important;
+		outline-color: var(--omarchy-base-entry-error-focused-border-color) !important;
 	}
 }
 
@@ -72,7 +72,7 @@ link[href="chrome://global/content/elements/moz-input-common.css"] ~ #input:focu
 .urlbar-icon {
 	fill-opacity: 0.8 !important;
 	transition-property: fil, fill-opacity, opacity;
-	transition-duration: var(--gnome-animation-time);
+	transition-duration: var(--omarchy-base-animation-time);
 }
 
 .identity-box-button:hover:not([open="true"]),
@@ -109,7 +109,7 @@ link[href="chrome://global/content/elements/moz-input-common.css"] ~ #input:focu
 	border: 0 !important;
 }
 #urlbar, #searchbar {
-	margin: 0 calc(var(--gnome-toolbar-spacing) / 2) !important;
+	margin: 0 calc(var(--omarchy-base-toolbar-spacing) / 2) !important;
 	padding: 0 3px !important;
 	padding-inline-start: 0 !important;
 	

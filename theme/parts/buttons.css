@@ -5,12 +5,12 @@
 /* Override vars */
 :root {
 	/* moz-button */
-	--button-border-radius: var(--gnome-button-radius) !important;	
-	--button-background-color: var(--gnome-button-background) !important;
-    --button-background-color-hover: var(--gnome-button-hover-background) !important;
-	--button-background-color-active: var(--gnome-button-active-background) !important;
-	--button-background-color-ghost-hover: var(--gnome-hover-color) !important;
-    --button-background-color-ghost-active: var(--gnome-active-color) !important;
+	--button-border-radius: var(--omarchy-base-button-radius) !important;
+	--button-background-color: var(--omarchy-base-button-background) !important;
+    --button-background-color-hover: var(--omarchy-base-button-hover-background) !important;
+	--button-background-color-active: var(--omarchy-base-button-active-background) !important;
+	--button-background-color-ghost-hover: var(--omarchy-base-hover-color) !important;
+    --button-background-color-ghost-active: var(--omarchy-base-active-color) !important;
 }
 
 /* Hide buttons separator */
@@ -59,40 +59,40 @@ button.close,
 .remote-tabs-close-button {
 	-moz-appearance: none !important;
 	align-items: center !important;
-	background-color: var(--gnome-button-background) !important;
-	border-radius: var(--gnome-button-radius) !important;
+	background-color: var(--omarchy-base-button-background) !important;
+	border-radius: var(--omarchy-base-button-radius) !important;
 	border: 0 !important;
-	color: var(--gnome-window-color) !important;
+	color: var(--omarchy-base-window-color) !important;
 	font: menu !important;
 	font-weight: bold !important;
 	justify-content: center !important;
-	max-height: var(--gnome-button-size) !important;
-	min-height: var(--gnome-button-size) !important;
-	min-width: var(--gnome-button-size) !important;
+	max-height: var(--omarchy-base-button-size) !important;
+	min-height: var(--omarchy-base-button-size) !important;
+	min-width: var(--omarchy-base-button-size) !important;
 	outline: 0 !important;
 	padding: 0 1px !important;
-	transition: background var(--gnome-animation-time);	
-	-moz-box-align: center !important;	
+	transition: background var(--omarchy-base-animation-time);
+	-moz-box-align: center !important;
 
 	&:not([disabled="true"]) {
 		/* Hover buttons */
 		&:hover {
 			outline: 0 !important;
-			background-color: var(--gnome-button-hover-background) !important;
+			background-color: var(--omarchy-base-button-hover-background) !important;
 		}
 		/* Active buttons */
 		&:active, &.active {
-			background-color: var(--gnome-button-active-background) !important;
+			background-color: var(--omarchy-base-button-active-background) !important;
 		}
 		/* Checked buttons */
 		&[selected], &[checked], &[open] {
-			background-color: var(--gnome-button-checked-background) !important;
-			
+			background-color: var(--omarchy-base-button-checked-background) !important;
+
 			&:hover {
-				background-color: var(--gnome-button-checked-hover-background) !important;
+				background-color: var(--omarchy-base-button-checked-hover-background) !important;
 			}
 			&:active {
-				background-color: var(--gnome-button-checked-active-background) !important;
+				background-color: var(--omarchy-base-button-checked-active-background) !important;
 			}
 		}
 	}
@@ -101,9 +101,9 @@ button.close,
 	&[disabled="true"] {
 		opacity: 0.5 !important;
 	}
-	
+
 	&[_moz-menuactive] {
-		outline: 2px solid var(--gnome-focus-border-color) !important;
+		outline: 2px solid var(--omarchy-base-focus-border-color) !important;
 		outline-offset: -2px !important;
 	}
 }
@@ -122,26 +122,26 @@ button.close,
 .unified-extensions-item-menu-button,
 .remote-tabs-close-button {
 	background-color: transparent !important;
-	transition: background var(--gnome-animation-time);
+	transition: background var(--omarchy-base-animation-time);
 
 	&:not([disabled="true"]):not(#hack) {
 		/* Hover buttons */
 		&:hover {
-			background-color: var(--gnome-hover-color) !important;
+			background-color: var(--omarchy-base-hover-color) !important;
 		}
 		/* Active buttons */
 		&:active {
-			background-color: var(--gnome-active-color) !important;
+			background-color: var(--omarchy-base-active-color) !important;
 		}
 		/* Checked buttons */
 		&[selected], &[checked], &[open] {
-			background-color: var(--gnome-selected-color) !important;
-			
+			background-color: var(--omarchy-base-selected-color) !important;
+
 			&:hover {
-				background-color: var(--gnome-selected-hover-color) !important;
+				background-color: var(--omarchy-base-selected-hover-color) !important;
 			}
 			&:active {
-				background-color: var(--gnome-selected-active-color) !important;
+				background-color: var(--omarchy-base-selected-active-color) !important;
 			}
 		}
 	}
@@ -158,9 +158,9 @@ button.popup-notification-primary-button:not(#hack),
 #editBookmarkPanelDoneButton,
 #tracking-action-block,
 .button.connect-device {
-	--gnome-button-background: var(--gnome-button-suggested-background) !important;
-	--gnome-button-hover-background: var(--gnome-button-suggested-background) !important;
-	--gnome-button-active-background: var(--gnome-button-suggested-background) !important;
+	--omarchy-base-button-background: var(--omarchy-base-button-suggested-background) !important;
+	--omarchy-base-button-hover-background: var(--omarchy-base-button-suggested-background) !important;
+	--omarchy-base-button-active-background: var(--omarchy-base-button-suggested-background) !important;
 	color: white !important;
 
 	&:not([disabled="true"]) {
@@ -176,20 +176,20 @@ button.popup-notification-primary-button:not(#hack),
 /* Buttons with destructive action */
 .panel-footer button#editBookmarkPanelRemoveButton,
 #PanelUI-panic-view-button {
-	--gnome-button-background: var(--gnome-button-destructive-background) !important;
-	--gnome-button-hover-background: var(--gnome-button-destructive-hover-background) !important;
-	--gnome-button-active-background: var(--gnome-button-destructive-active-background) !important;
-	color: var(--gnome-destructive) !important;
+	--omarchy-base-button-background: var(--omarchy-base-button-destructive-background) !important;
+	--omarchy-base-button-hover-background: var(--omarchy-base-button-destructive-hover-background) !important;
+	--omarchy-base-button-active-background: var(--omarchy-base-button-destructive-active-background) !important;
+	color: var(--omarchy-base-destructive) !important;
 }
 
 /* Buttons with margins */
 #nav-bar toolbarbutton:not(#urlbar-zoom-button, .subviewbutton, .titlebar-button, #urlbar-searchmode-switcher, .searchmode-switcher-close),
 .subviewbutton.panel-subview-footer:not(:only-of-type),
 .panel-footer button:not(:only-of-type):not(:last-child) {
-	margin: 0 calc(var(--gnome-toolbar-spacing) / 2) !important;
+	margin: 0 calc(var(--omarchy-base-toolbar-spacing) / 2) !important;
 }
 .close-icon:not(.tab-close-button) {
-	margin-left: var(--gnome-toolbar-spacing) !important;
+	margin-left: var(--omarchy-base-toolbar-spacing) !important;
 }
 
 /* Text buttons */

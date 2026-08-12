@@ -37,10 +37,10 @@ CSS
 HOME="$SANDBOX" PATH="$SANDBOX/bin:/usr/bin" FIREFOX_THEME_DIR="$THEME_DIR" \
     "$AUTOTHEMER" >/dev/null
 OUTPUT=$THEME_DIR/generated-gtk-colors.css
-grep -Fq -- '--gnome-window-background: #fafafa;' "$OUTPUT"
-grep -Fq -- '--gnome-window-color: rgba(17, 17, 17, 0.8);' "$OUTPUT"
-grep -Fq -- '--gnome-window-background: #181818;' "$OUTPUT"
-grep -Fq -- '--gnome-sidebar-background: #1c1c1c;' "$OUTPUT"
+grep -Fq -- '--omarchy-base-window-background: #fafafa;' "$OUTPUT"
+grep -Fq -- '--omarchy-base-window-color: rgba(17, 17, 17, 0.8);' "$OUTPUT"
+grep -Fq -- '--omarchy-base-window-background: #181818;' "$OUTPUT"
+grep -Fq -- '--omarchy-base-sidebar-background: #1c1c1c;' "$OUTPUT"
 
 # Invalid extraction must not replace the last-known-good generated palette.
 cp "$OUTPUT" "$SANDBOX/expected.css"

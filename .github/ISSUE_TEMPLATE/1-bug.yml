@@ -53,24 +53,24 @@ body:
       label: Optional features enabled
       description: Select the features you have enabled in `about:config`.
       options:
-        - label: gnomeTheme.hideSingleTab
-        - label: gnomeTheme.normalWidthTabs
-        - label: gnomeTheme.swapTabClose
-        - label: gnomeTheme.bookmarksToolbarUnderTabs
-        - label: gnomeTheme.activeTabContrast
-        - label: gnomeTheme.closeOnlySelectedTabs
-        - label: gnomeTheme.systemIcons
-        - label: gnomeTheme.noThemedIcons
-        - label: gnomeTheme.symbolicTabIcons
-        - label: gnomeTheme.hideWebrtcIndicator
-        - label: gnomeTheme.hideUnifiedExtensions
-        - label: gnomeTheme.dragWindowHeaderbarButtons
-        - label: gnomeTheme.tabsAsHeaderbar
-        - label: gnomeTheme.oledBlack
-        - label: gnomeTheme.allTabsButtonOnOverflow
-        - label: gnomeTheme.allTabsButton
-        - label: gnomeTheme.tabAlignLeft
-        - label: gnomeTheme.bookmarksOnFullscreen
+        - label: omarchyTheme.hideSingleTab
+        - label: omarchyTheme.normalWidthTabs
+        - label: omarchyTheme.swapTabClose
+        - label: omarchyTheme.bookmarksToolbarUnderTabs
+        - label: omarchyTheme.activeTabContrast
+        - label: omarchyTheme.closeOnlySelectedTabs
+        - label: omarchyTheme.systemIcons
+        - label: omarchyTheme.noThemedIcons
+        - label: omarchyTheme.symbolicTabIcons
+        - label: omarchyTheme.hideWebrtcIndicator
+        - label: omarchyTheme.hideUnifiedExtensions
+        - label: omarchyTheme.dragWindowHeaderbarButtons
+        - label: omarchyTheme.tabsAsHeaderbar
+        - label: omarchyTheme.oledBlack
+        - label: omarchyTheme.allTabsButtonOnOverflow
+        - label: omarchyTheme.allTabsButton
+        - label: omarchyTheme.tabAlignLeft
+        - label: omarchyTheme.bookmarksOnFullscreen
   - type: textarea
     attributes:
       label: Additional information

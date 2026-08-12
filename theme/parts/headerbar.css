@@ -3,14 +3,14 @@
 
 /* Headerbar */
 #nav-bar {
-	background: var(--gnome-headerbar-background) !important;
+	background: var(--omarchy-base-headerbar-background) !important;
 	border: 0 !important;
-	padding: var(--gnome-toolbar-padding) calc(var(--gnome-toolbar-padding) / 2) !important;
+	padding: var(--omarchy-base-toolbar-padding) calc(var(--omarchy-base-toolbar-padding) / 2) !important;
 }
 
 /* Add private window headerbar indicator */
 :root[privatebrowsingmode="temporary"] #nav-bar toolbarspring:first-of-type:before {
-	background: var(--gnome-icon-eye-not-looking-symbolic) no-repeat;
+	background: var(--omarchy-base-icon-eye-not-looking-symbolic) no-repeat;
 	background-size: 64px 64px;
 	content: "";
 	display: block;	
@@ -19,7 +19,7 @@
 	height: 64px;
 	top: 0;
 	transform: translate(15px, -9px);
-	fill: var(--gnome-window-color) !important;
+	fill: var(--omarchy-base-window-color) !important;
 	fill-opacity: 0.15 !important;
 	-moz-context-properties: fill, fill-opacity;
   }
@@ -33,7 +33,7 @@
 @media -moz-pref("browser.fullscreen.autohide") {
 	#navigator-toolbox[inFullscreen] { 	
 		position: fixed !important;
-		transition: margin var(--gnome-animation-time) ease-in-out 0s !important;
+		transition: margin var(--omarchy-base-animation-time) ease-in-out 0s !important;
 		line-height: 0;
 		z-index: 1;
 		width: 100vw;

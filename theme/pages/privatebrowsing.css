@@ -2,24 +2,24 @@
 
 @-moz-document url("about:privatebrowsing") {
     html.private {
-        --background-color-canvas: var(--gnome-private-in-content-page-background) !important;
+        --background-color-canvas: var(--omarchy-base-private-in-content-page-background) !important;
         /* Used by headings in promo boxes Firefox shows (like an ad for Firefox Focus) */
-        --text-color: var(--gnome-private-text-primary-color) !important;
+        --text-color: var(--omarchy-base-private-text-primary-color) !important;
         
         background: var(--background-color-canvas) !important;
     }
 
     .wordmark {
-        fill: var(--gnome-private-wordmark) !important;
+        fill: var(--omarchy-base-private-wordmark) !important;
     }
     
     .showPrivate {
-        color: var(--gnome-private-text-primary-color);
+        color: var(--omarchy-base-private-text-primary-color);
     }
 
     .info-border {
-        background: var(--gnome-card-background) !important;
-        box-shadow: var(--gnome-card-shadow) !important;
+        background: var(--omarchy-base-card-background) !important;
+        box-shadow: var(--omarchy-base-card-shadow) !important;
         border-radius: 0 !important;
         padding: 0 !important;
 

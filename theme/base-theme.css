@@ -3,7 +3,7 @@
 @import "icons/icons.css";
 @import "colors/light.css";
 @import "colors/dark.css";
-@import "colors/black.css" screen and -moz-pref("gnomeTheme.oledBlack"); 
+@import "colors/black.css" screen and -moz-pref("omarchyTheme.oledBlack");
 
 /* Core */
 @import "parts/toolbox.css";
@@ -33,18 +33,18 @@
 @import "platforms/windows.css" screen and (-moz-platform: windows);
 
 /* Extensions support */
-@import "extensions/adaptive-tab-bar-colour.css" screen and -moz-pref("gnomeTheme.extensions.adaptiveTabBarColour");
+@import "extensions/adaptive-tab-bar-colour.css" screen and -moz-pref("omarchyTheme.extensions.adaptiveTabBarColour");
 
 /* Optional */
-@import "system-icons.css" screen and -moz-pref("gnomeTheme.systemIcons");
-@import "symbolic-tab-icons.css" screen and -moz-pref("gnomeTheme.symbolicTabIcons");
+@import "system-icons.css" screen and -moz-pref("omarchyTheme.systemIcons");
+@import "symbolic-tab-icons.css" screen and -moz-pref("omarchyTheme.symbolicTabIcons");
 
 @namespace xul "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 
-/* Set theme version text in customization panel */
+/* Set theme name text in customization panel */
 #customization-footer::before {
 	background: url(../icon.svg) no-repeat;
 	background-size: contain;
-	content: "Firefox GNOME theme v150";
+	content: "Omarchy Chrome";
 	padding: 9px 9px 9px 50px;
 }

@@ -3,7 +3,7 @@
 @namespace xul "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 
 #tabbrowser-tabbox {
-	--chrome-content-separator-color: var(--gnome-toolbar-border-color);
+	--chrome-content-separator-color: var(--omarchy-base-toolbar-border-color);
 
 	.browserContainer {
 		box-shadow: none !important;
@@ -13,21 +13,21 @@
 
 @media -moz-pref("sidebar.revamp") and -moz-pref("sidebar.revamp.round-content-area") {
 	:root {
-		--chrome-content-separator-color: var(--gnome-toolbar-border-color) !important;
+		--chrome-content-separator-color: var(--omarchy-base-toolbar-border-color) !important;
 	}
 	
 	#tabbrowser-tabbox {
-		--border-radius-medium: var(--gnome-card-radius) !important;
+		--border-radius-medium: var(--omarchy-base-card-radius) !important;
 		
 		#tabbrowser-tabpanels {
-			background-color: var(--gnome-sidebar-background) !important;
+			background-color: var(--omarchy-base-sidebar-background) !important;
 		}
 		
 		.browserContainer {
 			outline: 0 !important;
 			
 			#tabbrowser-tabbox[sidebar-shown] & {
-				box-shadow: var(--gnome-card-shadow) !important;
+				box-shadow: var(--omarchy-base-card-shadow) !important;
 			}
 		}
 	}
@@ -37,7 +37,7 @@
 #tabbrowser-tabpanels {
 	&[splitview] {
 		& .split-view-panel.split-view-panel-active {
-			margin: var(--gnome-toolbar-padding) !important;
+			margin: var(--omarchy-base-toolbar-padding) !important;
 			margin-top: 0 !important;
 		}
 	}

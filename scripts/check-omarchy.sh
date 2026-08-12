@@ -6,24 +6,26 @@ cd "$ROOT_DIR"
 
 bash -n \
     scripts/autothemer.sh \
+    scripts/check-omarchy.sh \
     scripts/generate-omarchy-radius.sh \
+    scripts/generate-pkgbuild.sh \
     scripts/install-favicon-contrast.sh \
-    scripts/install.sh \
+    scripts/rebase-branches.sh \
     tests/autothemer.sh \
     tests/generate-omarchy-radius.sh \
-    tests/install-favicon-contrast.sh \
-    tests/install-theme.sh
+    tests/install-favicon-contrast.sh
 
 if command -v shellcheck >/dev/null 2>&1; then
     shellcheck \
         scripts/autothemer.sh \
+        scripts/check-omarchy.sh \
         scripts/generate-omarchy-radius.sh \
+        scripts/generate-pkgbuild.sh \
         scripts/install-favicon-contrast.sh \
-        scripts/install.sh \
+        scripts/rebase-branches.sh \
         tests/autothemer.sh \
         tests/generate-omarchy-radius.sh \
-        tests/install-favicon-contrast.sh \
-        tests/install-theme.sh
+        tests/install-favicon-contrast.sh
 fi
 
 if command -v node >/dev/null 2>&1; then
@@ -36,6 +38,7 @@ fi
 
 python3 - <<'PY'
 import re
+import subprocess
 from pathlib import Path
 from xml.etree import ElementTree
 
@@ -124,13 +127,38 @@ for path in required:
     if not path.is_file():
         raise SystemExit(f"missing notice/license: {path.relative_to(root)}")
 
+# The 2026-08-12 rebrand retired the --gnome-*/gnomeTheme.* naming in favor
+# of --omarchy-base-*/omarchyTheme.*. Fail if either stale prefix resurfaces
+# anywhere in the tracked tree, so a partial future edit (a copy-pasted rule,
+# a reverted hunk) can't silently reintroduce it undetected.
+allowed_stale_refs = {
+    # Handoff doc: documents the old names as historical inventory on purpose.
+    "docs/rebrand-and-restructure-plan.md",
+    # This script: has to name the retired strings to check for them.
+    "scripts/check-omarchy.sh",
+}
+tracked = subprocess.run(
+    ["git", "ls-files", "-z"], cwd=root, capture_output=True, check=True, text=True
+).stdout.split("\0")
+for relative_path in tracked:
+    if not relative_path or relative_path in allowed_stale_refs:
+        continue
+    path = root / relative_path
+    if not path.is_file():
+        continue
+    try:
+        text = path.read_text()
+    except (UnicodeDecodeError, OSError):
+        continue
+    if "--gnome-" in text or "gnomeTheme." in text:
+        raise SystemExit(f"stale pre-rebrand naming found in {relative_path}")
+
 print("Omarchy static checks passed")
 PY
 
 tests/autothemer.sh
 tests/generate-omarchy-radius.sh
 tests/install-favicon-contrast.sh
-tests/install-theme.sh
 
 if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     git diff --check

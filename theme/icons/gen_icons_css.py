@@ -67,7 +67,7 @@ def main():
     with open(CSS_FILE, "w") as css:
         css.write(":root {\n")
         for name, svg in icons_svg.items():
-            css.write(f'\t--gnome-icon-{name}: url("data:image/svg+xml,{svg}");\n')
+            css.write(f'\t--omarchy-base-icon-{name}: url("data:image/svg+xml,{svg}");\n')
         css.write("}\n")
 
     # Remove repos dirs

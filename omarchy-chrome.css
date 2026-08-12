@@ -144,54 +144,54 @@
     --input-color: var(--omarchy-fg) !important;
     --input-border-color: var(--omarchy-border) !important;
 
-    --gnome-window-background: var(--omarchy-surface) !important;
-    --gnome-window-color: var(--omarchy-fg) !important;
-    --gnome-view-background: var(--omarchy-surface) !important;
-    --gnome-view-color: var(--omarchy-fg) !important;
-    --gnome-sidebar-background: var(--omarchy-surface) !important;
-    --gnome-secondary-sidebar-background: var(--omarchy-field) !important;
-    --gnome-sidebar-text-color: var(--omarchy-fg) !important;
-    --gnome-view-selected-background: var(--omarchy-selection) !important;
-    --gnome-view-selected-hover-background: var(--omarchy-active) !important;
-    --gnome-view-selected-active-background: var(--omarchy-active) !important;
-    --gnome-headerbar-background: var(--omarchy-surface) !important;
-    --gnome-toolbar-background: var(--omarchy-surface) !important;
-    --gnome-toolbar-icon-fill: var(--omarchy-fg) !important;
-    --gnome-toolbar-border-color: var(--omarchy-border) !important;
-    --gnome-border-color: var(--omarchy-border) !important;
-    --gnome-menu-background: var(--omarchy-panel) !important;
-    --gnome-menu-color: var(--omarchy-fg) !important;
-    --gnome-menu-border-color: var(--omarchy-border) !important;
-    --gnome-menu-separator-color: var(--omarchy-border) !important;
-    --gnome-entry-background: var(--omarchy-field) !important;
-    --gnome-entry-color: var(--omarchy-fg) !important;
-    --gnome-inactive-entry-color: var(--omarchy-muted) !important;
-    --gnome-entry-focused-border-color: var(--omarchy-focus-accent) !important;
-    --gnome-entry-error-focused-border-color: color-mix(
+    --omarchy-base-window-background: var(--omarchy-surface) !important;
+    --omarchy-base-window-color: var(--omarchy-fg) !important;
+    --omarchy-base-view-background: var(--omarchy-surface) !important;
+    --omarchy-base-view-color: var(--omarchy-fg) !important;
+    --omarchy-base-sidebar-background: var(--omarchy-surface) !important;
+    --omarchy-base-secondary-sidebar-background: var(--omarchy-field) !important;
+    --omarchy-base-sidebar-text-color: var(--omarchy-fg) !important;
+    --omarchy-base-view-selected-background: var(--omarchy-selection) !important;
+    --omarchy-base-view-selected-hover-background: var(--omarchy-active) !important;
+    --omarchy-base-view-selected-active-background: var(--omarchy-active) !important;
+    --omarchy-base-headerbar-background: var(--omarchy-surface) !important;
+    --omarchy-base-toolbar-background: var(--omarchy-surface) !important;
+    --omarchy-base-toolbar-icon-fill: var(--omarchy-fg) !important;
+    --omarchy-base-toolbar-border-color: var(--omarchy-border) !important;
+    --omarchy-base-border-color: var(--omarchy-border) !important;
+    --omarchy-base-menu-background: var(--omarchy-panel) !important;
+    --omarchy-base-menu-color: var(--omarchy-fg) !important;
+    --omarchy-base-menu-border-color: var(--omarchy-border) !important;
+    --omarchy-base-menu-separator-color: var(--omarchy-border) !important;
+    --omarchy-base-entry-background: var(--omarchy-field) !important;
+    --omarchy-base-entry-color: var(--omarchy-fg) !important;
+    --omarchy-base-inactive-entry-color: var(--omarchy-muted) !important;
+    --omarchy-base-entry-focused-border-color: var(--omarchy-focus-accent) !important;
+    --omarchy-base-entry-error-focused-border-color: color-mix(
         in srgb,
         var(--omarchy-accent) 50%,
         transparent
     ) !important;
-    --gnome-focus-border-color: var(--omarchy-focus-accent) !important;
-    --gnome-selection-bg: var(--omarchy-selection) !important;
-    --gnome-accent-bg: var(--omarchy-accent) !important;
-    --gnome-accent: var(--omarchy-accent) !important;
-    --gnome-selected-background: var(--omarchy-selection) !important;
-    --gnome-hover-color: var(--omarchy-hover) !important;
-    --gnome-active-color: var(--omarchy-active) !important;
-    --gnome-selected-color: var(--omarchy-selection) !important;
-    --gnome-selected-hover-color: var(--omarchy-active) !important;
-    --gnome-selected-active-color: var(--omarchy-active) !important;
-    --gnome-card-background: var(--omarchy-panel) !important;
-    --gnome-card-shade-color: var(--omarchy-border) !important;
-    --gnome-card-shadow: none !important;
-    --gnome-menu-shadow: none !important;
-    --gnome-tabbar-background: var(--omarchy-surface) !important;
-    --gnome-tabbar-tab-hover-background: var(--omarchy-hover) !important;
-    --gnome-tabbar-tab-active-background: var(--omarchy-selection) !important;
-    --gnome-tabbar-tab-active-background-contrast: var(--omarchy-active) !important;
-    --gnome-tabbar-tab-active-hover-background: var(--omarchy-active) !important;
-    --gnome-tabbar-tab-active-border-bottom-color: var(--omarchy-focus-accent) !important;
+    --omarchy-base-focus-border-color: var(--omarchy-focus-accent) !important;
+    --omarchy-base-selection-bg: var(--omarchy-selection) !important;
+    --omarchy-base-accent-bg: var(--omarchy-accent) !important;
+    --omarchy-base-accent: var(--omarchy-accent) !important;
+    --omarchy-base-selected-background: var(--omarchy-selection) !important;
+    --omarchy-base-hover-color: var(--omarchy-hover) !important;
+    --omarchy-base-active-color: var(--omarchy-active) !important;
+    --omarchy-base-selected-color: var(--omarchy-selection) !important;
+    --omarchy-base-selected-hover-color: var(--omarchy-active) !important;
+    --omarchy-base-selected-active-color: var(--omarchy-active) !important;
+    --omarchy-base-card-background: var(--omarchy-panel) !important;
+    --omarchy-base-card-shade-color: var(--omarchy-border) !important;
+    --omarchy-base-card-shadow: none !important;
+    --omarchy-base-menu-shadow: none !important;
+    --omarchy-base-tabbar-background: var(--omarchy-surface) !important;
+    --omarchy-base-tabbar-tab-hover-background: var(--omarchy-hover) !important;
+    --omarchy-base-tabbar-tab-active-background: var(--omarchy-selection) !important;
+    --omarchy-base-tabbar-tab-active-background-contrast: var(--omarchy-active) !important;
+    --omarchy-base-tabbar-tab-active-hover-background: var(--omarchy-active) !important;
+    --omarchy-base-tabbar-tab-active-border-bottom-color: var(--omarchy-focus-accent) !important;
 }
 
 :root[lwtheme-brighttext] {
@@ -248,15 +248,15 @@
  * one native popup surface rather than stacked containers.
  */
 :root {
-    --gnome-button-radius: var(--omarchy-radius-container, 0px) !important;
-    --gnome-entry-radius: var(
+    --omarchy-base-button-radius: var(--omarchy-radius-container, 0px) !important;
+    --omarchy-base-entry-radius: var(
         --omarchy-radius-input,
         var(--omarchy-radius-container, 0px)
     ) !important;
-    --gnome-card-radius: var(--omarchy-radius-container, 0px) !important;
-    --gnome-menu-radius: var(--omarchy-radius-container, 0px) !important;
-    --gnome-popover-radius: var(--omarchy-radius-container, 0px) !important;
-    --gnome-dialog-radius: var(--omarchy-radius-container, 0px) !important;
+    --omarchy-base-card-radius: var(--omarchy-radius-container, 0px) !important;
+    --omarchy-base-menu-radius: var(--omarchy-radius-container, 0px) !important;
+    --omarchy-base-popover-radius: var(--omarchy-radius-container, 0px) !important;
+    --omarchy-base-dialog-radius: var(--omarchy-radius-container, 0px) !important;
 }
 
 #mainPopupSet > menupopup,
@@ -1121,12 +1121,12 @@ sidebar-pins-promo {
     --omarchy-nav-height: var(--omarchy-nav-row-height);
     --omarchy-nav-button-size: var(--omarchy-nav-control-size);
     --omarchy-nav-icon-size: 18px;
-    --gnome-toolbar-padding: 4px 6px !important;
-    --gnome-toolbar-spacing: var(--omarchy-control-gap) !important;
-    --gnome-button-size: var(--omarchy-nav-button-size) !important;
-    --gnome-button-background: transparent !important;
-    --gnome-button-hover-background: var(--omarchy-control-hover) !important;
-    --gnome-button-active-background: var(--omarchy-control-active) !important;
+    --omarchy-base-toolbar-padding: 4px 6px !important;
+    --omarchy-base-toolbar-spacing: var(--omarchy-control-gap) !important;
+    --omarchy-base-button-size: var(--omarchy-nav-button-size) !important;
+    --omarchy-base-button-background: transparent !important;
+    --omarchy-base-button-hover-background: var(--omarchy-control-hover) !important;
+    --omarchy-base-button-active-background: var(--omarchy-control-active) !important;
     min-height: var(--omarchy-nav-height) !important;
     align-items: center !important;
     column-gap: var(--omarchy-control-gap) !important;
@@ -1681,10 +1681,10 @@ sidebar-pins-promo {
 }
 
 #sidebar-main {
-    --gnome-toolbar-icon-fill: var(--omarchy-fg) !important;
-    --gnome-hover-color: var(--omarchy-hover) !important;
-    --gnome-active-color: var(--omarchy-active) !important;
-    --gnome-selected-color: var(--omarchy-selection) !important;
+    --omarchy-base-toolbar-icon-fill: var(--omarchy-fg) !important;
+    --omarchy-base-hover-color: var(--omarchy-hover) !important;
+    --omarchy-base-active-color: var(--omarchy-active) !important;
+    --omarchy-base-selected-color: var(--omarchy-selection) !important;
 }
 
 /* Keep the sidebar and viewport flush; disable the native rounded-content card. */
@@ -2464,16 +2464,16 @@ scrollbox[orient="horizontal"] ~ #scrollbutton-down[disabled] {
             var(--focus-outline-color) !important;
         --focus-outline-inset: calc(-1 * var(--focus-outline-width)) !important;
 
-        --gnome-button-background: transparent !important;
-        --gnome-button-hover-background: var(--omarchy-control-hover) !important;
-        --gnome-button-active-background: var(--omarchy-control-active) !important;
-        --gnome-button-checked-background: var(
+        --omarchy-base-button-background: transparent !important;
+        --omarchy-base-button-hover-background: var(--omarchy-control-hover) !important;
+        --omarchy-base-button-active-background: var(--omarchy-control-active) !important;
+        --omarchy-base-button-checked-background: var(
             --omarchy-control-selected
         ) !important;
-        --gnome-button-checked-hover-background: var(
+        --omarchy-base-button-checked-hover-background: var(
             --omarchy-control-active
         ) !important;
-        --gnome-button-checked-active-background: var(
+        --omarchy-base-button-checked-active-background: var(
             --omarchy-control-active
         ) !important;
 
@@ -2556,7 +2556,7 @@ scrollbox[orient="horizontal"] ~ #scrollbutton-down[disabled] {
         )[status="notfound"]:is(:focus, :focus-visible, [focused]) {
         border-color: transparent !important;
         box-shadow: inset 0 0 0 1px var(
-                --gnome-entry-error-focused-border-color
+                --omarchy-base-entry-error-focused-border-color
             ) !important;
     }
 

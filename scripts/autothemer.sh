@@ -218,24 +218,24 @@ write_colors_to_generated_css() {
     if [[ "$mode" == "light" ]]; then
         cat >> "$OUTPUT_TEMP" << EOF
 :root {
-	--gnome-window-background: $bg;
-	--gnome-window-color: $text_rgba;
-	--gnome-view-background: $view;
-	--gnome-sidebar-background: $sidebar;
-	--gnome-headerbar-background: $bg;
-	--gnome-secondary-sidebar-background: $backdrop_bg;
+	--omarchy-base-window-background: $bg;
+	--omarchy-base-window-color: $text_rgba;
+	--omarchy-base-view-background: $view;
+	--omarchy-base-sidebar-background: $sidebar;
+	--omarchy-base-headerbar-background: $bg;
+	--omarchy-base-secondary-sidebar-background: $backdrop_bg;
 }
 EOF
     else
         cat >> "$OUTPUT_TEMP" << EOF
 @media (prefers-color-scheme: dark) {
 	:root {
-		--gnome-window-background: $bg;
-		--gnome-window-color: $text_rgba;
-		--gnome-view-background: $view;
-		--gnome-sidebar-background: $sidebar;
-		--gnome-headerbar-background: $bg;
-		--gnome-secondary-sidebar-background: $backdrop_bg;
+		--omarchy-base-window-background: $bg;
+		--omarchy-base-window-color: $text_rgba;
+		--omarchy-base-view-background: $view;
+		--omarchy-base-sidebar-background: $sidebar;
+		--omarchy-base-headerbar-background: $bg;
+		--omarchy-base-secondary-sidebar-background: $backdrop_bg;
 	}
 }
 EOF

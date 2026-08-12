@@ -4,7 +4,7 @@
  * the GNOME icon set and must remain safe to regenerate.
  */
 
-@media not -moz-pref("gnomeTheme.noThemedIcons") {
+@media not -moz-pref("omarchyTheme.noThemedIcons") {
     /* Privacy and security */
     [data-extensionid="uBlock0@raymondhill.net"] .toolbarbutton-icon {
         list-style-image: url("../icons/custom/ublock.svg") !important;

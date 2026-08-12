@@ -4,26 +4,26 @@
 
 :root:has(#tabbrowser-tabbox[sidebar-shown]) {
 	@media -moz-pref("sidebar.revamp") and -moz-pref("sidebar.revamp.round-content-area") {
-		--gnome-headerbar-background: var(--gnome-sidebar-background);
+		--omarchy-base-headerbar-background: var(--omarchy-base-sidebar-background);
 		&[privatebrowsingmode="temporary"] {
-			--gnome-sidebar-background: var(--gnome-headerbar-background) !important;
+			--omarchy-base-sidebar-background: var(--omarchy-base-headerbar-background) !important;
 		}
 		&:not([privatebrowsingmode="temporary"]):-moz-window-inactive {
-			--gnome-headerbar-background: var(--gnome-sidebar-background) !important;
+			--omarchy-base-headerbar-background: var(--omarchy-base-sidebar-background) !important;
 		}
 	}
 }
 
 /* Main sidebar */
 #sidebar-main {
-	--button-size-icon: var(--gnome-button-size) !important;
-	background-color: var(--gnome-sidebar-background) !important;
+	--button-size-icon: var(--omarchy-base-button-size) !important;
+	background-color: var(--omarchy-base-sidebar-background) !important;
 }
 
 link[href="chrome://browser/content/sidebar/sidebar-main.css"] + .wrapper {
 	.buttons-wrapper {
 		justify-content: center !important;
-		min-height: calc(var(--gnome-button-size) + (var(--gnome-toolbar-padding) * 2)) !important;
+		min-height: calc(var(--omarchy-base-button-size) + (var(--omarchy-base-toolbar-padding) * 2)) !important;
 
 		@media -moz-pref("sidebar.visibility", "expand-on-hover") {
 			padding-block-end: 0 !important;
@@ -32,21 +32,21 @@ link[href="chrome://browser/content/sidebar/sidebar-main.css"] + .wrapper {
 
 	.tools-and-extensions {		
 		&[orientation="horizontal"] {
-			padding: var(--gnome-toolbar-padding) !important;
+			padding: var(--omarchy-base-toolbar-padding) !important;
 		}
 	}
 	
 	.actions-list {
 		& > moz-button:not(.tools-overflow) {
-			--button-outer-padding-inline: var(--gnome-toolbar-padding) !important;
-			--button-outer-padding-block: calc(var(--gnome-toolbar-spacing) / 2) !important;
-			--toolbarbutton-active-background: var(--gnome-selected-color) !important;
+			--button-outer-padding-inline: var(--omarchy-base-toolbar-padding) !important;
+			--button-outer-padding-block: calc(var(--omarchy-base-toolbar-spacing) / 2) !important;
+			--toolbarbutton-active-background: var(--omarchy-base-selected-color) !important;
 
 			&:last-of-type {
-				--button-outer-padding-block-end: var(--gnome-toolbar-padding) !important;
+				--button-outer-padding-block-end: var(--omarchy-base-toolbar-padding) !important;
 			}
 			&:first-of-type {
-				--button-outer-padding-block-start: var(--gnome-toolbar-padding) !important;
+				--button-outer-padding-block-start: var(--omarchy-base-toolbar-padding) !important;
 			}
 		}
 	}
@@ -54,11 +54,11 @@ link[href="chrome://browser/content/sidebar/sidebar-main.css"] + .wrapper {
 
 /* Sidebar content */
 #sidebar-box {
-	background-color: var(--gnome-sidebar-background) !important;
+	background-color: var(--omarchy-base-sidebar-background) !important;
 	padding: 0 !important;
 	@media -moz-pref("sidebar.revamp") and -moz-pref("sidebar.revamp.round-content-area") {
 		#browser:has(#tabbrowser-tabbox[sidebar-shown]) & {
-			padding: var(--gnome-toolbar-padding) !important;
+			padding: var(--omarchy-base-toolbar-padding) !important;
 			padding-top: 0 !important;
 		}		
 	}
@@ -72,7 +72,7 @@ link[href="chrome://browser/content/sidebar/sidebar-main.css"] + .wrapper {
 }
 
 #sidebar {
-	background-color: var(--gnome-secondary-sidebar-background) !important;
+	background-color: var(--omarchy-base-secondary-sidebar-background) !important;
 	border: 0 !important;
 	border-radius: 0 !important;
 	box-shadow: none !important;
@@ -80,21 +80,21 @@ link[href="chrome://browser/content/sidebar/sidebar-main.css"] + .wrapper {
 	
 	@media -moz-pref("sidebar.revamp") and -moz-pref("sidebar.revamp.round-content-area") {
 		#browser:has(#tabbrowser-tabbox[sidebar-shown]) & {
-			background-color: var(--gnome-card-background) !important;
-			border-radius: var(--gnome-card-radius) !important;
-			box-shadow: var(--gnome-card-shadow) !important;
+			background-color: var(--omarchy-base-card-background) !important;
+			border-radius: var(--omarchy-base-card-radius) !important;
+			box-shadow: var(--omarchy-base-card-shadow) !important;
 		}
 	}
 }
 
 #sidebar-search-container {
-	padding: var(--gnome-toolbar-padding) !important;
+	padding: var(--omarchy-base-toolbar-padding) !important;
 }
 
 /* Separator */
 #sidebar-splitter,
 #sidebar-launcher-splitter {
-	background-color: var(--gnome-sidebar-background) !important;
+	background-color: var(--omarchy-base-sidebar-background) !important;
 	border: 0 !important;
 	margin: 0 !important;
 	outline: 0 !important;
@@ -102,7 +102,7 @@ link[href="chrome://browser/content/sidebar/sidebar-main.css"] + .wrapper {
 	width: 0 !important;
 	
 	@media not -moz-pref("sidebar.revamp.round-content-area") {
-		border-right: 1px solid var(--gnome-toolbar-border-color) !important;
+		border-right: 1px solid var(--omarchy-base-toolbar-border-color) !important;
 	}
 	
 	@media -moz-pref("sidebar.revamp") and (not -moz-pref("sidebar.verticalTabs")) {
@@ -132,10 +132,10 @@ link[href="chrome://browser/content/sidebar/sidebar-main.css"] + .wrapper {
 }
 #sidebar-panel-header {
 	padding-block: 0 !important;
-	padding-inline: var(--gnome-menu-padding) !important;
+	padding-inline: var(--omarchy-base-menu-padding) !important;
 }
 .sidebar-panel-heading {
-	padding-block: var(--gnome-menu-padding) !important;
+	padding-block: var(--omarchy-base-menu-padding) !important;
 
 	> h4 {
 		margin: 0 !important;
@@ -152,10 +152,10 @@ sidebar-panel-header {
 		padding: 0 !important;
 
 		&:not(:last-of-type) {
-			border-bottom: 1px solid var(--gnome-card-shade-color) !important;
+			border-bottom: 1px solid var(--omarchy-base-card-shade-color) !important;
 		}
 		&[slot="nested"]:first-of-type {
-			border-top: 1px solid var(--gnome-card-shade-color) !important;
+			border-top: 1px solid var(--omarchy-base-card-shade-color) !important;
 		}
 	}
 	
@@ -171,7 +171,7 @@ sidebar-panel-header {
 		padding: 0 12px !important;
 		
 		&:not(:only-child) {
-			border-top: 1px solid var(--gnome-card-shade-color) !important;
+			border-top: 1px solid var(--omarchy-base-card-shade-color) !important;
 		}
 	}
 }
@@ -183,7 +183,7 @@ link[href="chrome://global/content/elements/moz-input-common.css"]:has(~ .nested
 		#label {
 			align-items: center;
 			display: flex !important;
-			gap: var(--gnome-toolbar-spacing);
+			gap: var(--omarchy-base-toolbar-spacing);
 			min-height: 50px !important;
 		}
 	}

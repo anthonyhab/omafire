@@ -2,11 +2,11 @@
 
 @-moz-document url("about:newtab"), url("about:home") {
     body {
-        --newtab-background-color: var(--gnome-window-background) !important;
-        --newtab-background-color-secondary: var(--gnome-menu-background) !important;
-        --newtab-primary-action-background: var(--gnome-accent) !important;
+        --newtab-background-color: var(--omarchy-base-window-background) !important;
+        --newtab-background-color-secondary: var(--omarchy-base-menu-background) !important;
+        --newtab-primary-action-background: var(--omarchy-base-accent) !important;
 
-        background-color: var(--gnome-window-background) !important;
+        background-color: var(--omarchy-base-window-background) !important;
         font-family: monospace !important;
     }
 
@@ -18,6 +18,6 @@
     .card-outer {
         border-radius: 0 !important;
         box-shadow: none !important;
-        border: 1px solid var(--gnome-border-color) !important;
+        border: 1px solid var(--omarchy-base-border-color) !important;
     }
 }

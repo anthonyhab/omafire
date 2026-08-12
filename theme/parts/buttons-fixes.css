@@ -4,7 +4,7 @@
 
 /* moz.button size */
 moz-button {
-	--button-size-icon-small: var(--gnome-button-size) !important;
+	--button-size-icon-small: var(--omarchy-base-button-size) !important;
 }
 
 /* Menulist */
@@ -193,7 +193,7 @@ button.close {
 /* Downloads button */
 #downloads-indicator-progress-inner {
 	background: conic-gradient(currentColor var(--download-progress-pcent), transparent var(--download-progress-pcent)) !important;
-	background-color: var(--gnome-button-active-background) !important;
+	background-color: var(--omarchy-base-button-active-background) !important;
 }
 #downloads-indicator-progress-outer,
 #downloads-indicator-start-image,
@@ -204,10 +204,10 @@ button.close {
 }
 #downloads-indicator-progress-outer,
 #downloads-indicator-start-image {
-	background: var(--gnome-toolbar-border-color) !important;
+	background: var(--omarchy-base-toolbar-border-color) !important;
 }
 #downloads-indicator-finish-image {
-	background: var(--gnome-toolbar-icon-fill) !important;
+	background: var(--omarchy-base-toolbar-icon-fill) !important;
 }
 
 #downloads-button[progress="true"] #downloads-indicator-progress-outer {
@@ -241,7 +241,7 @@ button.close {
 #stop-reload-button[animate] {
 	> #reload-button > .toolbarbutton-icon,
 	> #reload-button[displaystop] + #stop-button > .toolbarbutton-icon {
-		fill: var(--gnome-window-color) !important;
+		fill: var(--omarchy-base-window-color) !important;
 	}
 }
 
@@ -268,7 +268,7 @@ button.close {
 }
 
 /* OPTIONAL: Hide unified-extensions-button */
-@media -moz-pref("gnomeTheme.hideUnifiedExtensions") {
+@media -moz-pref("omarchyTheme.hideUnifiedExtensions") {
 	#unified-extensions-button {
 		display: none;
 	}

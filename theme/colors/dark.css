@@ -1,68 +1,68 @@
 @namespace xul url("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul");
 
-/* Variables that start with --gnome- are added by me and are assigned
+/* Variables that start with --omarchy-base- are added by me and are assigned
  * to elements somewhere in this code. The rest of the variables are
  * built-in in Firefox, so you need to add an !important if you wanna
  * override them. */
 @media (prefers-color-scheme: dark) {	
 	:root {
 		/* Colors */
-		--gnome-standalone-color-oklab: max(l, 0.85) a b;
-		--gnome-destructive-bg: var(--gnome-palette-red-4);
-		--gnome-success-bg: var(--gnome-palette-green-5);
-		--gnome-warning-bg: #cd9309;
-		--gnome-error-bg: var(--gnome-palette-red-4);
+		--omarchy-base-standalone-color-oklab: max(l, 0.85) a b;
+		--omarchy-base-destructive-bg: var(--omarchy-base-palette-red-4);
+		--omarchy-base-success-bg: var(--omarchy-base-palette-green-5);
+		--omarchy-base-warning-bg: #cd9309;
+		--omarchy-base-error-bg: var(--omarchy-base-palette-red-4);
 
-		--gnome-toolbar-star-button: var(--gnome-palette-yellow-1);
+		--omarchy-base-toolbar-star-button: var(--omarchy-base-palette-yellow-1);
 
 		/* Window */
-		--gnome-window-background: #222226;
-		--gnome-window-color: white;
-		--gnome-view-background: #1e1e1e;
-		--gnome-sidebar-background: #2e2e32;
-		--gnome-secondary-sidebar-background: #28282c;
+		--omarchy-base-window-background: #222226;
+		--omarchy-base-window-color: white;
+		--omarchy-base-view-background: #1e1e1e;
+		--omarchy-base-sidebar-background: #2e2e32;
+		--omarchy-base-secondary-sidebar-background: #28282c;
 
 		/* Card */
-		--gnome-card-background: rgba(255, 255, 255, 0.08);
-		--gnome-card-shade-color: rgba(0, 0, 6, 0.36);
+		--omarchy-base-card-background: rgba(255, 255, 255, 0.08);
+		--omarchy-base-card-shade-color: rgba(0, 0, 6, 0.36);
 
 		/* Menu */
-		--gnome-menu-background: #36363a;
+		--omarchy-base-menu-background: #36363a;
 
 		/* Header bar */
-		--gnome-headerbar-background: #2e2e32;
-		--gnome-headerbar-shade-color: rgba(0, 0, 0, 0.9);
+		--omarchy-base-headerbar-background: #2e2e32;
+		--omarchy-base-headerbar-shade-color: rgba(0, 0, 0, 0.9);
 
 		/* Tabs */		
-		--gnome-tabbar-identity-color-blue: #81d0ff;
-		--gnome-tabbar-identity-color-green: var(--gnome-palette-green-1);
-		--gnome-tabbar-identity-color-yellow: var(--gnome-palette-yellow-2);
-		--gnome-tabbar-identity-color-orange: var(--gnome-palette-orange-3);
-		--gnome-tabbar-identity-color-red: var(--gnome-palette-red-1);
-		--gnome-tabbar-identity-color-purple: var(--gnome-palette-purple-1);
+		--omarchy-base-tabbar-identity-color-blue: #81d0ff;
+		--omarchy-base-tabbar-identity-color-green: var(--omarchy-base-palette-green-1);
+		--omarchy-base-tabbar-identity-color-yellow: var(--omarchy-base-palette-yellow-2);
+		--omarchy-base-tabbar-identity-color-orange: var(--omarchy-base-palette-orange-3);
+		--omarchy-base-tabbar-identity-color-red: var(--omarchy-base-palette-red-1);
+		--omarchy-base-tabbar-identity-color-purple: var(--omarchy-base-palette-purple-1);
 		
 		/* Miscellaneous */
-		--gnome-shade-color: rgba(0, 0, 6, 0.25);
+		--omarchy-base-shade-color: rgba(0, 0, 6, 0.25);
 		
 		/* Text color for Firefox Logo in new private tab */
-		--gnome-private-wordmark: #FBFBFE;
+		--omarchy-base-private-wordmark: #FBFBFE;
 		/* New private tab background */
-		--gnome-private-in-content-page-background: #222226;
+		--omarchy-base-private-in-content-page-background: #222226;
 		/* Private browsing info box */
-		--gnome-private-text-primary-color: #FBFBFE;
+		--omarchy-base-private-text-primary-color: #FBFBFE;
 		
 		/* Backdrop colors */
 		&:-moz-window-inactive {
-			--gnome-sidebar-background: #28282c;
-			--gnome-secondary-sidebar-background: #252529;
+			--omarchy-base-sidebar-background: #28282c;
+			--omarchy-base-secondary-sidebar-background: #252529;
 		}
 		
 		/* Private browsing colors */
 		&[privatebrowsingmode="temporary"] {
 			/* Headerbar */
-			--gnome-headerbar-background: #2e2540 !important;
+			--omarchy-base-headerbar-background: #2e2540 !important;
 			&:-moz-window-inactive {
-				--gnome-headerbar-background: #241d34 !important;
+				--omarchy-base-headerbar-background: #241d34 !important;
 			}
 		}
 	}

@@ -243,33 +243,33 @@
 
             /* Firefox-GNOME's sidebar shadow styles consume their own token
              * family, so bridge both the native and GNOME variable names. */
-            --gnome-window-background: var(
+            --omarchy-base-window-background: var(
                 --omarchy-content-surface
             ) !important;
-            --gnome-window-color: var(--omarchy-content-fg) !important;
-            --gnome-view-background: var(
+            --omarchy-base-window-color: var(--omarchy-content-fg) !important;
+            --omarchy-base-view-background: var(
                 --omarchy-content-surface
             ) !important;
-            --gnome-view-color: var(--omarchy-content-fg) !important;
-            --gnome-sidebar-background: var(
+            --omarchy-base-view-color: var(--omarchy-content-fg) !important;
+            --omarchy-base-sidebar-background: var(
                 --omarchy-content-surface
             ) !important;
-            --gnome-secondary-sidebar-background: var(
+            --omarchy-base-secondary-sidebar-background: var(
                 --omarchy-content-panel
             ) !important;
-            --gnome-sidebar-text-color: var(
+            --omarchy-base-sidebar-text-color: var(
                 --omarchy-content-fg
             ) !important;
-            --gnome-card-background: var(--omarchy-content-panel) !important;
-            --gnome-card-shade-color: var(
+            --omarchy-base-card-background: var(--omarchy-content-panel) !important;
+            --omarchy-base-card-shade-color: var(
                 --omarchy-content-border
             ) !important;
-            --gnome-card-shadow: none !important;
-            --gnome-entry-background: var(--omarchy-content-panel) !important;
-            --gnome-entry-color: var(--omarchy-content-fg) !important;
-            --gnome-accent: var(--omarchy-content-focus) !important;
-            --gnome-accent-bg: var(--omarchy-content-focus) !important;
-            --gnome-focus-border-color: var(
+            --omarchy-base-card-shadow: none !important;
+            --omarchy-base-entry-background: var(--omarchy-content-panel) !important;
+            --omarchy-base-entry-color: var(--omarchy-content-fg) !important;
+            --omarchy-base-accent: var(--omarchy-content-focus) !important;
+            --omarchy-base-accent-bg: var(--omarchy-content-focus) !important;
+            --omarchy-base-focus-border-color: var(
                 --omarchy-content-focus
             ) !important;
 
