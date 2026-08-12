@@ -614,7 +614,7 @@
 
 /* about:addons and about:preferences are built on the same shared in-content
  * ("acorn") design system as the built-in sidebar above — the same
- * --in-content-*/--card-*/--button-*/--checkbox-* tokens apply. Reuse that
+ * --in-content-*, --card-*, --button-*, --checkbox-* tokens apply. Reuse that
  * proven bridge rather than the page's own light/dark in-content theme, which
  * does not follow the live Omarchy/Pywalfox palette. */
 @-moz-document url("about:addons"),

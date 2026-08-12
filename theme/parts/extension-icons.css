@@ -38,6 +38,12 @@
     [data-extensionid="vimium-c@gdh1995.cn"] .toolbarbutton-icon {
         list-style-image: url("../icons/custom/vimium.svg") !important;
     }
+
+    /* Userscripts */
+    [data-extensionid="{e4a8a97b-f2ed-450b-b12d-ee082ba24781}"]
+        .toolbarbutton-icon {
+        list-style-image: url("../icons/custom/greasemonkey.svg") !important;
+    }
 }
 
 /* Privacy Badger's old override was intentionally not carried over: it used a

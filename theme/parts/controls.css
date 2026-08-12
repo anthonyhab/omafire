@@ -95,7 +95,7 @@ radio > .radio-check[selected] {
 	border: 0 !important;
 }
 .toggle-button::before {
-	box-shadow: 0 2px 4px rgba(0, 0, 0, .2);
+	box-shadow: none !important;
 }
 
 link[href="chrome://global/content/elements/moz-toggle.css"] ~ .content-wrapper {

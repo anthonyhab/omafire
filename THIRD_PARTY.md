@@ -20,6 +20,20 @@ does not imply endorsement.
 `proton-pass.svg`, `pywalfox.svg`, and `vimium.svg` are original geometric
 Omarchy glyphs rather than copies of product artwork.
 
+## The Noun Project
+
+The following toolbar glyph is adapted from a
+[Noun Project](https://thenounproject.com) icon, licensed
+[CC BY 3.0](https://creativecommons.org/licenses/by/3.0/):
+
+| Local file | Icon | Author | Exact source |
+| --- | --- | --- | --- |
+| `theme/icons/custom/greasemonkey.svg` | "Monkey" | [creacuatro](https://thenounproject.com/creacuatro/) | [thenounproject.com/icon/monkey-7697218](https://thenounproject.com/icon/monkey-7697218/) |
+
+Only the outline path was kept (eye/mouth detail paths were dropped for
+legibility at toolbar size); it uses Firefox's `context-fill` paint like the
+Simple Icons adaptations above.
+
 ## Firefox CSSHacks
 
 Palette/geometry rewrites in `omarchy-features.css` were informed by these

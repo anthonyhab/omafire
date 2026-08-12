@@ -132,10 +132,10 @@ link[href="chrome://browser/content/sidebar/sidebar-main.css"] + .wrapper {
 }
 #sidebar-panel-header {
 	padding-block: 0 !important;
-	padding-inline: var(--gnome-content-padding) !important;
+	padding-inline: var(--gnome-menu-padding) !important;
 }
 .sidebar-panel-heading {
-	padding-block: var(--gnome-content-padding) !important;
+	padding-block: var(--gnome-menu-padding) !important;
 
 	> h4 {
 		margin: 0 !important;
@@ -143,18 +143,6 @@ link[href="chrome://browser/content/sidebar/sidebar-main.css"] + .wrapper {
 }
 sidebar-panel-header {
 	margin-block-start: 0 !important;
-	padding: 0 !important;
-}
-
-/* Settings lists */
-/* TODO: Move to lists.css */
-.sidebar-panel .customize-group .extensions,
-link[href="chrome://global/content/elements/moz-fieldset.css"] ~ fieldset #inputs {
-	background: var(--gnome-card-background) !important;
-	border: 0 !important;
-	border-radius: var(--gnome-card-radius) !important;
-	box-shadow: var(--gnome-card-shadow);
-	margin-top: 12px !important;
 	padding: 0 !important;
 }
 

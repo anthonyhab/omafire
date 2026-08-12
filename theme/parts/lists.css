@@ -2,12 +2,9 @@
 
 @namespace xul "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 
-/* TODO: create list color vars */
 /* List container */
 #permission-popup-permission-list,
 richlistbox#items {
-	--in-content-item-selected: var(--gnome-accent-bg) !important;
-	--in-content-item-selected-text: #fff !important;
 	background: var(--gnome-card-background) !important;
 	border: 0 !important;
 	border-radius: var(--gnome-card-radius) !important;
@@ -46,4 +43,15 @@ richlistbox#items richlistitem:not(:last-child) {
 	richlistbox#items richlistitem[selected=true] button {
 		filter: invert() brightness(200%) !important;
 	}
+}
+
+/* Settings lists */
+.sidebar-panel .customize-group .extensions,
+link[href="chrome://global/content/elements/moz-fieldset.css"] ~ fieldset #inputs {
+	background: var(--gnome-card-background) !important;
+	border: 0 !important;
+	border-radius: var(--gnome-card-radius) !important;
+	box-shadow: var(--gnome-card-shadow);
+	margin-top: 12px !important;
+	padding: 0 !important;
 }

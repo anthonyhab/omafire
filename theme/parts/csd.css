@@ -5,7 +5,7 @@
 :root[customtitlebar] {
 	/* Headerbar top border corners rounded */
 	&[sizemode="normal"]:not([gtktiledwindow="true"]) #nav-bar {
-		border-radius: env(-moz-gtk-csd-titlebar-radius, 8px) env(-moz-gtk-csd-titlebar-radius, 8px) 0 0 !important;
+		border-radius: var(--omarchy-radius-container, 0px) var(--omarchy-radius-container, 0px) 0 0 !important;
 	}
 
 	/* Always show nav bar window buttons*/
