@@ -6,7 +6,9 @@ still needs a focused pass so future work does not restart the same audit.
 
 ## Design rules
 
-- Keep Firefox-GNOME as the compatibility foundation; add narrow overrides.
+- Keep the audited Firefox-GNOME/Adwaita compatibility foundation
+  (`theme/base-theme.css`) as the base layer; add narrow Omarchy overrides
+  on top rather than editing it into a second, competing design system.
 - Prefer flat surfaces, the shell's measured spacing scale, readable neutral
   foregrounds, monospace chrome typography, and sharp borders.
 - Use foreground washes for chrome hover/selected/pressed fills. Use the live
@@ -22,8 +24,9 @@ still needs a focused pass so future work does not restart the same audit.
 
 ## Current layers
 
-1. Firefox-GNOME remains the base theme.
-2. `userChrome.css` imports generated radius and GTK tokens, the GNOME base,
+1. `theme/base-theme.css` (audited Firefox-GNOME/Adwaita lineage) remains the
+   base theme.
+2. `userChrome.css` imports generated radius and GTK tokens, the base theme,
    maintained `omarchy-chrome.css`, the privileged-content bridge, and the
    geometry-safe state cues. Ignored `customChrome.css` remains the final
    user-owned override.
@@ -33,7 +36,8 @@ still needs a focused pass so future work does not restart the same audit.
 4. `scripts/generate-omarchy-radius.sh` generates optional live radius and
    border tokens from Hyprland, with legacy settings as fallback. It writes
    beside either the direct development entrypoint or the standard nested
-   `firefox-gnome-theme/` entrypoint.
+   `omarchy-chrome/` entrypoint (falls back to the pre-rebrand
+   `firefox-gnome-theme/` name for profiles set up before the rename).
 5. `omarchy-chrome.css` bridges Pywalfox/LWT variables into semantic Omarchy
    surfaces, foregrounds, fields, panels, hover, selection, and borders.
 6. The external `omarchy-firefox-test` harness runs a separate copy-on-write VM
@@ -41,14 +45,16 @@ still needs a focused pass so future work does not restart the same audit.
 
 ## Ownership boundaries
 
-- Maintained source includes the named Omarchy layers, Firefox-GNOME base,
-  audited icon assets, installers, and checks.
+- Maintained source includes the named Omarchy layers, the audited base theme,
+  icon assets, and checks.
 - `generated-gtk-colors.css` and `omarchy-radius.css` are generated profile
   state. `customChrome.css` and `customContent.css` are user-owned overrides.
-- `scripts/install.sh` copies maintained payload files without copying or
-  replacing those generated/user files, profile markers, agent artifacts, or
-  VCS metadata. Uninstall removes only the nested payload and exact import or
-  preference entries.
+- There is no runtime installer script; the end goal is a static AUR package
+  (`pkgname=omarchy-chrome`, a payload staged under `/usr/share/omarchy-chrome/`)
+  plus the manual `omarchy-chrome` checkout/symlink and `@import` steps
+  documented in `README.md`. A packaging hook must not write into a user's
+  profile directory, so profile wiring stays a one-time, user-run step
+  regardless of how the payload itself is distributed.
 - The favicon helper is a separate privileged installation. Its installer
   replaces only exact current or SHA-256-enumerated legacy payloads.
 
@@ -64,7 +70,8 @@ treated as fresh evidence for the current worktree.
 | URL bar layout | Done (base/focus states) | Flexible input, explicit control rhythm, identity/search spacing, and native breakout outline replaced by Hyprland border tokens. |
 | URL autocomplete | Done | Readable URLs/actions, flat panel, dynamic border, no shadow. |
 | Horizontal tabs | Done | Selected tab is an accent line/subtle surface rather than a full bright card; regular cells stay 200px, Split View owns two 100px grid children, and overflow keeps fixed bidirectional controls. |
-| Collapsed vertical tabs | Done | Icon rail, hidden close overlay, compact selected/hover states. |
+| Collapsed vertical tabs | Patched, unverified | Icon rail, hidden close overlay, compact selected/hover states. Rail geometry was rewritten to a fixed 32px cell/2px gap/3px inline-offset ladder (`--tab-collapsed-width` now 39px, replacing the ~46px width the `20260804T233321Z-1533055` and `20260805T161657Z-454309` evidence runs were captured against); needs a fresh VM pass rather than carrying forward the prior "Done" status. |
+| Tab groups | Patched, unverified | Palette mapping from Pywalfox's live primary/attention colours to Firefox's nine named group colours, a flattened editor swatch picker, drag-target cue, and container-identity color reuse. No VM screenshot pass yet. |
 | Vertical-tab onboarding | Patched | Palette tokens are supplied to Firefox's shadow-component inheritance path. |
 | Main menus/popups | Done (representative states) | Native content parts receive the border; shells stay transparent; shadows removed. |
 | Firefox View | Done (base states) | Scheme-paired surfaces and foregrounds, a contrast-corrected action accent, square geometry, flatter cards, thin scrollbars, and no light/dark Theme API misclassification. |
@@ -192,7 +199,13 @@ Evidence is retained under `~/.local/state/omarchy-firefox-test/runs/`.
   collapsed tab column. `spacing-star-final-2.png` and
   `vertical-rail-alignment-hover.png` provide the visual proof; a BiDi geometry
   probe measured the sidebar button at `x=7, width=32` over a 46px rail and the
-  final harness check passed over 4,999 scoped journal lines.
+  final harness check passed over 4,999 scoped journal lines. Superseded: the
+  `#nav-bar-customization-target` centering rule this run proved was later
+  removed from `omarchy-chrome.css` (a fixed collapsed-rail width no longer
+  matches the 46px this formula was tuned against, and the recalculation was
+  causing the whole navbar to snap sideways mid-animation whenever `expanded`
+  toggled) — see the "Collapsed vertical tabs" row above; this evidence is
+  historical only and does not describe the current worktree.
 - `20260804T235750Z-1858466`: high-zoom sidebar repair prompted by populated
   Passwords and synced-device screenshots. Firefox-GNOME's broad entry rule
   had overridden Megalist's nested readonly fields, producing overflowing
