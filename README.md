@@ -1,16 +1,14 @@
-<img src="icon.svg" alt="Firefox GNOME theme" width="128" align="left"/>
+<img src="icon.svg" alt="Omarchy Chrome" width="128" align="left"/>
 
-# Firefox GNOME theme
-
-[![GitHub](https://img.shields.io/github/license/rafaelmardojai/firefox-gnome-theme.svg)](https://github.com/rafaelmardojai/firefox-gnome-theme/blob/master/LICENSE)
-[![Donate](https://img.shields.io/badge/PayPal-Donate-gray.svg?style=flat&logo=paypal&colorA=0071bb&logoColor=fff)](https://paypal.me/RafaelMardojaiCM)
-[![Liberapay](https://img.shields.io/liberapay/receives/rafaelmardojai.svg?logo=liberapay)](https://liberapay.com/rafaelmardojai/donate)
+# Omarchy Chrome
 
 <br>
 
-**A GNOME theme for Firefox**
+**A Firefox chrome theme for Omarchy**
 
-This theme follows latest GNOME Adwaita style.
+Built on a Firefox-GNOME/Adwaita compatibility foundation (see
+`theme/base-theme.css`), with a maintained Omarchy layer on top for Pywalfox
+colors, Hyprland-owned window geometry, and Omarchy-specific chrome features.
 
 > [!WARNING]
 >
@@ -22,141 +20,44 @@ This theme follows latest GNOME Adwaita style.
 
 ![Screenshot of the theme](screenshot.png)
 
-## Omarchy overlay in this branch
+## Architecture
 
-This branch keeps Firefox GNOME as its compatibility base and adds a maintained
-Omarchy layer for Pywalfox colors, compact Hyprland-owned window chrome,
-horizontal and vertical tabs, privileged Firefox pages, and optional state
-cues. The overlay was validated against Firefox `153.0.3`; Firefox-internal
-selectors can change between releases.
-
-Install **this checkout**, rather than the upstream release archive or curl
-command documented below:
-
-```sh
-./scripts/install.sh -f "$HOME/.mozilla/firefox" -p "<profile-name>"
-```
+Firefox-GNOME/Adwaita is the audited compatibility foundation
+(`theme/base-theme.css`); the maintained Omarchy layer on top
+(`omarchy-chrome.css`, `omarchy-content.css`, `omarchy-features.css`) bridges
+Pywalfox colors, compact Hyprland-owned window chrome, horizontal and vertical
+tabs, tab groups, privileged Firefox pages, and optional state cues. The
+overlay was validated against Firefox `153.0.3`; Firefox-internal selectors
+can change between releases. See `docs/omarchy-firefox-design-map.md` for the
+full layer breakdown and audit history.
 
 A checkout already located directly at `<profile>/chrome` is the development
 layout and does not need to be copied. Pywalfox supplies the live palette. The
 optional [`scripts/generate-omarchy-radius.sh`](scripts/generate-omarchy-radius.sh)
 bridges Omarchy/Noctalia geometry. It writes beside the active direct or
-`firefox-gnome-theme/` entrypoint; `FIREFOX_PROFILE_DIR` selects a profile and
-`FIREFOX_THEME_DIR` is an explicit destination override.
-[`docs/favicon-contrast.md`](docs/favicon-contrast.md) documents the separately
-installed JavaScript favicon helper. The upstream
-installation sections below describe the base theme and do not install this
-overlay unless they are run from this branch's checkout.
-
-## Description
-
-This is a bunch of CSS code to make Firefox look closer to GNOME's native apps.
-
-### Getting in Touch
-
-Matrix room: [#firefox-gnome-theme:matrix.org](https://matrix.to/#/#firefox-gnome-theme:matrix.org)
+`omarchy-chrome/` nested entrypoint; `FIREFOX_PROFILE_DIR` selects a profile
+and `FIREFOX_THEME_DIR` is an explicit destination override.
+[`docs/favicon-contrast.md`](docs/favicon-contrast.md) documents the
+separately installed JavaScript favicon helper.
 
 ### Firefox versions support
 
-The `master` branch of this repo supports the current Firefox stable release `150`.
-
-Theme versions compatible with older Firefox releases are preserved as git tags.
-
-We also have the `beta` and `nightly` branches for fixes only applicable to the current Firefox beta and nightly versions.
+This repo tracks Firefox on its `main` branch only, most recently validated
+against Firefox `153.0.3` (see `docs/omarchy-firefox-design-map.md` for the
+full audit history). Firefox-internal selectors can change between releases,
+so older Firefox versions aren't separately maintained.
 
 # Installation
-
-The most friendly way to get this theme is using the **Add Water** app.
-
-<a href='https://flathub.org/apps/dev.qwery.AddWater'>
-    <img width='240' alt='Get it on Flathub' src='https://flathub.org/api/badge?locale=en'/>
-</a>
-
-## One command install with curl
-
-To install this theme, you can run this command, which uses *curl* to download a script that will also download the latest released version of the theme (not the master version) and run the **auto-install** script for you.
-
-> [!WARNING]
-> Always be careful when running scripts from the Internet.
-
-```sh
-curl -s -o- https://raw.githubusercontent.com/rafaelmardojai/firefox-gnome-theme/master/scripts/install-by-curl.sh | bash
-```
-
-## Installation scripts
-
-If you want to use other version of the theme than the stable one you can manually download the theme and run its install scripts.
-
-First you need to grab a fresh copy of the theme repository by cloning it with git.
-
-1. Clone this repo and enter folder:
-
- ```sh
- git clone https://github.com/rafaelmardojai/firefox-gnome-theme.git
- cd firefox-gnome-theme
- ```
-
-1. Checkout a git branch or tag if needed, otherwise use `master` and ignore this step.
-
- ```sh
- git checkout beta # Set beta branch
- git checkout v78.1 # Set v78.1 tag
- ```
-
-This theme provides two installation scripts in addition to the curled one.
-
-### Auto install script
-
-This script will look for Firefox profiles from various known locations (`~/.mozilla/firefox/`, Flatpak, Snap, etc) and install the theme in each one.
-
-You can execute it by running:
-
-```sh
-./scripts/auto-install.sh
-```
-
-### Manual install script
-
-This script will only install the theme into the profiles found in the default Firefox folder `~/.mozilla/firefox/`. The script accepts various flags to change its behavior.
-
-Here are some examples of how to use it:
-
-```sh
-./scripts/install.sh # Standard
-./scripts/install.sh -p pc8577yz.default-release # Only install in a profile named pc8577yz.default-release
-./scripts/install.sh -f ~/.var/app/org.mozilla.firefox/.mozilla/firefox # Flatpak
-./scripts/install.sh -f ~/snap/firefox/common/.mozilla/firefox #Snap
-```
-
-#### Script options
-
-- `-f <firefox_folder_path>` *optional*
-  - Set custom Firefox folder path, for example `~/.mozilla/icecat/`.
-  - Default: `~/.mozilla/firefox/`
-
-- `-p <profile_name>` *optional*
-  - Set custom profile name, for example `e0j6yb0p.default-nightly`.
-  - Default: All the profiles found in the firefox folder
-
-### Advanced notes
-
-<details>
-    <summary>Expand</summary>
-
-If you want to checkout the theme version tag matching you Firefox version you can run:
-
-```sh
-git checkout v$(firefox --version | cut -d ' ' -f 3 | cut -d '.' -f 1) # Using Firefox version
-```
-
-</details>
 
 ## Package managers
 
 ### Arch Linux
 
-1. Install the [AUR package](https://aur.archlinux.org/packages/firefox-gnome-theme) `firefox-gnome-theme`
-2. Follow the instructions at `cat /usr/share/doc/firefox-gnome-theme/INSTALL.md`
+Not published to the AUR yet for this fork — the end goal is an AUR package
+(a static payload staged under `/usr/share/<pkgname>/`, with profile wiring
+left to the one-time manual steps below, since a packaging hook cannot safely
+write into a user's home directory). Until that exists, use
+[Manual installation](#manual-installation).
 
 ## Manual installation
 
@@ -176,10 +77,11 @@ git checkout v$(firefox --version | cut -d ' ' -f 3 | cut -d '.' -f 1) # Using F
     cd chrome
     ```
 
-5. Clone this repo to a subdirectory:
+5. Get the theme files into an `omarchy-chrome` subdirectory here — clone
+   this repo, or copy/symlink a packaged install once one exists:
 
     ```sh
-    git clone https://github.com/rafaelmardojai/firefox-gnome-theme.git
+    git clone --branch main <this-repo-url> omarchy-chrome
     ```
 
 6. Create single-line user CSS files if non-existent or empty (at least one line is needed for `sed`):
@@ -192,22 +94,23 @@ git checkout v$(firefox --version | cut -d ' ' -f 3 | cut -d '.' -f 1) # Using F
 7. Import this theme at the beginning of the CSS files (all `@import`s must come before any existing `@namespace` declarations):
 
     ```sh
-    sed -i '1s/^/@import "firefox-gnome-theme\/userChrome.css";\n/' userChrome.css
-    sed -i '1s/^/@import "firefox-gnome-theme\/userContent.css";\n/' userContent.css
+    sed -i '1s/^/@import "omarchy-chrome\/userChrome.css";\n/' userChrome.css
+    sed -i '1s/^/@import "omarchy-chrome\/userContent.css";\n/' userContent.css
     ```
 
-8. Symlink preferences file:
-
-    ```sh
-    cd .. # Go back to the profile directory
-    ln -fs chrome/firefox-gnome-theme/configuration/user.js user.js
-    ```
+8. Set the required preferences listed under
+   [Required Firefox preferences](#required-firefox-preferences) below via
+   `about:config`. (`configuration/user.js` also lists every optional
+   preference this theme reads, if you'd rather set them by copying
+   `user_pref(...)` lines into your own `user.js` than through the UI —
+   don't symlink or overwrite your whole `user.js`, since that discards any
+   preferences you already had.)
 
 9. Restart Firefox.
 
 10. Open Firefox customization panel and move the new tab button to headerbar.
 
-11. Be happy with your new gnomish Firefox.
+11. Be happy with your new Firefox.
 
 </details>
 
@@ -229,16 +132,18 @@ You should already have this file installed if you followed one of the installat
 
 ## Updating
 
-You can follow the installation script steps again to update the theme.
+Update the `omarchy-chrome` subdirectory in place (`git pull` for a
+checkout, or replace it with a newer packaged install) and restart Firefox.
+No other step needs to be repeated.
 
 ## Uninstalling
 
 1. Open the profile directory from `about:support` → **Application Basics** →
    **Profile Directory**.
-2. Remove only `chrome/firefox-gnome-theme`. Do **not** remove the whole
+2. Remove only `chrome/omarchy-chrome`. Do **not** remove the whole
    `chrome` directory; it can contain unrelated user styles and scripts.
-3. Remove the exact `@import "firefox-gnome-theme/userChrome.css";` and
-   `@import "firefox-gnome-theme/userContent.css";` lines from the profile's
+3. Remove the exact `@import "omarchy-chrome/userChrome.css";` and
+   `@import "omarchy-chrome/userContent.css";` lines from the profile's
    `chrome/userChrome.css` and `chrome/userContent.css` files.
 4. Remove only this theme's preference keys from the profile `user.js`; the
    owned key list is in `configuration/user.js`. Preserve every unrelated
@@ -260,83 +165,83 @@ Optional features can be enabled by creating new `boolean` preferences in `about
 
 ### Features
 
-- **Hide single tab** `gnomeTheme.hideSingleTab`
+- **Hide single tab** `omarchyTheme.hideSingleTab`
 
  Hide the tab bar when only one tab is open.
 
  > **Note:** You should move the new tab button out of the tabbar or it will be hidden when there is only one tab. You can rearrange the toolbars doing a right-click on any toolbar and selecting "Customize Toolbar…".
 
-- **Normal width tabs** `gnomeTheme.normalWidthTabs`
+- **Normal width tabs** `omarchyTheme.normalWidthTabs`
 
  Use normal width tabs as default Firefox.
 
-- **Swap tab close button position** `gnomeTheme.swapTabClose`
+- **Swap tab close button position** `omarchyTheme.swapTabClose`
 
  By default the tab close buttons follows the position of the window controls, this preference reverts that behavior.
 
-- **Bookmarks toolbar under tabs** `gnomeTheme.bookmarksToolbarUnderTabs`
+- **Bookmarks toolbar under tabs** `omarchyTheme.bookmarksToolbarUnderTabs`
 
  Move Bookmarks toolbar under tabs.
 
-- **Active tab contrast** `gnomeTheme.activeTabContrast`
+- **Active tab contrast** `omarchyTheme.activeTabContrast`
 
  Add more contrast to the active tab.
 
-- **Close only selected tabs** `gnomeTheme.closeOnlySelectedTabs`
+- **Close only selected tabs** `omarchyTheme.closeOnlySelectedTabs`
 
  Show the close button on the selected tab only.
 
-- **System icons** `gnomeTheme.systemIcons`
+- **System icons** `omarchyTheme.systemIcons`
 
  Use system theme icons instead of Adwaita icons included by theme.
 
  > **Note:** This feature has a [known color bug](#icons-color-broken-with-system-icons).
 
-- **No themed Icons** `gnomeTheme.noThemedIcons`
+- **No themed Icons** `omarchyTheme.noThemedIcons`
 
  Use default Firefox icons instead of the included icons.
 
-- **Symbolic tab icons** `gnomeTheme.symbolicTabIcons`
+- **Symbolic tab icons** `omarchyTheme.symbolicTabIcons`
 
  Make all tab icons look kinda like symbolic icons.
 
-- **Hide WebRTC indicator** `gnomeTheme.hideWebrtcIndicator`
+- **Hide WebRTC indicator** `omarchyTheme.hideWebrtcIndicator`
 
  Hide redundant WebRTC indicator since GNOME provides their own privacy icons in the top right.
 
-- **Hide unified extensions button** `gnomeTheme.hideUnifiedExtensions`
+- **Hide unified extensions button** `omarchyTheme.hideUnifiedExtensions`
 
  Hide unified extensions button from the navbar, you can also use `extensions.unifiedExtensions.enabled` instead, which is only going to work till Firefox 111.
 
-- **Drag window from headerbar buttons** `gnomeTheme.dragWindowHeaderbarButtons`
+- **Drag window from headerbar buttons** `omarchyTheme.dragWindowHeaderbarButtons`
 
  Allow dragging the window from headerbar buttons.
 
  > **Note:** This feature is BUGGED. It can activate the button with unpleasant behavior.
 
-- **Tabs as headerbar** `gnomeTheme.tabsAsHeaderbar`
+- **Tabs as headerbar** `omarchyTheme.tabsAsHeaderbar`
 
  Place the tabs on the top of the window, and use the tabs bar to hold the window controls, like Firefox's standard tab bar.
 
- > **Note:** Enabling with `gnomeTheme.hideSingleTab` will replace the single tab with a title bar.
+ > **Note:** Enabling with `omarchyTheme.hideSingleTab` will replace the single tab with a title bar.
 
-- **OLED black theme** `gnomeTheme.oledBlack`
+- **OLED black theme** `omarchyTheme.oledBlack`
 
  Change the dark theme into the black variant.
 
-- **Show "List All Tabs" button on overflow** `gnomeTheme.allTabsButtonOnOverflow`
+- **Show "List All Tabs" button on overflow** `omarchyTheme.allTabsButtonOnOverflow`
 
  Show the `List All Tabs` button when the tabs bar is overflowing (when you have too many tabs that the width of the tabs no longer shrinks when new tabs are added).
 
-- **Show "List All Tabs" button** `gnomeTheme.allTabsButton`
+- **Show "List All Tabs" button** `omarchyTheme.allTabsButton`
 
  Show the `List All Tabs` button all the time, like stock Firefox.
 
-- **Align tab title and icon to left** `gnomeTheme.tabAlignLeft`
+- **Align tab title and icon to left** `omarchyTheme.tabAlignLeft`
 
  Align the tab title and favicon to left of tab in place of center.
 
-- **Bookmarks bar in fullscreen** `gnomeTheme.bookmarksOnFullscreen`
+- **Bookmarks bar in fullscreen** `omarchyTheme.bookmarksOnFullscreen`
 
   Show the bookmarks bar while in fullscreen.
 
@@ -347,7 +252,7 @@ We also have optional features to enable support for some Firefox extensions.
 > [!WARNING]
 > Note that extension support is maintained by the community, so requests to support new extensions are not allowed, and the included extensions may be broken until someone shows up to fix them.
 
-- **Adaptive Tab Bar Colour support** `gnomeTheme.extensions.adaptiveTabBarColour`
+- **Adaptive Tab Bar Colour support** `omarchyTheme.extensions.adaptiveTabBarColour`
 
  > **Note:** Adaptive Tab Bar Colour presently hard-codes the colours for the home page (both normal as well as private windows). When navigating from the home page to any other page, the colour of the UI might momentarily switch to the original firefox home page colour before switching back to the expected colour (this is especially noticeable in private windows). This only happens when navigating from the homepage to another page, subsequent navigations should be unaffected.
 
@@ -372,7 +277,7 @@ See upstream [bug](https://bugzilla.mozilla.org/show_bug.cgi?id=1408360).
 
 ### Icons color broken with System icons
 
-Icons might appear black where they should be white on some systems. I have no idea why, but you can adjust them directly in the `system-icons.css` file, look for `--gnome-icons-hack-filter` & `--gnome-window-icons-hack-filter` vars and play with css filters.
+Icons might appear black where they should be white on some systems. I have no idea why, but you can adjust them directly in the `system-icons.css` file, look for `--omarchy-base-icons-hack-filter` & `--omarchy-base-window-icons-hack-filter` vars and play with css filters.
 
 ## Development
 
@@ -401,8 +306,15 @@ any specific license on your code.
 
 ## Credits
 
-Developed by **[Rafael Mardojai CM](https://github.com/rafaelmardojai)** and [contributors](https://github.com/rafaelmardojai/firefox-gnome-theme/graphs/contributors). Based on **[Luna Kurame](https://github.com/lunakurame/firefox-gnome-theme)**'s original work.
+This fork is based on **[Rafael Mardojai CM](https://github.com/rafaelmardojai)**'s
+[firefox-gnome-theme](https://github.com/rafaelmardojai/firefox-gnome-theme)
+and [contributors](https://github.com/rafaelmardojai/firefox-gnome-theme/graphs/contributors),
+itself based on **[Luna Kurame](https://github.com/lunakurame/firefox-gnome-theme)**'s
+original work.
 
 ## Donate
 
-If you want to support development, consider donating via [PayPal](https://paypal.me/RafaelMardojaiCM). Also consider donating upstream, [Firefox](https://donate.mozilla.org/) & [GNOME](https://www.gnome.org/donate/).
+This fork doesn't have its own donation link. Consider supporting the
+upstream project it's based on via [PayPal](https://paypal.me/RafaelMardojaiCM)
+or [Liberapay](https://liberapay.com/rafaelmardojai/donate), or
+[Firefox](https://donate.mozilla.org/) directly.

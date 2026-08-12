@@ -176,8 +176,13 @@ if theme_override:
 elif (profile_chrome_dir / "omarchy-chrome.css").is_file():
     # Profile-local development checkout (the repository itself is chrome/).
     chrome_dir = profile_chrome_dir
+elif (profile_chrome_dir / "omarchy-chrome" / "omarchy-chrome.css").is_file():
+    # Standard documented layout: an omarchy-chrome/ checkout or symlink
+    # nested inside the profile's chrome/ directory (see README.md).
+    chrome_dir = profile_chrome_dir / "omarchy-chrome"
 elif (profile_chrome_dir / "firefox-gnome-theme" / "omarchy-chrome.css").is_file():
-    # Standard scripts/install.sh layout.
+    # Pre-rebrand nested folder name, kept for backward compatibility with
+    # profiles set up before the omarchy-chrome/ rename.
     chrome_dir = profile_chrome_dir / "firefox-gnome-theme"
 else:
     # Keep the historical profile-root fallback for pre-install generation.

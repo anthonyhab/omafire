@@ -17,10 +17,10 @@ jobs:
           RELEASE: ${{ github.event.release.tag_name }}
         run: ./scripts/generate-pkgbuild.sh
 
-      - name: Publish firefox-gnome-theme to the AUR
+      - name: Publish omarchy-chrome to the AUR
         uses: KSXGitHub/github-actions-deploy-aur@v4.1.1
         with:
-          pkgname: firefox-gnome-theme
+          pkgname: omarchy-chrome
           pkgbuild: ./PKGBUILD
           commit_username: ${{ secrets.AUR_USERNAME }}
           commit_email: ${{ secrets.AUR_EMAIL }}

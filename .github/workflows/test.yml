@@ -31,11 +31,12 @@ jobs:
       - name: Run branch-local static checks
         run: ./scripts/check-omarchy.sh
 
-      - name: Install this checkout into a fresh profile
+      - name: Wire a fresh profile the same way a packaged install is documented
         env:
           FIREFOX_HOME: ${{ runner.temp }}/firefox
+          THEME_DIR: ${{ runner.temp }}/theme-install
         run: |
-          mkdir -p "$FIREFOX_HOME/test.default"
+          mkdir -p "$FIREFOX_HOME/test.default/chrome" "$THEME_DIR"
           cat > "$FIREFOX_HOME/profiles.ini" <<'EOF'
           [Profile0]
           Name=test
@@ -43,9 +44,22 @@ jobs:
           Path=test.default
           Default=1
           EOF
-          ./scripts/install.sh -f "$FIREFOX_HOME" -p test.default
-          test -f "$FIREFOX_HOME/test.default/chrome/firefox-gnome-theme/omarchy-chrome.css"
-          grep -Fq 'firefox-gnome-theme/userChrome.css' \
+
+          # Stand in for a static package payload staged outside the checkout
+          # (e.g. an AUR package's /usr/share/<pkgname>), then wire it in
+          # exactly as README.md documents: symlink it into the profile's
+          # chrome directory and add the two @import lines by hand.
+          git ls-files -z | xargs -0 cp --parents -t "$THEME_DIR"
+          ln -s "$THEME_DIR" "$FIREFOX_HOME/test.default/chrome/omarchy-chrome"
+          printf '%s\n' '@import "omarchy-chrome/userChrome.css";' \
+            > "$FIREFOX_HOME/test.default/chrome/userChrome.css"
+          printf '%s\n' '@import "omarchy-chrome/userContent.css";' \
+            > "$FIREFOX_HOME/test.default/chrome/userContent.css"
+          grep 'user_pref' "$THEME_DIR/configuration/user.js" \
+            > "$FIREFOX_HOME/test.default/user.js"
+
+          test -f "$FIREFOX_HOME/test.default/chrome/omarchy-chrome/omarchy-chrome.css"
+          grep -Fq 'omarchy-chrome/userChrome.css' \
             "$FIREFOX_HOME/test.default/chrome/userChrome.css"
 
       - name: Start Firefox from the fresh profile
