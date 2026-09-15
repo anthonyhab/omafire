@@ -5,6 +5,7 @@ set -euo pipefail
 TEST_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 PROJECT_DIR=$(dirname "$TEST_DIR")
 TEST_ROOT=$(mktemp -d)
+OMAFOX_BIN=${OMAFOX_BIN:-$(dirname "$TEST_DIR")/build/omafox}
 TEST_HOME="$TEST_ROOT/home"
 MOCK_BIN="$TEST_ROOT/bin"
 THEME_DIR="$TEST_ROOT/theme"
@@ -98,12 +99,12 @@ grep -Fq -- '--zen-toolbar-element-bg-hover:' "$ZEN_BRIDGE_SOURCE"
 grep -Fq -- '--zen-primary-color:' "$ZEN_BRIDGE_SOURCE"
 
 # Unrelated profile customizations alone are not an incomplete Omafox setup.
-initial_status=$("$PROJECT_DIR/omarchy/omafox" status)
+initial_status=$("$OMAFOX_BIN" status)
 [[ $initial_status == *"Zen profile: $RELATIVE_PROFILE (not configured)"* ]]
 [[ $initial_status == *"Zen profile: $ABSOLUTE_PROFILE (not configured)"* ]]
 [[ $initial_status == *"Zen profile: $MISSING_PROFILE (missing)"* ]]
 
-setup_output=$("$PROJECT_DIR/omarchy/omafox" setup 2>&1)
+setup_output=$("$OMAFOX_BIN" setup 2>&1)
 [[ $(grep -Fc "Configured Zen profile: $RELATIVE_PROFILE" <<< "$setup_output") == 1 ]]
 [[ $(grep -Fc "Configured Zen profile: $ABSOLUTE_PROFILE" <<< "$setup_output") == 1 ]]
 [[ $setup_output == *"Skipped missing Zen profile: $MISSING_PROFILE"* ]]
@@ -131,25 +132,25 @@ grep -Fqx '@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.
   "$RELATIVE_PROFILE/chrome/userChrome.css"
 grep -Fqx 'user_pref("example.existing", true);' "$RELATIVE_PROFILE/user.js"
 
-configured_status=$("$PROJECT_DIR/omarchy/omafox" status)
+configured_status=$("$OMAFOX_BIN" status)
 [[ $configured_status == *"Zen profile: $RELATIVE_PROFILE (configured)"* ]]
 [[ $configured_status == *"Zen profile: $ABSOLUTE_PROFILE (configured)"* ]]
 
 # Setup is idempotent and refreshes a stale packaged bridge.
-"$PROJECT_DIR/omarchy/omafox" setup >/dev/null 2>&1
+"$OMAFOX_BIN" setup >/dev/null 2>&1
 [[ $(grep -Fxc "$CSS_BEGIN" "$RELATIVE_PROFILE/chrome/userChrome.css") == 1 ]]
 [[ $(grep -Fxc "$PREFS_BEGIN" "$RELATIVE_PROFILE/user.js") == 1 ]]
 printf '%s\n' '/* package update */' >> "$ZEN_BRIDGE_SOURCE"
-outdated_status=$("$PROJECT_DIR/omarchy/omafox" status)
+outdated_status=$("$OMAFOX_BIN" status)
 [[ $outdated_status == *"Zen profile: $RELATIVE_PROFILE (outdated)"* ]]
-"$PROJECT_DIR/omarchy/omafox" setup >/dev/null 2>&1
+"$OMAFOX_BIN" setup >/dev/null 2>&1
 cmp "$ZEN_BRIDGE_SOURCE" "$RELATIVE_PROFILE/chrome/omafox.css"
 
 # Removal preflights every profile and refuses to delete an unowned collision.
 printf '%s\n' '/* existing user file */' > "$ABSOLUTE_PROFILE/chrome/omafox.css"
-conflict_status=$("$PROJECT_DIR/omarchy/omafox" status)
+conflict_status=$("$OMAFOX_BIN" status)
 [[ $conflict_status == *"Zen profile: $ABSOLUTE_PROFILE (conflict)"* ]]
-if remove_error=$("$PROJECT_DIR/omarchy/omafox" remove 2>&1); then
+if remove_error=$("$OMAFOX_BIN" remove 2>&1); then
   echo "remove with an unmanaged Zen bridge unexpectedly succeeded" >&2
   exit 1
 fi
@@ -159,7 +160,7 @@ grep -Fqx "$PREFS_BEGIN" "$RELATIVE_PROFILE/user.js"
 grep -Fqx '/* existing user file */' "$ABSOLUTE_PROFILE/chrome/omafox.css"
 install -m 600 "$ZEN_BRIDGE_SOURCE" "$ABSOLUTE_PROFILE/chrome/omafox.css"
 
-"$PROJECT_DIR/omarchy/omafox" remove >/dev/null
+"$OMAFOX_BIN" remove >/dev/null
 for profile in "$RELATIVE_PROFILE" "$ABSOLUTE_PROFILE"; do
   [[ ! -e $profile/chrome/omafox.css ]]
   if [[ -f $profile/chrome/userChrome.css ]]; then
@@ -176,7 +177,7 @@ cmp "$TEST_ROOT/original-user.js" "$RELATIVE_PROFILE/user.js"
 
 # Setup also refuses an unowned collision before changing any other profile.
 printf '%s\n' '/* existing user file */' > "$ABSOLUTE_PROFILE/chrome/omafox.css"
-if collision_error=$("$PROJECT_DIR/omarchy/omafox" setup 2>&1); then
+if collision_error=$("$OMAFOX_BIN" setup 2>&1); then
   echo "setup with an unmanaged Zen bridge unexpectedly succeeded" >&2
   exit 1
 fi
@@ -188,7 +189,7 @@ rm -f "$ABSOLUTE_PROFILE/chrome/omafox.css"
 
 # A malformed managed block aborts before any detected profile is changed.
 printf '%s\n' "$PREFS_BEGIN" > "$ABSOLUTE_PROFILE/user.js"
-if malformed_error=$("$PROJECT_DIR/omarchy/omafox" setup 2>&1); then
+if malformed_error=$("$OMAFOX_BIN" setup 2>&1); then
   echo "setup with malformed Zen markers unexpectedly succeeded" >&2
   exit 1
 fi

@@ -1,0 +1,21 @@
+/* OMAFOX FIREFOX BRIDGE MANAGED FILE */
+/* Generated Omarchy geometry; safe fallbacks live in the maintained layer. */
+@import "omarchy-radius.css";
+
+/* Compatibility foundation, audited from Firefox-GNOME upstream. */
+@import "theme/base-theme.css";
+
+/* Cold-start palette ownership: the built-in firefox-compact-dark theme
+ * (pinned in the profile user.js) paints the first frame dark from Firefox's
+ * own startup data, and pywalfox re-tints live once the browser is up;
+ * customChrome.css holds the no-lwtheme degradation net. The old GTK-derived
+ * generated-gtk-colors.css layer was retired — a third color source only
+ * fought the live Pywalfox theme. */
+
+/* Maintained Omarchy chrome, privileged-content, and state layers. */
+@import "omarchy-chrome.css";
+@import "omarchy-content.css";
+@import "omarchy-features.css";
+
+/* User overrides stay last and are never maintained by this repository. */
+@import "customChrome.css"; /**/

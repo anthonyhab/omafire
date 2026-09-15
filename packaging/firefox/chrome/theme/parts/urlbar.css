@@ -1,0 +1,289 @@
+/* Header bar's URL bar */
+
+@namespace xul "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+
+:root {
+	--urlbarView-item-inline-padding: 6px !important;
+	--urlbarView-item-block-padding: 4px !important;
+}
+
+#urlbar {
+	--urlbar-height: 34.00px;
+	--urlbar-toolbar-height: 34.00px !important;
+}
+
+#urlbar-container {
+	--urlbar-container-height: 34px !important;
+
+	@media (max-width: 630px) {
+		width: auto !important;
+	}
+}
+
+/* Center the URL bar */
+toolbarspring {
+	max-width: 10000px !important;
+}
+
+/* URL bar */
+#urlbar {
+	box-shadow: none !important;
+	&[breakout] {
+		width: calc(var(--urlbar-width) - var(--omarchy-base-toolbar-spacing)) !important;
+	}
+
+	.urlbar-background {
+		border: 0 !important;
+		border-radius: var(--omarchy-base-entry-radius) !important;
+		outline: 0 !important;
+	}
+	
+	.urlbar-input-container {
+		padding: 0 !important;
+	}
+}
+
+.urlbar-input::placeholder, .searchbar-textbox::placeholder {
+	opacity: 0.85 !important;
+}
+
+/* Firefox 155 renders the engine switcher as a moz-button. Its face lives in
+ * shadow DOM and reads --button-* tokens from the host, so flatten through
+ * them instead of painting the host box. */
+.searchmode-switcher {
+	--button-border: none !important;
+	--button-background-color: transparent !important;
+	--button-background-color-hover: var(--omarchy-base-hover-color) !important;
+	--button-background-color-active: var(--omarchy-base-active-color) !important;
+	--button-background-color-selected: var(--omarchy-base-selected-color) !important;
+	border-radius: var(--omarchy-base-button-radius) !important;
+
+	&::part(button) {
+		border-radius: var(--omarchy-base-button-radius) !important;
+	}
+
+	#urlbar[searchmode] & {
+		--button-background-color: var(--omarchy-base-selected-color) !important;
+		--button-background-color-hover: var(--omarchy-base-selected-hover-color) !important;
+		--button-background-color-active: var(--omarchy-base-selected-active-color) !important;
+	}
+}
+.searchmode-switcher-title {
+	color: var(--omarchy-base-window-color);
+	font-weight: bold;
+}
+.searchmode-switcher-close {
+	background-size: 16px !important;
+	border-radius: 50% !important;
+	height: 24px !important;
+	margin: 0 !important;
+	width: 24px !important;
+}
+
+/* URL bar results */
+.urlbarView {
+	background: transparent !important;
+	color: var(--omarchy-base-window-color) !important;
+	margin: 12px 0 0 0 !important;
+    box-shadow: var(--omarchy-base-menu-shadow) !important;
+    border-radius: var(--omarchy-base-popover-radius) !important;
+	width: 100% !important;
+}
+
+.urlbarView-body-outer {
+    background: var(--omarchy-base-menu-background) !important;
+	overflow-x: auto;
+	padding: var(--omarchy-base-menu-padding) calc(var(--omarchy-base-menu-padding) + 2px) !important;
+}
+
+.urlbarView-body-inner {
+	border: 0 !important;
+}
+
+.urlbarView-results {
+	padding: 0 !important;
+}
+
+.urlbarView-row {
+	&[selected] {
+		background: var(--omarchy-base-selected-color) !important;
+		color: var(--omarchy-base-window-color) !important;
+		
+		&:hover {
+			background: var(--omarchy-base-selected-hover-color) !important;
+		}
+	}
+
+	&:not([selected]) {
+		&:hover {
+			background: var(--omarchy-base-hover-color) !important;
+		}
+			&:active {
+			background: var(--omarchy-base-active-color) !important;
+		}
+	}
+
+	.urlbarView-row-inner {
+		border-radius: var(--omarchy-base-button-radius) !important;
+	}
+
+	.urlbarView-row-inner, .urlbarView-no-wrap  {
+		align-items: center !important;
+	}
+	
+	.urlbarView-url {
+		color: var(--omarchy-base-accent) !important;
+	}
+	
+	&[label]::before {
+		color: var(--omarchy-base-window-color) !important;
+		font: menu !important;
+		font-weight: bold !important;
+	}
+}
+
+.urlbarView-action {
+	.urlbarView-row[has-action]:is([type="switchtab"], [type="remotetab"], [type="clipboard"]) & {
+		align-items: center;
+		background-color: var(--omarchy-base-trough-background) !important;
+		border-radius: var(--omarchy-base-button-radius) !important;
+		border: 0 !important;
+		color: var(--omarchy-base-menu-color);
+		display: flex;
+		height: 28px !important;
+		padding: 0 12px !important;
+
+		&.urlbarView-switchToTab {
+			padding-inline-start: calc(12px + 8px + 2px) !important;
+		}
+		
+		/* Copied from original sheet */
+		.urlbarView-row[has-url]:is([type=remotetab], [sponsored]):is([selected], :hover) > .urlbarView-row-inner > .urlbarView-no-wrap > &,
+		.urlbarView-row:is([type=search], [restyled-search]):not([selected], [show-action-text], :hover) &,
+		.urlbarView[action-override] .urlbarView-row[type=switchtab] > .urlbarView-row-inner > .urlbarView-no-wrap > & {
+			padding: 0 !important;
+		}
+	}	
+}
+
+/* Search engines buttons */	
+.search-one-offs {
+	padding: 8px !important;
+	background: var(--omarchy-base-menu-background) !important;
+	border-top: 1px solid var(--omarchy-base-menu-separator-color) !important;
+	border-radius: 0 0 8px 8px !important;
+}
+
+.search-one-offs[is_searchbar="true"] {
+	margin-bottom: -8px !important;
+}
+
+/* Search bar result */
+#PopupSearchAutoComplete {
+  margin-top: 7px !important;
+}
+
+/* URL bar and Search bar */
+/* Firefox compensates a thicker focused border by pulling the input container
+ * out 1px. Our frame keeps a constant 1px ring, so that negative margin would
+ * just shift the text and controls — pin it in place. */
+#urlbar[focused] .urlbar-input-container {
+	margin: 0 !important;
+}
+#searchbar > .searchbar-textbox[focused] .searchbar-search-button {
+	margin-left: -1px !important;
+}
+#searchbar > .searchbar-textbox[focused] .search-go-button {
+	margin-right: -1px !important;
+}
+
+/* URL bar and Search bar's icons */
+.urlbar-icon:hover,
+.urlbar-icon[open],
+.urlbar-icon:hover:active,
+.searchbar-search-button:hover .searchbar-search-icon,
+.searchbar-search-button[open] .searchbar-search-icon,
+.searchbar-search-button:hover:active .searchbar-search-icon {
+	background-color: transparent !important;
+	fill-opacity: 1 !important;
+}
+
+/* Firefox 155 urlbar icons are html:img in fixed-size cells; height:100%
+ * stretched them to the full 36px field. Let them keep native icon size. */
+#urlbar .urlbar-icon {
+	margin: 0 !important;
+	height: auto !important;
+	max-height: var(--urlbar-basic-component-size, 28px) !important;
+	object-fit: contain !important;
+}
+#notification-popup-box {
+	height: 100%  !important;
+}
+
+@media -moz-pref("browser.urlbar.richSuggestions.featureGate") {
+	#urlbar:not(.searchButton) > .urlbar-input-container > #identity-box[pageproxystate="invalid"] > .identity-box-button {
+		margin-inline-start: 2px;
+	}
+}
+
+/* Search mode indicator */
+#urlbar-search-mode-indicator,
+#urlbar-label-box,
+#urlbar-zoom-button {
+	background: var(--omarchy-base-button-background) !important;
+	border: 0 !important;
+	border-radius: var(--omarchy-base-button-radius) !important;
+	outline: 0 !important;
+	margin: 4px 0;
+}
+#urlbar-search-mode-indicator {
+	padding-right: 0 !important;
+}
+#urlbar-search-mode-indicator-title {
+	color: var(--omarchy-base-window-color);
+	padding-inline: 4px !important;
+}
+#urlbar-search-mode-indicator-close {
+	background-size: 16px !important;
+	background-position: center;
+	border-radius: var(--omarchy-base-button-radius) !important;
+	padding: 5px !important;
+}
+#urlbar-search-mode-indicator-close:hover {
+	background-color: var(--omarchy-base-button-hover-background) !important;
+}
+#urlbar-zoom-button {
+	opacity: 0.8;
+}
+#urlbar-zoom-button:hover {
+	opacity: 1;
+}
+
+/* Firefox identity box */
+#identity-box[pageproxystate="valid"].notSecureText > .identity-box-button,
+#identity-box[pageproxystate="valid"].chromeUI > .identity-box-button,
+#identity-box[pageproxystate="valid"].extensionPage > .identity-box-button,
+#urlbar-label-box {
+	background-color: transparent !important;
+}
+
+#identity-box[pageproxystate="valid"].notSecureText > .identity-box-button:hover:not([open]),
+#identity-box[pageproxystate="valid"].chromeUI > .identity-box-button:hover:not([open]),
+#identity-box[pageproxystate="valid"].extensionPage > .identity-box-button:hover:not([open]) {
+	background-color: hsla(0,0%,70%,.2) !important;
+}
+
+#identity-box[pageproxystate="valid"].notSecureText > .identity-box-button:hover:active,
+#identity-box[pageproxystate="valid"].notSecureText > .identity-box-button[open=true],
+#identity-box[pageproxystate="valid"].chromeUI > .identity-box-button:hover:active,
+#identity-box[pageproxystate="valid"].chromeUI > .identity-box-button[open=true],
+#identity-box[pageproxystate="valid"].extensionPage > .identity-box-button:hover:active,
+#identity-box[pageproxystate="valid"].extensionPage > .identity-box-button[open=true] {
+	background-color: hsla(0,0%,70%,.3) !important;
+}
+
+@media -moz-pref("browser.urlbar.richSuggestions.featureGate") {
+	#identity-box[pageproxystate="invalid"] > .identity-box-button {
+		padding-inline:  var(--urlbar-icon-padding) !important;
+	}
+}

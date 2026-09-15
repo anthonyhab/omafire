@@ -38,6 +38,7 @@ make -C "$PROJECT_DIR" \
 [[ -f $SYSTEM_MANIFEST ]]
 [[ -x $SYSTEM_HOOK_SOURCE ]]
 [[ -f $SYSTEM_ZEN_BRIDGE ]]
+[[ -f "$PACKAGE_ROOT/usr/share/omafox/firefox/chrome/userChrome.css" ]]
 [[ -f "$PACKAGE_ROOT/usr/share/doc/omafox/README.md" ]]
 [[ -f "$PACKAGE_ROOT/usr/share/licenses/omafox/LICENSE" ]]
 [[ $($SYSTEM_COMMAND version) == 1.1.0 ]]

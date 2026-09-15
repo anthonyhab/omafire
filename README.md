@@ -3,6 +3,16 @@
 Omafox keeps Firefox and Zen Browser in sync with your current
 [Omarchy](https://omarchy.org/) theme.
 
+> **This fork** ports the command-line tool from bash to C (one small binary,
+> no shell startup on every theme change), adds a managed **Firefox
+> `chrome/` bridge** that installs a full userChrome theme payload, and
+> regenerates a palette-accurate first-paint stylesheet
+> (`chrome/omafox-palette.css`) on every sync so Firefox's cold-start frame
+> already matches the live theme — closing the window where a light default
+> theme or an approximate fallback could flash before the extension applies.
+> The native messaging host, wire protocol, and signed `@omafox` WebExtension
+> are unchanged and compatible with upstream.
+
 ## Features
 
 - Automatically updates supported browsers whenever you change your Omarchy
@@ -52,9 +62,12 @@ Setup registers the Omarchy theme-change hook and immediately sends your
 current palette to every connected browser. If Zen has been launched at least
 once, setup also detects the profiles in `~/.config/zen/profiles.ini`,
 installs the Omafox CSS bridge into each existing profile, and enables the two
-Zen preferences it needs. Restart Zen once after setup. Run setup once for
-each desktop user who wants to use Omafox, and rerun it after creating a new
-Zen profile.
+Zen preferences it needs. Firefox profiles in `~/.mozilla/firefox/profiles.ini`
+receive the packaged `omarchy-firefox` theme payload, managed
+`userChrome.css`/`userContent.css` imports, the palette-synced first-paint
+stylesheet, and the required `user.js` preferences. Restart each browser once
+after setup. Run setup once for each desktop user who wants to use Omafox, and
+rerun it after creating a new browser profile.
 
 ## Usage
 
@@ -99,16 +112,28 @@ Omafox is made up of a few small parts:
   adds the required preferences to a managed block in `user.js`. Existing
   profile customizations outside those marked blocks are preserved. Setup
   refuses to overwrite an unrelated `chrome/omafox.css` file.
+- For Firefox profiles, `omafox setup` installs the packaged theme payload to
+  `chrome/omarchy-firefox/`, adds managed imports to `chrome/userChrome.css`
+  and `chrome/userContent.css`, and adds the required preferences to a
+  managed block in `user.js`. On every `omafox sync` it also regenerates
+  `chrome/omafox-palette.css`, a `:root:not([lwtheme])` fallback holding the
+  *current* palette, plus the mode-matched
+  `layout.css.prefers-color-scheme.content-override` and
+  `browser.display` canvas prefs — so the first painted frame, restored
+  pages, and pages with native dark-mode CSS all start on the real palette
+  instead of an approximation. The fallback self-disables the moment the
+  extension's theme lands. Setup refuses to overwrite an unrelated
+  `chrome/omarchy-firefox/` directory.
 
 The flow is:
 
 ```text
 Omarchy theme change
         ↓
-Theme hook → local state file → native messaging host → browser extension
-                                                        ↓
-                                           Firefox theme properties
-                                                        ↓
+Theme hook (C binary) → local state file → native messaging host → browser extension
+        ↓                                                          ↓
+  generated palette CSS →                     Firefox theme properties
+  Firefox profile first paint                          ↓
                                        Firefox UI or Zen CSS bridge
 ```
 

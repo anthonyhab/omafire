@@ -1,0 +1,4 @@
+<!-- Original Omarchy geometric pass/keyhole glyph. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="context-fill" fill-opacity="context-fill-opacity">
+  <path fill-rule="evenodd" d="M12 1 22 6.75v10.5L12 23 2 17.25V6.75L12 1Zm0 6.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5Zm-1.25 6h2.5V18h-2.5v-4.5Z"/>
+</svg>
