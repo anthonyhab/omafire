@@ -149,6 +149,42 @@ function waitFor(predicate, message) {
       '{"debug":true,"chrome-gap":false}\n'
     );
 
+    sendMessage({
+      action: "features-set",
+      features: { translucency: true, transparency: 0.8 }
+    });
+    await waitFor(
+      () => messages.length >= 6,
+      "native host did not ack a numeric features-set"
+    );
+    assert.deepEqual(messages[5], {
+      type: "features-ack",
+      ok: true,
+      applied: 2
+    });
+    assert.equal(
+      fs.readFileSync(featuresFile, "utf8"),
+      '{"translucency":true,"transparency":0.8}\n'
+    );
+
+    sendMessage({
+      action: "features-set",
+      features: { transparency: 2000000 }
+    });
+    await waitFor(
+      () => messages.length >= 7,
+      "native host did not reject an out-of-range feature value"
+    );
+    assert.deepEqual(messages[6], {
+      type: "features-ack",
+      ok: false,
+      applied: 0
+    });
+    assert.equal(
+      fs.readFileSync(featuresFile, "utf8"),
+      '{"translucency":true,"transparency":0.8}\n'
+    );
+
     sendMessage({ action: "unrelated", data: { nested: true } });
     await new Promise((resolve) => setTimeout(resolve, 50));
     assert.equal(child.exitCode, null, "native host died on unknown action");

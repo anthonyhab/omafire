@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <math.h>
 #include <poll.h>
 #include <signal.h>
 #include <stdint.h>
@@ -287,11 +288,12 @@ static int json_expect_literal(const unsigned char *message, size_t length,
   return 0;
 }
 
-/* Parses {"key": true|false, ...} starting at *position (which must point at
- * '{'). On success fills entries and advances past the closing '}'. */
+/* Parses {"key": true|false|number, ...} starting at *position (which must
+ * point at '{'). Numbers are bounded to a sane slider range and stored as
+ * doubles with numeric[] marking them so they serialize back as numbers. */
 static int json_parse_features(const unsigned char *message, size_t length,
-                               size_t *position, char *keys, int *values,
-                               size_t *count) {
+                               size_t *position, char *keys, double *values,
+                               unsigned char *numeric, size_t *count) {
   if (*position >= length || message[*position] != '{') {
     return -1;
   }
@@ -343,17 +345,47 @@ static int json_parse_features(const unsigned char *message, size_t length,
     json_skip_space(message, length, position);
     if (json_expect_literal(message, length, position, "true") == 0) {
       values[*count] = 1;
+      numeric[*count] = 0;
     } else if (json_expect_literal(message, length, position, "false") == 0) {
       values[*count] = 0;
+      numeric[*count] = 0;
     } else {
-      return -1;
+      /* Number token: -?digits[.digits][eE+-digits], bounded. */
+      size_t token_start = *position;
+      size_t token_length = 0;
+      while (*position < length
+             && (message[*position] == '-' || message[*position] == '+'
+                 || message[*position] == '.' || message[*position] == 'e'
+                 || message[*position] == 'E'
+                 || (message[*position] >= '0' && message[*position] <= '9'))) {
+        if (token_length >= 31) {
+          return -1;
+        }
+        token_length++;
+        (*position)++;
+      }
+      if (token_length == 0) {
+        return -1;
+      }
+      char token[32];
+      memcpy(token, message + token_start, token_length);
+      token[token_length] = '\0';
+      char *end = NULL;
+      double number = strtod(token, &end);
+      if (end != token + token_length || !isfinite(number)
+          || number < -1000000.0 || number > 1000000.0) {
+        return -1;
+      }
+      values[*count] = number;
+      numeric[*count] = 1;
     }
     (*count)++;
   }
 }
 
 static int write_features_file(const char *path, const char *keys,
-                               const int *values, size_t count) {
+                               const double *values,
+                               const unsigned char *numeric, size_t count) {
   char temporary[PATH_MAX];
   int path_length = snprintf(temporary, sizeof(temporary), "%s.tmp", path);
   if (path_length < 0 || (size_t)path_length >= sizeof(temporary)) {
@@ -367,13 +399,19 @@ static int write_features_file(const char *path, const char *keys,
     return -1;
   }
 
-  char line[MAX_FEATURE_KEY + 12U];
+  char line[MAX_FEATURE_KEY + 40U];
   int failed = write_all(descriptor, "{", 1) < 0;
   for (size_t i = 0; !failed && i < count; i++) {
     const char *key = keys + i * (MAX_FEATURE_KEY + 1U);
+    char value_text[32];
+    if (numeric[i]) {
+      snprintf(value_text, sizeof(value_text), "%.6g", values[i]);
+    } else {
+      snprintf(value_text, sizeof(value_text), "%s",
+               values[i] != 0.0 ? "true" : "false");
+    }
     int line_length = snprintf(line, sizeof(line), "%s\"%s\":%s",
-                               i > 0 ? "," : "", key,
-                               values[i] ? "true" : "false");
+                               i > 0 ? "," : "", key, value_text);
     if (line_length < 0 || (size_t)line_length >= sizeof(line)
         || write_all(descriptor, line, (size_t)line_length) < 0) {
       failed = 1;
@@ -424,15 +462,17 @@ static int dispatch_message(const unsigned char *message, size_t length,
 
   long features_position = json_member(message, length, "features");
   char keys[MAX_FEATURES * (MAX_FEATURE_KEY + 1U)];
-  int values[MAX_FEATURES];
+  double values[MAX_FEATURES];
+  unsigned char numeric[MAX_FEATURES];
   size_t count = 0;
   int ok = 0;
   if (features_position >= 0) {
     size_t features_start = (size_t)features_position;
     if (json_parse_features(message, length, &features_start, keys, values,
-                            &count)
+                            numeric, &count)
             == 0
-        && write_features_file(features_path, keys, values, count) == 0) {
+        && write_features_file(features_path, keys, values, numeric, count)
+               == 0) {
       ok = 1;
     }
   }

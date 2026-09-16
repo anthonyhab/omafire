@@ -21,12 +21,30 @@
       id: "chrome-gap",
       label: "Window frame gap",
       description: "Restore the Nova inset gap around the toolbox and viewport"
+    },
+    {
+      id: "translucency",
+      label: "Translucent chrome",
+      description:
+        "Glass surfaces for blur-capable compositors (Hyprland layerrule blur)"
+    },
+    {
+      id: "transparency",
+      type: "range",
+      min: 0.55,
+      max: 1,
+      step: 0.01,
+      default: 0.85,
+      dependsOn: "translucency",
+      label: "Glass opacity",
+      description:
+        "Surface opacity while Translucent chrome is enabled; lower is clearer"
     }
   ];
 
   const STORAGE_KEY = "features";
   const VALID_ID = /^[a-z0-9-]{1,48}$/;
-  const KNOWN_IDS = new Set(FEATURES.map((feature) => feature.id));
+  const KNOWN_IDS = new Map(FEATURES.map((feature) => [feature.id, feature]));
 
   function normalizeFeatures(candidate) {
     if (!candidate || typeof candidate !== "object" || Array.isArray(candidate)) {
@@ -34,7 +52,19 @@
     }
     const normalized = {};
     for (const [id, value] of Object.entries(candidate)) {
-      if (KNOWN_IDS.has(id) && VALID_ID.test(id) && typeof value === "boolean") {
+      const feature = KNOWN_IDS.get(id);
+      if (!feature || !VALID_ID.test(id)) {
+        continue;
+      }
+      if (feature.type === "range") {
+        const number = Number(value);
+        if (Number.isFinite(number)) {
+          normalized[id] = Math.min(
+            feature.max,
+            Math.max(feature.min, number)
+          );
+        }
+      } else if (typeof value === "boolean") {
         normalized[id] = value;
       }
     }

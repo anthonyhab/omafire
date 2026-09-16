@@ -1,0 +1,91 @@
+@namespace xul "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+
+/* Optional glass chrome, gated by omarchy.translucency (extension Hacks).
+ * --omarchy-transparency is pushed live onto each navigator:browser window
+ * root by the features bridge as a 0.55–1 opacity fraction. Surfaces keep
+ * their token hues — only the alpha changes — so the palette, hover ladder,
+ * and separators stay coherent. Content stays opaque: tabpanels and the
+ * browser deck are untouched, the page owns legibility.
+ *
+ * On a compositor with a blur rule for Firefox (Hyprland layerrule/decoration
+ * blur) the chrome rows render as frosted glass; elsewhere they are simply
+ * translucent. Turn the feature off to restore fully opaque surfaces. */
+@media -moz-pref("omarchy.translucency") {
+    /* The generated palette pins surface vars with !important under
+     * :root:not([lwtheme]); match its specificity so glass wins in both
+     * theme modes. --omarchy-glass-panel is mixed from surface+accent rather
+     * than var(--omarchy-panel): under lwtheme that var aliases
+     * --panel-background-color, which this block overrides — a self
+     * reference would invalidate the whole chain. */
+    :root,
+    :root:not([lwtheme]),
+    :root[lwtheme] {
+        --omarchy-glass-alpha: var(--omarchy-transparency, 0.85) !important;
+        --omarchy-glass: color-mix(
+            in srgb,
+            var(--omarchy-surface) calc(var(--omarchy-glass-alpha) * 100%),
+            transparent
+        ) !important;
+        --omarchy-glass-panel: color-mix(
+            in srgb,
+            var(--omarchy-surface) calc(var(--omarchy-glass-alpha) * 96%),
+            var(--omarchy-accent) calc(var(--omarchy-glass-alpha) * 4%)
+        ) !important;
+        --toolbar-background-color: var(--omarchy-glass) !important;
+        --toolbar-background-color-inactive: var(--omarchy-glass) !important;
+        --toolbar-bgcolor: var(--omarchy-glass) !important;
+        --toolbox-background-color: var(--omarchy-glass) !important;
+        --sidebar-background-color: var(--omarchy-glass) !important;
+        --panel-background-color: var(--omarchy-glass-panel) !important;
+        --omarchy-panel: var(--omarchy-glass-panel) !important;
+        /* The urlbar field keeps a floor on its alpha: it is a text entry
+         * and must stay legible even when the rest of the chrome is glass. */
+        --omarchy-glass-field: color-mix(
+            in srgb,
+            var(--omarchy-field)
+                calc(min(1, var(--omarchy-glass-alpha) + 0.15) * 100%),
+            transparent
+        ) !important;
+        --toolbar-field-background-color: var(--omarchy-glass-field) !important;
+        --toolbar-field-focus-background-color: var(
+            --omarchy-glass-field
+        ) !important;
+    }
+
+    /* Element-level paints that bypass the vars above. */
+    #TabsToolbar {
+        background-color: var(--omarchy-glass) !important;
+    }
+
+    /* The window itself must not paint an opaque frame behind the glass or
+     * the translucency composites onto the frame color and stays invisible. */
+    :root,
+    #main-window,
+    #navigator-toolbox {
+        background-color: transparent !important;
+        background-image: none !important;
+    }
+
+    /* Our sidebar component paints --omarchy-surface on element backgrounds,
+     * which would sit opaque over the glass var. Repoint them at the glass. */
+    #browser #sidebar-container,
+    #browser sidebar-main,
+    #browser #sidebar-box,
+    #browser #sidebar,
+    #browser #tabbrowser-tabbox {
+        background-color: var(--omarchy-glass) !important;
+        background-image: none !important;
+    }
+}
+
+/* Accessibility: an OS "reduce transparency" request always wins over the
+ * feature toggle — forcing the alpha to 1 makes every glass var collapse
+ * back to its solid token color, no selector re-declaration needed. */
+@media -moz-pref("omarchy.translucency")
+    and (prefers-reduced-transparency: reduce) {
+    :root,
+    :root:not([lwtheme]),
+    :root[lwtheme] {
+        --omarchy-glass-alpha: 1 !important;
+    }
+}

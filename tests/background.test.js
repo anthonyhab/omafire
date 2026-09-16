@@ -178,6 +178,34 @@ function waitFor(predicate, message) {
   });
   assert.deepEqual(featuresApi.normalizeFeatures({ debug: "1" }), {});
 
+  // Range features accept finite numbers, clamp to their bounds, and reject
+  // non-numeric input.
+  assert.deepEqual(featuresApi.normalizeFeatures({ transparency: 0.7 }), {
+    transparency: 0.7
+  });
+  assert.deepEqual(featuresApi.normalizeFeatures({ transparency: 9 }), {
+    transparency: 1
+  });
+  assert.deepEqual(featuresApi.normalizeFeatures({ transparency: 0 }), {
+    transparency: 0.55
+  });
+  assert.deepEqual(featuresApi.normalizeFeatures({ transparency: "x" }), {});
+  assert.deepEqual(featuresApi.normalizeFeatures({ translucency: true }), {
+    translucency: true
+  });
+  assert.deepEqual(featuresApi.normalizeFeatures({ translucency: 1 }), {});
+
+  // A numeric feature relays through the same merge + host path.
+  await runtimeMessageListener({
+    type: "features-set",
+    features: { transparency: 0.9 }
+  });
+  assert.deepEqual(memory.features, { debug: true, transparency: 0.9 });
+  assert.deepEqual(nativeSent.at(-1), {
+    action: "features-set",
+    features: { debug: true, transparency: 0.9 }
+  });
+
   // A features-ack is control traffic, not a theme payload.
   const updatesBeforeAck = themeUpdates.length;
   nativeMessageListener({ type: "features-ack", ok: true, applied: 1 });
@@ -194,7 +222,7 @@ function waitFor(predicate, message) {
   );
   assert.deepEqual(nativeSent.at(-1), {
     action: "features-set",
-    features: { debug: true }
+    features: { debug: true, transparency: 0.9 }
   });
 
   console.log("background.test.js: ok");

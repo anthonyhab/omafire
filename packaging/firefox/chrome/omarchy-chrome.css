@@ -19,6 +19,7 @@
 @import "omarchy-fixes.css";
 @import "omarchy-grid.css";
 @import "omarchy-motion.css";
+@import "omarchy-translucency.css";
 
 /* Debug instrumentation, inert unless omarchy.debug is set in about:config. */
 @import "omarchy-debug.css";

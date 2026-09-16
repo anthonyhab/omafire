@@ -142,6 +142,33 @@ button:disabled {
   accent-color: var(--ofs-accent, AccentColor);
 }
 
+.feature-range {
+  flex-direction: column;
+  gap: 4px;
+}
+
+.feature-range-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.feature-value {
+  font-size: 0.85em;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.7;
+}
+
+.feature-range input[type="range"] {
+  margin: 0;
+  width: 100%;
+}
+
+.feature-range input[type="range"]:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
 .feature-label {
   display: block;
   font-weight: 600;

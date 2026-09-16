@@ -113,6 +113,21 @@
 
   const featureList = document.querySelector("#feature-list");
   const { FEATURES, STORAGE_KEY: FEATURES_KEY } = globalThis.OmafoxFeatures;
+  const rangeDebounce = new Map();
+
+  async function sendFeature(id, value) {
+    try {
+      await browser.runtime.sendMessage({
+        type: "features-set",
+        features: { [id]: value }
+      });
+      showError("");
+      return true;
+    } catch (error) {
+      showError(error instanceof Error ? error.message : String(error));
+      return false;
+    }
+  }
 
   async function renderFeatures() {
     const result = await browser.storage.local.get(FEATURES_KEY);
@@ -121,19 +136,70 @@
     for (const feature of FEATURES) {
       const label = document.createElement("label");
       label.className = "feature";
+      const gated =
+        feature.dependsOn && enabled[feature.dependsOn] !== true;
+
+      if (feature.type === "range") {
+        label.classList.add("feature-range");
+
+        const head = document.createElement("span");
+        head.className = "feature-range-head";
+        const name = document.createElement("span");
+        name.className = "feature-label";
+        name.textContent = feature.label;
+        const readout = document.createElement("span");
+        readout.className = "feature-value";
+        head.append(name, readout);
+
+        const description = document.createElement("span");
+        description.className = "feature-description";
+        description.textContent = feature.description;
+
+        const input = document.createElement("input");
+        input.type = "range";
+        input.min = String(feature.min);
+        input.max = String(feature.max);
+        input.step = String(feature.step);
+        input.value = String(
+          typeof enabled[feature.id] === "number"
+            ? enabled[feature.id]
+            : feature.default
+        );
+        input.disabled = gated;
+        const renderValue = () => {
+          readout.textContent = `${Math.round(Number(input.value) * 100)}%`;
+        };
+        renderValue();
+        input.addEventListener("input", () => {
+          renderValue();
+          clearTimeout(rangeDebounce.get(feature.id));
+          rangeDebounce.set(
+            feature.id,
+            setTimeout(
+              () => void sendFeature(feature.id, Number(input.value)),
+              100
+            )
+          );
+        });
+        input.addEventListener("change", () => {
+          clearTimeout(rangeDebounce.get(feature.id));
+          void sendFeature(feature.id, Number(input.value));
+        });
+
+        label.append(head, input, description);
+        featureList.append(label);
+        continue;
+      }
 
       const input = document.createElement("input");
       input.type = "checkbox";
       input.checked = enabled[feature.id] === true;
       input.addEventListener("change", async () => {
-        try {
-          await browser.runtime.sendMessage({
-            type: "features-set",
-            features: { [feature.id]: input.checked }
-          });
-        } catch (error) {
+        const ok = await sendFeature(feature.id, input.checked);
+        if (ok) {
+          await renderFeatures();
+        } else {
           input.checked = !input.checked;
-          showError(error instanceof Error ? error.message : String(error));
         }
       });
 

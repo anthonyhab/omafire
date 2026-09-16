@@ -710,3 +710,46 @@ scrollbox[orient="horizontal"] ~ #scrollbutton-down[disabled] {
         outline-offset: 2px !important;
     }
 }
+
+/* Seam flattening. With the opt-in window-frame gap off (the default) the
+ * website should own every pixel between the chrome rows: Nova still frames
+ * the content deck with a border, corner radius, outline, and drop shadow,
+ * insets the toolbox as a floating card, and reserves a permanent composite
+ * layer for the inactive-window tint. None of that communicates state, so
+ * remove it and let the page edge meet the chrome edge. Split-view keeps its
+ * own panel borders — those carry grouping meaning — and sidebar splitters
+ * and focus cues stay with their components. Enabling omarchy.chrome-gap
+ * restores the full Nova card treatment. */
+@media not -moz-pref("omarchy.chrome-gap") {
+    #navigator-toolbox {
+        border-bottom: 0 !important;
+    }
+
+    @media -moz-pref("browser.nova.enabled") {
+        #navigator-toolbox {
+            will-change: auto !important;
+        }
+
+        #browser {
+            gap: 0 !important;
+        }
+
+        :root:not([inFullscreen], [inDOMFullscreen]) #browser {
+            padding: 0 !important;
+        }
+
+        #tabbrowser-tabpanels > :not(.split-view-panel) .browserContainer {
+            border: 0 !important;
+            border-radius: 0 !important;
+        }
+    }
+
+    /* The revamped sidebar prepaint adds a content-area outline and shadow on
+     * top of the Nova card border removed above. */
+    @media -moz-pref("sidebar.revamp") {
+        #tabbrowser-tabpanels > :not(.split-view-panel) .browserContainer {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+    }
+}
