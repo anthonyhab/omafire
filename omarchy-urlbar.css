@@ -196,15 +196,17 @@
         opacity 140ms ease-out !important;
 }
 
-#urlbar:not(:hover):not(:focus-within):not([open])
-    :is(
-        .urlbar-page-action:not(#star-button-box),
-        #star-button-box:not(:has(#star-button[starred]))
-    ) {
-    margin-inline: 0 !important;
-    max-width: 0 !important;
-    opacity: 0 !important;
-    padding-inline: 0 !important;
+@media not -moz-pref("omarchy.urlbar-actions") {
+    #urlbar:not(:hover):not(:focus-within):not([open])
+        :is(
+            .urlbar-page-action:not(#star-button-box),
+            #star-button-box:not(:has(#star-button[starred]))
+        ) {
+        margin-inline: 0 !important;
+        max-width: 0 !important;
+        opacity: 0 !important;
+        padding-inline: 0 !important;
+    }
 }
 
 /* A saved page is a semantic state, not Firefox's stock yellow notification.

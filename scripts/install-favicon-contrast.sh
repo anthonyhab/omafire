@@ -160,16 +160,22 @@ fi
 
 SOURCE_PREF=$ROOT_DIR/configuration/autoconfig.js
 SOURCE_CONFIG=$ROOT_DIR/configuration/mozilla.cfg
-SOURCE_HELPER=$ROOT_DIR/favicon-contrast.uc.js
+HELPERS=(favicon-contrast.uc.js omarchy-features.uc.js)
 TARGET_PREF=$FIREFOX_DIR/defaults/pref/autoconfig.js
 TARGET_CONFIG=$FIREFOX_DIR/mozilla.cfg
-TARGET_HELPER=$FIREFOX_DIR/omarchy/favicon-contrast.uc.js
 PROFILE_CHROME=$PROFILE_DIR/chrome
 MARKER=$PROFILE_CHROME/.omarchy-favicon-contrast-enabled
+MARKER_FEATURES=$PROFILE_CHROME/.omarchy-features-enabled
 
-for source in "$SOURCE_PREF" "$SOURCE_CONFIG" "$SOURCE_HELPER"; do
+for source in "$SOURCE_PREF" "$SOURCE_CONFIG"; do
     if [[ ! -f $source || -L $source ]]; then
         printf 'Required regular source file not found: %s\n' "$source" >&2
+        exit 1
+    fi
+done
+for helper in "${HELPERS[@]}"; do
+    if [[ ! -f $ROOT_DIR/$helper || -L $ROOT_DIR/$helper ]]; then
+        printf 'Required regular source file not found: %s\n' "$ROOT_DIR/$helper" >&2
         exit 1
     fi
 done
@@ -196,7 +202,8 @@ is_exact_legacy_install() {
     digest=$(sha256_file "$target") || return 1
     case $kind in
         pref)
-            [[ $digest == 867a3149c693469c41e6305696cfc17b41e1421a206e2a26ceacd225cd448888 ]]
+            [[ $digest == 867a3149c693469c41e6305696cfc17b41e1421a206e2a26ceacd225cd448888 \
+                || $digest == 5be78133c2477255777f1c248474354c24bb4206cd8486dbc222305971241659 ]]
             ;;
         config)
             [[ $digest == b7e660c466194db6a4731c7ac2b6a47e85d6664529c8107970b62847280d6b44 ]]
@@ -224,10 +231,16 @@ check_replaceable() {
     fi
 }
 
+helper_target() {
+    printf '%s/omarchy/%s' "$FIREFOX_DIR" "$1"
+}
+
 if [[ $ACTION == install ]]; then
     check_replaceable pref "$SOURCE_PREF" "$TARGET_PREF"
     check_replaceable config "$SOURCE_CONFIG" "$TARGET_CONFIG"
-    check_replaceable helper "$SOURCE_HELPER" "$TARGET_HELPER"
+    for helper in "${HELPERS[@]}"; do
+        check_replaceable helper "$ROOT_DIR/$helper" "$(helper_target "$helper")"
+    done
 fi
 
 printf 'Profile: %s\nFirefox: %s\n' "$PROFILE_DIR" "$FIREFOX_DIR"
@@ -236,8 +249,7 @@ if [[ $ACTION == uninstall ]]; then
     if ((PURGE)); then
         for pair in \
             "pref:$SOURCE_PREF:$TARGET_PREF" \
-            "config:$SOURCE_CONFIG:$TARGET_CONFIG" \
-            "helper:$SOURCE_HELPER:$TARGET_HELPER"; do
+            "config:$SOURCE_CONFIG:$TARGET_CONFIG"; do
             IFS=: read -r kind source target <<<"$pair"
             [[ ! -e $target ]] && continue
             if ! cmp -s -- "$source" "$target"; then
@@ -245,21 +257,32 @@ if [[ $ACTION == uninstall ]]; then
                 exit 1
             fi
         done
+        for helper in "${HELPERS[@]}"; do
+            target=$(helper_target "$helper")
+            [[ ! -e $target ]] && continue
+            if ! cmp -s -- "$ROOT_DIR/$helper" "$target"; then
+                printf 'Refusing to purge modified file: %s\n' "$target" >&2
+                exit 1
+            fi
+        done
     fi
 
     if ((DRY_RUN)); then
-        printf 'Would remove profile marker: %s\n' "$MARKER"
+        printf 'Would remove profile markers: %s %s\n' "$MARKER" "$MARKER_FEATURES"
         if ((PURGE)); then
-            printf 'Would remove recognized global files:\n  %s\n  %s\n  %s\n' \
-                "$TARGET_HELPER" "$TARGET_CONFIG" "$TARGET_PREF"
+            printf 'Would remove recognized global files:\n'
+            printf '  %s\n' "$TARGET_CONFIG" "$TARGET_PREF"
+            for helper in "${HELPERS[@]}"; do
+                printf '  %s\n' "$(helper_target "$helper")"
+            done
         else
             printf '%s\n' 'Global files would remain for other opted-in profiles.'
         fi
         exit 0
     fi
 
-    rm -f -- "$MARKER"
-    printf 'Disabled favicon contrast for %s\n' "$PROFILE_DIR"
+    rm -f -- "$MARKER" "$MARKER_FEATURES"
+    printf 'Disabled Omarchy helpers for %s\n' "$PROFILE_DIR"
     if ((!PURGE)); then
         printf '%s\n' 'Global files remain available for other profiles; restart Firefox.'
         exit 0
@@ -270,21 +293,29 @@ GLOBAL_WRITE=0
 if [[ $ACTION == install ]]; then
     for pair in \
         "$SOURCE_PREF:$TARGET_PREF" \
-        "$SOURCE_CONFIG:$TARGET_CONFIG" \
-        "$SOURCE_HELPER:$TARGET_HELPER"; do
+        "$SOURCE_CONFIG:$TARGET_CONFIG"; do
         IFS=: read -r source target <<<"$pair"
         if [[ ! -e $target ]] || ! cmp -s -- "$source" "$target"; then
             GLOBAL_WRITE=1
         fi
     done
+    for helper in "${HELPERS[@]}"; do
+        target=$(helper_target "$helper")
+        if [[ ! -e $target ]] || ! cmp -s -- "$ROOT_DIR/$helper" "$target"; then
+            GLOBAL_WRITE=1
+        fi
+    done
 else
-    for target in "$TARGET_HELPER" "$TARGET_CONFIG" "$TARGET_PREF"; do
+    for target in "$TARGET_CONFIG" "$TARGET_PREF"; do
         [[ -e $target ]] && GLOBAL_WRITE=1
+    done
+    for helper in "${HELPERS[@]}"; do
+        [[ -e $(helper_target "$helper") ]] && GLOBAL_WRITE=1
     done
 fi
 
 PRIVILEGE=()
-APP_DIR=$(dirname -- "$TARGET_HELPER")
+APP_DIR=$FIREFOX_DIR/omarchy
 NEEDS_PRIVILEGE=0
 if ((GLOBAL_WRITE)) && [[ ${EUID:-$(id -u)} -ne 0 ]]; then
     if [[ ! -w $FIREFOX_DIR || ! -w $FIREFOX_DIR/defaults/pref ]]; then
@@ -313,9 +344,11 @@ run_privileged() {
 
 if ((DRY_RUN)); then
     if [[ $ACTION == install ]]; then
-        printf 'Would install application helper: %s\n' "$TARGET_HELPER"
+        for helper in "${HELPERS[@]}"; do
+            printf 'Would install application helper: %s\n' "$(helper_target "$helper")"
+        done
         printf 'Would install autoconfig loader: %s and %s\n' "$TARGET_PREF" "$TARGET_CONFIG"
-        printf 'Would create profile marker: %s\n' "$MARKER"
+        printf 'Would create profile markers: %s %s\n' "$MARKER" "$MARKER_FEATURES"
     fi
     exit 0
 fi
@@ -362,17 +395,29 @@ atomic_install() {
 }
 
 if [[ $ACTION == install ]]; then
-    atomic_install "$SOURCE_HELPER" "$TARGET_HELPER"
+    for helper in "${HELPERS[@]}"; do
+        atomic_install "$ROOT_DIR/$helper" "$(helper_target "$helper")"
+    done
     atomic_install "$SOURCE_CONFIG" "$TARGET_CONFIG"
     atomic_install "$SOURCE_PREF" "$TARGET_PREF"
     mkdir -p -- "$PROFILE_CHROME"
-    temporary_marker=$PROFILE_CHROME/.omarchy-favicon-contrast-enabled.$$.tmp
-    printf '%s\n' 'Installed by scripts/install-favicon-contrast.sh; this file is not executable.' > "$temporary_marker"
-    chmod 0644 "$temporary_marker"
-    mv -f -- "$temporary_marker" "$MARKER"
-    printf 'Enabled favicon contrast for %s\n' "$PROFILE_DIR"
+    for marker in "$MARKER" "$MARKER_FEATURES"; do
+        temporary_marker=$marker.$$.tmp
+        printf '%s\n' 'Installed by scripts/install-favicon-contrast.sh; this file is not executable.' > "$temporary_marker"
+        chmod 0644 "$temporary_marker"
+        mv -f -- "$temporary_marker" "$marker"
+    done
+    printf 'Enabled Omarchy helpers for %s\n' "$PROFILE_DIR"
 else
-    for target in "$TARGET_HELPER" "$TARGET_CONFIG" "$TARGET_PREF"; do
+    for helper in "${HELPERS[@]}"; do
+        target=$(helper_target "$helper")
+        [[ -e $target ]] || continue
+        backup=$(dirname -- "$target")/.omarchy-remove.$$.backup.$(basename -- "$target")
+        run_privileged mv -- "$target" "$backup"
+        ROLLBACK_TARGETS+=("$target")
+        ROLLBACK_BACKUPS+=("$backup")
+    done
+    for target in "$TARGET_CONFIG" "$TARGET_PREF"; do
         [[ -e $target ]] || continue
         backup=$(dirname -- "$target")/.omarchy-remove.$$.backup.$(basename -- "$target")
         run_privileged mv -- "$target" "$backup"
@@ -389,8 +434,8 @@ for backup in "${ROLLBACK_BACKUPS[@]}"; do
 done
 
 if [[ $ACTION == install ]]; then
-    printf 'Installed trusted application code in %s\n' "$TARGET_HELPER"
+    printf 'Installed trusted application code in %s\n' "$APP_DIR"
 else
-    printf '%s\n' 'Removed recognized global favicon-contrast files.'
+    printf '%s\n' 'Removed recognized global Omarchy helper files.'
 fi
 printf '%s\n' 'Restart Firefox to apply the change.'

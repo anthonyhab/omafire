@@ -280,7 +280,6 @@
  * gap at 0, so zero is a supported layout. */
 @media -moz-pref("browser.nova.enabled") {
     :root {
-        --chrome-window-gap: 0px !important;
         --chrome-block-radius: var(
             --omarchy-radius-container,
             0px
@@ -290,5 +289,16 @@
         --chrome-content-separator-color: var(
             --omarchy-border
         ) !important;
+    }
+    /* omarchy.chrome-gap: opt back into Nova's inset frame. */
+    @media not -moz-pref("omarchy.chrome-gap") {
+        :root {
+            --chrome-window-gap: 0px !important;
+        }
+    }
+    @media -moz-pref("omarchy.chrome-gap") {
+        :root {
+            --chrome-window-gap: 4px !important;
+        }
     }
 }
