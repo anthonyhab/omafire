@@ -58,6 +58,7 @@
 #define FF_PREFS_BEGIN "// BEGIN OMAFOX FIREFOX BRIDGE"
 #define FF_PREFS_END "// END OMAFOX FIREFOX BRIDGE"
 #define FF_PALETTE_NAME "omafox-palette.css"
+#define FF_CONTENT_PALETTE_NAME "omafox-content-palette.css"
 #define FF_PAYLOAD_DIRNAME "omarchy-firefox"
 #define FF_PAYLOAD_ENTRY "userChrome.css"
 
@@ -1396,6 +1397,7 @@ static void remove_ff_profile(const char *profile) {
   char *chrome_dir = path_join(profile, "chrome");
   char *payload_dir = path_join(chrome_dir, FF_PAYLOAD_DIRNAME);
   char *palette_file = path_join(chrome_dir, FF_PALETTE_NAME);
+  char *content_palette_file = path_join(chrome_dir, FF_CONTENT_PALETTE_NAME);
   char *user_chrome = path_join(chrome_dir, "userChrome.css");
   char *user_content = path_join(chrome_dir, "userContent.css");
   char *user_prefs = path_join(profile, "user.js");
@@ -1416,12 +1418,15 @@ static void remove_ff_profile(const char *profile) {
     remove_ff_payload_dir(payload_dir);
   if (is_regular_file(palette_file))
     unlink(palette_file);
+  if (is_regular_file(content_palette_file))
+    unlink(content_palette_file);
   if (configured)
     printf("Removed Firefox profile bridge: %s\n", profile);
 
   free(chrome_dir);
   free(payload_dir);
   free(palette_file);
+  free(content_palette_file);
   free(user_chrome);
   free(user_content);
   free(user_prefs);
@@ -1445,6 +1450,8 @@ static void remove_ff_profiles(void) {
 
 /* ------------------------------------------------------- palette refresh */
 
+static char *raw_palette_vars(const palette_t *p, char *buf, size_t cap);
+
 /* Regenerate the first-paint fallback CSS in every configured profile.
  * Scoped to :root:not([lwtheme]) so it self-disables the moment the
  * extension's theme lands — the point is that first paint uses the REAL
@@ -1457,6 +1464,7 @@ static void write_palette_css(const palette_t *p, const char *path) {
   const char *dark_bg = palette_get(p, "dark_background");
   const char *darker_bg = palette_get(p, "darker_background");
 
+  char raw[4096];
   char *css = xasprintf(
       "/* OMAFOX GENERATED PALETTE — written by omafox sync; do not edit. */\n"
       ":root:not([lwtheme]) {\n"
@@ -1481,13 +1489,87 @@ static void write_palette_css(const palette_t *p, const char *path) {
       "#tabbrowser-tabbox,\n"
       "#tabbrowser-tabpanels {\n"
       "    background-color: %s !important;\n"
-      "}\n",
+      "}\n\n"
+      "/* Full theme palette — status colors and extra accents. Kept\n"
+      " * unconditional: even under lwtheme, theme.json owns these. */\n"
+      "%s",
       p->mode,
       dark_bg, dark_bg, fg, dark_bg,
       darker_bg, darker_bg,
       bg, fg, muted, darker_bg, dark_bg, muted,
       accent, accent,
-      bg);
+      bg,
+      raw_palette_vars(p, raw, sizeof(raw)));
+  atomic_write(path, css, strlen(css), 0600, false);
+  free(css);
+}
+
+/* Render the raw palette keys (--omarchy-red, --omarchy-green, …) into buf.
+ * These stay available unconditionally — even under lwtheme the theme.json
+ * palette is the source of truth for status/accent colors the extension
+ * does not carry. Keys already emitted as semantic aliases (accent, muted,
+ * selection) are skipped so they cannot override lwtheme-derived mappings.
+ * Returns buf. */
+static char *raw_palette_vars(const palette_t *p, char *buf, size_t cap) {
+  static const char *const SKIP[] = {"accent", "muted", "selection"};
+  size_t off = 0;
+  off += snprintf(buf + off, cap - off, ":root {\n");
+  for (size_t i = 1; i < N_PALETTE_KEYS; i++) {
+    const char *v = palette_get(p, PALETTE_KEYS[i]);
+    if (!v)
+      continue;
+    bool skip = false;
+    for (size_t j = 0; j < sizeof(SKIP) / sizeof(SKIP[0]); j++)
+      if (strcmp(PALETTE_KEYS[i], SKIP[j]) == 0)
+        skip = true;
+    if (skip)
+      continue;
+    off += snprintf(buf + off, cap - off,
+                    "    --omarchy-%s: %s !important;\n",
+                    PALETTE_KEYS[i], v);
+    if (off >= cap)
+      break;
+  }
+  snprintf(buf + off, cap - off, "}\n");
+  return buf;
+}
+
+/* Content-scope companion to write_palette_css: the same palette exposed as
+ * --omarchy-* vars for userContent.css, plus an --omarchy-color-scheme token.
+ * Deliberately omits the color-scheme property itself and the tabbox pre-paint
+ * rules so importing it can never force a scheme onto ordinary web pages;
+ * themed chrome:// and about: documents opt in via
+ * color-scheme: var(--omarchy-color-scheme). */
+static void write_content_palette_css(const palette_t *p, const char *path) {
+  const char *fg = palette_get(p, "foreground");
+  const char *muted = palette_get(p, "muted");
+  const char *accent = palette_get(p, "accent");
+  const char *bg = palette_get(p, "background");
+  const char *dark_bg = palette_get(p, "dark_background");
+  const char *darker_bg = palette_get(p, "darker_background");
+
+  char raw[4096];
+  char *css = xasprintf(
+      "/* OMAFOX GENERATED CONTENT PALETTE — written by omafox sync; do not"
+      " edit. */\n"
+      ":root {\n"
+      "    --omarchy-color-scheme: %s;\n"
+      "    --omarchy-surface: %s;\n"
+      "    --omarchy-fg: %s;\n"
+      "    --omarchy-muted: %s;\n"
+      "    --omarchy-field: %s;\n"
+      "    --omarchy-panel: %s;\n"
+      "    --omarchy-border: %s;\n"
+      "    --omarchy-accent: %s;\n"
+      "    --omarchy-focus-accent: %s;\n"
+      "}\n\n"
+      "/* Full theme palette — status colors and extra accents for\n"
+      " * surfaces that need them (about: pages, dialogs, reader). */\n"
+      "%s",
+      p->mode,
+      bg, fg, muted, darker_bg, dark_bg, muted,
+      accent, accent,
+      raw_palette_vars(p, raw, sizeof(raw)));
   atomic_write(path, css, strlen(css), 0600, false);
   free(css);
 }
@@ -1500,12 +1582,14 @@ static void refresh_ff_profile_colors(const char *profile,
   char *user_chrome = path_join(chrome_dir, "userChrome.css");
   char *user_prefs = path_join(profile, "user.js");
   char *palette_file = path_join(chrome_dir, FF_PALETTE_NAME);
+  char *content_palette_file = path_join(chrome_dir, FF_CONTENT_PALETTE_NAME);
 
   if (!managed_block_present(user_chrome, FF_CSS_BEGIN, FF_CSS_END)) {
     free(chrome_dir);
     free(user_chrome);
     free(user_prefs);
     free(palette_file);
+    free(content_palette_file);
     return;
   }
 
@@ -1530,10 +1614,12 @@ static void refresh_ff_profile_colors(const char *profile,
   free(block);
 
   write_palette_css(p, palette_file);
+  write_content_palette_css(p, content_palette_file);
   free(chrome_dir);
   free(user_chrome);
   free(user_prefs);
   free(palette_file);
+  free(content_palette_file);
 }
 
 static void refresh_ff_profiles_colors(const palette_t *p) {

@@ -18,7 +18,7 @@
 }
 
 .controlBar {
-	border-radius: 5px;
+	border-radius: var(--omarchy-radius-container, 5px);
 	margin: auto;
 	margin-bottom: 5px;
 	width: 98.5%;

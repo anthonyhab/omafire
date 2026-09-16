@@ -1,4 +1,6 @@
 :root {
+	--omarchy-ui-font: monospace;
+	--omarchy-ui-font-size: 12px;
 	--omarchy-base-toolbar-padding: 6px;
 	--omarchy-base-toolbar-spacing: 6px;
 	--omarchy-base-button-radius: 9px;

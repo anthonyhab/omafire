@@ -1,9 +1,0 @@
-:root {
-  --omarchy-radius-container: 0.0px;
-  --omarchy-radius-input: 0.0px;
-  --omarchy-border-width: 2px;
-  --omarchy-border-active-source: linear-gradient(0deg, #3264ebff);
-  --omarchy-border-active-color: #3264ebff;
-  --omarchy-border-inactive-source: linear-gradient(0deg, #595959aa);
-  --omarchy-border-inactive-color: #595959aa;
-}
