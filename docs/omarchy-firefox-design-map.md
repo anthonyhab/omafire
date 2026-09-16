@@ -384,3 +384,17 @@ errors, binding loops, unknown properties, shell crashes, or IPC failures.
   frame, stacked edges, and resolved tokens. Caveat for future probes:
   `.tab-background` transitions `background`, so computed reads must wait
   ~250ms after toggling drag attributes or they return mid-fade values.
+
+2026-09-16 — Bridge regression fix. Two tokens from the Acorn bridge are
+  painted unconditionally by Firefox: toolbarbutton applies
+  `outline: var(--toolbarbutton-outline)` to every button/icon (native
+  default transparent), and moz-button's inner `.button-background` paints
+  `border: 1px solid var(--button-border-color)` at rest. Pinned
+  `--toolbarbutton-outline-color*` back to transparent (our ring tokens own
+  state cues), `--button-border-color` to ghost-at-rest with hover/active
+  borders, and `--border-color-interactive` to the subtle
+  `--omarchy-border` ladder (accent only on active). Also gave
+  `#vertical-pinned-tabs-splitter` `margin-block: --omarchy-control-gap` so
+  tabs stop sitting flush against the divider. Lesson for future token
+  bridges: check whether the native default is transparent before
+  assigning a real colour.
