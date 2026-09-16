@@ -5,6 +5,7 @@ ROOT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 cd "$ROOT_DIR"
 
 bash -n \
+    scripts/audit-native-skin.sh \
     scripts/autothemer.sh \
     scripts/check-omarchy.sh \
     scripts/generate-omarchy-radius.sh \
@@ -17,6 +18,7 @@ bash -n \
 
 if command -v shellcheck >/dev/null 2>&1; then
     shellcheck \
+        scripts/audit-native-skin.sh \
         scripts/autothemer.sh \
         scripts/check-omarchy.sh \
         scripts/generate-omarchy-radius.sh \
@@ -159,6 +161,13 @@ PY
 tests/autothemer.sh
 tests/generate-omarchy-radius.sh
 tests/install-favicon-contrast.sh
+
+# Drift watch: warn (don't fail) when the installed Firefox's native skin
+# gains tokens or loses selectors vs tests/native-skin-baseline.txt —
+# review the report, then `scripts/audit-native-skin.sh update`.
+if ! scripts/audit-native-skin.sh check; then
+    echo "audit-native-skin: drift detected — review docs/firefox-skin-audit.md" >&2
+fi
 
 if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     git diff --check
