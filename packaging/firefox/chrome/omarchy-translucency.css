@@ -31,10 +31,20 @@
             var(--omarchy-surface) calc(var(--omarchy-glass-alpha) * 100%),
             transparent
         ) !important;
+        /* Menus/panels are transient text-dense surfaces: they keep a high
+         * alpha floor even when the chrome slider is pushed low — the
+         * compositor's popup blur supplies the frost, the panel stays
+         * legible. */
+        --omarchy-glass-panel-alpha: max(
+            var(--omarchy-glass-alpha),
+            0.8
+        ) !important;
         --omarchy-glass-panel: color-mix(
             in srgb,
-            var(--omarchy-surface) calc(var(--omarchy-glass-alpha) * 96%),
-            var(--omarchy-accent) calc(var(--omarchy-glass-alpha) * 4%)
+            var(--omarchy-surface)
+                calc(var(--omarchy-glass-panel-alpha) * 96%),
+            var(--omarchy-accent)
+                calc(var(--omarchy-glass-panel-alpha) * 4%)
         ) !important;
         --toolbar-background-color: var(--omarchy-glass) !important;
         --toolbar-background-color-inactive: var(--omarchy-glass) !important;
