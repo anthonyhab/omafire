@@ -137,3 +137,41 @@
 #mainPopupSet menu {
     color: var(--arrowpanel-color) !important;
 }
+
+/* Nova popup tokens. With browser.nova.enabled the --arrowpanel-* family is
+ * retired and toolkit popup.css paints ::part(content) from
+ * --panel-background-color / --panel-text-color / --panel-border-color.
+ * Declared at panel scope so the values apply wherever a popup lives, not
+ * just under #mainPopupSet. #DateTimePickerPanel self-themes to the content
+ * color scheme and .autoscroller's whole look lives in these tokens (its
+ * arrow glyph is part of --panel-background-color), so both are excluded.
+ *
+ * The --button-*-menu-* family (Firefox 154+ panel rows: subviewbuttons,
+ * panelview toolbarbuttons) aliases the ghost tokens AT :root, and custom
+ * property substitution bakes that alias before inheritance — panel-scoped
+ * ghost overrides never reach the rows. Re-declare the family here. */
+:is(panel, menupopup):not(#DateTimePickerPanel, .autoscroller) {
+    --panel-background-color: var(--omarchy-panel) !important;
+    --panel-text-color: var(--omarchy-fg) !important;
+    --panel-border-color: var(--omarchy-border) !important;
+    --panel-separator-color: var(--omarchy-border) !important;
+    --button-background-color-menu-hover: var(
+        --omarchy-control-hover
+    ) !important;
+    --button-background-color-menu-active: var(
+        --omarchy-control-active
+    ) !important;
+    --button-text-color-menu-hover: var(--omarchy-fg) !important;
+    --button-text-color-menu-active: var(--omarchy-fg) !important;
+}
+
+/* Extensions-panel gear buttons: toolkit declares --uei-button-* at :root
+ * aliased to the ghost tokens, which bake to Nova's defaults before our
+ * panel overrides can resolve — same substitution trap as the menu family.
+ * Re-declare on the button itself. Inert on builds without the family. */
+.unified-extensions-item-menu-button {
+    --uei-button-hover-bgcolor: var(--omarchy-control-hover) !important;
+    --uei-button-active-bgcolor: var(--omarchy-control-active) !important;
+    --uei-button-hover-color: var(--omarchy-fg) !important;
+    --uei-button-active-color: var(--omarchy-fg) !important;
+}
