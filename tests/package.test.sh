@@ -53,7 +53,7 @@ with open(sys.argv[1], encoding="utf-8") as source:
 assert manifest["name"] == "org.omarchy.omafox"
 assert manifest["path"] == "/usr/lib/omafox/omafox-native-host"
 assert manifest["type"] == "stdio"
-assert manifest["allowed_extensions"] == ["@omafox"]
+assert manifest["allowed_extensions"] == ["omarchy-ff-sync@bb.hab.rip", "@omafox"]
 PY
 
 export HOME="$TEST_HOME"

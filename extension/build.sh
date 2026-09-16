@@ -5,7 +5,7 @@ set -euo pipefail
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 DIST_DIR="$SCRIPT_DIR/dist"
 VERSION=$(sed -nE 's/^[[:space:]]*"version":[[:space:]]*"([^"]+)",?$/\1/p' "$SCRIPT_DIR/manifest.json")
-ARTIFACT="$DIST_DIR/omafox-$VERSION.xpi"
+ARTIFACT="$DIST_DIR/omarchy-ff-sync-$VERSION.xpi"
 
 if ! command -v zip >/dev/null 2>&1; then
   echo "Omafox: zip is required to build the XPI" >&2

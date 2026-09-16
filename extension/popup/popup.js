@@ -19,6 +19,33 @@
     errorMessage.hidden = !message;
   }
 
+  function applyPalette(record) {
+    if (!record) return;
+    try {
+      const theme = globalThis.OmafoxTheme.toFirefoxTheme(record);
+      const palette = record.palette;
+      const style = document.documentElement.style;
+      style.setProperty("--ofs-bg", theme.colors.popup);
+      style.setProperty("--ofs-fg", theme.colors.popup_text);
+      style.setProperty("--ofs-border", theme.colors.popup_border);
+      style.setProperty("--ofs-accent", palette.accent);
+      style.setProperty(
+        "--ofs-accent-fg",
+        globalThis.OmafoxTheme.readableTextColor(palette.accent, palette.bright_foreground, [
+          palette.foreground,
+          palette.light_foreground,
+          palette.dark_foreground,
+          palette.background,
+          palette.darker_background
+        ])
+      );
+      style.setProperty("--ofs-error", palette.bright_red);
+      document.documentElement.style.colorScheme = palette.mode;
+    } catch {
+      /* stored theme failed validation — keep system colors */
+    }
+  }
+
   async function loadState() {
     const result = await browser.storage.local.get([
       STORAGE_KEY,
@@ -27,6 +54,7 @@
     ]);
     storedTheme = result[STORAGE_KEY] || null;
     const nativeStatus = result[NATIVE_STATUS_KEY] || null;
+    applyPalette(storedTheme);
 
     if (storedTheme) {
       state.textContent = nativeStatus?.connected === false

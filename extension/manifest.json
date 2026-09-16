@@ -1,11 +1,11 @@
 {
   "manifest_version": 3,
-  "name": "Omafox",
+  "name": "Omarchy FF Sync",
   "version": "1.1.0",
   "description": "Keeps Firefox and Zen Browser in sync with the current Omarchy theme.",
   "browser_specific_settings": {
     "gecko": {
-      "id": "@omafox",
+      "id": "omarchy-ff-sync@bb.hab.rip",
       "strict_min_version": "142.0",
       "data_collection_permissions": {
         "required": ["none"]
@@ -25,7 +25,7 @@
     ]
   },
   "action": {
-    "default_title": "Omafox",
+    "default_title": "Omarchy FF Sync",
     "default_popup": "popup/popup.html",
     "default_icon": {
       "16": "icons/omafox.svg",

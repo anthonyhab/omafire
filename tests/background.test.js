@@ -100,9 +100,11 @@ function waitFor(predicate, message) {
   assert.deepEqual(manifest.permissions, ["nativeMessaging", "storage", "theme"]);
   assert.equal(Object.hasOwn(manifest, "host_permissions"), false);
   assert.equal(nativeHostName, nativeManifest.name);
-  assert.deepEqual(nativeManifest.allowed_extensions, [
-    manifest.browser_specific_settings.gecko.id
-  ]);
+  assert.ok(
+    nativeManifest.allowed_extensions.includes(
+      manifest.browser_specific_settings.gecko.id
+    )
+  );
   assert.equal(typeof nativeMessageListener, "function");
   assert.equal(typeof nativeDisconnectListener, "function");
 

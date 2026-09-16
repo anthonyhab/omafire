@@ -1,9 +1,10 @@
 /* omafox — Omarchy → Firefox/Zen theme sync command.
  *
- * C port of the original bash CLI. Speaks the omafox v1 protocol so the
- * signed @omafox WebExtension works unmodified: `sync` normalizes the
- * current Quattro palette into ~/.local/state/omafox/theme.json and the
- * native host pushes it to connected browsers over inotify.
+ * C port of the original bash CLI. Speaks the omafox v1 protocol so both the
+ * upstream-signed @omafox WebExtension and this fork's Omarchy FF Sync
+ * extension work unmodified: `sync` normalizes the current Quattro palette
+ * into ~/.local/state/omafox/theme.json and the native host pushes it to
+ * connected browsers over inotify.
  *
  * Firefox support adds the same managed-block pattern used for Zen:
  *   chrome/userChrome.css  -> BEGIN/END OMAFOX FIREFOX BRIDGE import block

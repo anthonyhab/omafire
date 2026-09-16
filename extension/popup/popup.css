@@ -8,8 +8,8 @@ body {
   margin: 0;
   min-width: 300px;
   padding: 16px;
-  background: Canvas;
-  color: CanvasText;
+  background: var(--ofs-bg, Canvas);
+  color: var(--ofs-fg, CanvasText);
 }
 
 header {
@@ -40,7 +40,7 @@ header p {
 dl {
   margin: 16px 0;
   padding: 0;
-  border-block: 1px solid color-mix(in srgb, CanvasText 20%, transparent);
+  border-block: 1px solid color-mix(in srgb, var(--ofs-border, CanvasText) 40%, transparent);
 }
 
 dl div {
@@ -65,7 +65,7 @@ dd {
 
 .error {
   margin: 14px 0;
-  color: #d70022;
+  color: var(--ofs-error, #d70022);
 }
 
 .actions {
@@ -78,17 +78,27 @@ button {
   flex: 1;
   padding: 7px 10px;
   border: 1px solid transparent;
-  border-radius: 5px;
-  background: AccentColor;
-  color: AccentColorText;
+  border-radius: var(--ofs-radius, 5px);
+  background: var(--ofs-accent, AccentColor);
+  color: var(--ofs-accent-fg, AccentColorText);
   font: inherit;
   cursor: pointer;
+  transition: background-color 90ms cubic-bezier(0.2, 0, 0, 1);
 }
 
 button.secondary {
-  border-color: color-mix(in srgb, CanvasText 30%, transparent);
+  border-color: color-mix(in srgb, var(--ofs-border, CanvasText) 60%, transparent);
   background: transparent;
-  color: CanvasText;
+  color: var(--ofs-fg, CanvasText);
+}
+
+button:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+button.secondary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--ofs-fg, CanvasText) 8%, transparent);
+  filter: none;
 }
 
 button:disabled {
@@ -98,7 +108,7 @@ button:disabled {
 
 
 #hacks {
-  border-top: 1px solid color-mix(in srgb, CanvasText 15%, transparent);
+  border-top: 1px solid color-mix(in srgb, var(--ofs-border, CanvasText) 30%, transparent);
   margin-top: 16px;
   padding-top: 12px;
 }
@@ -115,14 +125,21 @@ button:disabled {
 .feature {
   display: flex;
   gap: 10px;
-  padding: 6px 0;
+  padding: 6px 4px;
+  margin-inline: -4px;
+  border-radius: var(--ofs-radius, 5px);
   align-items: flex-start;
   cursor: pointer;
+  transition: background-color 90ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.feature:hover {
+  background: color-mix(in srgb, var(--ofs-fg, CanvasText) 6%, transparent);
 }
 
 .feature input {
   margin-top: 3px;
-  accent-color: AccentColor;
+  accent-color: var(--ofs-accent, AccentColor);
 }
 
 .feature-label {

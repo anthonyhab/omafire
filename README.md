@@ -11,7 +11,9 @@ Omafox keeps Firefox and Zen Browser in sync with your current
 > already matches the live theme — closing the window where a light default
 > theme or an approximate fallback could flash before the extension applies.
 > The native messaging host, wire protocol, and signed `@omafox` WebExtension
-> are unchanged and compatible with upstream.
+> remain wire-compatible with upstream; the WebExtension half is now forked
+  as **Omarchy FF Sync** (`omarchy-ff-sync@bb.hab.rip`) with a Hacks page for
+  live userChrome feature toggles.
 
 ## Features
 

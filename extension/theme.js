@@ -311,6 +311,7 @@
     PROTOCOL,
     SCHEMA_VERSION,
     parseThemeMessage,
+    readableTextColor,
     toFirefoxTheme,
     validatePalette
   });
