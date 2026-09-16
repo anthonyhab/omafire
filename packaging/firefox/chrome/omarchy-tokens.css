@@ -270,3 +270,25 @@
 }
 
 
+
+/* Nova's window furniture: --chrome-window-gap (4px) insets every
+ * .chrome-block card (toolbox, sidebar, browser) from the window edge and
+ * --chrome-block-radius rounds each card (GTK CSD env on Linux). Hyprland
+ * already owns window edges and corner rounding, so collapse the gap and
+ * hand the block radius to the generated geometry — square themes get
+ * square blocks, rounded themes match. Compact density already runs the
+ * gap at 0, so zero is a supported layout. */
+@media -moz-pref("browser.nova.enabled") {
+    :root {
+        --chrome-window-gap: 0px !important;
+        --chrome-block-radius: var(
+            --omarchy-radius-container,
+            0px
+        ) !important;
+        /* Nova overrides this separator with a light-dark violet pair in
+         * browser-colors.css, past the --card-border-color we already own. */
+        --chrome-content-separator-color: var(
+            --omarchy-border
+        ) !important;
+    }
+}
