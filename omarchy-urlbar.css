@@ -183,6 +183,30 @@
     width: var(--omarchy-nav-icon-size) !important;
 }
 
+/* The page-action cluster keeps growing — reader mode, PiP, taskbar tabs,
+ * translations, split view, share, the overflow menu, plus CFR promos.
+ * Collapse actions until the field is hovered, focused, or open; state
+ * indicators stay visible (the zoom chip only exists off-100%, and the
+ * star only when the page is actually bookmarked). */
+#urlbar .urlbar-page-action {
+    max-width: var(--omarchy-nav-control-size) !important;
+    overflow: hidden !important;
+    transition:
+        max-width 140ms ease-out,
+        opacity 140ms ease-out !important;
+}
+
+#urlbar:not(:hover):not(:focus-within):not([open])
+    :is(
+        .urlbar-page-action:not(#star-button-box),
+        #star-button-box:not(:has(#star-button[starred]))
+    ) {
+    margin-inline: 0 !important;
+    max-width: 0 !important;
+    opacity: 0 !important;
+    padding-inline: 0 !important;
+}
+
 /* A saved page is a semantic state, not Firefox's stock yellow notification.
  * Use the live Pywal toolbar accent; the solid glyph already carries state. */
 #urlbar #star-button[starred] {

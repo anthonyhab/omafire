@@ -154,6 +154,35 @@
     --input-color: var(--omarchy-fg) !important;
     --input-border-color: var(--omarchy-border) !important;
 
+    /* Nova remaps the semantic accent family to its violet palette
+     * (tokens-shared.css: light-dark violet-50/30). Links, focus rings,
+     * toggles, primary buttons, and info cards all derive from these —
+     * pinning them keeps Nova on the generated accent. --omarchy-accent
+     * already tracks the authoritative source (generated palette, or the
+     * lwt theme's own values under [lwtheme]), so no gate is needed. */
+    --color-accent-primary: var(--omarchy-accent) !important;
+    --color-accent-primary-hover: var(--omarchy-accent) !important;
+    --color-accent-primary-active: var(--omarchy-accent) !important;
+    --color-accent-primary-selected: var(--omarchy-accent) !important;
+    /* Satellites that reference the violet palette directly. */
+    --background-color-information: var(--omarchy-panel) !important;
+    --icon-color-information: var(--omarchy-accent) !important;
+    --icon-color-accent-primary-desaturated: var(--omarchy-muted) !important;
+    --button-background-color-primary-disabled: color-mix(
+        in srgb,
+        var(--omarchy-accent) 40%,
+        var(--omarchy-surface)
+    ) !important;
+    /* Nova drifts base chrome text to violet-desaturated-0. */
+    --text-color: var(--omarchy-fg) !important;
+    /* Nova paints the toolbox with a violet-leading gradient stop. */
+    --toolbox-background-color-gradient-leading: var(
+        --omarchy-surface
+    ) !important;
+    /* The content container behind pages: owning it kills the white flash
+     * during load/navigation. Chrome surface only — site content untouched. */
+    --tabpanel-background-color: var(--omarchy-surface) !important;
+
     --omarchy-base-window-background: var(--omarchy-surface) !important;
     --omarchy-base-window-color: var(--omarchy-fg) !important;
     --omarchy-base-view-background: var(--omarchy-surface) !important;
