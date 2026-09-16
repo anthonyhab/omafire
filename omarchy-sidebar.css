@@ -1,0 +1,78 @@
+@namespace xul "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+
+/* Use Firefox's paired sidebar text/highlight colors for the launcher and tabs. */
+sidebar-main,
+#vertical-tabs,
+#tabbrowser-arrowscrollbox[orient="vertical"],
+#sidebar-box,
+#sidebar,
+.sidebar-panel {
+    color: var(--omarchy-fg) !important;
+}
+
+sidebar-main {
+    --omarchy-base-toolbar-icon-fill: var(--omarchy-fg) !important;
+    --omarchy-base-hover-color: var(--omarchy-hover) !important;
+    --omarchy-base-active-color: var(--omarchy-active) !important;
+    --omarchy-base-selected-color: var(--omarchy-selection) !important;
+}
+
+/* Keep the sidebar and viewport flush; disable the native rounded-content card. */
+#browser:has(#sidebar-container:not([hidden])) #sidebar-box,
+#browser:has(#tabbrowser-tabbox[sidebar-shown]) #sidebar-box {
+    padding: 0 !important;
+}
+
+#browser:has(#sidebar-container:not([hidden])) #sidebar-container,
+#browser:has(#sidebar-container:not([hidden])) sidebar-main,
+#browser:has(#sidebar-container:not([hidden])) #sidebar-box,
+#browser:has(#sidebar-container:not([hidden])) #sidebar,
+#browser:has(#tabbrowser-tabbox[sidebar-shown]) #sidebar-box,
+#browser:has(#tabbrowser-tabbox[sidebar-shown]) #sidebar {
+    background: var(--omarchy-surface) !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+#browser:has(#sidebar-container:not([hidden])) #tabbrowser-tabbox,
+#tabbrowser-tabbox[sidebar-shown] {
+    background-color: var(--omarchy-surface) !important;
+}
+
+#browser:has(#sidebar-container:not([hidden]))
+    #tabbrowser-tabbox
+    .browserContainer,
+#tabbrowser-tabbox[sidebar-shown] .browserContainer {
+    background: var(--lwt-accent-color) !important;
+    overflow: visible !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Keep Firefox's resize hit targets and keyboard focus cue while letting the
+ * splitter disappear into the flat sidebar until it is hovered or focused. */
+#sidebar-launcher-splitter,
+#sidebar-splitter {
+    --splitter-width: 4px;
+    background-color: transparent !important;
+    flex: 0 0 auto !important;
+    max-width: none !important;
+    min-width: 1px !important;
+    position: relative !important;
+    width: var(--splitter-width) !important;
+    z-index: var(--browser-area-z-index-sidebar-splitter) !important;
+}
+
+#sidebar-splitter {
+    -moz-user-focus: normal !important;
+    width: var(--space-medium, var(--splitter-width)) !important;
+}
+
+:is(#sidebar-launcher-splitter, #sidebar-splitter):hover {
+    background-color: var(--omarchy-focus-accent) !important;
+}
+
+#sidebar-splitter:focus-visible {
+    box-shadow: var(--omarchy-ring-focus) !important;
+    outline: none !important;
+}

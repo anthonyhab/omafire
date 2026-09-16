@@ -55,14 +55,28 @@ optional_imports = {
     "generated-gtk-colors.css",
     "omarchy-radius.css",
 }
-for entrypoint in (root / "userChrome.css", root / "userContent.css"):
+for entrypoint in (
+    root / "userChrome.css",
+    root / "userContent.css",
+    root / "omarchy-chrome.css",
+):
     text = entrypoint.read_text()
     for imported in re.findall(r'@import\s+["\']([^"\']+)["\']', text):
         target = entrypoint.parent / imported
         if not target.is_file() and target.name not in optional_imports:
             raise SystemExit(f"missing import: {entrypoint.name} -> {imported}")
 
-chrome = (root / "omarchy-chrome.css").read_text()
+def resolve_imports(path: Path) -> str:
+    text = path.read_text()
+    parts = [text]
+    for imported in re.findall(r'@import\s+["\']([^"\']+)["\']', text):
+        target = path.parent / imported
+        if target.is_file():
+            parts.append(target.read_text())
+    return "\n".join(parts)
+
+
+chrome = resolve_imports(root / "omarchy-chrome.css")
 content = (root / "omarchy-content.css").read_text()
 for snippet in (
     'tab-split-view-wrapper:not([dragtarget])',
@@ -110,14 +124,16 @@ def check_css(path: Path) -> None:
         raise SystemExit(f"unbalanced CSS: {path} (depth={depth})")
 
 
-for css in (
+css_files = [
     root / "omarchy-chrome.css",
     root / "omarchy-content.css",
     root / "omarchy-features.css",
     root / "theme/parts/extension-icons.css",
     root / "userChrome.css",
     root / "userContent.css",
-):
+]
+css_files += sorted(root.glob("omarchy-*.css"))
+for css in dict.fromkeys(css_files):
     check_css(css)
 
 required = (

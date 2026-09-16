@@ -1,0 +1,243 @@
+@namespace xul "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+
+:root[lwtheme-brighttext] {
+    color-scheme: dark;
+}
+
+:root[lwtheme]:not([lwtheme-brighttext]) {
+    color-scheme: light;
+}
+
+/* Pywal semantic palette
+ *
+ * Pywalfox's accent is useful as an accent, but it is not automatically a
+ * readable foreground. Keep the live hue for focus/selection and derive
+ * neutral foregrounds and low-contrast surfaces for the rest of the chrome.
+ */
+:root {
+    /* Omarchy shell rhythm. Keep these centralized: Firefox's internal
+     * widgets otherwise collapse back to unrelated GNOME dimensions. */
+    --omarchy-ui-font: monospace;
+    --omarchy-ui-font-size: 12px;
+    --omarchy-ui-label-size: 13px;
+    --omarchy-nav-row-height: 44px;
+    --omarchy-nav-control-size: 32px;
+    --omarchy-urlbar-height: 36px;
+    --omarchy-tabs-row-height: 40px;
+    --omarchy-tabs-control-size: 32px;
+    --omarchy-control-gap: 4px;
+    --omarchy-focus-accent: var(
+        --omarchy-border-active-color,
+        var(--omarchy-accent)
+    );
+
+    --omarchy-surface: var(--lwt-accent-color, #fafafa);
+    --omarchy-accent: var(--lwt-text-color, #7c3aed);
+    --omarchy-fg: color-mix(
+        in srgb,
+        #17151c 88%,
+        var(--omarchy-accent) 12%
+    );
+    --omarchy-muted: color-mix(
+        in srgb,
+        var(--omarchy-fg) 62%,
+        var(--omarchy-surface) 38%
+    );
+    --omarchy-field: color-mix(
+        in srgb,
+        var(--omarchy-surface) 97%,
+        var(--omarchy-accent) 3%
+    );
+    --omarchy-panel: color-mix(
+        in srgb,
+        var(--omarchy-surface) 96%,
+        var(--omarchy-accent) 4%
+    );
+    --omarchy-border: color-mix(
+        in srgb,
+        var(--omarchy-fg) 16%,
+        transparent
+    );
+    --omarchy-separator: color-mix(
+        in srgb,
+        var(--omarchy-fg) 12%,
+        transparent
+    );
+    --omarchy-control-border: color-mix(
+        in srgb,
+        var(--omarchy-fg) 40%,
+        transparent
+    );
+    --omarchy-control-hover-border: color-mix(
+        in srgb,
+        var(--omarchy-fg) 25%,
+        transparent
+    );
+    --omarchy-hover: color-mix(
+        in srgb,
+        var(--omarchy-fg) 8%,
+        transparent
+    );
+    --omarchy-active: color-mix(
+        in srgb,
+        var(--omarchy-fg) 22%,
+        transparent
+    );
+    /* Omarchy's shell states are foreground washes: 8% hover, 18% selected,
+     * and 22% pressed. Keep them opaque here so every Firefox surface renders
+     * the same visible state regardless of its parent background. */
+    --omarchy-control-hover: color-mix(
+        in srgb,
+        var(--omarchy-surface) 92%,
+        var(--omarchy-fg) 8%
+    );
+    --omarchy-control-selected: color-mix(
+        in srgb,
+        var(--omarchy-surface) 82%,
+        var(--omarchy-fg) 18%
+    );
+    --omarchy-control-active: color-mix(
+        in srgb,
+        var(--omarchy-surface) 78%,
+        var(--omarchy-fg) 22%
+    );
+    /* Interaction rings: inset shadows, not borders or outlines, so state
+     * changes never shift layout. Hover/active/focus all draw the same 1px
+     * inner frame; only the color moves. */
+    --omarchy-ring: inset 0 0 0 1px var(--omarchy-border);
+    --omarchy-ring-hover: inset 0 0 0 1px var(--omarchy-control-hover-border);
+    --omarchy-ring-focus: inset 0 0 0 1px var(--omarchy-focus-accent);
+    --omarchy-ring-inactive: inset 0 0 0 1px
+        var(--omarchy-border-inactive-color, transparent);
+    /* Keyboard-navigation cue stays max-contrast regardless of accent. */
+    --omarchy-ring-kbd: inset 0 0 0 1px var(--omarchy-fg);
+    --omarchy-tab-selected-hover: var(--omarchy-control-active);
+    --omarchy-selection: color-mix(
+        in srgb,
+        var(--omarchy-fg) 18%,
+        transparent
+    );
+
+    --toolbar-bgcolor: var(--omarchy-surface) !important;
+    --toolbar-color: var(--omarchy-fg) !important;
+    --toolbar-background-color: var(--omarchy-surface) !important;
+    --toolbar-text-color: var(--omarchy-fg) !important;
+    --toolbar-field-border-color-focus: var(--omarchy-focus-accent) !important;
+    --urlbar-box-text-color: var(--omarchy-fg) !important;
+    --urlbar-box-text-color-hover: var(--omarchy-fg) !important;
+    /* Firefox 155 box controls (engine switcher, zoom chip, label chips) read
+     * these; unthemed they resolve to stock light-dark boxes that paint
+     * visible rectangles inside the field. */
+    --urlbar-box-background-color: transparent !important;
+    --urlbar-box-background-color-hover: var(
+        --omarchy-control-hover
+    ) !important;
+    --urlbar-box-background-color-active: var(
+        --omarchy-control-active
+    ) !important;
+    --urlbar-box-background-color-focus: transparent !important;
+    --urlbarView-secondary-text-color: var(--omarchy-muted) !important;
+    --link-color: var(--omarchy-accent) !important;
+    --link-color-hover: var(--omarchy-accent) !important;
+    --toolbarbutton-icon-fill: var(--omarchy-fg) !important;
+    --tab-selected-textcolor: var(--omarchy-fg) !important;
+
+    --arrowpanel-background: var(--omarchy-panel) !important;
+    --arrowpanel-color: var(--omarchy-fg) !important;
+    --arrowpanel-border-color: var(--omarchy-border) !important;
+    --panel-background: var(--omarchy-panel) !important;
+    --panel-color: var(--omarchy-fg) !important;
+    --panel-border-color: var(--omarchy-border) !important;
+    --sidebar-background-color: var(--omarchy-surface) !important;
+    --sidebar-text-color: var(--omarchy-fg) !important;
+    --input-bgcolor: var(--omarchy-field) !important;
+    --input-color: var(--omarchy-fg) !important;
+    --input-border-color: var(--omarchy-border) !important;
+
+    --omarchy-base-window-background: var(--omarchy-surface) !important;
+    --omarchy-base-window-color: var(--omarchy-fg) !important;
+    --omarchy-base-view-background: var(--omarchy-surface) !important;
+    --omarchy-base-view-color: var(--omarchy-fg) !important;
+    --omarchy-base-sidebar-background: var(--omarchy-surface) !important;
+    --omarchy-base-secondary-sidebar-background: var(--omarchy-field) !important;
+    --omarchy-base-sidebar-text-color: var(--omarchy-fg) !important;
+    --omarchy-base-view-selected-background: var(--omarchy-selection) !important;
+    --omarchy-base-view-selected-hover-background: var(--omarchy-active) !important;
+    --omarchy-base-view-selected-active-background: var(--omarchy-active) !important;
+    --omarchy-base-headerbar-background: var(--omarchy-surface) !important;
+    --omarchy-base-toolbar-background: var(--omarchy-surface) !important;
+    --omarchy-base-toolbar-icon-fill: var(--omarchy-fg) !important;
+    --omarchy-base-toolbar-border-color: var(--omarchy-border) !important;
+    --omarchy-base-border-color: var(--omarchy-border) !important;
+    --omarchy-base-menu-background: var(--omarchy-panel) !important;
+    --omarchy-base-menu-color: var(--omarchy-fg) !important;
+    --omarchy-base-menu-border-color: var(--omarchy-border) !important;
+    --omarchy-base-menu-separator-color: var(--omarchy-border) !important;
+    --omarchy-base-entry-background: var(--omarchy-field) !important;
+    --omarchy-base-entry-color: var(--omarchy-fg) !important;
+    --omarchy-base-inactive-entry-color: var(--omarchy-muted) !important;
+    --omarchy-base-entry-focused-border-color: var(--omarchy-focus-accent) !important;
+    --omarchy-base-entry-error-focused-border-color: color-mix(
+        in srgb,
+        var(--omarchy-accent) 50%,
+        transparent
+    ) !important;
+    --omarchy-base-focus-border-color: var(--omarchy-focus-accent) !important;
+    --omarchy-base-selection-bg: var(--omarchy-selection) !important;
+    --omarchy-base-accent-bg: var(--omarchy-accent) !important;
+    --omarchy-base-accent: var(--omarchy-accent) !important;
+    --omarchy-base-selected-background: var(--omarchy-selection) !important;
+    --omarchy-base-hover-color: var(--omarchy-hover) !important;
+    --omarchy-base-active-color: var(--omarchy-active) !important;
+    --omarchy-base-selected-color: var(--omarchy-selection) !important;
+    --omarchy-base-selected-hover-color: var(--omarchy-active) !important;
+    --omarchy-base-selected-active-color: var(--omarchy-active) !important;
+    --omarchy-base-card-background: var(--omarchy-panel) !important;
+    --omarchy-base-card-shade-color: var(--omarchy-border) !important;
+    --omarchy-base-card-shadow: none !important;
+    --omarchy-base-menu-shadow: none !important;
+    --omarchy-base-tabbar-background: var(--omarchy-surface) !important;
+    --omarchy-base-tabbar-tab-hover-background: var(--omarchy-hover) !important;
+    --omarchy-base-tabbar-tab-active-background: var(--omarchy-selection) !important;
+    --omarchy-base-tabbar-tab-active-background-contrast: var(--omarchy-active) !important;
+    --omarchy-base-tabbar-tab-active-hover-background: var(--omarchy-active) !important;
+    --omarchy-base-tabbar-tab-active-border-bottom-color: var(--omarchy-focus-accent) !important;
+}
+
+/* Before the extension theme lands, own the field tokens so first paint and
+ * the pre-theme window match the generated palette exactly. The moment
+ * lwtheme applies, Firefox's own theme vars carry the same palette values
+ * from the omafox extension — pinning here would fight them with
+ * approximations, so these stay startup-only. */
+:root:not([lwtheme]) {
+    --toolbar-field-background-color: var(--omarchy-field) !important;
+    --toolbar-field-color: var(--omarchy-fg) !important;
+    --toolbar-field-text-color: var(--omarchy-fg) !important;
+    --toolbar-field-text-color-focus: var(--omarchy-fg) !important;
+    --toolbar-field-focus-background-color: var(--omarchy-field) !important;
+    --toolbar-field-focus-color: var(--omarchy-fg) !important;
+    /* Firefox 155 renamed the focused-field tokens; the old names above stay
+     * for any consumer that still reads them. */
+    --toolbar-field-background-color-focus: var(--omarchy-field) !important;
+    --toolbar-field-border-color: var(--omarchy-border) !important;
+    --urlbarview-text-color-selected: var(--omarchy-fg) !important;
+}
+
+/* Under a live theme, source --omarchy-* from the theme's own values instead
+ * of approximating. The omafox extension maps the palette onto Firefox's
+ * theme keys exactly (field = darker_background, popup = dark_background,
+ * separators/field border = muted, tab line = accent), so these vars hold
+ * the real colors rather than derived ones. */
+:root[lwtheme] {
+    --omarchy-fg: var(--lwt-text-color, #f7f5f8);
+    --omarchy-muted: var(--toolbarseparator-color, var(--omarchy-fg));
+    --omarchy-field: var(
+        --toolbar-field-background-color,
+        var(--omarchy-surface)
+    );
+    --omarchy-panel: var(--panel-background-color, var(--omarchy-surface));
+    --omarchy-border: var(--toolbar-field-border-color, var(--omarchy-fg));
+    --omarchy-accent: var(--lwt-tab-line-color, var(--lwt-text-color));
+}
+
+

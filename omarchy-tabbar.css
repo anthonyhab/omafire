@@ -1,0 +1,952 @@
+@namespace xul "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+
+/* Keep the active horizontal tab as a small accent line instead of a full
+ * bright card. Vertical-tab rules below remain more specific. */
+#tabbrowser-tabs .tabbrowser-tab .tab-background {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: var(--omarchy-base-button-radius) !important;
+    box-shadow: none !important;
+}
+
+#tabbrowser-tabs .tabbrowser-tab[selected] .tab-background {
+    background: var(--omarchy-control-selected) !important;
+    border-block-end: max(1px, var(--omarchy-border-width, 0px)) solid
+        var(--omarchy-focus-accent) !important;
+}
+
+#tabbrowser-tabs .tabbrowser-tab:not([selected]):hover .tab-background {
+    background: var(--omarchy-hover) !important;
+}
+
+/* Horizontal tabs need their own flat layout pass. The GNOME base intentionally
+ * makes tabs full-width cards; that is especially noisy when vertical tabs are
+ * switched off. Keep a compact normal-width strip with one shared surface. */
+#tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab,
+#tabbrowser-tabs[orient="horizontal"] .tab-stack,
+#tabbrowser-tabs[orient="horizontal"] .tab-content {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"]
+    .tabbrowser-tab:not([pinned]):not(
+        tab-split-view-wrapper > .tabbrowser-tab
+    ) {
+    flex: 0 0 200px !important;
+    max-width: 200px !important;
+    min-width: 200px !important;
+    padding: 0 !important;
+    width: 200px !important;
+}
+
+/* Firefox 153 treats a split pair as one tab-strip item backed by a two-column
+ * grid. Give that wrapper the same 200px slot as an ordinary tab, while its
+ * child tabs divide the slot instead of inheriting the fixed-tab width. */
+#tabbrowser-tabs[orient="horizontal"] tab-split-view-wrapper:not([dragtarget]) {
+    align-items: stretch !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-sizing: border-box !important;
+    flex: 0 0 200px !important;
+    height: var(--omarchy-tabs-row-height) !important;
+    margin-block: 0 !important;
+    max-height: var(--omarchy-tabs-row-height) !important;
+    max-width: 200px !important;
+    min-height: var(--omarchy-tabs-row-height) !important;
+    min-width: 200px !important;
+    padding: 0 !important;
+    width: 200px !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"]
+    tab-split-view-wrapper
+    > .tabbrowser-tab {
+    flex: 1 1 0 !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    width: auto !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"]
+    tab-group[collapsed]
+    > tab-split-view-wrapper:not([hasactivetab]) {
+    flex: 0 0 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    max-height: 0 !important;
+    max-width: 0 !important;
+    min-height: 0 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    width: 0 !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab > .tab-stack {
+    max-width: none !important;
+    min-width: 0 !important;
+    width: auto !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab[selected] .tab-background {
+    background: var(--omarchy-control-selected) !important;
+    border-block-end: 0 !important;
+    box-shadow: inset 0 -1px var(--omarchy-focus-accent) !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"]
+    .tabbrowser-tab[selected]:hover
+    .tab-background {
+    background: var(--omarchy-tab-selected-hover) !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"]
+    .tabbrowser-tab:not([selected]):hover
+    .tab-background {
+    background: var(--omarchy-control-hover) !important;
+    box-shadow: var(--omarchy-ring-hover) !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] .tab-content::before {
+    display: none !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] .tab-close-button:hover {
+    background: var(--omarchy-control-hover) !important;
+    border-radius: var(--omarchy-base-button-radius) !important;
+    box-shadow: var(--omarchy-ring-hover) !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] .tab-close-button:active {
+    background: var(--omarchy-control-active) !important;
+}
+
+/* Tab groups inherit Firefox's bright product swatches by default. Build a
+ * compact terminal palette from Pywalfox's live primary/attention colours and
+ * its text hue instead: the choices remain distinct without looking like a
+ * second product palette. Firefox 153 selects the `--tab-group-*` set with
+ * Nova enabled and the `--tab-group-color-*` set otherwise. */
+:root {
+    --omarchy-group-primary: var(
+        --lwt-toolbarbutton-icon-fill,
+        var(--omarchy-focus-accent)
+    );
+    --omarchy-group-secondary: var(
+        --lwt-toolbarbutton-icon-fill-attention,
+        var(--omarchy-accent)
+    );
+    --omarchy-group-blue: color-mix(
+        in srgb,
+        var(--omarchy-group-secondary) 76%,
+        var(--omarchy-fg) 24%
+    );
+    --omarchy-group-purple: color-mix(
+        in srgb,
+        var(--omarchy-group-secondary) 58%,
+        var(--omarchy-accent) 42%
+    );
+    --omarchy-group-cyan: color-mix(
+        in srgb,
+        var(--omarchy-group-primary) 74%,
+        var(--omarchy-fg) 26%
+    );
+    --omarchy-group-orange: color-mix(
+        in srgb,
+        var(--omarchy-accent) 62%,
+        var(--omarchy-group-primary) 38%
+    );
+    --omarchy-group-yellow: color-mix(
+        in srgb,
+        var(--omarchy-group-primary) 52%,
+        var(--omarchy-fg) 48%
+    );
+    --omarchy-group-pink: color-mix(
+        in srgb,
+        var(--omarchy-accent) 78%,
+        var(--omarchy-fg) 22%
+    );
+    --omarchy-group-green: color-mix(
+        in srgb,
+        var(--omarchy-group-primary) 65%,
+        var(--omarchy-fg) 35%
+    );
+    --omarchy-group-gray: color-mix(
+        in srgb,
+        var(--omarchy-fg) 70%,
+        var(--omarchy-surface) 30%
+    );
+    --omarchy-group-red: color-mix(
+        in srgb,
+        var(--omarchy-accent) 60%,
+        var(--omarchy-fg) 40%
+    );
+    --omarchy-group-text: var(--omarchy-surface);
+    --tab-group-label-text-dark: var(--omarchy-fg) !important;
+}
+
+/* Firefox's colour names are persisted with tab groups, so retain them while
+ * mapping each name to the live terminal palette above. */
+:root {
+    --tab-group-color-blue: var(--omarchy-group-blue);
+    --tab-group-color-purple: var(--omarchy-group-purple);
+    --tab-group-color-cyan: var(--omarchy-group-cyan);
+    --tab-group-color-orange: var(--omarchy-group-orange);
+    --tab-group-color-yellow: var(--omarchy-group-yellow);
+    --tab-group-color-pink: var(--omarchy-group-pink);
+    --tab-group-color-green: var(--omarchy-group-green);
+    --tab-group-color-gray: var(--omarchy-group-gray);
+    --tab-group-color-red: var(--omarchy-group-red);
+
+    --tab-group-color-blue-invert: var(--omarchy-group-blue);
+    --tab-group-color-purple-invert: var(--omarchy-group-purple);
+    --tab-group-color-cyan-invert: var(--omarchy-group-cyan);
+    --tab-group-color-orange-invert: var(--omarchy-group-orange);
+    --tab-group-color-yellow-invert: var(--omarchy-group-yellow);
+    --tab-group-color-pink-invert: var(--omarchy-group-pink);
+    --tab-group-color-green-invert: var(--omarchy-group-green);
+    --tab-group-color-gray-invert: var(--omarchy-group-gray);
+    --tab-group-color-red-invert: var(--omarchy-group-red);
+
+    --tab-group-color-blue-pale: color-mix(
+        in srgb,
+        var(--omarchy-group-blue) 18%,
+        var(--omarchy-surface)
+    );
+    --tab-group-color-purple-pale: color-mix(
+        in srgb,
+        var(--omarchy-group-purple) 18%,
+        var(--omarchy-surface)
+    );
+    --tab-group-color-cyan-pale: color-mix(
+        in srgb,
+        var(--omarchy-group-cyan) 18%,
+        var(--omarchy-surface)
+    );
+    --tab-group-color-orange-pale: color-mix(
+        in srgb,
+        var(--omarchy-group-orange) 18%,
+        var(--omarchy-surface)
+    );
+    --tab-group-color-yellow-pale: color-mix(
+        in srgb,
+        var(--omarchy-group-yellow) 18%,
+        var(--omarchy-surface)
+    );
+    --tab-group-color-pink-pale: color-mix(
+        in srgb,
+        var(--omarchy-group-pink) 18%,
+        var(--omarchy-surface)
+    );
+    --tab-group-color-green-pale: color-mix(
+        in srgb,
+        var(--omarchy-group-green) 18%,
+        var(--omarchy-surface)
+    );
+    --tab-group-color-gray-pale: color-mix(
+        in srgb,
+        var(--omarchy-group-gray) 18%,
+        var(--omarchy-surface)
+    );
+    --tab-group-color-red-pale: color-mix(
+        in srgb,
+        var(--omarchy-group-red) 18%,
+        var(--omarchy-surface)
+    );
+}
+
+/* Nova's group label, hover, icon, and picker paths use a separate token
+ * family. Give all of them an explicit foreground so the muted swatches stay
+ * legible on both light and dark live Pywalfox themes. */
+:root {
+    --tab-group-blue: var(--omarchy-group-blue);
+    --tab-group-purple: var(--omarchy-group-purple);
+    --tab-group-cyan: var(--omarchy-group-cyan);
+    --tab-group-orange: var(--omarchy-group-orange);
+    --tab-group-yellow: var(--omarchy-group-yellow);
+    --tab-group-pink: var(--omarchy-group-pink);
+    --tab-group-green: var(--omarchy-group-green);
+    --tab-group-gray: var(--omarchy-group-gray);
+    --tab-group-red: var(--omarchy-group-red);
+
+    --tab-group-blue-invert: var(--tab-group-color-blue-pale);
+    --tab-group-purple-invert: var(--tab-group-color-purple-pale);
+    --tab-group-cyan-invert: var(--tab-group-color-cyan-pale);
+    --tab-group-orange-invert: var(--tab-group-color-orange-pale);
+    --tab-group-yellow-invert: var(--tab-group-color-yellow-pale);
+    --tab-group-pink-invert: var(--tab-group-color-pink-pale);
+    --tab-group-green-invert: var(--tab-group-color-green-pale);
+    --tab-group-gray-invert: var(--tab-group-color-gray-pale);
+    --tab-group-red-invert: var(--tab-group-color-red-pale);
+
+    --tab-group-blue-text: var(--omarchy-group-text);
+    --tab-group-purple-text: var(--omarchy-group-text);
+    --tab-group-cyan-text: var(--omarchy-group-text);
+    --tab-group-orange-text: var(--omarchy-group-text);
+    --tab-group-yellow-text: var(--omarchy-group-text);
+    --tab-group-pink-text: var(--omarchy-group-text);
+    --tab-group-green-text: var(--omarchy-group-text);
+    --tab-group-gray-text: var(--omarchy-group-text);
+    --tab-group-red-text: var(--omarchy-group-text);
+
+    --tab-group-blue-text-invert: var(--omarchy-fg);
+    --tab-group-purple-text-invert: var(--omarchy-fg);
+    --tab-group-cyan-text-invert: var(--omarchy-fg);
+    --tab-group-orange-text-invert: var(--omarchy-fg);
+    --tab-group-yellow-text-invert: var(--omarchy-fg);
+    --tab-group-pink-text-invert: var(--omarchy-fg);
+    --tab-group-green-text-invert: var(--omarchy-fg);
+    --tab-group-gray-text-invert: var(--omarchy-fg);
+    --tab-group-red-text-invert: var(--omarchy-fg);
+
+    --tab-group-blue-hover: color-mix(
+        in srgb,
+        var(--omarchy-group-blue) 82%,
+        var(--omarchy-fg)
+    );
+    --tab-group-purple-hover: color-mix(
+        in srgb,
+        var(--omarchy-group-purple) 82%,
+        var(--omarchy-fg)
+    );
+    --tab-group-cyan-hover: color-mix(
+        in srgb,
+        var(--omarchy-group-cyan) 82%,
+        var(--omarchy-fg)
+    );
+    --tab-group-orange-hover: color-mix(
+        in srgb,
+        var(--omarchy-group-orange) 82%,
+        var(--omarchy-fg)
+    );
+    --tab-group-yellow-hover: color-mix(
+        in srgb,
+        var(--omarchy-group-yellow) 82%,
+        var(--omarchy-fg)
+    );
+    --tab-group-pink-hover: color-mix(
+        in srgb,
+        var(--omarchy-group-pink) 82%,
+        var(--omarchy-fg)
+    );
+    --tab-group-green-hover: color-mix(
+        in srgb,
+        var(--omarchy-group-green) 82%,
+        var(--omarchy-fg)
+    );
+    --tab-group-gray-hover: color-mix(
+        in srgb,
+        var(--omarchy-group-gray) 82%,
+        var(--omarchy-fg)
+    );
+    --tab-group-red-hover: color-mix(
+        in srgb,
+        var(--omarchy-group-red) 82%,
+        var(--omarchy-fg)
+    );
+}
+
+/* A tab group is a compact organisational marker, not a floating pill.
+ * Square labels and swatches align it with Omarchy's zero-radius controls;
+ * the generated Hyprland focus colour remains the only selection flourish. */
+.tab-group-label,
+.tab-group-editor-panel .tab-group-editor-swatch {
+    border-radius: var(--omarchy-radius-container, 0px) !important;
+}
+
+.tab-group-editor-panel .tab-group-editor-swatch {
+    box-sizing: border-box !important;
+    height: 20px !important;
+    padding: 2px !important;
+    width: 20px !important;
+}
+
+.tab-group-editor-panel {
+    background: var(--omarchy-panel) !important;
+    border: 1px solid var(--omarchy-control-border) !important;
+    border-radius: var(--omarchy-base-popover-radius) !important;
+    box-shadow: none !important;
+    color: var(--omarchy-fg) !important;
+}
+
+/* The editor writes each stock colour onto an individual swatch variable.
+ * Target the paired input/label instead, which is stable native markup and
+ * lets the visible picker share the same restrained palette as group labels. */
+.tab-group-editor-panel
+    input[name="tab-group-color"][value="blue"]
+    + .tab-group-editor-swatch {
+    background-color: var(--omarchy-group-blue) !important;
+}
+
+.tab-group-editor-panel
+    input[name="tab-group-color"][value="purple"]
+    + .tab-group-editor-swatch {
+    background-color: var(--omarchy-group-purple) !important;
+}
+
+.tab-group-editor-panel
+    input[name="tab-group-color"][value="cyan"]
+    + .tab-group-editor-swatch {
+    background-color: var(--omarchy-group-cyan) !important;
+}
+
+.tab-group-editor-panel
+    input[name="tab-group-color"][value="orange"]
+    + .tab-group-editor-swatch {
+    background-color: var(--omarchy-group-orange) !important;
+}
+
+.tab-group-editor-panel
+    input[name="tab-group-color"][value="yellow"]
+    + .tab-group-editor-swatch {
+    background-color: var(--omarchy-group-yellow) !important;
+}
+
+.tab-group-editor-panel
+    input[name="tab-group-color"][value="pink"]
+    + .tab-group-editor-swatch {
+    background-color: var(--omarchy-group-pink) !important;
+}
+
+.tab-group-editor-panel
+    input[name="tab-group-color"][value="green"]
+    + .tab-group-editor-swatch {
+    background-color: var(--omarchy-group-green) !important;
+}
+
+.tab-group-editor-panel
+    input[name="tab-group-color"][value="gray"]
+    + .tab-group-editor-swatch {
+    background-color: var(--omarchy-group-gray) !important;
+}
+
+.tab-group-editor-panel
+    input[name="tab-group-color"][value="red"]
+    + .tab-group-editor-swatch {
+    background-color: var(--omarchy-group-red) !important;
+}
+
+.tab-group-editor-panel
+    input[name="tab-group-color"]:checked
+    + .tab-group-editor-swatch {
+    border-color: var(--omarchy-focus-accent) !important;
+    box-shadow: var(--omarchy-ring) !important;
+}
+
+/* Firefox stores the selected colour only in the group object's inline token
+ * bridge; there is no colour attribute to select. Resolve that persisted token
+ * to one Omarchy colour, then replace every host-level component token with it
+ * so the picker, label, line, count and drag target cannot diverge. Default to
+ * gray first so an unrecognised or not-yet-written colour name still renders
+ * a visible group instead of an invalid/unset token. */
+#tabbrowser-tabs tab-group {
+    --omarchy-current-group-color: var(--omarchy-group-gray);
+}
+
+#tabbrowser-tabs tab-group[style*="--tab-group-blue"] {
+    --omarchy-current-group-color: var(--omarchy-group-blue);
+}
+
+#tabbrowser-tabs tab-group[style*="--tab-group-purple"] {
+    --omarchy-current-group-color: var(--omarchy-group-purple);
+}
+
+#tabbrowser-tabs tab-group[style*="--tab-group-cyan"] {
+    --omarchy-current-group-color: var(--omarchy-group-cyan);
+}
+
+#tabbrowser-tabs tab-group[style*="--tab-group-orange"] {
+    --omarchy-current-group-color: var(--omarchy-group-orange);
+}
+
+#tabbrowser-tabs tab-group[style*="--tab-group-yellow"] {
+    --omarchy-current-group-color: var(--omarchy-group-yellow);
+}
+
+#tabbrowser-tabs tab-group[style*="--tab-group-pink"] {
+    --omarchy-current-group-color: var(--omarchy-group-pink);
+}
+
+#tabbrowser-tabs tab-group[style*="--tab-group-green"] {
+    --omarchy-current-group-color: var(--omarchy-group-green);
+}
+
+#tabbrowser-tabs tab-group[style*="--tab-group-gray"] {
+    --omarchy-current-group-color: var(--omarchy-group-gray);
+}
+
+#tabbrowser-tabs tab-group[style*="--tab-group-red"] {
+    --omarchy-current-group-color: var(--omarchy-group-red);
+}
+
+#tabbrowser-tabs tab-group {
+    --tab-group-color: var(--omarchy-current-group-color) !important;
+    --tab-group-color-invert: color-mix(
+        in srgb,
+        var(--omarchy-current-group-color) 18%,
+        var(--omarchy-surface)
+    ) !important;
+    --tab-group-color-pale: color-mix(
+        in srgb,
+        var(--omarchy-current-group-color) 18%,
+        var(--omarchy-surface)
+    ) !important;
+    --tab-group-background-color: var(
+        --omarchy-current-group-color
+    ) !important;
+    --tab-group-background-color-hover: color-mix(
+        in srgb,
+        var(--omarchy-current-group-color) 82%,
+        var(--omarchy-fg)
+    ) !important;
+    --tab-group-line-color: var(--omarchy-current-group-color) !important;
+    --tab-group-text-color: var(--omarchy-group-text) !important;
+    --tab-group-text-color-invert: var(--omarchy-fg) !important;
+}
+
+/* Keep Firefox's per-group paint ownership while flattening its component
+ * geometry. The label, line, count, hover and picker now resolve through the
+ * same named palette tokens instead of being flattened to one neutral card. */
+#tabbrowser-tabs[orient="vertical"] .tab-group-label {
+    border-radius: var(--omarchy-base-button-radius) !important;
+    box-shadow: none !important;
+    outline: 0 !important;
+}
+
+#tabbrowser-tabs[orient="vertical"]
+    .tab-group-label[dragover-groupTarget] {
+    --omarchy-group-drag-border: color-mix(
+        in srgb,
+        var(--tab-group-color-invert) 35%,
+        var(--omarchy-fg) 65%
+    );
+    background: color-mix(
+        in srgb,
+        var(--dragover-tab-group-color, var(--omarchy-focus-accent)) 25%,
+        transparent
+    ) !important;
+    border: 2px solid var(--omarchy-group-drag-border) !important;
+    box-shadow: inset 0 0 0 2px var(--omarchy-group-drag-border) !important;
+    box-sizing: border-box !important;
+    outline: 2px solid var(--omarchy-group-drag-border) !important;
+    outline-offset: -2px !important;
+}
+
+/* Drag affordances. Firefox marks a grouping drop with
+ * [dragover-groupTarget] on the hovered tab, split-view wrapper, or group
+ * label; expands #pinned-drop-indicator over the pinned area; and draws
+ * stacked-card shadows under a multi-tab [small-stack]/[big-stack] drag.
+ * The flat surfaces above would erase all of it, so each cue is re-exposed
+ * in Omarchy terms: a group-colour wash and accent frame that say exactly
+ * where release lands. */
+/* #main-window lifts these above the equal-specificity selected/hover rules
+ * below — a drop target that is also selected must still read as a target. */
+#main-window
+    #tabbrowser-tabs[movingtab]
+    .tabbrowser-tab[dragover-groupTarget]
+    > .tab-stack
+    > .tab-background,
+#main-window
+    #tabbrowser-tabs[movingtab]
+    tab-split-view-wrapper[dragover-groupTarget]
+    .tab-background {
+    background: color-mix(
+        in srgb,
+        var(--dragover-tab-group-color, var(--omarchy-focus-accent)) 30%,
+        transparent
+    ) !important;
+    box-shadow: inset 0 0 0 2px
+        var(--dragover-tab-group-color, var(--omarchy-focus-accent)) !important;
+}
+
+/* Pinned-area drop zone: the dashed target the native skin draws in its
+ * attention colour. Keep the expand animation; restyle colour/radius. */
+#pinned-drop-indicator {
+    color: var(--omarchy-focus-accent) !important;
+}
+
+#pinned-drop-indicator[visible] {
+    background: color-mix(
+        in srgb,
+        var(--omarchy-focus-accent) 14%,
+        transparent
+    ) !important;
+    border-radius: var(--omarchy-base-button-radius) !important;
+    outline: 1px dashed var(--omarchy-focus-accent) !important;
+}
+
+#pinned-drop-indicator[interactive] {
+    background: color-mix(
+        in srgb,
+        var(--omarchy-focus-accent) 26%,
+        transparent
+    ) !important;
+    outline-style: solid !important;
+}
+
+/* Multi-tab drags stack a second edge under the dragged tab. The flat
+ * .tab-background rule above removes those shadows, so draw them back in
+ * accent at the tab's trailing edge — two stacked edges for big-stack. */
+#main-window
+    #tabbrowser-tabs[orient="vertical"][movingtab]
+    :is(.tabbrowser-tab[small-stack], tab-split-view-wrapper[small-stack])
+    > .tab-stack
+    > .tab-background,
+#main-window
+    #tabbrowser-tabs[orient="vertical"][movingtab]
+    tab-split-view-wrapper[small-stack]
+    .tab-background {
+    box-shadow:
+        0 5px 0 -3px var(--omarchy-control-selected),
+        0 3px var(--omarchy-focus-accent) !important;
+}
+
+#main-window
+    #tabbrowser-tabs[orient="vertical"][movingtab]
+    :is(.tabbrowser-tab[big-stack], tab-split-view-wrapper[big-stack])
+    > .tab-stack
+    > .tab-background,
+#main-window
+    #tabbrowser-tabs[orient="vertical"][movingtab]
+    tab-split-view-wrapper[big-stack]
+    .tab-background {
+    box-shadow:
+        0 5px 0 -3px var(--omarchy-control-selected),
+        0 3px var(--omarchy-focus-accent),
+        0 8px 0 -3px var(--omarchy-control-selected),
+        0 6px var(--omarchy-focus-accent) !important;
+}
+
+#main-window
+    #tabbrowser-tabs[orient="horizontal"][movingtab]
+    :is(.tabbrowser-tab[small-stack], tab-split-view-wrapper[small-stack])
+    > .tab-stack
+    > .tab-background,
+#main-window
+    #tabbrowser-tabs[orient="horizontal"][movingtab]
+    tab-split-view-wrapper[small-stack]
+    .tab-background {
+    box-shadow:
+        5px 0 0 -3px var(--omarchy-control-selected),
+        3px 0 var(--omarchy-focus-accent) !important;
+}
+
+#main-window
+    #tabbrowser-tabs[orient="horizontal"][movingtab]
+    :is(.tabbrowser-tab[big-stack], tab-split-view-wrapper[big-stack])
+    > .tab-stack
+    > .tab-background,
+#main-window
+    #tabbrowser-tabs[orient="horizontal"][movingtab]
+    tab-split-view-wrapper[big-stack]
+    .tab-background {
+    box-shadow:
+        5px 0 0 -3px var(--omarchy-control-selected),
+        3px 0 var(--omarchy-focus-accent),
+        8px 0 0 -3px var(--omarchy-control-selected),
+        6px 0 var(--omarchy-focus-accent) !important;
+}
+
+#tabbrowser-tabs[orient="vertical"]
+    :is(.tab-group-label-container, .tab-group-overflow-count-container)::after {
+    background-color: var(--tab-group-line-color) !important;
+}
+
+#tabbrowser-tabs[orient="vertical"] .tab-group-overflow-count {
+    background-color: transparent !important;
+    color: var(--tab-group-line-color) !important;
+}
+
+/* Flattening the label clears Firefox's rounded focus treatment. Restore the
+ * same crisp keyboard cue used by the rest of the compact tab rail. */
+#tabbrowser-tabs[orient="vertical"][tablist-has-focus]
+    .tab-group-label.tablist-keyboard-focus,
+#tabbrowser-tabs[orient="vertical"] .tab-group-label:focus-visible {
+    box-shadow: var(--omarchy-ring-kbd) !important;
+    outline: none !important;
+}
+
+/* The vertical-tab pinning tour is a Firefox shadow component. Supplying
+ * these inherited palette tokens removes its hard-coded violet card without
+ * reaching into the component's shadow DOM. */
+sidebar-main,
+sidebar-pins-promo {
+    --color-violet-0: var(--omarchy-fg) !important;
+    --color-violet-10: var(--omarchy-panel) !important;
+    --color-violet-50: var(--omarchy-border) !important;
+    --color-violet-60: var(--omarchy-panel) !important;
+    --color-violet-70: var(--omarchy-fg) !important;
+}
+
+/* Collapsed vertical tabs are an icon rail, not a miniature button grid. */
+:root {
+    --omarchy-rail-cell-size: 32px;
+    --omarchy-rail-gap: 2px;
+}
+
+#tabbrowser-tabs[orient="vertical"]:not([expanded]) .tab-close-button {
+    display: none !important;
+}
+
+#vertical-tabs:has(#tabbrowser-tabs[orient="vertical"]:not([expanded])),
+#tabbrowser-tabs[orient="vertical"]:not([expanded]) {
+    --tab-min-height: var(--omarchy-rail-cell-size) !important;
+    --tab-collapsed-background-width: var(--omarchy-rail-cell-size) !important;
+    --tab-collapsed-width: calc(
+        var(--omarchy-rail-cell-size) + 2 * var(--omarchy-rail-gap)
+    ) !important;
+    --tab-inner-inline-margin: var(--omarchy-rail-gap) !important;
+    /* Firefox's vertical-tab implementation swaps these native values when
+     * the window deactivates. Pin every rail state to the Omarchy ladder so
+     * neither focus changes nor a container identity can reintroduce a stock
+     * blue card. */
+    --tab-background-color: transparent !important;
+    --tab-background-color-hover: var(--omarchy-control-hover) !important;
+    --tab-background-color-selected: var(--omarchy-control-selected) !important;
+    --tab-background-color-selected-hover: var(
+        --omarchy-control-active
+    ) !important;
+    --toolbox-background-color: var(--omarchy-surface) !important;
+    --toolbox-background-color-inactive: var(--omarchy-surface) !important;
+    --tab-selected-textcolor: var(--omarchy-fg) !important;
+}
+
+/* The collapsed tab must fill the rail so its 32px icon cell can center
+ * against the rail itself; the old inline translateX left icons visibly
+ * off-center when Firefox 155 widened the rail. */
+#tabbrowser-tabs[orient="vertical"]:not([expanded]) .tabbrowser-tab {
+    box-sizing: border-box !important;
+    height: var(--omarchy-rail-cell-size) !important;
+    margin: 0 !important;
+    max-height: var(--omarchy-rail-cell-size) !important;
+    min-height: var(--omarchy-rail-cell-size) !important;
+    padding: 0 !important;
+    transform: none !important;
+    width: 100% !important;
+}
+
+#tabbrowser-tabs[orient="vertical"]:not([expanded])
+    :is(.tab-group-label-container, .tab-group-overflow-count-container) {
+    transform: none !important;
+}
+
+#tabbrowser-tabs[orient="vertical"]:not([expanded]) .tab-background {
+    background-color: transparent !important;
+    border: 0 !important;
+    border-inline-start: 1px solid transparent !important;
+    border-radius: var(--omarchy-base-button-radius) !important;
+    box-shadow: none !important;
+    height: var(--omarchy-rail-cell-size) !important;
+    justify-self: center !important;
+    margin-block: 0 !important;
+    margin-inline: auto !important;
+    max-height: var(--omarchy-rail-cell-size) !important;
+    min-height: var(--omarchy-rail-cell-size) !important;
+    width: var(--omarchy-rail-cell-size) !important;
+}
+
+#tabbrowser-tabs[orient="vertical"]:not([expanded]) .tab-content,
+#tabbrowser-tabs[orient="vertical"]:not([expanded]) .tab-icon-stack {
+    align-items: center !important;
+    box-sizing: border-box !important;
+    height: var(--omarchy-rail-cell-size) !important;
+    justify-content: center !important;
+    justify-self: center !important;
+    margin: 0 !important;
+    min-height: var(--omarchy-rail-cell-size) !important;
+    padding: 0 !important;
+    width: var(--omarchy-rail-cell-size) !important;
+}
+
+#tabbrowser-tabs[orient="vertical"]:not([expanded])
+    :is(.tab-icon-image, .tab-icon-overlay) {
+    height: 16px !important;
+    margin: 0 !important;
+    width: 16px !important;
+}
+
+/* Keep the first rail item off the navbar divider with the same inset the
+ * rail's own cells use. #main-window lifts specificity over the native
+ * !important reset on the tabs element. */
+#main-window #tabbrowser-tabs[orient="vertical"]:not([expanded]) {
+    padding-block-start: var(--omarchy-control-gap) !important;
+}
+
+/* The pinned/unpinned splitter natively has only inline margins, so the
+ * neighbouring tabs sit flush against the line. Give it the rail's gap on
+ * both sides — symmetric breathing room around the divider. */
+#vertical-pinned-tabs-splitter {
+    margin-block: var(--omarchy-control-gap) !important;
+}
+
+/* Collapsed rail: a tab-group label has no room for its expanded row. Render
+ * it as a short centered bar in the group's own colour — a grouping cue, not
+ * a 24px solid swatch. */
+#main-window
+    #tabbrowser-tabs[orient="vertical"]:not([expanded])
+    .tab-group-label-container {
+    height: 12px !important;
+    min-height: 12px !important;
+    max-height: 12px !important;
+}
+
+#main-window
+    #tabbrowser-tabs[orient="vertical"]:not([expanded])
+    .tab-group-label-hover-highlight {
+    height: 12px !important;
+    min-height: 12px !important;
+    max-height: 12px !important;
+}
+
+#main-window
+    #tabbrowser-tabs[orient="vertical"]:not([expanded])
+    .tab-group-label {
+    border-radius: var(--omarchy-radius-container, 0px) !important;
+    height: 4px !important;
+    margin-inline: auto !important;
+    max-height: 4px !important;
+    max-width: 22px !important;
+    min-height: 4px !important;
+    min-width: 22px !important;
+    padding: 0 !important;
+    width: 22px !important;
+}
+
+/* Firefox 155 keeps two periphery buttons: #tabs-newtab-button is the live
+ * one in the collapsed rail; #vertical-tabs-newtab-button stays hidden. */
+#tabbrowser-tabs[orient="vertical"]:not([expanded])
+    :is(#tabs-newtab-button, #vertical-tabs-newtab-button) {
+    box-sizing: border-box !important;
+    height: var(--omarchy-rail-cell-size) !important;
+    margin: var(--omarchy-rail-gap) auto !important;
+    max-height: var(--omarchy-rail-cell-size) !important;
+    max-width: var(--omarchy-rail-cell-size) !important;
+    min-height: var(--omarchy-rail-cell-size) !important;
+    min-width: var(--omarchy-rail-cell-size) !important;
+    padding: 0 !important;
+    transform: none !important;
+    width: var(--omarchy-rail-cell-size) !important;
+}
+
+#tabbrowser-tabs[orient="vertical"]:not([expanded])
+    :is(#tabs-newtab-button, #vertical-tabs-newtab-button)
+    > .toolbarbutton-icon {
+    height: 18px !important;
+    margin: 0 !important;
+    width: 18px !important;
+}
+
+#tabbrowser-tabs[orient="vertical"]:not([expanded])
+    .tabbrowser-tab[selected]
+    .tab-background {
+    background-color: var(--omarchy-control-selected) !important;
+    border-inline-start-color: var(--omarchy-focus-accent) !important;
+}
+
+#tabbrowser-tabs[orient="vertical"]:not([expanded])
+    .tabbrowser-tab:not([selected]):hover
+    .tab-background {
+    background-color: var(--omarchy-control-hover) !important;
+}
+
+#tabbrowser-tabs[orient="vertical"]:not([expanded])
+    :is(#tabs-newtab-button, #vertical-tabs-newtab-button):hover {
+    background-color: var(--omarchy-control-hover) !important;
+    box-shadow: var(--omarchy-ring-hover) !important;
+}
+
+#tabbrowser-tabs[orient="vertical"]:not([expanded])
+    :is(#tabs-newtab-button, #vertical-tabs-newtab-button):active {
+    background-color: var(--omarchy-control-active) !important;
+    box-shadow: var(--omarchy-ring-hover) !important;
+}
+
+/* Firefox otherwise substitutes an inactive toolbox paint beneath the tab
+ * background. Keep the same state ladder when this window loses focus; the
+ * compositor border is the only intentional active/inactive colour change. */
+:root:-moz-window-inactive
+    #tabbrowser-tabs[orient="vertical"]:not([expanded])
+    .tab-background {
+    background-color: transparent !important;
+}
+
+:root:-moz-window-inactive
+    #tabbrowser-tabs[orient="vertical"]:not([expanded])
+    .tabbrowser-tab[selected]
+    .tab-background {
+    background-color: var(--omarchy-control-selected) !important;
+}
+
+:root:-moz-window-inactive
+    #tabbrowser-tabs[orient="vertical"]:not([expanded])
+    .tabbrowser-tab:not([selected]):hover
+    .tab-background {
+    background-color: var(--omarchy-control-hover) !important;
+}
+
+/* The collapsed rail removes Firefox's card treatment, so retain a precise
+ * keyboard cue for tab traversal without reintroducing rounded selection. */
+#tabbrowser-tabs[orient="vertical"]:not([expanded])[tablist-has-focus]
+    .tabbrowser-tab.tablist-keyboard-focus
+    .tab-background {
+    box-shadow: var(--omarchy-ring-kbd) !important;
+    outline: none !important;
+}
+
+/* Container identity colours are useful metadata, but Firefox's saturated
+ * defaults form a competing colour system. Reuse the same named live palette
+ * as tab groups so every coloured rail edge speaks one language. */
+.identity-color-blue {
+    --identity-tab-color: var(--omarchy-group-blue) !important;
+}
+
+.identity-color-purple {
+    --identity-tab-color: var(--omarchy-group-purple) !important;
+}
+
+.identity-color-cyan,
+.identity-color-turquoise {
+    --identity-tab-color: var(--omarchy-group-cyan) !important;
+}
+
+.identity-color-orange {
+    --identity-tab-color: var(--omarchy-group-orange) !important;
+}
+
+.identity-color-yellow {
+    --identity-tab-color: var(--omarchy-group-yellow) !important;
+}
+
+.identity-color-pink {
+    --identity-tab-color: var(--omarchy-group-pink) !important;
+}
+
+.identity-color-green {
+    --identity-tab-color: var(--omarchy-group-green) !important;
+}
+
+.identity-color-gray {
+    --identity-tab-color: var(--omarchy-group-gray) !important;
+}
+
+.identity-color-red {
+    --identity-tab-color: var(--omarchy-group-red) !important;
+}
+
+:is(
+    .identity-color-blue,
+    .identity-color-cyan,
+    .identity-color-turquoise,
+    .identity-color-green,
+    .identity-color-yellow,
+    .identity-color-orange,
+    .identity-color-red,
+    .identity-color-pink,
+    .identity-color-purple,
+    .identity-color-gray
+) {
+    --identity-icon-color: var(--identity-tab-color) !important;
+}

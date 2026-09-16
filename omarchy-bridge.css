@@ -1,0 +1,139 @@
+@namespace xul "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+
+/* Omarchy/Cascade layer
+ *
+ * Keep Firefox GNOME as the compatibility foundation, but centralize the
+ * maintained Omarchy simplifications here so the cascade has one clear owner.
+ * Cascade's useful cues are shared geometry, icon-only collapsed tabs, and
+ * one native popup surface rather than stacked containers.
+ */
+:root {
+    --omarchy-base-button-radius: var(--omarchy-radius-container, 0px) !important;
+    --omarchy-base-entry-radius: var(
+        --omarchy-radius-input,
+        var(--omarchy-radius-container, 0px)
+    ) !important;
+    --omarchy-base-card-radius: var(--omarchy-radius-container, 0px) !important;
+    --omarchy-base-menu-radius: var(--omarchy-radius-container, 0px) !important;
+    --omarchy-base-popover-radius: var(--omarchy-radius-container, 0px) !important;
+    --omarchy-base-dialog-radius: var(--omarchy-radius-container, 0px) !important;
+
+    /* Firefox's own design tokens drive every native surface (moz-* custom
+     * elements, panels, and the Firefox 155 urlbar field through
+     * --urlbar-background-border-radius). Repoint the whole family at the
+     * generated Hyprland tokens so native and maintained rules cannot drift
+     * on either square or rounded themes. --border-radius-circle is a
+     * semantic pill shape, not theme rounding, so it is left alone. */
+    --border-radius-xsmall: var(--omarchy-radius-container, 0px) !important;
+    --border-radius-small: var(--omarchy-radius-container, 0px) !important;
+    --border-radius-medium: var(--omarchy-radius-container, 0px) !important;
+    --border-radius-large: var(--omarchy-radius-container, 0px) !important;
+    --border-radius-xlarge: var(--omarchy-radius-container, 0px) !important;
+    --button-border-radius: var(--omarchy-base-button-radius) !important;
+    --toolbarbutton-border-radius: var(--omarchy-base-button-radius) !important;
+    --tab-border-radius: var(--omarchy-base-button-radius) !important;
+    --menuitem-border-radius: var(--omarchy-base-button-radius) !important;
+    --panel-menuitem-border-radius: var(--omarchy-base-button-radius) !important;
+    --input-text-border-radius: var(--omarchy-base-entry-radius) !important;
+    --input-search-border-radius: var(--omarchy-base-entry-radius) !important;
+    --card-border-radius: var(--omarchy-base-card-radius) !important;
+    --panel-border-radius: var(--omarchy-base-popover-radius) !important;
+    --popup-border-radius: var(--omarchy-base-popover-radius) !important;
+    --urlbarview-border-radius: var(--omarchy-radius-container, 0px) !important;
+    --urlbar-background-border-radius: var(
+        --omarchy-base-entry-radius
+    ) !important;
+    --urlbar-inner-border-radius: var(--omarchy-base-entry-radius) !important;
+    --urlbarView-row-border-radius: var(
+        --omarchy-base-button-radius
+    ) !important;
+
+    /* Acorn semantic layer: the tokens every moz-* shadow component and
+     * toolkit widget read. Bridging them here themes buttons, cards, menus,
+     * checkboxes, and message bars at once instead of per-element patching.
+     * Raw palette ramps (--color-*-NN) stay native — they are inputs. */
+    --button-background-color: transparent !important;
+    --button-background-color-hover: var(--omarchy-control-hover) !important;
+    --button-background-color-active: var(--omarchy-control-active) !important;
+    --button-background-color-selected: var(
+        --omarchy-control-selected
+    ) !important;
+    --button-background-color-disabled: transparent !important;
+    --button-text-color: var(--omarchy-fg) !important;
+    --button-text-color-hover: var(--omarchy-fg) !important;
+    --button-text-color-active: var(--omarchy-fg) !important;
+    --button-text-color-selected: var(--omarchy-fg) !important;
+    --button-text-color-disabled: var(--omarchy-muted) !important;
+    /* moz-button's inner .button-background paints this border
+     * unconditionally — keep it ghost at rest, border on interaction. */
+    --button-border-color: transparent !important;
+    --button-border-color-hover: var(
+        --omarchy-control-hover-border
+    ) !important;
+    --button-border-color-active: var(--omarchy-focus-accent) !important;
+    --button-border-color-selected: var(--omarchy-focus-accent) !important;
+    --button-border-color-disabled: transparent !important;
+    --border-color: var(--omarchy-border) !important;
+    --border-color-deemphasized: var(--omarchy-muted) !important;
+    --border-color-selected: var(--omarchy-focus-accent) !important;
+    --border-color-interactive: var(--omarchy-border) !important;
+    --border-color-interactive-hover: var(
+        --omarchy-control-hover-border
+    ) !important;
+    --border-color-interactive-active: var(--omarchy-focus-accent) !important;
+    --border-color-interactive-disabled: var(--omarchy-muted) !important;
+    --background-color-list-item-hover: var(
+        --omarchy-control-hover
+    ) !important;
+    --toolbarbutton-background-color: transparent !important;
+    --toolbarbutton-background-color-hover: var(
+        --omarchy-control-hover
+    ) !important;
+    --toolbarbutton-background-color-active: var(
+        --omarchy-control-active
+    ) !important;
+    /* toolbarbutton paints --toolbarbutton-outline unconditionally; the
+     * native default is transparent, and it must stay invisible — our ring
+     * tokens own hover/focus cues. */
+    --toolbarbutton-outline-color: transparent !important;
+    --toolbarbutton-outline-color-hover: transparent !important;
+    --toolbarbutton-outline-color-active: transparent !important;
+    --toolbarbutton-outline-color-selected: transparent !important;
+    --toolbarbutton-icon-fill: var(--omarchy-fg) !important;
+    --toolbarbutton-icon-fill-attention: var(--omarchy-focus-accent) !important;
+    --toolbarbutton-badge-background-color: var(
+        --omarchy-focus-accent
+    ) !important;
+    --toolbox-text-color: var(--omarchy-fg) !important;
+    --toolbox-text-color-inactive: var(--omarchy-muted) !important;
+    --tabs-navbar-separator-color: var(--omarchy-border) !important;
+    --card-border-color: var(--omarchy-border) !important;
+    --panel-box-shadow: none !important;
+    --popup-box-shadow: none !important;
+    --popup-border-color: var(--omarchy-border) !important;
+    --sidebar-border-color: var(--omarchy-border) !important;
+    --info-bar-background-color: var(--omarchy-panel) !important;
+    --info-bar-border-color: var(--omarchy-border) !important;
+}
+
+#mainPopupSet > menupopup,
+#mainPopupSet > panel {
+    --panel-background: var(--arrowpanel-background) !important;
+    --panel-shadow: none !important;
+    --arrowpanel-shadow: none !important;
+    --panel-color: var(--arrowpanel-color) !important;
+    --panel-border-color: var(--arrowpanel-border-color) !important;
+    --panel-border-radius: var(--omarchy-radius-container, 0px) !important;
+    --arrowpanel-border-radius: var(
+        --omarchy-radius-container,
+        0px
+    ) !important;
+    background-color: transparent !important;
+    color: var(--panel-color) !important;
+    border-color: transparent !important;
+}
+
+#mainPopupSet menuitem,
+#mainPopupSet menu {
+    color: var(--arrowpanel-color) !important;
+}
