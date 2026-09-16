@@ -63,7 +63,8 @@ button.close,
 	border-radius: var(--omarchy-base-button-radius) !important;
 	border: 0 !important;
 	color: var(--omarchy-base-window-color) !important;
-	font: menu !important;
+	font-family: var(--omarchy-ui-font) !important;
+	font-size: var(--omarchy-ui-font-size) !important;
 	font-weight: bold !important;
 	justify-content: center !important;
 	max-height: var(--omarchy-base-button-size) !important;

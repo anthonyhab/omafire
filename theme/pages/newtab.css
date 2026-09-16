@@ -7,7 +7,7 @@
         --newtab-primary-action-background: var(--omarchy-base-accent) !important;
 
         background-color: var(--omarchy-base-window-background) !important;
-        font-family: monospace !important;
+        font-family: var(--omarchy-ui-font, monospace) !important;
     }
 
     /* Colors come from the Pywalfox extension's live LWT theme; only flatten

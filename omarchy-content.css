@@ -11,29 +11,18 @@
     url("chrome://browser/content/firefoxview/firefoxview.html") {
     @media not (forced-colors) {
         :root {
-            color-scheme: light !important;
-            --omarchy-content-surface: #fafafa;
-            --omarchy-content-fg: #17151c;
-            --omarchy-content-muted: color-mix(
-                in srgb,
-                var(--omarchy-content-fg) 68%,
-                transparent
-            );
-            --omarchy-content-panel: color-mix(
-                in srgb,
-                var(--omarchy-content-surface) 94%,
-                var(--omarchy-content-fg) 6%
-            );
-            --omarchy-content-field: color-mix(
-                in srgb,
-                var(--omarchy-content-surface) 97%,
-                var(--omarchy-content-fg) 3%
-            );
-            --omarchy-content-border: color-mix(
-                in srgb,
-                var(--omarchy-content-fg) 18%,
-                transparent
-            );
+            color-scheme: var(--omarchy-color-scheme, normal) !important;
+            font-family: var(--omarchy-ui-font, monospace) !important;
+            /* The generated Omafox content palette owns these — exact theme
+             * values, light or dark, no approximations. Hover/active/
+             * selected stay as mixes off the real surface/fg so they follow
+             * any palette. */
+            --omarchy-content-surface: var(--omarchy-surface);
+            --omarchy-content-fg: var(--omarchy-fg);
+            --omarchy-content-muted: var(--omarchy-muted);
+            --omarchy-content-panel: var(--omarchy-panel);
+            --omarchy-content-field: var(--omarchy-field);
+            --omarchy-content-border: var(--omarchy-border);
             --omarchy-content-hover: color-mix(
                 in srgb,
                 var(--omarchy-content-surface) 92%,
@@ -49,16 +38,12 @@
                 var(--omarchy-content-surface) 82%,
                 var(--omarchy-content-fg) 18%
             );
-            --omarchy-content-accent-raw: var(
-                --newtab-primary-action-background,
-                AccentColor
+            --omarchy-content-accent: var(--omarchy-accent);
+            --omarchy-content-accent-raw: var(--omarchy-accent);
+            --omarchy-content-focus: var(
+                --omarchy-focus-accent,
+                var(--omarchy-accent)
             );
-            --omarchy-content-accent: color-mix(
-                in srgb,
-                var(--omarchy-content-accent-raw) 35%,
-                var(--omarchy-content-fg) 65%
-            );
-            --omarchy-content-focus: var(--omarchy-content-accent);
 
             --fxview-background-color: var(
                 --omarchy-content-surface
@@ -144,16 +129,10 @@
             scrollbar-width: thin;
         }
 
-        :root[lwt-newtab-brighttext] {
-            color-scheme: dark !important;
-            --omarchy-content-surface: #171820;
-            --omarchy-content-fg: #f7f5f8;
-        }
-
         body {
             background: var(--omarchy-content-surface) !important;
             color: var(--omarchy-content-fg) !important;
-            font-family: monospace !important;
+            font-family: var(--omarchy-ui-font, monospace) !important;
         }
 
         input#input:not(.input-field) {
@@ -198,22 +177,16 @@
     url("chrome://global/content/megalist/megalist.html") {
     @media not (forced-colors) {
         :root {
-            color-scheme: light !important;
-            /* Sidebar theme data can report a light surface even while the
-             * Omarchy window is dark. Use a paired system-scheme palette so
-             * surface and foreground can never diverge. */
-            --omarchy-content-surface: #fafafa;
-            --omarchy-content-fg: #17151c;
-            --omarchy-content-muted: color-mix(
-                in srgb,
-                var(--omarchy-content-fg) 68%,
-                transparent
-            );
-            --omarchy-content-panel: color-mix(
-                in srgb,
-                var(--omarchy-content-surface) 94%,
-                var(--omarchy-content-fg) 6%
-            );
+            color-scheme: var(--omarchy-color-scheme, normal) !important;
+            font-family: var(--omarchy-ui-font, monospace) !important;
+            /* Palette-fed — sidebar pages read the generated palette like
+             * every other surface, so light and dark both stay exact. */
+            --omarchy-content-surface: var(--omarchy-surface);
+            --omarchy-content-fg: var(--omarchy-fg);
+            --omarchy-content-muted: var(--omarchy-muted);
+            --omarchy-content-panel: var(--omarchy-panel);
+            --omarchy-content-field: var(--omarchy-field);
+            --omarchy-content-border: var(--omarchy-border);
             --omarchy-content-hover: color-mix(
                 in srgb,
                 var(--omarchy-content-surface) 92%,
@@ -229,16 +202,11 @@
                 var(--omarchy-content-surface) 82%,
                 var(--omarchy-content-fg) 18%
             );
-            --omarchy-content-border: color-mix(
-                in srgb,
-                var(--omarchy-content-fg) 18%,
-                transparent
-            );
-            --omarchy-content-accent-raw: AccentColor;
-            --omarchy-content-focus: color-mix(
-                in srgb,
-                var(--omarchy-content-accent-raw) 35%,
-                var(--omarchy-content-fg) 65%
+            --omarchy-content-accent: var(--omarchy-accent);
+            --omarchy-content-accent-raw: var(--omarchy-accent);
+            --omarchy-content-focus: var(
+                --omarchy-focus-accent,
+                var(--omarchy-accent)
             );
 
             /* Firefox-GNOME's sidebar shadow styles consume their own token
@@ -384,14 +352,6 @@
             scrollbar-width: thin;
         }
 
-        @media (prefers-color-scheme: dark) {
-            :root {
-                color-scheme: dark !important;
-                --omarchy-content-surface: #121212;
-                --omarchy-content-fg: #f7f5f8;
-            }
-        }
-
         body,
         sidebar-customize,
         sidebar-history,
@@ -400,7 +360,7 @@
         .sidebar-panel {
             background: var(--omarchy-content-surface) !important;
             color: var(--omarchy-content-fg) !important;
-            font-family: monospace !important;
+            font-family: var(--omarchy-ui-font, monospace) !important;
             font-size: 14px !important;
             line-height: 1.3 !important;
         }
@@ -562,23 +522,16 @@
     url-prefix("chrome://pdf.js/content/web/viewer.html") {
     @media not (forced-colors) {
         :root {
-            --main-color: #f7f5f8 !important;
-            --body-bg-color: #171820 !important;
-            --toolbar-bg-color: #171820 !important;
-            --toolbar-border-color: color-mix(
-                in srgb,
-                #f7f5f8 16%,
-                transparent
-            ) !important;
-            --field-color: #f7f5f8 !important;
-            --field-bg-color: #1d1e2b !important;
-            --field-border-color: color-mix(
-                in srgb,
-                #f7f5f8 25%,
-                transparent
-            ) !important;
-            --sidebar-narrow-bg-color: #171820 !important;
-            --sidebar-toolbar-bg-color: #171820 !important;
+            color-scheme: var(--omarchy-color-scheme, normal) !important;
+            --main-color: var(--omarchy-fg) !important;
+            --body-bg-color: var(--omarchy-surface) !important;
+            --toolbar-bg-color: var(--omarchy-surface) !important;
+            --toolbar-border-color: var(--omarchy-border) !important;
+            --field-color: var(--omarchy-fg) !important;
+            --field-bg-color: var(--omarchy-field) !important;
+            --field-border-color: var(--omarchy-border) !important;
+            --sidebar-narrow-bg-color: var(--omarchy-surface) !important;
+            --sidebar-toolbar-bg-color: var(--omarchy-surface) !important;
         }
     }
 }
@@ -591,23 +544,23 @@
  * bridged, since those are UI chrome rather than a deliberate reading choice. */
 @-moz-document url-prefix("about:reader") {
     @media not (forced-colors) {
+        :root {
+            color-scheme: var(--omarchy-color-scheme, normal) !important;
+        }
+
         body.auto {
-            background-color: #171820 !important;
-            color: #f7f5f8 !important;
+            background-color: var(--omarchy-surface) !important;
+            color: var(--omarchy-fg) !important;
         }
 
         .toolbar-container,
         .dropdown-popup {
-            background-color: #171820 !important;
-            border-color: color-mix(
-                in srgb,
-                #f7f5f8 16%,
-                transparent
-            ) !important;
+            background-color: var(--omarchy-surface) !important;
+            border-color: var(--omarchy-border) !important;
         }
 
         .dropdown-popup .dropdown-item {
-            color: #f7f5f8 !important;
+            color: var(--omarchy-fg) !important;
         }
     }
 }
@@ -619,32 +572,21 @@
  * does not follow the live Omarchy/Pywalfox palette. */
 @-moz-document url("about:addons"),
     url("about:preferences"),
-    url-prefix("about:preferences#") {
+    url-prefix("about:preferences#"),
+    url-prefix("about:logins"),
+    url-prefix("about:processes"),
+    url-prefix("about:config") {
     @media not (forced-colors) {
         :root {
-            color-scheme: light !important;
-            --omarchy-content-surface: #fafafa;
-            --omarchy-content-fg: #17151c;
-            --omarchy-content-muted: color-mix(
-                in srgb,
-                var(--omarchy-content-fg) 68%,
-                transparent
-            );
-            --omarchy-content-panel: color-mix(
-                in srgb,
-                var(--omarchy-content-surface) 94%,
-                var(--omarchy-content-fg) 6%
-            );
-            --omarchy-content-field: color-mix(
-                in srgb,
-                var(--omarchy-content-surface) 97%,
-                var(--omarchy-content-fg) 3%
-            );
-            --omarchy-content-border: color-mix(
-                in srgb,
-                var(--omarchy-content-fg) 18%,
-                transparent
-            );
+            color-scheme: var(--omarchy-color-scheme, normal) !important;
+            font-family: var(--omarchy-ui-font, monospace) !important;
+            /* Palette-fed — same --in-content-* bridge, exact theme values. */
+            --omarchy-content-surface: var(--omarchy-surface);
+            --omarchy-content-fg: var(--omarchy-fg);
+            --omarchy-content-muted: var(--omarchy-muted);
+            --omarchy-content-panel: var(--omarchy-panel);
+            --omarchy-content-field: var(--omarchy-field);
+            --omarchy-content-border: var(--omarchy-border);
             --omarchy-content-hover: color-mix(
                 in srgb,
                 var(--omarchy-content-surface) 92%,
@@ -660,11 +602,11 @@
                 var(--omarchy-content-surface) 82%,
                 var(--omarchy-content-fg) 18%
             );
-            --omarchy-content-accent-raw: AccentColor;
-            --omarchy-content-focus: color-mix(
-                in srgb,
-                var(--omarchy-content-accent-raw) 35%,
-                var(--omarchy-content-fg) 65%
+            --omarchy-content-accent: var(--omarchy-accent);
+            --omarchy-content-accent-raw: var(--omarchy-accent);
+            --omarchy-content-focus: var(
+                --omarchy-focus-accent,
+                var(--omarchy-accent)
             );
 
             --in-content-page-background: var(
@@ -775,21 +717,13 @@
             scrollbar-width: thin;
         }
 
-        @media (prefers-color-scheme: dark) {
-            :root {
-                color-scheme: dark !important;
-                --omarchy-content-surface: #171820;
-                --omarchy-content-fg: #f7f5f8;
-            }
-        }
-
         body,
         #categories,
         #category-general,
         .main-content {
             background: var(--omarchy-content-surface) !important;
             color: var(--omarchy-content-fg) !important;
-            font-family: monospace !important;
+            font-family: var(--omarchy-ui-font, monospace) !important;
         }
 
         /* about:addons cards and about:preferences groupboxes both consume
@@ -806,6 +740,145 @@
 
         a {
             color: var(--omarchy-content-focus) !important;
+        }
+    }
+}
+
+/* Acorn semantic bridge for privileged content documents — the same token
+ * family the chrome layer bridges (buttons, cards, tables, links, status
+ * surfaces). about:logins, about:protections, about:support and toolkit
+ * dialogs consume these tokens directly instead of the --in-content-*
+ * aliases, so they get their own map. Scoped to Firefox-owned documents so
+ * ordinary websites never see these vars; palette values come from the
+ * generated omafox-content-palette.css, which stays exact under lwtheme. */
+@-moz-document url-prefix("about:"),
+    url-prefix("chrome://browser/content/"),
+    url-prefix("chrome://global/content/"),
+    url-prefix("chrome://mozapps/content/") {
+    @media not (forced-colors) {
+        :root {
+            color-scheme: var(--omarchy-color-scheme, normal) !important;
+            font-family: var(--omarchy-ui-font, monospace) !important;
+            --text-color: var(--omarchy-fg) !important;
+            --text-color-deemphasized: var(--omarchy-muted) !important;
+            --background-color-canvas: var(--omarchy-surface) !important;
+            --background-color-box: var(--omarchy-panel) !important;
+            --background-color-overlay: var(--omarchy-panel) !important;
+            --background-color-box-info: color-mix(
+                in srgb,
+                var(--omarchy-accent) 12%,
+                var(--omarchy-surface)
+            ) !important;
+            --background-color-critical: color-mix(
+                in srgb,
+                var(--omarchy-red) 16%,
+                var(--omarchy-surface)
+            ) !important;
+            --background-color-warning: color-mix(
+                in srgb,
+                var(--omarchy-orange, var(--omarchy-yellow)) 16%,
+                var(--omarchy-surface)
+            ) !important;
+            --background-color-success: color-mix(
+                in srgb,
+                var(--omarchy-green) 16%,
+                var(--omarchy-surface)
+            ) !important;
+            --border-color: var(--omarchy-border) !important;
+            --border-color-selected: var(--omarchy-accent) !important;
+            --border-color-interactive: var(--omarchy-border) !important;
+            --border-color-interactive-hover: var(--omarchy-border) !important;
+            --border-color-interactive-active: var(--omarchy-focus-accent) !important;
+            --card-border-color: var(--omarchy-border) !important;
+            --link-color: var(--omarchy-accent) !important;
+            --link-color-hover: var(--omarchy-focus-accent) !important;
+            --focus-outline-color: var(--omarchy-focus-accent) !important;
+            --icon-color-critical: var(--omarchy-red) !important;
+            --icon-color-success: var(--omarchy-green) !important;
+
+            /* Buttons: ghost at rest (same rule as the chrome bridge —
+             * Acorn paints borders unconditionally), control ladder on
+             * interaction, accent for primary. */
+            --button-background-color: transparent !important;
+            --button-background-color-hover: color-mix(
+                in srgb,
+                var(--omarchy-surface) 92%,
+                var(--omarchy-fg) 8%
+            ) !important;
+            --button-background-color-active: color-mix(
+                in srgb,
+                var(--omarchy-surface) 78%,
+                var(--omarchy-fg) 22%
+            ) !important;
+            --button-background-color-selected: color-mix(
+                in srgb,
+                var(--omarchy-surface) 82%,
+                var(--omarchy-fg) 18%
+            ) !important;
+            --button-background-color-primary: var(--omarchy-accent) !important;
+            --button-background-color-primary-hover: color-mix(
+                in srgb,
+                var(--omarchy-accent) 88%,
+                var(--omarchy-fg) 12%
+            ) !important;
+            --button-background-color-primary-active: color-mix(
+                in srgb,
+                var(--omarchy-accent) 76%,
+                var(--omarchy-fg) 24%
+            ) !important;
+            --button-background-color-ghost-hover: var(
+                --button-background-color-hover
+            ) !important;
+            --button-background-color-ghost-active: var(
+                --button-background-color-active
+            ) !important;
+            --button-text-color: var(--omarchy-fg) !important;
+            --button-text-color-hover: var(--omarchy-fg) !important;
+            --button-text-color-active: var(--omarchy-fg) !important;
+            --button-text-color-selected: var(--omarchy-fg) !important;
+            --button-text-color-primary: var(--omarchy-surface) !important;
+            --button-text-color-primary-hover: var(--omarchy-surface) !important;
+            --button-text-color-primary-active: var(--omarchy-surface) !important;
+            --button-text-color-ghost: var(--omarchy-fg) !important;
+            --button-text-color-ghost-hover: var(--omarchy-fg) !important;
+            --button-border-color: transparent !important;
+            --button-border-color-hover: var(--omarchy-border) !important;
+            --button-border-color-active: var(--omarchy-focus-accent) !important;
+            --button-border-color-primary: transparent !important;
+            --button-border-color-primary-hover: transparent !important;
+            --button-border-color-primary-active: transparent !important;
+
+            /* Tables, inputs, cards. */
+            --table-row-background-color: var(--omarchy-surface) !important;
+            --table-row-background-color-alternate: var(--omarchy-panel) !important;
+            --input-background-color: var(--omarchy-field) !important;
+            --input-border-color: var(--omarchy-border) !important;
+            --input-text-color: var(--omarchy-fg) !important;
+            --card-background-color: var(--omarchy-panel) !important;
+
+            /* Generated Omarchy geometry — square themes stay square. */
+            --border-radius-xsmall: var(--omarchy-radius-container, 0px) !important;
+            --border-radius-small: var(--omarchy-radius-container, 0px) !important;
+            --border-radius-medium: var(--omarchy-radius-container, 0px) !important;
+            --border-radius-large: var(--omarchy-radius-container, 0px) !important;
+            --border-radius-xlarge: var(--omarchy-radius-container, 0px) !important;
+            --button-border-radius: var(--omarchy-radius-container, 0px) !important;
+            --input-text-border-radius: var(
+                --omarchy-radius-input,
+                var(--omarchy-radius-container, 0px)
+            ) !important;
+            --card-border-radius: var(--omarchy-radius-container, 0px) !important;
+            --logins-dialog-border-radius: var(
+                --omarchy-radius-container,
+                0px
+            ) !important;
+
+            /* Protection-report category colors track the theme palette. */
+            --tracker-color: var(--omarchy-magenta) !important;
+            --fingerprinter-color: var(--omarchy-orange, var(--omarchy-yellow)) !important;
+            --cryptominer-color: var(--omarchy-cyan) !important;
+            --social-color: var(--omarchy-blue) !important;
+            --cookie-color: var(--omarchy-violet, var(--omarchy-magenta)) !important;
         }
     }
 }

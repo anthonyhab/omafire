@@ -105,6 +105,11 @@ toolbarspring {
 }
 
 .urlbarView-row {
+	/* Proton skin rounds the outer row with calc(gutter + inner-radius);
+	 * the gutter is a spacing var, so square themes still leaked ~2px of
+	 * rounding. Own the outer corner directly. */
+	border-radius: var(--omarchy-base-button-radius) !important;
+
 	&[selected] {
 		background: var(--omarchy-base-selected-color) !important;
 		color: var(--omarchy-base-window-color) !important;
@@ -137,7 +142,8 @@ toolbarspring {
 	
 	&[label]::before {
 		color: var(--omarchy-base-window-color) !important;
-		font: menu !important;
+		font-family: var(--omarchy-ui-font) !important;
+		font-size: var(--omarchy-ui-font-size) !important;
 		font-weight: bold !important;
 	}
 }

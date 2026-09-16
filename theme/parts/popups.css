@@ -177,7 +177,8 @@ panel toolbarseparator {
 
 .subview-subheader,
 .PanelUI-remotetabs-clientcontainer label {
-	font: menu !important;
+	font-family: var(--omarchy-ui-font) !important;
+	font-size: var(--omarchy-ui-font-size) !important;
 	font-weight: bold !important;
 }
 

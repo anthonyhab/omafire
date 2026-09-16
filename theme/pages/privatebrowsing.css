@@ -30,6 +30,6 @@
     }
 
     body {
-        font-family: monospace !important;
+        font-family: var(--omarchy-ui-font, monospace) !important;
     }
 }
