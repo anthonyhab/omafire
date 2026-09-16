@@ -20,6 +20,8 @@
 #define MAX_STATE_BYTES 65536U
 #define RETRY_INTERVAL_MS 1000
 #define EVENT_BUFFER_BYTES (16U * 1024U)
+#define MAX_FEATURES 64U
+#define MAX_FEATURE_KEY 48U
 
 static int write_all(int descriptor, const void *buffer, size_t length) {
   const unsigned char *cursor = buffer;
@@ -213,16 +215,244 @@ static int consume_inotify_events(int descriptor, int watch_descriptor,
   return should_check;
 }
 
+static int resolve_features_path(char *features_path, size_t size) {
+  const char *override = getenv("OMAFOX_FEATURES_FILE");
+  if (override != NULL && override[0] != '\0') {
+    int length = snprintf(features_path, size, "%s", override);
+    return length >= 0 && (size_t)length < size ? 0 : -1;
+  }
+
+  char state_path[PATH_MAX];
+  if (resolve_state_path(state_path, sizeof(state_path)) < 0) {
+    return -1;
+  }
+  char directory[PATH_MAX];
+  const char *filename = NULL;
+  if (split_state_path(state_path, directory, sizeof(directory), &filename)
+      < 0) {
+    return -1;
+  }
+  int length = snprintf(features_path, size, "%s/features.json", directory);
+  return length >= 0 && (size_t)length < size ? 0 : -1;
+}
+
+static int json_space(unsigned char c) {
+  return c == ' ' || c == '\t' || c == '\r' || c == '\n';
+}
+
+static int feature_key_char(unsigned char c) {
+  return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-';
+}
+
+static void json_skip_space(const unsigned char *message, size_t length,
+                            size_t *position) {
+  while (*position < length && json_space(message[*position])) {
+    (*position)++;
+  }
+}
+
+/* Returns the offset just past the colon following "key", or -1. */
+static long json_member(const unsigned char *message, size_t length,
+                        const char *key) {
+  char needle[MAX_FEATURE_KEY + 3U];
+  int needle_length =
+      snprintf(needle, sizeof(needle), "\"%s\"", key);
+  if (needle_length <= 0 || (size_t)needle_length >= sizeof(needle)) {
+    return -1;
+  }
+
+  for (size_t i = 0; i + (size_t)needle_length <= length; i++) {
+    if (memcmp(message + i, needle, (size_t)needle_length) != 0) {
+      continue;
+    }
+    size_t position = i + (size_t)needle_length;
+    json_skip_space(message, length, &position);
+    if (position < length && message[position] == ':') {
+      position++;
+      json_skip_space(message, length, &position);
+      return (long)position;
+    }
+  }
+  return -1;
+}
+
+static int json_expect_literal(const unsigned char *message, size_t length,
+                               size_t *position, const char *literal) {
+  size_t literal_length = strlen(literal);
+  if (*position + literal_length > length
+      || memcmp(message + *position, literal, literal_length) != 0) {
+    return -1;
+  }
+  *position += literal_length;
+  return 0;
+}
+
+/* Parses {"key": true|false, ...} starting at *position (which must point at
+ * '{'). On success fills entries and advances past the closing '}'. */
+static int json_parse_features(const unsigned char *message, size_t length,
+                               size_t *position, char *keys, int *values,
+                               size_t *count) {
+  if (*position >= length || message[*position] != '{') {
+    return -1;
+  }
+  (*position)++;
+  *count = 0;
+
+  while (1) {
+    json_skip_space(message, length, position);
+    if (*position >= length) {
+      return -1;
+    }
+    if (message[*position] == '}') {
+      (*position)++;
+      return 0;
+    }
+    if (*count > 0) {
+      if (message[*position] != ',') {
+        return -1;
+      }
+      (*position)++;
+      json_skip_space(message, length, position);
+    }
+    if (*count >= MAX_FEATURES || *position >= length
+        || message[*position] != '"') {
+      return -1;
+    }
+    (*position)++;
+    size_t key_length = 0;
+    while (*position < length && feature_key_char(message[*position])) {
+      if (key_length >= MAX_FEATURE_KEY) {
+        return -1;
+      }
+      keys[(*count) * (MAX_FEATURE_KEY + 1U) + key_length] =
+          (char)message[*position];
+      key_length++;
+      (*position)++;
+    }
+    if (key_length == 0 || *position >= length
+        || message[*position] != '"') {
+      return -1;
+    }
+    keys[(*count) * (MAX_FEATURE_KEY + 1U) + key_length] = '\0';
+    (*position)++;
+    json_skip_space(message, length, position);
+    if (*position >= length || message[*position] != ':') {
+      return -1;
+    }
+    (*position)++;
+    json_skip_space(message, length, position);
+    if (json_expect_literal(message, length, position, "true") == 0) {
+      values[*count] = 1;
+    } else if (json_expect_literal(message, length, position, "false") == 0) {
+      values[*count] = 0;
+    } else {
+      return -1;
+    }
+    (*count)++;
+  }
+}
+
+static int write_features_file(const char *path, const char *keys,
+                               const int *values, size_t count) {
+  char temporary[PATH_MAX];
+  int path_length = snprintf(temporary, sizeof(temporary), "%s.tmp", path);
+  if (path_length < 0 || (size_t)path_length >= sizeof(temporary)) {
+    return -1;
+  }
+
+  int descriptor =
+      open(temporary, O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC | O_NOFOLLOW,
+           0644);
+  if (descriptor < 0) {
+    return -1;
+  }
+
+  char line[MAX_FEATURE_KEY + 12U];
+  int failed = write_all(descriptor, "{", 1) < 0;
+  for (size_t i = 0; !failed && i < count; i++) {
+    const char *key = keys + i * (MAX_FEATURE_KEY + 1U);
+    int line_length = snprintf(line, sizeof(line), "%s\"%s\":%s",
+                               i > 0 ? "," : "", key,
+                               values[i] ? "true" : "false");
+    if (line_length < 0 || (size_t)line_length >= sizeof(line)
+        || write_all(descriptor, line, (size_t)line_length) < 0) {
+      failed = 1;
+    }
+  }
+  if (!failed && write_all(descriptor, "}\n", 2) < 0) {
+    failed = 1;
+  }
+  if (close(descriptor) < 0 || failed) {
+    unlink(temporary);
+    return -1;
+  }
+  return rename(temporary, path) < 0 ? -1 : 0;
+}
+
+static int send_features_reply(int ok, size_t applied) {
+  char reply[96];
+  int length = snprintf(reply, sizeof(reply),
+                        "{\"type\":\"features-ack\",\"ok\":%s,\"applied\":%u}",
+                        ok ? "true" : "false", (unsigned)applied);
+  if (length < 0 || (size_t)length >= sizeof(reply)) {
+    return -1;
+  }
+  return send_theme_message(reply, (size_t)length);
+}
+
+static int dispatch_message(const unsigned char *message, size_t length,
+                            const char *features_path) {
+  long action_position = json_member(message, length, "action");
+  if (action_position < 0) {
+    return 0;
+  }
+  size_t position = (size_t)action_position;
+  if (position >= length || message[position] != '"') {
+    return 0;
+  }
+  position++;
+  size_t action_start = position;
+  while (position < length && message[position] != '"') {
+    position++;
+  }
+  if (position >= length
+      || (size_t)(position - action_start) != strlen("features-set")
+      || memcmp(message + action_start, "features-set",
+                strlen("features-set")) != 0) {
+    return 0;
+  }
+
+  long features_position = json_member(message, length, "features");
+  char keys[MAX_FEATURES * (MAX_FEATURE_KEY + 1U)];
+  int values[MAX_FEATURES];
+  size_t count = 0;
+  int ok = 0;
+  if (features_position >= 0) {
+    size_t features_start = (size_t)features_position;
+    if (json_parse_features(message, length, &features_start, keys, values,
+                            &count)
+            == 0
+        && write_features_file(features_path, keys, values, count) == 0) {
+      ok = 1;
+    }
+  }
+  return send_features_reply(ok, ok ? count : 0);
+}
+
 int main(void) {
   char state_path[PATH_MAX];
+  char features_path[PATH_MAX];
   char state_directory[PATH_MAX];
   char last_message[MAX_STATE_BYTES + 1U] = {0};
   size_t last_length = 0;
   const char *state_filename = NULL;
+  unsigned char inbound[MAX_STATE_BYTES + 4U];
+  size_t inbound_have = 0;
 
   if (resolve_state_path(state_path, sizeof(state_path)) < 0
       || split_state_path(state_path, state_directory,
-                          sizeof(state_directory), &state_filename) < 0) {
+                          sizeof(state_directory), &state_filename) < 0
+      || resolve_features_path(features_path, sizeof(features_path)) < 0) {
     fprintf(stderr, "omafox native host: invalid state path\n");
     return 1;
   }
@@ -264,12 +494,40 @@ int main(void) {
       break;
     }
     if ((descriptors[0].revents & POLLIN) != 0) {
-      char discard[4096];
       ssize_t amount;
       do {
-        amount = read(STDIN_FILENO, discard, sizeof(discard));
+        amount = read(STDIN_FILENO, inbound + inbound_have,
+                      sizeof(inbound) - inbound_have);
       } while (amount < 0 && errno == EINTR);
       if (amount <= 0) {
+        break;
+      }
+      inbound_have += (size_t)amount;
+
+      int protocol_error = 0;
+      while (inbound_have >= 4U && !protocol_error) {
+        uint32_t frame_length = (uint32_t)inbound[0]
+                                | ((uint32_t)inbound[1] << 8U)
+                                | ((uint32_t)inbound[2] << 16U)
+                                | ((uint32_t)inbound[3] << 24U);
+        if (frame_length > MAX_STATE_BYTES) {
+          protocol_error = 1;
+          break;
+        }
+        if (inbound_have < (size_t)frame_length + 4U) {
+          break;
+        }
+        if (dispatch_message(inbound + 4U, (size_t)frame_length,
+                             features_path)
+            < 0) {
+          protocol_error = 1;
+          break;
+        }
+        memmove(inbound, inbound + 4U + frame_length,
+                inbound_have - 4U - frame_length);
+        inbound_have -= 4U + (size_t)frame_length;
+      }
+      if (protocol_error) {
         break;
       }
     }

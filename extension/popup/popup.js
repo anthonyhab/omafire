@@ -75,5 +75,45 @@
     }
   });
 
+  const featureList = document.querySelector("#feature-list");
+  const { FEATURES, STORAGE_KEY: FEATURES_KEY } = globalThis.OmafoxFeatures;
+
+  async function renderFeatures() {
+    const result = await browser.storage.local.get(FEATURES_KEY);
+    const enabled = result[FEATURES_KEY] || {};
+    featureList.textContent = "";
+    for (const feature of FEATURES) {
+      const label = document.createElement("label");
+      label.className = "feature";
+
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.checked = enabled[feature.id] === true;
+      input.addEventListener("change", async () => {
+        try {
+          await browser.runtime.sendMessage({
+            type: "features-set",
+            features: { [feature.id]: input.checked }
+          });
+        } catch (error) {
+          input.checked = !input.checked;
+          showError(error instanceof Error ? error.message : String(error));
+        }
+      });
+
+      const text = document.createElement("span");
+      const name = document.createElement("span");
+      name.className = "feature-label";
+      name.textContent = feature.label;
+      const description = document.createElement("span");
+      description.className = "feature-description";
+      description.textContent = feature.description;
+      text.append(name, description);
+      label.append(input, text);
+      featureList.append(label);
+    }
+  }
+
   void loadState().catch((error) => showError(error.message));
+  void renderFeatures().catch((error) => showError(error.message));
 })();

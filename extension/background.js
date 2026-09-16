@@ -6,6 +6,8 @@
   const NATIVE_STATUS_KEY = "nativeStatus";
   const NATIVE_HOST = "org.omarchy.omafox";
   const { parseThemeMessage, toFirefoxTheme } = globalThis.OmafoxTheme;
+  const { STORAGE_KEY: FEATURES_KEY, normalizeFeatures } =
+    globalThis.OmafoxFeatures;
   let updateQueue = Promise.resolve();
   let nativePort = null;
   let reconnectTimer = null;
@@ -67,6 +69,44 @@
     });
   }
 
+  function sendFeaturesToHost(features) {
+    if (!nativePort) {
+      return false;
+    }
+    try {
+      nativePort.postMessage({ action: "features-set", features });
+      return true;
+    } catch (error) {
+      console.error("Omafox could not send feature toggles", error);
+      return false;
+    }
+  }
+
+  async function pushStoredFeatures() {
+    const result = await browser.storage.local.get(FEATURES_KEY);
+    const features = normalizeFeatures(result[FEATURES_KEY]);
+    if (Object.keys(features).length > 0) {
+      sendFeaturesToHost(features);
+    }
+  }
+
+  async function handleFeaturesMessage(rawFeatures) {
+    const features = normalizeFeatures(rawFeatures);
+    const result = await browser.storage.local.get(FEATURES_KEY);
+    const merged = normalizeFeatures({
+      ...(result[FEATURES_KEY] || {}),
+      ...features
+    });
+    await browser.storage.local.set({ [FEATURES_KEY]: merged });
+    if (!sendFeaturesToHost(merged)) {
+      await browser.storage.local.set({
+        [ERROR_KEY]: errorRecord(
+          new Error("Native helper is disconnected; toggles saved for retry")
+        )
+      });
+    }
+  }
+
   function scheduleNativeReconnect() {
     if (reconnectTimer !== null) return;
     reconnectTimer = setTimeout(() => {
@@ -86,6 +126,12 @@
       port.onMessage.addListener((message) => {
         reconnectDelay = 1000;
         void setNativeStatus(true);
+        if (message && message.type === "features-ack") {
+          if (message.ok !== true) {
+            console.error("Omafox host rejected a features update", message);
+          }
+          return;
+        }
         void enqueue(() => receiveThemeMessage(message), "native update");
       });
 
@@ -97,6 +143,7 @@
       });
 
       void setNativeStatus(true);
+      void pushStoredFeatures();
     } catch (error) {
       nativePort = null;
       void setNativeStatus(false, error instanceof Error ? error.message : String(error));
@@ -109,6 +156,13 @@
     connectNativeHost();
     return restore;
   }
+
+  browser.runtime.onMessage.addListener((message) => {
+    if (message && message.type === "features-set") {
+      return handleFeaturesMessage(message.features);
+    }
+    return undefined;
+  });
 
   browser.runtime.onStartup.addListener(handleBrowserLifecycle);
   browser.runtime.onInstalled.addListener(handleBrowserLifecycle);

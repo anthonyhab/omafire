@@ -4,16 +4,22 @@ const assert = require("node:assert/strict");
 const manifest = require("../extension/manifest.json");
 const nativeManifest = require("../packaging/org.omarchy.omafox.json");
 const themeApi = require("../extension/theme.js");
+const featuresApi = require("../extension/features.js");
 
 const memory = {};
 const themeUpdates = [];
+const nativeSent = [];
 let startupListener;
 let nativeHostName;
 let nativeMessageListener;
 let nativeDisconnectListener;
+let runtimeMessageListener;
 
 const nativePort = {
   error: null,
+  postMessage(message) {
+    nativeSent.push(message);
+  },
   onMessage: {
     addListener(listener) {
       nativeMessageListener = listener;
@@ -59,6 +65,11 @@ global.browser = {
     connectNative(name) {
       nativeHostName = name;
       return nativePort;
+    },
+    onMessage: {
+      addListener(listener) {
+        runtimeMessageListener = listener;
+      }
     },
     onStartup: {
       addListener(listener) {
@@ -151,6 +162,38 @@ function waitFor(predicate, message) {
   console.error = originalConsoleError;
   assert.match(memory.lastError.message, /mode/);
   assert.equal(memory.storedTheme.themeName, "native-dark");
+
+  // features-set from the popup merges into storage and relays to the host;
+  // ids outside the registry and non-boolean values are dropped.
+  await runtimeMessageListener({
+    type: "features-set",
+    features: { debug: true, "not-a-feature": true, "urlbar-actions": "yes" }
+  });
+  assert.deepEqual(memory.features, { debug: true });
+  assert.deepEqual(nativeSent.at(-1), {
+    action: "features-set",
+    features: { debug: true }
+  });
+  assert.deepEqual(featuresApi.normalizeFeatures({ debug: "1" }), {});
+
+  // A features-ack is control traffic, not a theme payload.
+  const updatesBeforeAck = themeUpdates.length;
+  nativeMessageListener({ type: "features-ack", ok: true, applied: 1 });
+  await new Promise((resolve) => setTimeout(resolve, 20));
+  assert.equal(themeUpdates.length, updatesBeforeAck);
+
+  // Reconnecting the host re-pushes the stored toggle state.
+  nativeSent.length = 0;
+  nativeDisconnectListener();
+  await startupListener();
+  await waitFor(
+    () => nativeSent.length > 0,
+    "stored features were not re-pushed on reconnect"
+  );
+  assert.deepEqual(nativeSent.at(-1), {
+    action: "features-set",
+    features: { debug: true }
+  });
 
   console.log("background.test.js: ok");
 })().catch((error) => {

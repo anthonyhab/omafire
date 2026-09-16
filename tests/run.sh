@@ -28,6 +28,7 @@ shellcheck \
   "$SCRIPT_DIR/fixtures/bin/omarchy"
 
 node --check "$PROJECT_DIR/extension/theme.js"
+node --check "$PROJECT_DIR/extension/features.js"
 node --check "$PROJECT_DIR/extension/background.js"
 node --check "$PROJECT_DIR/extension/popup/popup.js"
 node --check "$SCRIPT_DIR/native-host.test.js"
