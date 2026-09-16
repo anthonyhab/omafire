@@ -1,0 +1,176 @@
+@namespace xul "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+
+/* Low-risk Firefox Theme API crack fixes. */
+#sidebar-header,
+.sidebar-panel,
+treechildren {
+    background-color: var(--omarchy-surface) !important;
+    color: var(--omarchy-fg) !important;
+}
+
+treechildren::-moz-tree-row(selected) {
+    background-color: var(--omarchy-selection) !important;
+}
+
+treechildren::-moz-tree-cell-text(selected) {
+    color: var(--omarchy-fg) !important;
+}
+
+treechildren::-moz-tree-row(hover) {
+    background-color: var(--omarchy-hover) !important;
+}
+
+findbar {
+    background-color: var(--toolbar-bgcolor) !important;
+    color: var(--toolbar-color) !important;
+    border-top-color: var(--omarchy-border) !important;
+}
+
+.findbar-textbox {
+    background-color: var(--omarchy-field) !important;
+    color: var(--omarchy-fg) !important;
+    border-color: var(--omarchy-border) !important;
+}
+
+.findbar-closebutton {
+    color: var(--toolbar-color) !important;
+    fill: var(--toolbar-color) !important;
+    -moz-context-properties: fill, fill-opacity !important;
+}
+
+tooltip {
+    background-color: var(--arrowpanel-background) !important;
+    color: var(--arrowpanel-color) !important;
+    border-color: var(--arrowpanel-border-color) !important;
+}
+
+/* Replace the GNOME theme's fixed white foreground on accent buttons. */
+#appMenu-popup .panel-banner-item[notificationid="update-restart"],
+button.popup-notification-primary-button:not(#hack),
+#editBookmarkPanelDoneButton,
+#tracking-action-block,
+.button.connect-device {
+    color: var(--omarchy-fg) !important;
+}
+
+/* Keep selected in-content rows paired with their dynamic highlight color. */
+richlistbox#items {
+    --in-content-item-selected: var(--omarchy-selection) !important;
+    --in-content-item-selected-text: var(--omarchy-fg) !important;
+}
+
+@-moz-document url("chrome://browser/content/places/places.xhtml") {
+    /* Library windows never get [lwtheme], so the generated omafox palette
+     * (scoped to :root:not([lwtheme])) already supplies the exact theme
+     * colors here. */
+    :root {
+        --in-content-page-background: var(--omarchy-surface) !important;
+        --in-content-text-color: var(--omarchy-fg) !important;
+        --in-content-box-background: var(--toolbar-bgcolor) !important;
+        --in-content-border-color: var(--omarchy-border) !important;
+        --in-content-primary-button-background: var(--omarchy-accent) !important;
+    }
+
+    body,
+    #places,
+    #placesView,
+    #contentView,
+    #placesViewsBox,
+    #placesToolbar,
+    #placesList,
+    #placeContent,
+    #downloadsListBox,
+    #detailsPane,
+    #placesView > splitter {
+        background-color: var(--omarchy-surface) !important;
+        color: var(--omarchy-fg) !important;
+    }
+
+    #placesView #placeContent,
+    #placesView #downloadsListBox,
+    #placesView > #contentView,
+    #placesView > #contentView > #placesViewsBox,
+    #placesView > #placesList {
+        background-color: var(--omarchy-surface) !important;
+        color: var(--omarchy-fg) !important;
+    }
+
+    #placesView treechildren::-moz-tree-row,
+    #placesView treechildren::-moz-tree-cell {
+        background-color: var(--omarchy-surface) !important;
+        color: var(--omarchy-fg) !important;
+    }
+
+    #placesView treechildren::-moz-tree-row(selected) {
+        background-color: var(--omarchy-selection) !important;
+    }
+
+    #placesView treechildren::-moz-tree-cell-text {
+        color: var(--omarchy-fg) !important;
+    }
+
+    #placesView > splitter {
+        border-color: var(--omarchy-border) !important;
+    }
+
+    #placesView > splitter + #contentView {
+        background-color: var(--omarchy-surface) !important;
+    }
+
+    #placesView > splitter + #contentView > #placesViewsBox {
+        background-color: var(--omarchy-surface) !important;
+    }
+
+    #placesView > splitter + #contentView > #placesViewsBox > tree,
+    #placesView > splitter + #contentView > #placesViewsBox > richlistbox {
+        background-color: var(--omarchy-surface) !important;
+        color: var(--omarchy-fg) !important;
+    }
+
+    #placesView > splitter + #contentView > #placesViewsBox > treechildren {
+        background-color: var(--omarchy-surface) !important;
+    }
+
+    #placesToolbar {
+        border-bottom: var(--omarchy-border-width, 0px) solid
+            var(--omarchy-border) !important;
+    }
+
+    #placesList,
+    #placeContent {
+        --sidebar-background-color: var(--omarchy-surface) !important;
+        --sidebar-text-color: var(--omarchy-fg) !important;
+    }
+
+    #searchFilter {
+        --input-background-color: var(--omarchy-field) !important;
+        --input-text-color: var(--omarchy-fg) !important;
+        --input-border-color: var(--omarchy-border) !important;
+        background: var(--omarchy-field) !important;
+        color: var(--omarchy-fg) !important;
+        border-color: var(--omarchy-border) !important;
+    }
+
+    tree,
+    treechildren,
+    richlistbox {
+        background-color: var(--omarchy-surface) !important;
+        color: var(--omarchy-fg) !important;
+    }
+
+    #detailsPane {
+        background-color: var(--toolbar-bgcolor) !important;
+        border-top-color: var(--omarchy-border) !important;
+    }
+
+    treechildren::-moz-tree-row(selected),
+    richlistitem[selected] {
+        background-color: var(--omarchy-selection) !important;
+        color: var(--omarchy-fg) !important;
+    }
+
+    treechildren::-moz-tree-cell-text,
+    richlistitem {
+        color: var(--omarchy-fg) !important;
+    }
+}

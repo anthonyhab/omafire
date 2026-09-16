@@ -1,0 +1,54 @@
+@namespace xul "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+
+/* Match the shell's fontconfig-driven typography rather than Firefox's
+ * platform sans. Primary chrome labels use the shell subtitle step.
+ * The container rules alone are not enough: native skin puts `font: menu`
+ * / `font: caption` (system sans) on menuitems, toolbar buttons, and
+ * labels, which would otherwise escape the container font and split the
+ * same popup into two typefaces. */
+#navigator-toolbox,
+#mainPopupSet > menupopup,
+#mainPopupSet > panel {
+    font-family: var(--omarchy-ui-font) !important;
+    font-size: var(--omarchy-ui-font-size) !important;
+}
+
+#mainPopupSet
+    :is(
+        menupopup,
+        panel,
+        panelview
+    )
+    :is(
+        menu,
+        menuitem,
+        toolbarbutton,
+        toolbaritem,
+        label,
+        description,
+        input,
+        checkbox,
+        radio,
+        button,
+        moz-button,
+        richlistitem,
+        menulist,
+        select,
+        .toolbarbutton-text,
+        .menu-iconic-text,
+        .menu-accel
+    ),
+#navigator-toolbox
+    :is(toolbarbutton, toolbaritem, label, .toolbarbutton-text, toolbarbadge) {
+    font-family: var(--omarchy-ui-font) !important;
+    font-size: var(--omarchy-ui-font-size) !important;
+}
+
+:is(#urlbar-input, .tab-label) {
+    font-family: var(--omarchy-ui-font) !important;
+    font-size: var(--omarchy-ui-label-size) !important;
+}
+
+#tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab[selected] .tab-label {
+    font-weight: 700 !important;
+}

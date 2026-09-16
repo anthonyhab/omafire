@@ -1,0 +1,321 @@
+@namespace xul "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+
+/* Main navigation surfaces and chrome text. */
+#navigator-toolbox,
+#toolbar-menubar,
+#TabsToolbar,
+#nav-bar,
+#PersonalToolbar {
+    background: var(--toolbar-bgcolor) !important;
+    color: var(--toolbar-color) !important;
+}
+
+#navigator-toolbox {
+    border-bottom-color: var(--omarchy-border) !important;
+}
+
+/* Hyprland owns window lifecycle and geometry. The compositor shortcuts are
+ * the close/maximize/minimize affordances; do not reserve headerbar space for
+ * GNOME-style CSD buttons. */
+:root[customtitlebar] .titlebar-buttonbox-container,
+#nav-bar .titlebar-buttonbox-container,
+#TabsToolbar .titlebar-buttonbox-container,
+#toolbar-menubar .titlebar-buttonbox-container,
+.titlebar-buttonbox-container {
+    display: none !important;
+}
+
+/* Firefox-GNOME can reassert display:flex on the empty navbar CSD wrapper.
+ * Collapse every dimension as well so its 8px side padding cannot survive as
+ * a blank trailing cell when Hyprland owns window controls. */
+#navigator-toolbox #nav-bar > .titlebar-buttonbox-container {
+    display: none !important;
+    flex: 0 0 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    max-height: 0 !important;
+    max-width: 0 !important;
+    min-height: 0 !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    width: 0 !important;
+}
+
+.titlebar-button.titlebar-close,
+.titlebar-button.titlebar-min,
+.titlebar-button.titlebar-max,
+.titlebar-button.titlebar-restore {
+    display: none !important;
+}
+
+/* Navigation controls are a compact icon rail, not a row of GNOME button
+ * cards. Preserve a quiet hover/active signal without consuming extra space. */
+#nav-bar {
+    --omarchy-nav-height: var(--omarchy-nav-row-height);
+    --omarchy-nav-button-size: var(--omarchy-nav-control-size);
+    --omarchy-nav-icon-size: 18px;
+    --omarchy-base-toolbar-padding: 4px 6px !important;
+    --omarchy-base-toolbar-spacing: var(--omarchy-control-gap) !important;
+    --omarchy-base-button-size: var(--omarchy-nav-button-size) !important;
+    --omarchy-base-button-background: transparent !important;
+    --omarchy-base-button-hover-background: var(--omarchy-control-hover) !important;
+    --omarchy-base-button-active-background: var(--omarchy-control-active) !important;
+    min-height: var(--omarchy-nav-height) !important;
+    align-items: center !important;
+    column-gap: var(--omarchy-control-gap) !important;
+    /* The collapsed vertical-tab rail centers its 32px cells at x=23. The
+     * first navbar button natively sits at cx=20 — equalize both sides so the
+     * rail reads as the same icon column, not a second, shifted one. */
+    padding-inline: 3px !important;
+}
+
+/* Firefox puts almost every customizable widget inside this hbox. Align the
+ * hbox and its direct widget children; styling only #nav-bar's direct
+ * children misses the actual navigation tree. */
+#nav-bar-customization-target {
+    align-items: center !important;
+    column-gap: var(--omarchy-control-gap) !important;
+    min-width: 0 !important;
+}
+
+/* Keep the navigation rail anchored while Firefox expands vertical tabs.
+ * Applying a collapsed-only centering margin makes the entire toolbar snap
+ * sideways as soon as the native `expanded` attribute flips, midway through
+ * its width animation. A fixed origin keeps the URL bar and button gaps out
+ * of that transition; only the sidebar's native width is allowed to move. */
+
+#nav-bar-customization-target > toolbarbutton,
+#nav-bar-customization-target > toolbaritem,
+#nav-bar-customization-target > toolbarspring,
+#nav-bar > toolbarbutton,
+#nav-bar > toolbaritem,
+#nav-bar > toolbarspring {
+    align-self: center !important;
+}
+
+#nav-bar-customization-target > toolbaritem:not(#urlbar-container) {
+    align-items: center !important;
+    box-sizing: border-box !important;
+    height: var(--omarchy-nav-button-size) !important;
+    max-height: var(--omarchy-nav-button-size) !important;
+    min-height: var(--omarchy-nav-button-size) !important;
+    margin-inline: 0 !important;
+}
+
+/* Stop/reload is a toolbaritem around two mutually-exclusive buttons. Give
+ * the wrapper the same cell as every other navigation widget. */
+#nav-bar-customization-target > #stop-reload-button {
+    flex: 0 0 var(--omarchy-nav-button-size) !important;
+    max-width: var(--omarchy-nav-button-size) !important;
+    width: var(--omarchy-nav-button-size) !important;
+}
+
+#nav-bar-customization-target > #stop-reload-button > toolbarbutton {
+    flex: 0 0 var(--omarchy-nav-button-size) !important;
+    margin-inline: 0 !important;
+    max-width: var(--omarchy-nav-button-size) !important;
+    width: var(--omarchy-nav-button-size) !important;
+}
+
+/* Keep icon-only widgets on one fixed optical box. Bookmark items stay
+ * content-sized, while stop/reload and extension buttons share this rail. */
+#nav-bar-customization-target > toolbarbutton:not(
+        #urlbar-zoom-button,
+        .subviewbutton,
+        .titlebar-button,
+        .searchmode-switcher,
+        .searchmode-switcher-close,
+        .bookmark-item
+    ),
+#nav-bar-customization-target
+    > toolbaritem:not(#urlbar-container)
+    > toolbarbutton:not(.subviewbutton, .titlebar-button),
+#nav-bar > toolbarbutton:not(
+        #urlbar-zoom-button,
+        .subviewbutton,
+        .titlebar-button,
+        .searchmode-switcher,
+        .searchmode-switcher-close,
+        .bookmark-item
+    ),
+#nav-bar > toolbaritem:not(#urlbar-container)
+    > toolbarbutton:not(.subviewbutton, .titlebar-button) {
+    flex: 0 0 var(--omarchy-nav-button-size) !important;
+    max-width: var(--omarchy-nav-button-size) !important;
+    width: var(--omarchy-nav-button-size) !important;
+}
+
+#nav-bar toolbarbutton:not(
+        #urlbar-zoom-button,
+        .subviewbutton,
+        .titlebar-button,
+        .searchmode-switcher,
+        .searchmode-switcher-close
+    ) {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: var(--omarchy-base-button-radius) !important;
+    box-shadow: none !important;
+    align-items: center !important;
+    box-sizing: border-box !important;
+    height: var(--omarchy-nav-button-size) !important;
+    max-height: var(--omarchy-nav-button-size) !important;
+    margin-block: 0 !important;
+    margin-inline: 0 !important;
+    min-height: var(--omarchy-nav-button-size) !important;
+    min-width: var(--omarchy-nav-button-size) !important;
+    padding: 0 !important;
+}
+
+#nav-bar toolbarbutton:not([disabled]):hover {
+    background-color: var(--omarchy-control-hover) !important;
+    background-image: none !important;
+    box-shadow: var(--omarchy-ring-hover) !important;
+}
+
+#nav-bar toolbarbutton:not([disabled]):is(:active, [open]) {
+    background-color: var(--omarchy-control-active) !important;
+    background-image: none !important;
+}
+
+#nav-bar toolbarbutton[disabled]:hover {
+    background: transparent !important;
+    background-image: none !important;
+}
+
+/* Omarchy uses accent only as a focus/edge cue. Firefox's keyboard focus can
+ * land on XUL toolbar buttons and anonymous tab-row controls, so restore a
+ * visible inset ring after flattening their native cards. */
+#navigator-toolbox
+    :is(toolbarbutton, .urlbar-page-action, .tab-close-button):is(
+        :focus-visible,
+        :-moz-focusring
+    ) {
+    background: var(--omarchy-control-hover) !important;
+    box-shadow: var(--omarchy-ring-focus) !important;
+    outline: none !important;
+}
+
+/* Firefox applies family-specific toolbar hover shorthands after the generic
+ * button rule. Anchor the customization rail and menu button explicitly so
+ * native controls, extensions, and the hamburger resolve to one opaque state. */
+#nav-bar #nav-bar-customization-target toolbarbutton:not([disabled]):hover,
+#nav-bar #PanelUI-menu-button:not([disabled]):hover,
+#nav-bar #nav-bar-overflow-button:not([disabled]):hover {
+    background: var(--omarchy-control-hover) !important;
+    border-radius: var(--omarchy-base-button-radius) !important;
+    box-shadow: var(--omarchy-ring-hover) !important;
+}
+
+#nav-bar
+    #nav-bar-customization-target
+    toolbarbutton:not([disabled]):is(:active, [open]),
+#nav-bar #PanelUI-menu-button:not([disabled]):is(:active, [open]),
+#nav-bar #nav-bar-overflow-button:not([disabled]):is(:active, [open]) {
+    background: var(--omarchy-control-active) !important;
+    border-radius: var(--omarchy-base-button-radius) !important;
+}
+
+/* Native and extension buttons may paint a second hover tile on their icon or
+ * badge stack. Keep those layers transparent so only the outer cell owns
+ * interaction color. */
+#nav-bar
+    toolbarbutton:is(:hover, :active, [open])
+    :is(.toolbarbutton-icon, .toolbarbutton-badge-stack) {
+    background: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Extension buttons use a badge stack, so size the icon inside the stack as
+ * well as the native navigation icons. This keeps mixed toolbar buttons on
+ * one optical baseline instead of letting extension assets choose their own
+ * dimensions. */
+#nav-bar-customization-target > toolbarbutton:not(
+        #urlbar-zoom-button,
+        .subviewbutton,
+        .titlebar-button,
+        .searchmode-switcher,
+        .searchmode-switcher-close,
+        .bookmark-item
+    ) .toolbarbutton-icon,
+#nav-bar-customization-target
+    > toolbaritem:not(#urlbar-container)
+    > toolbarbutton:not(.subviewbutton, .titlebar-button)
+    .toolbarbutton-icon,
+#nav-bar > toolbarbutton:not(
+        #urlbar-zoom-button,
+        .subviewbutton,
+        .titlebar-button,
+        .searchmode-switcher,
+        .searchmode-switcher-close,
+        .bookmark-item
+    ) .toolbarbutton-icon,
+#nav-bar > toolbaritem:not(#urlbar-container)
+    > toolbarbutton:not(.subviewbutton, .titlebar-button)
+    .toolbarbutton-icon {
+    align-self: center !important;
+    box-sizing: border-box !important;
+    height: var(--omarchy-nav-icon-size) !important;
+    max-height: var(--omarchy-nav-icon-size) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: var(--omarchy-nav-icon-size) !important;
+    max-width: var(--omarchy-nav-icon-size) !important;
+}
+
+/* The badge stack is the extension button's inner hover surface. Make it
+ * fill the same cell as native controls, then keep its own paint transparent
+ * so every widget gets exactly one hover rectangle. */
+#nav-bar-customization-target > toolbarbutton:not(
+        #urlbar-zoom-button,
+        .subviewbutton,
+        .titlebar-button,
+        .searchmode-switcher,
+        .searchmode-switcher-close,
+        .bookmark-item
+    ) > .toolbarbutton-badge-stack,
+#nav-bar-customization-target
+    > toolbaritem:not(#urlbar-container)
+    > toolbarbutton:not(.subviewbutton, .titlebar-button)
+    > .toolbarbutton-badge-stack,
+#nav-bar > toolbarbutton:not(
+        #urlbar-zoom-button,
+        .subviewbutton,
+        .titlebar-button,
+        .searchmode-switcher,
+        .searchmode-switcher-close,
+        .bookmark-item
+    ) > .toolbarbutton-badge-stack,
+#nav-bar > toolbaritem:not(#urlbar-container)
+    > toolbarbutton:not(.subviewbutton, .titlebar-button)
+    > .toolbarbutton-badge-stack {
+    align-items: center !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    height: var(--omarchy-nav-button-size) !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    max-height: var(--omarchy-nav-button-size) !important;
+    max-width: var(--omarchy-nav-button-size) !important;
+    padding: 0 !important;
+    width: var(--omarchy-nav-button-size) !important;
+}
+
+#downloads-indicator-icon {
+    align-self: center !important;
+    height: var(--omarchy-nav-icon-size) !important;
+    width: var(--omarchy-nav-icon-size) !important;
+}
+
+#navigator-toolbox .toolbarbutton-icon,
+#navigator-toolbox .toolbarbutton-text,
+.menu-iconic-left,
+.menuitem-iconic {
+    color: var(--omarchy-fg) !important;
+    fill: var(--omarchy-fg) !important;
+    -moz-context-properties: fill, fill-opacity !important;
+}
