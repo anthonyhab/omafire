@@ -405,13 +405,49 @@ spacer[part=overflow-start-indicator], spacer[part=overflow-end-indicator] {
 	}
 }
 
-/* Audio button */
+/* Audio button → favicon badge. Firefox's in-flow .tab-audio-button is a
+ * 24px control that steals a full icon cell from the label row on every
+ * playing tab. The tab click handler already treats .tab-icon-overlay as
+ * the mute target on any tab (pinned tabs use it natively), so suppress the
+ * button entirely and surface the compact corner badge in all orientations. */
 .tab-audio-button {
-	--button-border-radius: 50% !important;
-	--button-size-icon-small: 24px !important;
+	display: none !important;
+}
 
-	#tabbrowser-tabs[orient="horizontal"] & {
-		margin-inline: 0 !important;
+.tab-icon-overlay:is([soundplaying], [muted], [activemedia-blocked]) {
+	display: revert !important;
+}
+
+.tab-icon-overlay:not([crashed]) {
+	&[soundplaying] {
+		list-style-image: url("chrome://browser/skin/tabbrowser/tab-audio-playing-small.svg") !important;
+	}
+	&[muted] {
+		list-style-image: url("chrome://browser/skin/tabbrowser/tab-audio-muted-small.svg") !important;
+	}
+	&[activemedia-blocked] {
+		list-style-image: url("chrome://browser/skin/tabbrowser/tab-audio-blocked-small.svg") !important;
+	}
+}
+
+/* The badge needs a legible chip on expanded tabs too — pinned/collapsed
+ * tabs get the native opaque stack; give expanded tabs an opaque field chip
+ * with a hairline ring so the glyph survives busy favicons. It deliberately
+ * uses --omarchy-field (always solid) rather than --omarchy-panel, which the
+ * translucency gate may make translucent. */
+.tab-icon-overlay:is([soundplaying], [muted], [activemedia-blocked]):not([crashed]) {
+	-moz-context-properties: fill, fill-opacity;
+	background-color: var(--omarchy-field) !important;
+	box-shadow: 0 0 0 1px var(--omarchy-border) !important;
+	cursor: pointer;
+	fill: var(--omarchy-fg) !important;
+	fill-opacity: 1 !important;
+
+	&:hover {
+		background-color: var(--omarchy-control-hover) !important;
+	}
+	&:active {
+		background-color: var(--omarchy-control-active) !important;
 	}
 }
 

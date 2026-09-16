@@ -1,7 +1,9 @@
 // Omarchy Firefox: bridge from omafox-native-host feature toggles to prefs.
 // Watches ~/.local/state/omafox/features.json; on change applies each
-// key as a boolean "omarchy.<key>" pref so @media -moz-pref() gates in
+// boolean key as an "omarchy.<key>" pref so @media -moz-pref() gates in
 // userChrome.css re-evaluate live, then flushes chrome skin caches.
+// Numeric keys instead become a string pref plus a live --omarchy-<key>
+// CSS custom property pushed onto every navigator:browser window root.
 (function () {
     var Cc = Components.classes;
     var Ci = Components.interfaces;
@@ -30,6 +32,59 @@
         Ci.nsIObserverService,
     );
     var lastModified = 0;
+    var appliedVars = [];
+    var lastVars = {};
+
+    function pushWindowVars(vars) {
+        var mediator = Cc["@mozilla.org/appshell/window-mediator;1"]
+            .getService(Ci.nsIWindowMediator);
+        var windows = mediator.getEnumerator("navigator:browser");
+        while (windows.hasMoreElements()) {
+            var root = windows.getNext().document.documentElement;
+            if (!root || !root.style) {
+                continue;
+            }
+            for (var i = 0; i < appliedVars.length; i++) {
+                if (!(appliedVars[i] in vars)) {
+                    root.style.removeProperty(appliedVars[i]);
+                }
+            }
+            for (var name in vars) {
+                var value = String(vars[name]);
+                if (root.style.getPropertyValue(name) !== value) {
+                    root.style.setProperty(name, value);
+                }
+            }
+        }
+        appliedVars = [];
+        lastVars = vars;
+        for (var applied in vars) {
+            appliedVars.push(applied);
+        }
+    }
+
+    // Windows opened after the last file change inherit nothing from the
+    // inline-style push, so re-apply the latest vars as each browser window
+    // finishes starting up.
+    observers.addObserver(
+        {
+            observe: function () {
+                try {
+                    var keys = [];
+                    for (var name in lastVars) {
+                        keys.push(name);
+                    }
+                    if (keys.length > 0) {
+                        pushWindowVars(lastVars);
+                    }
+                } catch (error) {
+                    Cu.reportError("[omarchy-features] " + error);
+                }
+            },
+        },
+        "browser-delayed-startup-finished",
+        false,
+    );
 
     function readFeatures() {
         var input = Cc["@mozilla.org/network/file-input-stream;1"]
@@ -48,6 +103,15 @@
     }
 
     function check() {
+        /* Re-push every tick: the startup-observer race can miss the first
+         * window, and restored or unusual windows get the vars within one
+         * interval instead of waiting for the next file write. The push is
+         * idempotent — it compares before setting. */
+        try {
+            pushWindowVars(lastVars);
+        } catch (error) {
+            Cu.reportError("[omarchy-features] " + error);
+        }
         try {
             if (!stateFile.exists()) {
                 return;
@@ -59,23 +123,34 @@
             lastModified = modified;
 
             var features = readFeatures();
-            if (features === null || typeof features !== "object") {
-                return;
-            }
-            var changed = false;
-            for (var key in features) {
-                if (!/^[a-z0-9-]{1,48}$/.test(key)) {
-                    continue;
+            if (features !== null && typeof features === "object") {
+                var changed = false;
+                var vars = {};
+                for (var key in features) {
+                    if (!/^[a-z0-9-]{1,48}$/.test(key)) {
+                        continue;
+                    }
+                    var pref = "omarchy." + key;
+                    if (typeof features[key] === "number"
+                            && isFinite(features[key])) {
+                        vars["--omarchy-" + key] = features[key];
+                        var text = String(features[key]);
+                        if (prefs.getCharPref(pref, "") !== text) {
+                            prefs.setCharPref(pref, text);
+                            changed = true;
+                        }
+                        continue;
+                    }
+                    var value = features[key] === true;
+                    if (prefs.getBoolPref(pref, null) !== value) {
+                        prefs.setBoolPref(pref, value);
+                        changed = true;
+                    }
                 }
-                var value = features[key] === true;
-                var pref = "omarchy." + key;
-                if (prefs.getBoolPref(pref, null) !== value) {
-                    prefs.setBoolPref(pref, value);
-                    changed = true;
+                pushWindowVars(vars);
+                if (changed) {
+                    observers.notifyObservers(null, "chrome-flush-skin-caches");
                 }
-            }
-            if (changed) {
-                observers.notifyObservers(null, "chrome-flush-skin-caches");
             }
         } catch (error) {
             Cu.reportError("[omarchy-features] " + error);
