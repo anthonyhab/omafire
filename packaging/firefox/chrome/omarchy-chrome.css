@@ -18,3 +18,6 @@
 @import "omarchy-sidebar.css";
 @import "omarchy-fixes.css";
 @import "omarchy-grid.css";
+
+/* Debug instrumentation, inert unless omarchy.debug is set in about:config. */
+@import "omarchy-debug.css";
