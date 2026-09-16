@@ -50,11 +50,60 @@
         --toolbar-field-focus-background-color: var(
             --omarchy-glass-field
         ) !important;
+
+        /* The GNOME base layer paints surfaces at element level from its own
+         * --omarchy-base-* ladder, bypassing the Firefox vars above. Repoint
+         * the ladder at the glass so every toolbar row, the rail, the sidebar,
+         * tab backgrounds and the scroll fades all resolve translucent in one
+         * stroke. Window/view-canvas colors stay opaque on purpose: content
+         * surfaces keep their paint so pages stay legible. */
+        --omarchy-base-toolbar-background: var(--omarchy-glass) !important;
+        --omarchy-base-headerbar-background: var(--omarchy-glass) !important;
+        --omarchy-base-tabbar-background: var(--omarchy-glass) !important;
+        --omarchy-base-sidebar-background: var(--omarchy-glass) !important;
+        --omarchy-base-secondary-sidebar-background: var(
+            --omarchy-glass
+        ) !important;
+        --omarchy-base-view-background: var(--omarchy-glass) !important;
+    }
+
+    /* The collapsed rail re-pins its toolbox vars scoped to the tab strip;
+     * :root repoints cannot reach inside that scope. */
+    #tabbrowser-tabs[orient="vertical"]:not([expanded]) {
+        --toolbox-background-color: var(--omarchy-glass) !important;
+        --toolbox-background-color-inactive: var(--omarchy-glass) !important;
+    }
+
+    /* Focus must not change the glass: the base layer swaps surface vars and
+     * dims labels when the window deactivates, which would flip the chrome
+     * opaque on blur. Keep every state identical. */
+    :root:-moz-window-inactive {
+        --omarchy-base-toolbar-background: var(--omarchy-glass) !important;
+        --omarchy-base-headerbar-background: var(--omarchy-glass) !important;
+        --omarchy-base-tabbar-background: var(--omarchy-glass) !important;
+        --omarchy-base-sidebar-background: var(--omarchy-glass) !important;
+        --omarchy-base-secondary-sidebar-background: var(
+            --omarchy-glass
+        ) !important;
+        --omarchy-base-view-background: var(--omarchy-glass) !important;
+    }
+    #navigator-toolbox:-moz-window-inactive label,
+    #downloads-indicator-anchor:-moz-window-inactive,
+    findbar:-moz-window-inactive
+        :is(image:not(#hack), label, description),
+    #viewButton:-moz-window-inactive dropmarker,
+    .container.infobar:-moz-window-inactive {
+        opacity: 1 !important;
     }
 
     /* Element-level paints that bypass the vars above. */
-    #TabsToolbar {
+    #TabsToolbar,
+    #browser:has(#sidebar-container:not([hidden]))
+        #tabbrowser-tabbox
+        .browserContainer,
+    #tabbrowser-tabbox[sidebar-shown] .browserContainer {
         background-color: var(--omarchy-glass) !important;
+        background-image: none !important;
     }
 
     /* The window itself must not paint an opaque frame behind the glass or
@@ -66,8 +115,17 @@
         background-image: none !important;
     }
 
-    /* Our sidebar component paints --omarchy-surface on element backgrounds,
-     * which would sit opaque over the glass var. Repoint them at the glass. */
+    /* Our sidebar component paints --omarchy-surface on element backgrounds
+     * through :has() selectors, which outrank plain descendant selectors at
+     * equal !important. Mirror them exactly so the surfaces turn to glass. */
+    #browser:has(#sidebar-container:not([hidden])) #sidebar-container,
+    #browser:has(#sidebar-container:not([hidden])) sidebar-main,
+    #browser:has(#sidebar-container:not([hidden])) #sidebar-box,
+    #browser:has(#sidebar-container:not([hidden])) #sidebar,
+    #browser:has(#tabbrowser-tabbox[sidebar-shown]) #sidebar-box,
+    #browser:has(#tabbrowser-tabbox[sidebar-shown]) #sidebar,
+    #browser:has(#sidebar-container:not([hidden])) #tabbrowser-tabbox,
+    #tabbrowser-tabbox[sidebar-shown],
     #browser #sidebar-container,
     #browser sidebar-main,
     #browser #sidebar-box,
