@@ -2,14 +2,19 @@
 
 /* Optional glass chrome, gated by omarchy.translucency (extension Hacks).
  * --omarchy-transparency is pushed live onto each navigator:browser window
- * root by the features bridge as a 0.55–1 opacity fraction. Surfaces keep
- * their token hues — only the alpha changes — so the palette, hover ladder,
- * and separators stay coherent. Content stays opaque: tabpanels and the
- * browser deck are untouched, the page owns legibility.
+ * root by the features bridge as a 0.55–1 opacity fraction.
  *
- * On a compositor with a blur rule for Firefox (Hyprland layerrule/decoration
- * blur) the chrome rows render as frosted glass; elsewhere they are simply
- * translucent. Turn the feature off to restore fully opaque surfaces. */
+ * Architecture: each region paints glass exactly ONCE at its outermost
+ * surface; every child inside is transparent so alpha never stacks (two
+ * stacked 0.62 layers composite to ~0.86 — the "barely see through" bug).
+ * Regions: navigator-toolbox (top chrome), sidebar-container (vertical tab
+ * rail + launcher), sidebar-box (panel sibling), tabbrowser-tabbox (content
+ * frame edges). Content surfaces (tabpanels, browser, about: pages) stay
+ * opaque — the page owns legibility.
+ *
+ * On a compositor with a blur rule for Firefox (Hyprland decoration blur)
+ * the chrome renders as frosted glass; elsewhere it is simply translucent.
+ * Turn the feature off to restore fully opaque surfaces. */
 @media -moz-pref("omarchy.translucency") {
     /* The generated palette pins surface vars with !important under
      * :root:not([lwtheme]); match its specificity so glass wins in both
@@ -51,12 +56,33 @@
             --omarchy-glass-field
         ) !important;
 
+        /* Glass-aware state ladder: translucent washes so hover/selected
+         * states tint the glass instead of blocking it with opaque paint. */
+        --omarchy-control-hover: color-mix(
+            in srgb,
+            var(--omarchy-fg) 8%,
+            transparent
+        ) !important;
+        --omarchy-control-active: color-mix(
+            in srgb,
+            var(--omarchy-fg) 13%,
+            transparent
+        ) !important;
+        --omarchy-control-selected: color-mix(
+            in srgb,
+            var(--omarchy-fg) 15%,
+            transparent
+        ) !important;
+        --omarchy-selection: color-mix(
+            in srgb,
+            var(--omarchy-accent) 22%,
+            transparent
+        ) !important;
+
         /* The GNOME base layer paints surfaces at element level from its own
-         * --omarchy-base-* ladder, bypassing the Firefox vars above. Repoint
-         * the ladder at the glass so every toolbar row, the rail, the sidebar,
-         * tab backgrounds and the scroll fades all resolve translucent in one
-         * stroke. Window/view-canvas colors stay opaque on purpose: content
-         * surfaces keep their paint so pages stay legible. */
+         * --omarchy-base-* ladder. Repoint it at the glass as a safety net for
+         * any element the transparent rules below miss — a stray element then
+         * renders one glass layer instead of an opaque patch. */
         --omarchy-base-toolbar-background: var(--omarchy-glass) !important;
         --omarchy-base-headerbar-background: var(--omarchy-glass) !important;
         --omarchy-base-tabbar-background: var(--omarchy-glass) !important;
@@ -89,50 +115,69 @@
     }
     #navigator-toolbox:-moz-window-inactive label,
     #downloads-indicator-anchor:-moz-window-inactive,
-    findbar:-moz-window-inactive
-        :is(image:not(#hack), label, description),
+    findbar:-moz-window-inactive :is(image:not(#hack), label, description),
     #viewButton:-moz-window-inactive dropmarker,
     .container.infobar:-moz-window-inactive {
         opacity: 1 !important;
-    }
-
-    /* Element-level paints that bypass the vars above. */
-    #TabsToolbar,
-    #browser:has(#sidebar-container:not([hidden]))
-        #tabbrowser-tabbox
-        .browserContainer,
-    #tabbrowser-tabbox[sidebar-shown] .browserContainer {
-        background-color: var(--omarchy-glass) !important;
-        background-image: none !important;
     }
 
     /* The window itself must not paint an opaque frame behind the glass or
      * the translucency composites onto the frame color and stays invisible. */
     :root,
     #main-window,
-    #navigator-toolbox {
+    #browser {
         background-color: transparent !important;
         background-image: none !important;
     }
 
-    /* Our sidebar component paints --omarchy-surface on element backgrounds
-     * through :has() selectors, which outrank plain descendant selectors at
-     * equal !important. Mirror them exactly so the surfaces turn to glass. */
+    /* Region layers — the single glass paint each. Selectors must match the
+     * specificity of the rules they replace: the sidebar component paints
+     * through :has() chains, so every variant is listed. */
+    #navigator-toolbox,
     #browser:has(#sidebar-container:not([hidden])) #sidebar-container,
-    #browser:has(#sidebar-container:not([hidden])) sidebar-main,
-    #browser:has(#sidebar-container:not([hidden])) #sidebar-box,
-    #browser:has(#sidebar-container:not([hidden])) #sidebar,
-    #browser:has(#tabbrowser-tabbox[sidebar-shown]) #sidebar-box,
-    #browser:has(#tabbrowser-tabbox[sidebar-shown]) #sidebar,
-    #browser:has(#sidebar-container:not([hidden])) #tabbrowser-tabbox,
-    #tabbrowser-tabbox[sidebar-shown],
     #browser #sidebar-container,
-    #browser sidebar-main,
-    #browser #sidebar-box,
-    #browser #sidebar,
-    #browser #tabbrowser-tabbox {
+    #browser:has(#tabbrowser-tabbox[sidebar-shown]) #sidebar-box,
+    #sidebar-box,
+    #browser:has(#sidebar-container:not([hidden])) #tabbrowser-tabbox,
+    #tabbrowser-tabbox,
+    findbar {
         background-color: var(--omarchy-glass) !important;
         background-image: none !important;
+    }
+
+    /* Children of a glass region stay transparent — this is what keeps the
+     * alpha honest. */
+    #navigator-toolbox
+        :is(#toolbar-menubar, #nav-bar, #PersonalToolbar, #TabsToolbar),
+    #browser:has(#sidebar-container:not([hidden])) #sidebar-container
+        :is(sidebar-main, vertical-tabs, #tabbrowser-tabs),
+    #browser #sidebar-container
+        :is(sidebar-main, vertical-tabs, #tabbrowser-tabs),
+    #browser:has(#tabbrowser-tabbox[sidebar-shown]) #sidebar,
+    #sidebar-box :is(#sidebar, sidebar-header),
+    #browser:has(#sidebar-container:not([hidden]))
+        #tabbrowser-tabbox
+        .browserContainer,
+    #tabbrowser-tabbox[sidebar-shown] .browserContainer,
+    #tabbrowser-tabbox .browserContainer {
+        background-color: transparent !important;
+        background-image: none !important;
+        -moz-appearance: none !important;
+    }
+
+    /* The 4px splitter gaps sit between glass regions; fill them with the
+     * same glass so the wall behind never peeks through as a crack. */
+    #sidebar-launcher-splitter,
+    #sidebar-splitter {
+        background-color: var(--omarchy-glass) !important;
+    }
+
+    /* Floating surfaces inside chrome keep their own glass layer — they
+     * stack over content, not over chrome, so their alpha reads correctly. */
+    #statuspanel .statuspanel-label,
+    .container.infobar,
+    .notificationbox-stack notification-message {
+        background-color: var(--omarchy-glass-panel) !important;
     }
 }
 
