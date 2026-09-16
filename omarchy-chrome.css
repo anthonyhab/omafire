@@ -312,6 +312,68 @@
     --urlbarView-row-border-radius: var(
         --omarchy-base-button-radius
     ) !important;
+
+    /* Acorn semantic layer: the tokens every moz-* shadow component and
+     * toolkit widget read. Bridging them here themes buttons, cards, menus,
+     * checkboxes, and message bars at once instead of per-element patching.
+     * Raw palette ramps (--color-*-NN) stay native — they are inputs. */
+    --button-background-color: transparent !important;
+    --button-background-color-hover: var(--omarchy-control-hover) !important;
+    --button-background-color-active: var(--omarchy-control-active) !important;
+    --button-background-color-selected: var(
+        --omarchy-control-selected
+    ) !important;
+    --button-background-color-disabled: transparent !important;
+    --button-text-color: var(--omarchy-fg) !important;
+    --button-text-color-hover: var(--omarchy-fg) !important;
+    --button-text-color-active: var(--omarchy-fg) !important;
+    --button-text-color-selected: var(--omarchy-fg) !important;
+    --button-text-color-disabled: var(--omarchy-muted) !important;
+    --button-border-color: var(--omarchy-control-border) !important;
+    --button-border-color-hover: var(
+        --omarchy-control-hover-border
+    ) !important;
+    --button-border-color-active: var(--omarchy-focus-accent) !important;
+    --button-border-color-selected: var(--omarchy-focus-accent) !important;
+    --button-border-color-disabled: var(--omarchy-muted) !important;
+    --border-color: var(--omarchy-border) !important;
+    --border-color-deemphasized: var(--omarchy-muted) !important;
+    --border-color-selected: var(--omarchy-focus-accent) !important;
+    --border-color-interactive: var(--omarchy-focus-accent) !important;
+    --border-color-interactive-hover: var(--omarchy-focus-accent) !important;
+    --border-color-interactive-active: var(--omarchy-focus-accent) !important;
+    --border-color-interactive-disabled: var(--omarchy-muted) !important;
+    --background-color-list-item-hover: var(
+        --omarchy-control-hover
+    ) !important;
+    --toolbarbutton-background-color: transparent !important;
+    --toolbarbutton-background-color-hover: var(
+        --omarchy-control-hover
+    ) !important;
+    --toolbarbutton-background-color-active: var(
+        --omarchy-control-active
+    ) !important;
+    --toolbarbutton-outline-color: var(--omarchy-focus-accent) !important;
+    --toolbarbutton-outline-color-hover: var(--omarchy-focus-accent) !important;
+    --toolbarbutton-outline-color-active: var(--omarchy-focus-accent) !important;
+    --toolbarbutton-outline-color-selected: var(
+        --omarchy-focus-accent
+    ) !important;
+    --toolbarbutton-icon-fill: var(--omarchy-fg) !important;
+    --toolbarbutton-icon-fill-attention: var(--omarchy-focus-accent) !important;
+    --toolbarbutton-badge-background-color: var(
+        --omarchy-focus-accent
+    ) !important;
+    --toolbox-text-color: var(--omarchy-fg) !important;
+    --toolbox-text-color-inactive: var(--omarchy-muted) !important;
+    --tabs-navbar-separator-color: var(--omarchy-border) !important;
+    --card-border-color: var(--omarchy-border) !important;
+    --panel-box-shadow: none !important;
+    --popup-box-shadow: none !important;
+    --popup-border-color: var(--omarchy-border) !important;
+    --sidebar-border-color: var(--omarchy-border) !important;
+    --info-bar-background-color: var(--omarchy-panel) !important;
+    --info-bar-border-color: var(--omarchy-border) !important;
 }
 
 #mainPopupSet > menupopup,
@@ -879,11 +941,131 @@
         var(--tab-group-color-invert) 35%,
         var(--omarchy-fg) 65%
     );
+    background: color-mix(
+        in srgb,
+        var(--dragover-tab-group-color, var(--omarchy-focus-accent)) 25%,
+        transparent
+    ) !important;
     border: 2px solid var(--omarchy-group-drag-border) !important;
     box-shadow: inset 0 0 0 2px var(--omarchy-group-drag-border) !important;
     box-sizing: border-box !important;
     outline: 2px solid var(--omarchy-group-drag-border) !important;
     outline-offset: -2px !important;
+}
+
+/* Drag affordances. Firefox marks a grouping drop with
+ * [dragover-groupTarget] on the hovered tab, split-view wrapper, or group
+ * label; expands #pinned-drop-indicator over the pinned area; and draws
+ * stacked-card shadows under a multi-tab [small-stack]/[big-stack] drag.
+ * The flat surfaces above would erase all of it, so each cue is re-exposed
+ * in Omarchy terms: a group-colour wash and accent frame that say exactly
+ * where release lands. */
+/* #main-window lifts these above the equal-specificity selected/hover rules
+ * below — a drop target that is also selected must still read as a target. */
+#main-window
+    #tabbrowser-tabs[movingtab]
+    .tabbrowser-tab[dragover-groupTarget]
+    > .tab-stack
+    > .tab-background,
+#main-window
+    #tabbrowser-tabs[movingtab]
+    tab-split-view-wrapper[dragover-groupTarget]
+    .tab-background {
+    background: color-mix(
+        in srgb,
+        var(--dragover-tab-group-color, var(--omarchy-focus-accent)) 30%,
+        transparent
+    ) !important;
+    box-shadow: inset 0 0 0 2px
+        var(--dragover-tab-group-color, var(--omarchy-focus-accent)) !important;
+}
+
+/* Pinned-area drop zone: the dashed target the native skin draws in its
+ * attention colour. Keep the expand animation; restyle colour/radius. */
+#pinned-drop-indicator {
+    color: var(--omarchy-focus-accent) !important;
+}
+
+#pinned-drop-indicator[visible] {
+    background: color-mix(
+        in srgb,
+        var(--omarchy-focus-accent) 14%,
+        transparent
+    ) !important;
+    border-radius: var(--omarchy-base-button-radius) !important;
+    outline: 1px dashed var(--omarchy-focus-accent) !important;
+}
+
+#pinned-drop-indicator[interactive] {
+    background: color-mix(
+        in srgb,
+        var(--omarchy-focus-accent) 26%,
+        transparent
+    ) !important;
+    outline-style: solid !important;
+}
+
+/* Multi-tab drags stack a second edge under the dragged tab. The flat
+ * .tab-background rule above removes those shadows, so draw them back in
+ * accent at the tab's trailing edge — two stacked edges for big-stack. */
+#main-window
+    #tabbrowser-tabs[orient="vertical"][movingtab]
+    :is(.tabbrowser-tab[small-stack], tab-split-view-wrapper[small-stack])
+    > .tab-stack
+    > .tab-background,
+#main-window
+    #tabbrowser-tabs[orient="vertical"][movingtab]
+    tab-split-view-wrapper[small-stack]
+    .tab-background {
+    box-shadow:
+        0 5px 0 -3px var(--omarchy-control-selected),
+        0 3px var(--omarchy-focus-accent) !important;
+}
+
+#main-window
+    #tabbrowser-tabs[orient="vertical"][movingtab]
+    :is(.tabbrowser-tab[big-stack], tab-split-view-wrapper[big-stack])
+    > .tab-stack
+    > .tab-background,
+#main-window
+    #tabbrowser-tabs[orient="vertical"][movingtab]
+    tab-split-view-wrapper[big-stack]
+    .tab-background {
+    box-shadow:
+        0 5px 0 -3px var(--omarchy-control-selected),
+        0 3px var(--omarchy-focus-accent),
+        0 8px 0 -3px var(--omarchy-control-selected),
+        0 6px var(--omarchy-focus-accent) !important;
+}
+
+#main-window
+    #tabbrowser-tabs[orient="horizontal"][movingtab]
+    :is(.tabbrowser-tab[small-stack], tab-split-view-wrapper[small-stack])
+    > .tab-stack
+    > .tab-background,
+#main-window
+    #tabbrowser-tabs[orient="horizontal"][movingtab]
+    tab-split-view-wrapper[small-stack]
+    .tab-background {
+    box-shadow:
+        5px 0 0 -3px var(--omarchy-control-selected),
+        3px 0 var(--omarchy-focus-accent) !important;
+}
+
+#main-window
+    #tabbrowser-tabs[orient="horizontal"][movingtab]
+    :is(.tabbrowser-tab[big-stack], tab-split-view-wrapper[big-stack])
+    > .tab-stack
+    > .tab-background,
+#main-window
+    #tabbrowser-tabs[orient="horizontal"][movingtab]
+    tab-split-view-wrapper[big-stack]
+    .tab-background {
+    box-shadow:
+        5px 0 0 -3px var(--omarchy-control-selected),
+        3px 0 var(--omarchy-focus-accent),
+        8px 0 0 -3px var(--omarchy-control-selected),
+        6px 0 var(--omarchy-focus-accent) !important;
 }
 
 #tabbrowser-tabs[orient="vertical"]

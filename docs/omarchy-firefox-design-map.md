@@ -361,3 +361,26 @@ errors, binding loops, unknown properties, shell crashes, or IPC failures.
   first-paint palette are the same values. The stale Rosé-Pine-hardcoded
   places.xhtml block was removed — Library windows have no `[lwtheme]`, so
   the generated palette already covers them.
+
+2026-09-15 — Acorn semantic bridge + drag/drop affordances. The native
+  design-system state tokens (`--button-*`, `--border-color*`,
+  `--toolbarbutton-*`, `--card-border-color`, `--panel-box-shadow`,
+  `--info-bar-*`, `--toolbox-text-color*`) now read the Omarchy control
+  ladder (`--omarchy-control-{hover,active,selected}`, `--omarchy-border`,
+  `--omarchy-focus-accent`), so every moz-* shadow component and toolkit
+  widget shares one hover/focus/border vocabulary instead of per-element
+  patching. Raw `--color-*` ramps stay native inputs.
+  Drag/drop: the flat `.tab-background` reset had erased Firefox's three
+  native drag cues. Restored in Omarchy terms: `[dragover-groupTarget]`
+  tabs/split-view wrappers get a group-colour wash plus accent inset frame
+  (`#main-window` prefix lifts them above equal-specificity selected/hover
+  rules); the group-label variant gained the same wash;
+  `#pinned-drop-indicator` is restyled to accent colour, 14%→26% wash on
+  interactive, dashed→solid outline, Omarchy radius (native 0.25s expand
+  kept); `[small-stack]`/`[big-stack]` stacked-edge shadows are redrawn in
+  accent for both orientations and split-view wrappers.
+  Verified fresh-process via Marionette: computed styles after the 200ms
+  `transition: background` settles show the group-colour wash, inset
+  frame, stacked edges, and resolved tokens. Caveat for future probes:
+  `.tab-background` transitions `background`, so computed reads must wait
+  ~250ms after toggling drag attributes or they return mid-fade values.
