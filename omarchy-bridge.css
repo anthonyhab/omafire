@@ -117,7 +117,7 @@
 }
 
 #mainPopupSet > menupopup,
-#mainPopupSet > panel {
+#mainPopupSet > panel:not(.autoscroller, #DateTimePickerPanel) {
     --panel-background: var(--arrowpanel-background) !important;
     --panel-shadow: none !important;
     --arrowpanel-shadow: none !important;
@@ -174,4 +174,22 @@
     --uei-button-active-bgcolor: var(--omarchy-control-active) !important;
     --uei-button-hover-color: var(--omarchy-fg) !important;
     --uei-button-active-color: var(--omarchy-fg) !important;
+}
+
+/* The middle-click autoscroller's entire appearance lives in --panel-*
+ * tokens: the direction glyph is embedded in --panel-background-color and
+ * the shape is --panel-border-radius: 100%. The flat resets above flatten
+ * it to an empty square, so re-declare its own values at element scope,
+ * tinted to the palette. */
+.autoscroller {
+    --panel-background-color: color-mix(
+            in srgb,
+            var(--omarchy-panel) 84%,
+            transparent
+        )
+        no-repeat center var(--autoscroll-background-image) !important;
+    --panel-border-color: var(--omarchy-border) !important;
+    --panel-border-radius: 100% !important;
+    --panel-box-shadow: none !important;
+    --panel-padding: 0 !important;
 }
