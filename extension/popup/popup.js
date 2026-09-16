@@ -20,11 +20,18 @@
   }
 
   function applyPalette(record) {
-    if (!record) return;
+    const style = document.documentElement.style;
+    if (!record) {
+      for (const key of ["--ofs-bg", "--ofs-fg", "--ofs-border",
+          "--ofs-accent", "--ofs-accent-fg", "--ofs-error"]) {
+        style.removeProperty(key);
+      }
+      style.removeProperty("color-scheme");
+      return;
+    }
     try {
       const theme = globalThis.OmafoxTheme.toFirefoxTheme(record);
       const palette = record.palette;
-      const style = document.documentElement.style;
       style.setProperty("--ofs-bg", theme.colors.popup);
       style.setProperty("--ofs-fg", theme.colors.popup_text);
       style.setProperty("--ofs-border", theme.colors.popup_border);
@@ -97,6 +104,7 @@
     try {
       await browser.theme.reset();
       await browser.storage.local.remove([STORAGE_KEY, ERROR_KEY]);
+      await browser.runtime.sendMessage({ type: "icon-reset" });
       await loadState();
     } catch (error) {
       showError(error instanceof Error ? error.message : String(error));

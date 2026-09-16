@@ -20,8 +20,50 @@
     };
   }
 
+  async function tintActionIcon(theme) {
+    if (typeof document === "undefined" || typeof Image === "undefined") return;
+    const color = theme.colors.icons;
+    const iconUrl = browser.runtime.getURL("icons/omarchy.svg");
+    const source = await (await fetch(iconUrl)).text();
+    const tinted = source
+      .replace('fill="context-fill"', `fill="${color}"`)
+      .replace('fill-opacity="context-fill-opacity"', 'fill-opacity="1"');
+    const image = new Image();
+    await new Promise((resolve, reject) => {
+      image.onload = resolve;
+      image.onerror = () => reject(new Error("Could not rasterize the Omarchy icon"));
+      image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(tinted)}`;
+    });
+    const imageData = {};
+    for (const size of [16, 32]) {
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
+      const context = canvas.getContext("2d");
+      context.drawImage(image, 0, 0, size, size);
+      imageData[size] = context.getImageData(0, 0, size, size);
+    }
+    await browser.action.setIcon({ imageData });
+  }
+
+  async function resetActionIcon() {
+    try {
+      await browser.action.setIcon({
+        path: browser.runtime.getManifest().action.default_icon
+      });
+    } catch (error) {
+      console.error("Omafox could not restore its toolbar icon", error);
+    }
+  }
+
   async function applyRecord(record) {
-    await browser.theme.update(toFirefoxTheme(record));
+    const theme = toFirefoxTheme(record);
+    await browser.theme.update(theme);
+    try {
+      await tintActionIcon(theme);
+    } catch (error) {
+      console.error("Omafox could not tint its toolbar icon", error);
+    }
   }
 
   async function restoreStoredTheme() {
@@ -160,6 +202,9 @@
   browser.runtime.onMessage.addListener((message) => {
     if (message && message.type === "features-set") {
       return handleFeaturesMessage(message.features);
+    }
+    if (message && message.type === "icon-reset") {
+      return resetActionIcon();
     }
     return undefined;
   });
