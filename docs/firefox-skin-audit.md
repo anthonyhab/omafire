@@ -62,6 +62,28 @@ density picker). Verified themed end-to-end on 2026-09-16; the
 `about:preferences` "Find in Settings" pill and Nova newtab tiles are the
 first Nova components still on native geometry.
 
+Nova token layer (purged 2026-09-16, FoxOne-informed): Nova remaps
+`--color-accent-primary{,-hover,-active,-selected}` to its violet palette
+and paints `--toolbox-background-color-gradient-leading`; both are pinned
+in omarchy-tokens.css alongside the satellites
+(`--background-color-information`, `--icon-color-*`,
+`--button-background-color-primary-disabled`, `--text-color`,
+`--tabpanel-background-color`). Two substitution traps matter under Nova:
+`--button-*-menu-*` (FF154+ panel rows) and `--uei-button-*` (extensions
+gear) alias ghost tokens AT :root and inherit pre-baked — they must be
+re-declared at the consuming scope (panel element / the button itself),
+which omarchy-bridge.css now does. `--arrowpanel-*` is retired under Nova;
+the live popup tokens are `--panel-background-color` / `-text-color` /
+`-border-color` / `-separator-color` on `:is(panel, menupopup)`, with
+`#DateTimePickerPanel` and `.autoscroller` excluded.
+
+Nova DOM additions observed in the wild: `#ai-window-toggle`,
+`#smartwindow-group-tabs-button`, `#smartwindow-ask-button`,
+`#taskbar-tabs-audio`, `#document-pip-return-to-opener-button` in the
+navbar; `#taskbar-tabs-button`, `#split-view-button`, `#share-button`,
+`#pageActionButton` in the urlbar page-action cluster (cluster now
+collapse-until-hover in omarchy-urlbar.css).
+
 Not covered / partial:
 
 | Surface | Native file | What's unthemed |
