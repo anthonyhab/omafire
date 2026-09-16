@@ -1,0 +1,68 @@
+@namespace xul "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+
+/* Shared interaction motion. Firefox's native hover transitions are a
+ * grab-bag — the sidebar splitter eases for 0.5s, GTK titlebar buttons for
+ * 0.2s (matching libadwaita), arrowscrollbox icons fade over 1s — while our
+ * own additions had none, so the rail's periphery buttons snapped and native
+ * chrome crawled. Every state-colour change now runs one duration/easing via
+ * --omarchy-motion-state.
+ *
+ * Scope note: only elements whose transitions are purely cosmetic belong
+ * here. Elements with functional animation (tab drag transforms, urlbar
+ * page-action reveal, overflow indicators) keep component-owned transitions;
+ * those compose --omarchy-motion-state into their own transition list. */
+
+/* Toolbar-family buttons: nav controls, unified extensions, rail periphery
+ * buttons, panel/menu rows, and the tab strip's scroll buttons. */
+:is(
+        .toolbarbutton-1,
+        toolbarbutton.subviewbutton,
+        .subviewbutton,
+        #tabs-newtab-button,
+        #vertical-tabs-newtab-button
+    ) {
+    transition: var(--omarchy-motion-state) !important;
+}
+
+/* Tab surfaces. .tab-background itself carries no functional animation —
+ * the drag/width transitions live on .tabbrowser-tab and are untouched. */
+.tabbrowser-tab .tab-background {
+    transition: var(--omarchy-motion-state) !important;
+}
+
+/* Menus and panel rows (native menupopup contents). */
+:is(
+        menupopup menuitem,
+        menupopup menu,
+        menulist,
+        .panel-subview-body toolbarbutton,
+        .urlbarView-row
+    ) {
+    transition: var(--omarchy-motion-state) !important;
+}
+
+/* The sidebar/toolbox splitter is the worst native offender (0.5s). */
+:is(.sidebar-splitter, #sidebar-splitter, splitter) {
+    transition: var(--omarchy-motion-state) !important;
+}
+
+/* GTK CSD titlebar buttons match libadwaita's 0.2s fade; bring them onto the
+ * shared timing. */
+:is(.titlebar-button, .titlebar-min, .titlebar-max, .titlebar-close) {
+    transition: var(--omarchy-motion-state) !important;
+}
+
+/* Tab strip scroll arrows ease their icon colour over a full second. */
+:is(
+        .scrollbutton-up,
+        .scrollbutton-down,
+        .arrowscrollbox-overflow-start-indicator,
+        .arrowscrollbox-overflow-end-indicator
+    ) {
+    transition: var(--omarchy-motion-state) !important;
+}
+
+/* Findbar and status panel hovers. */
+:is(findbar toolbarbutton, statusbar statusbarpanel) {
+    transition: var(--omarchy-motion-state) !important;
+}

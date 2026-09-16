@@ -16,7 +16,7 @@
 }
 
 #tabbrowser-tabs .tabbrowser-tab:not([selected]):hover .tab-background {
-    background: var(--omarchy-hover) !important;
+    background: var(--omarchy-control-hover) !important;
 }
 
 /* Horizontal tabs need their own flat layout pass. The GNOME base intentionally

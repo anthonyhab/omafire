@@ -12,8 +12,8 @@ sidebar-main,
 
 sidebar-main {
     --omarchy-base-toolbar-icon-fill: var(--omarchy-fg) !important;
-    --omarchy-base-hover-color: var(--omarchy-hover) !important;
-    --omarchy-base-active-color: var(--omarchy-active) !important;
+    --omarchy-base-hover-color: var(--omarchy-control-hover) !important;
+    --omarchy-base-active-color: var(--omarchy-control-active) !important;
     --omarchy-base-selected-color: var(--omarchy-selection) !important;
 }
 
