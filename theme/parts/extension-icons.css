@@ -39,6 +39,13 @@
         list-style-image: url("../icons/custom/vimium.svg") !important;
     }
 
+
+    /* Omarchy sync */
+    [data-extensionid="omarchy-ff-sync@bb.hab.rip"] .toolbarbutton-icon,
+    [data-extensionid="@omafox"] .toolbarbutton-icon {
+        list-style-image: url("../icons/custom/omarchy.svg") !important;
+    }
+
     /* Userscripts */
     [data-extensionid="{e4a8a97b-f2ed-450b-b12d-ee082ba24781}"]
         .toolbarbutton-icon {
