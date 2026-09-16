@@ -41,6 +41,27 @@ Covered today: findbar, identity/protections popups, unified-extensions
 panel, downloads panel, edit-bookmark, Library/places, menupopups,
 translations panel, PiP glyphs.
 
+Content-document coverage (userContent): `omarchy-content.css` bridges the
+`--in-content-*` family for about:preferences/addons/logins/processes/
+config plus the built-in sidebar docs, and a second Acorn block maps the
+raw `--text-color`/`--background-color-*`/`--button-*`/`--card-*`/
+`--table-*`/`--border-radius-*` family onto generated palette vars for all
+`about:` and `chrome://…/content/` documents (about:support,
+about:protections, toolkit dialogs). Palette values come from
+`omafox-content-palette.css` — the content-scope generated file that omits
+`color-scheme` and tabbox rules so ordinary web pages are untouched.
+Themed docs opt into the generated scheme via
+`color-scheme: var(--omarchy-color-scheme)`. All bridge declarations need
+`!important`: userContent is user-origin, so normal declarations lose to
+the pages' own author rules.
+
+Nova note: `browser.nova.enabled` + `browser.newtabpage.activity-stream
+.nova.enabled` are on in the profile — Mozilla's staged redesign (new
+about:preferences layout, Nova newtab, `view-nova.css` urlbar variant,
+density picker). Verified themed end-to-end on 2026-09-16; the
+`about:preferences` "Find in Settings" pill and Nova newtab tiles are the
+first Nova components still on native geometry.
+
 Not covered / partial:
 
 | Surface | Native file | What's unthemed |
