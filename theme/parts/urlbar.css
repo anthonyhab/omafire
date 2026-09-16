@@ -35,7 +35,6 @@ toolbarspring {
 	.urlbar-background {
 		border: 0 !important;
 		border-radius: var(--omarchy-base-entry-radius) !important;
-		background: transparent !important;
 		outline: 0 !important;
 	}
 	
@@ -48,24 +47,25 @@ toolbarspring {
 	opacity: 0.85 !important;
 }
 
-#urlbar-searchmode-switcher {
-	background-color: transparent !important;
+/* Firefox 155 renders the engine switcher as a moz-button. Its face lives in
+ * shadow DOM and reads --button-* tokens from the host, so flatten through
+ * them instead of painting the host box. */
+.searchmode-switcher {
+	--button-border: none !important;
+	--button-background-color: transparent !important;
+	--button-background-color-hover: var(--omarchy-base-hover-color) !important;
+	--button-background-color-active: var(--omarchy-base-active-color) !important;
+	--button-background-color-selected: var(--omarchy-base-selected-color) !important;
 	border-radius: var(--omarchy-base-button-radius) !important;
-	&:hover {
-		background-color: var(--omarchy-base-hover-color) !important;
+
+	&::part(button) {
+		border-radius: var(--omarchy-base-button-radius) !important;
 	}
-	&:active, &[open] {
-		background-color: var(--omarchy-base-active-color) !important;
-	}
+
 	#urlbar[searchmode] & {
-		background-color: var(--omarchy-base-selected-color) !important;
-			
-		&:hover {
-			background-color: var(--omarchy-base-selected-hover-color) !important;
-		}
-		&:active, &[open] {
-			background-color: var(--omarchy-base-selected-active-color) !important;
-		}
+		--button-background-color: var(--omarchy-base-selected-color) !important;
+		--button-background-color-hover: var(--omarchy-base-selected-hover-color) !important;
+		--button-background-color-active: var(--omarchy-base-selected-active-color) !important;
 	}
 }
 .searchmode-switcher-title {
@@ -85,7 +85,6 @@ toolbarspring {
 	background: transparent !important;
 	color: var(--omarchy-base-window-color) !important;
 	margin: 12px 0 0 0 !important;
-    position: absolute !important;
     box-shadow: var(--omarchy-base-menu-shadow) !important;
     border-radius: var(--omarchy-base-popover-radius) !important;
 	width: 100% !important;
@@ -172,7 +171,8 @@ toolbarspring {
 	padding: 8px !important;
 	background: var(--omarchy-base-menu-background) !important;
 	border-top: 1px solid var(--omarchy-base-menu-separator-color) !important;
-	border-radius: 0 0 8px 8px !important;
+	border-radius: 0 0 var(--omarchy-base-popover-radius)
+		var(--omarchy-base-popover-radius) !important;
 }
 
 .search-one-offs[is_searchbar="true"] {
@@ -185,8 +185,11 @@ toolbarspring {
 }
 
 /* URL bar and Search bar */
-#urlbar[focused] .urlbar-textbox-container {
-	margin: -1px !important;
+/* Firefox compensates a thicker focused border by pulling the input container
+ * out 1px. Our frame keeps a constant 1px ring, so that negative margin would
+ * just shift the text and controls — pin it in place. */
+#urlbar[focused] .urlbar-input-container {
+	margin: 0 !important;
 }
 #searchbar > .searchbar-textbox[focused] .searchbar-search-button {
 	margin-left: -1px !important;
@@ -197,11 +200,8 @@ toolbarspring {
 
 /* URL bar and Search bar's icons */
 .urlbar-icon:hover,
-.urlbar-icon-wrapper:hover,
 .urlbar-icon[open],
-.urlbar-icon-wrapper[open],
 .urlbar-icon:hover:active,
-.urlbar-icon-wrapper:hover:active,
 .searchbar-search-button:hover .searchbar-search-icon,
 .searchbar-search-button[open] .searchbar-search-icon,
 .searchbar-search-button:hover:active .searchbar-search-icon {
@@ -209,9 +209,13 @@ toolbarspring {
 	fill-opacity: 1 !important;
 }
 
+/* Firefox 155 urlbar icons are html:img in fixed-size cells; height:100%
+ * stretched them to the full 36px field. Let them keep native icon size. */
 #urlbar .urlbar-icon {
 	margin: 0 !important;
-	height: 100%  !important;
+	height: auto !important;
+	max-height: var(--urlbar-basic-component-size, 28px) !important;
+	object-fit: contain !important;
 }
 #notification-popup-box {
 	height: 100%  !important;

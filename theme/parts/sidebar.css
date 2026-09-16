@@ -14,8 +14,8 @@
 	}
 }
 
-/* Main sidebar */
-#sidebar-main {
+/* Main sidebar (Firefox 155: custom element, no id) */
+sidebar-main {
 	--button-size-icon: var(--omarchy-base-button-size) !important;
 	background-color: var(--omarchy-base-sidebar-background) !important;
 }

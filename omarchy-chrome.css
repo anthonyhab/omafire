@@ -106,6 +106,16 @@
         var(--omarchy-surface) 78%,
         var(--omarchy-fg) 22%
     );
+    /* Interaction rings: inset shadows, not borders or outlines, so state
+     * changes never shift layout. Hover/active/focus all draw the same 1px
+     * inner frame; only the color moves. */
+    --omarchy-ring: inset 0 0 0 1px var(--omarchy-border);
+    --omarchy-ring-hover: inset 0 0 0 1px var(--omarchy-control-hover-border);
+    --omarchy-ring-focus: inset 0 0 0 1px var(--omarchy-focus-accent);
+    --omarchy-ring-inactive: inset 0 0 0 1px
+        var(--omarchy-border-inactive-color, transparent);
+    /* Keyboard-navigation cue stays max-contrast regardless of accent. */
+    --omarchy-ring-kbd: inset 0 0 0 1px var(--omarchy-fg);
     --omarchy-tab-selected-hover: var(--omarchy-control-active);
     --omarchy-selection: color-mix(
         in srgb,
@@ -117,15 +127,20 @@
     --toolbar-color: var(--omarchy-fg) !important;
     --toolbar-background-color: var(--omarchy-surface) !important;
     --toolbar-text-color: var(--omarchy-fg) !important;
-    --toolbar-field-background-color: var(--omarchy-field) !important;
-    --toolbar-field-color: var(--omarchy-fg) !important;
-    --toolbar-field-text-color: var(--omarchy-fg) !important;
-    --toolbar-field-text-color-focus: var(--omarchy-fg) !important;
-    --toolbar-field-focus-background-color: var(--omarchy-field) !important;
-    --toolbar-field-focus-color: var(--omarchy-fg) !important;
+    --toolbar-field-border-color-focus: var(--omarchy-focus-accent) !important;
     --urlbar-box-text-color: var(--omarchy-fg) !important;
     --urlbar-box-text-color-hover: var(--omarchy-fg) !important;
-    --urlbarview-text-color-selected: var(--omarchy-fg) !important;
+    /* Firefox 155 box controls (engine switcher, zoom chip, label chips) read
+     * these; unthemed they resolve to stock light-dark boxes that paint
+     * visible rectangles inside the field. */
+    --urlbar-box-background-color: transparent !important;
+    --urlbar-box-background-color-hover: var(
+        --omarchy-control-hover
+    ) !important;
+    --urlbar-box-background-color-active: var(
+        --omarchy-control-active
+    ) !important;
+    --urlbar-box-background-color-focus: transparent !important;
     --urlbarView-secondary-text-color: var(--omarchy-muted) !important;
     --link-color: var(--omarchy-accent) !important;
     --link-color-hover: var(--omarchy-accent) !important;
@@ -194,33 +209,43 @@
     --omarchy-base-tabbar-tab-active-border-bottom-color: var(--omarchy-focus-accent) !important;
 }
 
-:root[lwtheme-brighttext] {
-    --omarchy-fg: color-mix(
-        in srgb,
-        #f7f5f8 88%,
-        var(--omarchy-accent) 12%
-    );
-    --omarchy-muted: color-mix(
-        in srgb,
-        var(--omarchy-fg) 62%,
-        var(--omarchy-surface) 38%
-    );
-    --omarchy-field: color-mix(
-        in srgb,
-        var(--omarchy-surface) 92%,
-        #ffffff 8%
-    );
-    --omarchy-panel: color-mix(
-        in srgb,
-        var(--omarchy-surface) 94%,
-        #ffffff 6%
-    );
-    --omarchy-border: color-mix(
-        in srgb,
-        var(--omarchy-fg) 22%,
-        transparent
-    );
+/* Before the extension theme lands, own the field tokens so first paint and
+ * the pre-theme window match the generated palette exactly. The moment
+ * lwtheme applies, Firefox's own theme vars carry the same palette values
+ * from the omafox extension — pinning here would fight them with
+ * approximations, so these stay startup-only. */
+:root:not([lwtheme]) {
+    --toolbar-field-background-color: var(--omarchy-field) !important;
+    --toolbar-field-color: var(--omarchy-fg) !important;
+    --toolbar-field-text-color: var(--omarchy-fg) !important;
+    --toolbar-field-text-color-focus: var(--omarchy-fg) !important;
+    --toolbar-field-focus-background-color: var(--omarchy-field) !important;
+    --toolbar-field-focus-color: var(--omarchy-fg) !important;
+    /* Firefox 155 renamed the focused-field tokens; the old names above stay
+     * for any consumer that still reads them. */
+    --toolbar-field-background-color-focus: var(--omarchy-field) !important;
+    --toolbar-field-border-color: var(--omarchy-border) !important;
+    --urlbarview-text-color-selected: var(--omarchy-fg) !important;
 }
+
+/* Under a live theme, source --omarchy-* from the theme's own values instead
+ * of approximating. The omafox extension maps the palette onto Firefox's
+ * theme keys exactly (field = darker_background, popup = dark_background,
+ * separators/field border = muted, tab line = accent), so these vars hold
+ * the real colors rather than derived ones. */
+:root[lwtheme] {
+    --omarchy-fg: var(--lwt-text-color, #f7f5f8);
+    --omarchy-muted: var(--toolbarseparator-color, var(--omarchy-fg));
+    --omarchy-field: var(
+        --toolbar-field-background-color,
+        var(--omarchy-surface)
+    );
+    --omarchy-panel: var(--panel-background-color, var(--omarchy-surface));
+    --omarchy-border: var(--toolbar-field-border-color, var(--omarchy-fg));
+    --omarchy-accent: var(--lwt-tab-line-color, var(--lwt-text-color));
+}
+
+
 
 /* Match the shell's fontconfig-driven typography rather than Firefox's
  * platform sans. Primary chrome labels use the shell subtitle step. */
@@ -257,6 +282,36 @@
     --omarchy-base-menu-radius: var(--omarchy-radius-container, 0px) !important;
     --omarchy-base-popover-radius: var(--omarchy-radius-container, 0px) !important;
     --omarchy-base-dialog-radius: var(--omarchy-radius-container, 0px) !important;
+
+    /* Firefox's own design tokens drive every native surface (moz-* custom
+     * elements, panels, and the Firefox 155 urlbar field through
+     * --urlbar-background-border-radius). Repoint the whole family at the
+     * generated Hyprland tokens so native and maintained rules cannot drift
+     * on either square or rounded themes. --border-radius-circle is a
+     * semantic pill shape, not theme rounding, so it is left alone. */
+    --border-radius-xsmall: var(--omarchy-radius-container, 0px) !important;
+    --border-radius-small: var(--omarchy-radius-container, 0px) !important;
+    --border-radius-medium: var(--omarchy-radius-container, 0px) !important;
+    --border-radius-large: var(--omarchy-radius-container, 0px) !important;
+    --border-radius-xlarge: var(--omarchy-radius-container, 0px) !important;
+    --button-border-radius: var(--omarchy-base-button-radius) !important;
+    --toolbarbutton-border-radius: var(--omarchy-base-button-radius) !important;
+    --tab-border-radius: var(--omarchy-base-button-radius) !important;
+    --menuitem-border-radius: var(--omarchy-base-button-radius) !important;
+    --panel-menuitem-border-radius: var(--omarchy-base-button-radius) !important;
+    --input-text-border-radius: var(--omarchy-base-entry-radius) !important;
+    --input-search-border-radius: var(--omarchy-base-entry-radius) !important;
+    --card-border-radius: var(--omarchy-base-card-radius) !important;
+    --panel-border-radius: var(--omarchy-base-popover-radius) !important;
+    --popup-border-radius: var(--omarchy-base-popover-radius) !important;
+    --urlbarview-border-radius: var(--omarchy-radius-container, 0px) !important;
+    --urlbar-background-border-radius: var(
+        --omarchy-base-entry-radius
+    ) !important;
+    --urlbar-inner-border-radius: var(--omarchy-base-entry-radius) !important;
+    --urlbarView-row-border-radius: var(
+        --omarchy-base-button-radius
+    ) !important;
 }
 
 #mainPopupSet > menupopup,
@@ -306,7 +361,7 @@
 #tabbrowser-tabs .tabbrowser-tab .tab-background {
     background: transparent !important;
     border: 0 !important;
-    border-radius: 0 !important;
+    border-radius: var(--omarchy-base-button-radius) !important;
     box-shadow: none !important;
 }
 
@@ -409,7 +464,7 @@
     .tabbrowser-tab:not([selected]):hover
     .tab-background {
     background: var(--omarchy-control-hover) !important;
-    box-shadow: inset 0 0 0 1px var(--omarchy-control-hover-border) !important;
+    box-shadow: var(--omarchy-ring-hover) !important;
 }
 
 #tabbrowser-tabs[orient="horizontal"] .tab-content::before {
@@ -418,8 +473,8 @@
 
 #tabbrowser-tabs[orient="horizontal"] .tab-close-button:hover {
     background: var(--omarchy-control-hover) !important;
-    border-radius: 0 !important;
-    box-shadow: inset 0 0 0 1px var(--omarchy-control-hover-border) !important;
+    border-radius: var(--omarchy-base-button-radius) !important;
+    box-shadow: var(--omarchy-ring-hover) !important;
 }
 
 #tabbrowser-tabs[orient="horizontal"] .tab-close-button:active {
@@ -668,7 +723,7 @@
 .tab-group-editor-panel {
     background: var(--omarchy-panel) !important;
     border: 1px solid var(--omarchy-control-border) !important;
-    border-radius: 0 !important;
+    border-radius: var(--omarchy-base-popover-radius) !important;
     box-shadow: none !important;
     color: var(--omarchy-fg) !important;
 }
@@ -734,7 +789,7 @@
     input[name="tab-group-color"]:checked
     + .tab-group-editor-swatch {
     border-color: var(--omarchy-focus-accent) !important;
-    box-shadow: inset 0 0 0 1px var(--omarchy-border) !important;
+    box-shadow: var(--omarchy-ring) !important;
 }
 
 /* Firefox stores the selected colour only in the group object's inline token
@@ -812,7 +867,7 @@
  * geometry. The label, line, count, hover and picker now resolve through the
  * same named palette tokens instead of being flattened to one neutral card. */
 #tabbrowser-tabs[orient="vertical"] .tab-group-label {
-    border-radius: 0 !important;
+    border-radius: var(--omarchy-base-button-radius) !important;
     box-shadow: none !important;
     outline: 0 !important;
 }
@@ -846,14 +901,14 @@
 #tabbrowser-tabs[orient="vertical"][tablist-has-focus]
     .tab-group-label.tablist-keyboard-focus,
 #tabbrowser-tabs[orient="vertical"] .tab-group-label:focus-visible {
-    outline: 1px solid var(--omarchy-fg) !important;
-    outline-offset: -1px !important;
+    box-shadow: var(--omarchy-ring-kbd) !important;
+    outline: none !important;
 }
 
 /* The vertical-tab pinning tour is a Firefox shadow component. Supplying
  * these inherited palette tokens removes its hard-coded violet card without
  * reaching into the component's shadow DOM. */
-#sidebar-main,
+sidebar-main,
 sidebar-pins-promo {
     --color-violet-0: var(--omarchy-fg) !important;
     --color-violet-10: var(--omarchy-panel) !important;
@@ -866,7 +921,6 @@ sidebar-pins-promo {
 :root {
     --omarchy-rail-cell-size: 32px;
     --omarchy-rail-gap: 2px;
-    --omarchy-rail-inline-offset: 3px;
 }
 
 #tabbrowser-tabs[orient="vertical"]:not([expanded]) .tab-close-button {
@@ -878,8 +932,7 @@ sidebar-pins-promo {
     --tab-min-height: var(--omarchy-rail-cell-size) !important;
     --tab-collapsed-background-width: var(--omarchy-rail-cell-size) !important;
     --tab-collapsed-width: calc(
-        var(--omarchy-rail-cell-size) + 2 * var(--omarchy-rail-gap) +
-            var(--omarchy-rail-inline-offset)
+        var(--omarchy-rail-cell-size) + 2 * var(--omarchy-rail-gap)
     ) !important;
     --tab-inner-inline-margin: var(--omarchy-rail-gap) !important;
     /* Firefox's vertical-tab implementation swaps these native values when
@@ -897,6 +950,9 @@ sidebar-pins-promo {
     --tab-selected-textcolor: var(--omarchy-fg) !important;
 }
 
+/* The collapsed tab must fill the rail so its 32px icon cell can center
+ * against the rail itself; the old inline translateX left icons visibly
+ * off-center when Firefox 155 widened the rail. */
 #tabbrowser-tabs[orient="vertical"]:not([expanded]) .tabbrowser-tab {
     box-sizing: border-box !important;
     height: var(--omarchy-rail-cell-size) !important;
@@ -904,22 +960,25 @@ sidebar-pins-promo {
     max-height: var(--omarchy-rail-cell-size) !important;
     min-height: var(--omarchy-rail-cell-size) !important;
     padding: 0 !important;
-    transform: translateX(var(--omarchy-rail-inline-offset)) !important;
+    transform: none !important;
+    width: 100% !important;
 }
 
 #tabbrowser-tabs[orient="vertical"]:not([expanded])
     :is(.tab-group-label-container, .tab-group-overflow-count-container) {
-    transform: translateX(var(--omarchy-rail-inline-offset)) !important;
+    transform: none !important;
 }
 
 #tabbrowser-tabs[orient="vertical"]:not([expanded]) .tab-background {
     background-color: transparent !important;
     border: 0 !important;
     border-inline-start: 1px solid transparent !important;
-    border-radius: 0 !important;
+    border-radius: var(--omarchy-base-button-radius) !important;
     box-shadow: none !important;
     height: var(--omarchy-rail-cell-size) !important;
+    justify-self: center !important;
     margin-block: 0 !important;
+    margin-inline: auto !important;
     max-height: var(--omarchy-rail-cell-size) !important;
     min-height: var(--omarchy-rail-cell-size) !important;
     width: var(--omarchy-rail-cell-size) !important;
@@ -931,6 +990,7 @@ sidebar-pins-promo {
     box-sizing: border-box !important;
     height: var(--omarchy-rail-cell-size) !important;
     justify-content: center !important;
+    justify-self: center !important;
     margin: 0 !important;
     min-height: var(--omarchy-rail-cell-size) !important;
     padding: 0 !important;
@@ -944,8 +1004,50 @@ sidebar-pins-promo {
     width: 16px !important;
 }
 
+/* Keep the first rail item off the navbar divider with the same inset the
+ * rail's own cells use. #main-window lifts specificity over the native
+ * !important reset on the tabs element. */
+#main-window #tabbrowser-tabs[orient="vertical"]:not([expanded]) {
+    padding-block-start: var(--omarchy-control-gap) !important;
+}
+
+/* Collapsed rail: a tab-group label has no room for its expanded row. Render
+ * it as a short centered bar in the group's own colour — a grouping cue, not
+ * a 24px solid swatch. */
+#main-window
+    #tabbrowser-tabs[orient="vertical"]:not([expanded])
+    .tab-group-label-container {
+    height: 12px !important;
+    min-height: 12px !important;
+    max-height: 12px !important;
+}
+
+#main-window
+    #tabbrowser-tabs[orient="vertical"]:not([expanded])
+    .tab-group-label-hover-highlight {
+    height: 12px !important;
+    min-height: 12px !important;
+    max-height: 12px !important;
+}
+
+#main-window
+    #tabbrowser-tabs[orient="vertical"]:not([expanded])
+    .tab-group-label {
+    border-radius: var(--omarchy-radius-container, 0px) !important;
+    height: 4px !important;
+    margin-inline: auto !important;
+    max-height: 4px !important;
+    max-width: 22px !important;
+    min-height: 4px !important;
+    min-width: 22px !important;
+    padding: 0 !important;
+    width: 22px !important;
+}
+
+/* Firefox 155 keeps two periphery buttons: #tabs-newtab-button is the live
+ * one in the collapsed rail; #vertical-tabs-newtab-button stays hidden. */
 #tabbrowser-tabs[orient="vertical"]:not([expanded])
-    #vertical-tabs-newtab-button {
+    :is(#tabs-newtab-button, #vertical-tabs-newtab-button) {
     box-sizing: border-box !important;
     height: var(--omarchy-rail-cell-size) !important;
     margin: var(--omarchy-rail-gap) auto !important;
@@ -954,12 +1056,12 @@ sidebar-pins-promo {
     min-height: var(--omarchy-rail-cell-size) !important;
     min-width: var(--omarchy-rail-cell-size) !important;
     padding: 0 !important;
-    transform: translateX(var(--omarchy-rail-inline-offset)) !important;
+    transform: none !important;
     width: var(--omarchy-rail-cell-size) !important;
 }
 
 #tabbrowser-tabs[orient="vertical"]:not([expanded])
-    #vertical-tabs-newtab-button
+    :is(#tabs-newtab-button, #vertical-tabs-newtab-button)
     > .toolbarbutton-icon {
     height: 18px !important;
     margin: 0 !important;
@@ -977,6 +1079,18 @@ sidebar-pins-promo {
     .tabbrowser-tab:not([selected]):hover
     .tab-background {
     background-color: var(--omarchy-control-hover) !important;
+}
+
+#tabbrowser-tabs[orient="vertical"]:not([expanded])
+    :is(#tabs-newtab-button, #vertical-tabs-newtab-button):hover {
+    background-color: var(--omarchy-control-hover) !important;
+    box-shadow: var(--omarchy-ring-hover) !important;
+}
+
+#tabbrowser-tabs[orient="vertical"]:not([expanded])
+    :is(#tabs-newtab-button, #vertical-tabs-newtab-button):active {
+    background-color: var(--omarchy-control-active) !important;
+    box-shadow: var(--omarchy-ring-hover) !important;
 }
 
 /* Firefox otherwise substitutes an inactive toolbox paint beneath the tab
@@ -1007,8 +1121,8 @@ sidebar-pins-promo {
 #tabbrowser-tabs[orient="vertical"]:not([expanded])[tablist-has-focus]
     .tabbrowser-tab.tablist-keyboard-focus
     .tab-background {
-    outline: 1px solid var(--omarchy-fg) !important;
-    outline-offset: -1px !important;
+    box-shadow: var(--omarchy-ring-kbd) !important;
+    outline: none !important;
 }
 
 /* Container identity colours are useful metadata, but Firefox's saturated
@@ -1130,6 +1244,10 @@ sidebar-pins-promo {
     min-height: var(--omarchy-nav-height) !important;
     align-items: center !important;
     column-gap: var(--omarchy-control-gap) !important;
+    /* The collapsed vertical-tab rail centers its 32px cells at x=23. The
+     * first navbar button natively sits at cx=20 — equalize both sides so the
+     * rail reads as the same icon column, not a second, shifted one. */
+    padding-inline: 3px !important;
 }
 
 /* Firefox puts almost every customizable widget inside this hbox. Align the
@@ -1186,7 +1304,7 @@ sidebar-pins-promo {
         #urlbar-zoom-button,
         .subviewbutton,
         .titlebar-button,
-        #urlbar-searchmode-switcher,
+        .searchmode-switcher,
         .searchmode-switcher-close,
         .bookmark-item
     ),
@@ -1197,7 +1315,7 @@ sidebar-pins-promo {
         #urlbar-zoom-button,
         .subviewbutton,
         .titlebar-button,
-        #urlbar-searchmode-switcher,
+        .searchmode-switcher,
         .searchmode-switcher-close,
         .bookmark-item
     ),
@@ -1212,12 +1330,12 @@ sidebar-pins-promo {
         #urlbar-zoom-button,
         .subviewbutton,
         .titlebar-button,
-        #urlbar-searchmode-switcher,
+        .searchmode-switcher,
         .searchmode-switcher-close
     ) {
     background: transparent !important;
     border: 0 !important;
-    border-radius: 0 !important;
+    border-radius: var(--omarchy-base-button-radius) !important;
     box-shadow: none !important;
     align-items: center !important;
     box-sizing: border-box !important;
@@ -1233,7 +1351,7 @@ sidebar-pins-promo {
 #nav-bar toolbarbutton:not([disabled]):hover {
     background-color: var(--omarchy-control-hover) !important;
     background-image: none !important;
-    box-shadow: inset 0 0 0 1px var(--omarchy-control-hover-border) !important;
+    box-shadow: var(--omarchy-ring-hover) !important;
 }
 
 #nav-bar toolbarbutton:not([disabled]):is(:active, [open]) {
@@ -1255,8 +1373,8 @@ sidebar-pins-promo {
         :-moz-focusring
     ) {
     background: var(--omarchy-control-hover) !important;
-    outline: 1px solid var(--omarchy-focus-accent) !important;
-    outline-offset: -1px !important;
+    box-shadow: var(--omarchy-ring-focus) !important;
+    outline: none !important;
 }
 
 /* Firefox applies family-specific toolbar hover shorthands after the generic
@@ -1266,8 +1384,8 @@ sidebar-pins-promo {
 #nav-bar #PanelUI-menu-button:not([disabled]):hover,
 #nav-bar #nav-bar-overflow-button:not([disabled]):hover {
     background: var(--omarchy-control-hover) !important;
-    border-radius: 0 !important;
-    box-shadow: inset 0 0 0 1px var(--omarchy-control-hover-border) !important;
+    border-radius: var(--omarchy-base-button-radius) !important;
+    box-shadow: var(--omarchy-ring-hover) !important;
 }
 
 #nav-bar
@@ -1276,7 +1394,7 @@ sidebar-pins-promo {
 #nav-bar #PanelUI-menu-button:not([disabled]):is(:active, [open]),
 #nav-bar #nav-bar-overflow-button:not([disabled]):is(:active, [open]) {
     background: var(--omarchy-control-active) !important;
-    border-radius: 0 !important;
+    border-radius: var(--omarchy-base-button-radius) !important;
 }
 
 /* Native and extension buttons may paint a second hover tile on their icon or
@@ -1298,7 +1416,7 @@ sidebar-pins-promo {
         #urlbar-zoom-button,
         .subviewbutton,
         .titlebar-button,
-        #urlbar-searchmode-switcher,
+        .searchmode-switcher,
         .searchmode-switcher-close,
         .bookmark-item
     ) .toolbarbutton-icon,
@@ -1310,7 +1428,7 @@ sidebar-pins-promo {
         #urlbar-zoom-button,
         .subviewbutton,
         .titlebar-button,
-        #urlbar-searchmode-switcher,
+        .searchmode-switcher,
         .searchmode-switcher-close,
         .bookmark-item
     ) .toolbarbutton-icon,
@@ -1334,7 +1452,7 @@ sidebar-pins-promo {
         #urlbar-zoom-button,
         .subviewbutton,
         .titlebar-button,
-        #urlbar-searchmode-switcher,
+        .searchmode-switcher,
         .searchmode-switcher-close,
         .bookmark-item
     ) > .toolbarbutton-badge-stack,
@@ -1346,7 +1464,7 @@ sidebar-pins-promo {
         #urlbar-zoom-button,
         .subviewbutton,
         .titlebar-button,
-        #urlbar-searchmode-switcher,
+        .searchmode-switcher,
         .searchmode-switcher-close,
         .bookmark-item
     ) > .toolbarbutton-badge-stack,
@@ -1382,15 +1500,23 @@ sidebar-pins-promo {
     -moz-context-properties: fill, fill-opacity !important;
 }
 
-/* URL bar field: use the same live Pywalfox field colors as Firefox itself. */
+/* URL bar field: use the same live Pywalfox field colors as Firefox itself.
+ * Firefox 155 paints the field on .urlbar-background (absolute, inset:0, and
+ * it follows breakout growth). The input container sits flush on top, so an
+ * opaque container would cover the frame border — keep it and the input
+ * layers clear and let the background layer carry the field color. */
 #urlbar,
-.urlbar-background,
-#urlbar .urlbar-input-container,
-#urlbar .urlbar-input,
-#urlbar .urlbar-input-box {
+#urlbar > .urlbar-background {
     background-color: var(--omarchy-field) !important;
     color: var(--omarchy-fg) !important;
     border-color: var(--omarchy-border) !important;
+}
+
+#urlbar .urlbar-input-container,
+#urlbar .urlbar-input,
+#urlbar .urlbar-input-box {
+    background-color: transparent !important;
+    color: var(--omarchy-fg) !important;
 }
 
 /* Give the URL bar a deliberate control rhythm instead of inheriting the
@@ -1404,6 +1530,11 @@ sidebar-pins-promo {
     --urlbar-height: var(--omarchy-urlbar-height) !important;
     --urlbar-toolbar-height: var(--omarchy-urlbar-height) !important;
     --urlbar-icon-padding: 4px !important;
+    /* Firefox 155 drives field geometry through tokens: margin-inline feeds
+     * the one-sided breakout-extend shift, so zeroing it keeps the bar
+     * centered instead of drifting a few px when focus expands it. */
+    --urlbar-margin-inline: 0px !important;
+    --urlbar-border-radius: var(--omarchy-radius-input) !important;
     align-self: center !important;
     box-sizing: border-box !important;
     height: var(--omarchy-urlbar-height) !important;
@@ -1438,10 +1569,31 @@ sidebar-pins-promo {
     padding-inline: 0 !important;
 }
 
-#urlbar-searchmode-switcher,
+/* Firefox 155 hosts the engine switcher in a moz-button whose shadow face
+ * reads --button-* tokens; keep it flat and let the state rules below tint
+ * it through the same vars. */
+.searchmode-switcher {
+    --button-background-color: transparent !important;
+    --button-background-color-hover: var(--omarchy-control-hover) !important;
+    --button-background-color-active: var(--omarchy-control-active) !important;
+    --button-border: none !important;
+    border-radius: var(--omarchy-radius-input, 0px) !important;
+    margin-inline: 0 !important;
+    min-height: 26px !important;
+    padding-inline: 7px !important;
+}
+
+#urlbar[searchmode] .searchmode-switcher {
+    --button-background-color: var(--omarchy-control-selected) !important;
+}
+
 #urlbar-search-mode-indicator,
 #urlbar-label-box,
-#urlbar-zoom-button {
+#urlbar-zoom-button,
+#trust-icon-container,
+#tracking-protection-icon-container,
+#notification-popup-box,
+#urlbar-revert-button-container {
     background: transparent !important;
     border: 0 !important;
     border-radius: var(--omarchy-radius-input, 0px) !important;
@@ -1454,19 +1606,18 @@ sidebar-pins-promo {
 /* URL-bar controls use the same state tokens as toolbar widgets. Their
  * search-mode/zoom elements are not all toolbarbuttons, so cover both the
  * XUL buttons and the hbox/div page actions explicitly. */
-#urlbar-searchmode-switcher:hover,
 #urlbar-search-mode-indicator:hover,
 #urlbar-label-box:hover,
 #urlbar-zoom-button:hover,
 #urlbar .urlbar-page-action:hover,
-#urlbar #identity-box > .identity-box-button:hover {
+#urlbar #identity-box > .identity-box-button:hover,
+#urlbar #trust-icon-container:hover,
+#urlbar #tracking-protection-icon-container:hover {
     background-color: var(--omarchy-control-hover) !important;
     background-image: none !important;
-    box-shadow: inset 0 0 0 1px var(--omarchy-control-hover-border) !important;
+    box-shadow: var(--omarchy-ring-hover) !important;
 }
 
-#urlbar-searchmode-switcher:is(:active, [open]),
-#urlbar[searchmode] #urlbar-searchmode-switcher,
 #urlbar-search-mode-indicator:is(:active, [open]),
 #urlbar-label-box:active,
 #urlbar-zoom-button:is(:active, [open]),
@@ -1476,16 +1627,20 @@ sidebar-pins-promo {
     background-image: none !important;
 }
 
-#urlbar-searchmode-switcher .toolbarbutton-icon,
-#urlbar-search-mode-indicator .toolbarbutton-icon {
+#urlbar-search-mode-indicator-close {
     height: 18px !important;
     width: 18px !important;
 }
 
-#urlbar-go-button {
+/* Firefox 155's go button is an html:img: content-box sizing plus the
+ * theme's padding used to let it overflow the field, and content:-swapped
+ * glyphs stretch to the box unless object-fit constrains them. */
+.urlbar-go-button {
+    box-sizing: border-box !important;
     flex-shrink: 0 !important;
     height: var(--omarchy-nav-control-size) !important;
     margin-inline: 0 !important;
+    object-fit: contain !important;
     padding: 7px !important;
     width: var(--omarchy-nav-control-size) !important;
 }
@@ -1548,7 +1703,7 @@ sidebar-pins-promo {
  * field sits inside a roomier toolbar row, so keep that same framing here. */
 #urlbar > .urlbar-background {
     border: 1px solid var(--omarchy-control-border) !important;
-    border-radius: 0 !important;
+    border-radius: var(--omarchy-base-entry-radius) !important;
     box-sizing: border-box !important;
     height: var(--omarchy-urlbar-height) !important;
     inset: 0 !important;
@@ -1587,7 +1742,7 @@ sidebar-pins-promo {
 #urlbar:has(#urlbar-input:focus) > .urlbar-input-container,
 #urlbar:is([focused], :focus-within, [breakout][breakout-extend])
     > .urlbar-input-container {
-    box-shadow: inset 0 0 0 1px var(--omarchy-focus-accent) !important;
+    box-shadow: var(--omarchy-ring-focus) !important;
 }
 
 :root:-moz-window-inactive
@@ -1596,10 +1751,7 @@ sidebar-pins-promo {
 :root:-moz-window-inactive
     #urlbar:is([focused], :focus-within, [breakout][breakout-extend])
     > .urlbar-input-container {
-    box-shadow: inset 0 0 0 1px var(
-            --omarchy-border-inactive-color,
-            transparent
-        ) !important;
+    box-shadow: var(--omarchy-ring-inactive) !important;
 }
 
 /* Keep autocomplete readable: accent belongs to URLs and focus, not every
@@ -1650,7 +1802,7 @@ sidebar-pins-promo {
 
 .urlbarView-row-inner,
 .urlbarView-no-wrap {
-    border-radius: 0 !important;
+    border-radius: var(--omarchy-base-button-radius) !important;
 }
 
 .urlbarView-title {
@@ -1671,7 +1823,7 @@ sidebar-pins-promo {
 }
 
 /* Use Firefox's paired sidebar text/highlight colors for the launcher and tabs. */
-#sidebar-main,
+sidebar-main,
 #vertical-tabs,
 #tabbrowser-arrowscrollbox[orient="vertical"],
 #sidebar-box,
@@ -1680,7 +1832,7 @@ sidebar-pins-promo {
     color: var(--omarchy-fg) !important;
 }
 
-#sidebar-main {
+sidebar-main {
     --omarchy-base-toolbar-icon-fill: var(--omarchy-fg) !important;
     --omarchy-base-hover-color: var(--omarchy-hover) !important;
     --omarchy-base-active-color: var(--omarchy-active) !important;
@@ -1694,7 +1846,7 @@ sidebar-pins-promo {
 }
 
 #browser:has(#sidebar-container:not([hidden])) #sidebar-container,
-#browser:has(#sidebar-container:not([hidden])) #sidebar-main,
+#browser:has(#sidebar-container:not([hidden])) sidebar-main,
 #browser:has(#sidebar-container:not([hidden])) #sidebar-box,
 #browser:has(#sidebar-container:not([hidden])) #sidebar,
 #browser:has(#tabbrowser-tabbox[sidebar-shown]) #sidebar-box,
@@ -1743,8 +1895,8 @@ sidebar-pins-promo {
 }
 
 #sidebar-splitter:focus-visible {
-    outline: 1px solid var(--omarchy-focus-accent) !important;
-    outline-offset: -1px !important;
+    box-shadow: var(--omarchy-ring-focus) !important;
+    outline: none !important;
 }
 
 /* Low-risk Firefox Theme API crack fixes. */
@@ -1807,25 +1959,9 @@ richlistbox#items {
 }
 
 @-moz-document url("chrome://browser/content/places/places.xhtml") {
-    /* Library windows do not receive Pywalfox's browser-window LWT aliases.
-     * Keep their fallback on the same dark Omarchy palette in dark sessions. */
-    @media (prefers-color-scheme: dark) {
-        :root {
-            color-scheme: dark !important;
-            --omarchy-surface: #171820 !important;
-            --omarchy-panel: #1d1e2b !important;
-            --omarchy-field: #222331 !important;
-            --omarchy-fg: #eee4ef !important;
-            --omarchy-muted: #b8afc0 !important;
-            --omarchy-accent: #c4a7e7 !important;
-            --omarchy-border: #514b63 !important;
-            --omarchy-hover: #2b2938 !important;
-            --omarchy-selection: #3a3450 !important;
-            --toolbar-bgcolor: var(--omarchy-surface) !important;
-            --toolbar-color: var(--omarchy-fg) !important;
-        }
-    }
-
+    /* Library windows never get [lwtheme], so the generated omafox palette
+     * (scoped to :root:not([lwtheme])) already supplies the exact theme
+     * colors here. */
     :root {
         --in-content-page-background: var(--omarchy-surface) !important;
         --in-content-text-color: var(--omarchy-fg) !important;
@@ -2006,7 +2142,7 @@ richlistbox#items {
     background: transparent !important;
     background-image: none !important;
     border: 0 !important;
-    border-radius: 0 !important;
+    border-radius: var(--omarchy-base-button-radius) !important;
     bottom: auto !important;
     box-sizing: border-box !important;
     display: flex !important;
@@ -2035,7 +2171,7 @@ scrollbox[orient="horizontal"] ~ #scrollbutton-down {
     background: transparent !important;
     background-image: none !important;
     border: 0 !important;
-    border-radius: 0 !important;
+    border-radius: var(--omarchy-base-button-radius) !important;
     bottom: auto !important;
     box-sizing: border-box !important;
     display: flex !important;
@@ -2077,7 +2213,7 @@ scrollbox[orient="horizontal"]
 #scrollbutton-up:has(~ scrollbox[orient="horizontal"]):hover,
 scrollbox[orient="horizontal"] ~ #scrollbutton-down:hover {
     background: var(--omarchy-control-hover) !important;
-    box-shadow: inset 0 0 0 1px var(--omarchy-control-hover-border) !important;
+    box-shadow: var(--omarchy-ring-hover) !important;
 }
 
 /* Keep both directions discoverable at overflow boundaries. The host exposes
@@ -2130,8 +2266,8 @@ scrollbox[orient="horizontal"] ~ #scrollbutton-down[disabled] {
 #tabbrowser-tabs[orient="horizontal"][tablist-has-focus]
     .tabbrowser-tab.tablist-keyboard-focus
     .tab-background {
-    outline: 1px solid var(--omarchy-focus-accent) !important;
-    outline-offset: -1px !important;
+    box-shadow: var(--omarchy-ring-focus) !important;
+    outline: none !important;
 }
 
 #TabsToolbar:has(#tabbrowser-tabs[orient="horizontal"])
@@ -2169,7 +2305,7 @@ scrollbox[orient="horizontal"] ~ #scrollbutton-down[disabled] {
 #TabsToolbar:has(#tabbrowser-tabs[orient="horizontal"])
     #firefox-view-button {
     background: transparent !important;
-    border-radius: 0 !important;
+    border-radius: var(--omarchy-base-button-radius) !important;
     height: var(--omarchy-tabs-control-size) !important;
     margin-block: calc(
         (var(--omarchy-tabs-row-height) - var(--omarchy-tabs-control-size)) / 2
@@ -2199,8 +2335,8 @@ scrollbox[orient="horizontal"] ~ #scrollbutton-down[disabled] {
         #alltabs-button
     ):hover {
     background: var(--omarchy-control-hover) !important;
-    border-radius: 0 !important;
-    box-shadow: inset 0 0 0 1px var(--omarchy-control-hover-border) !important;
+    border-radius: var(--omarchy-base-button-radius) !important;
+    box-shadow: var(--omarchy-ring-hover) !important;
 }
 
 #TabsToolbar:has(#tabbrowser-tabs[orient="horizontal"])
@@ -2339,7 +2475,7 @@ scrollbox[orient="horizontal"] ~ #scrollbutton-down[disabled] {
 }
 
 #tabbrowser-tabs[orient="horizontal"] .tab-close-button {
-    border-radius: 0 !important;
+    border-radius: var(--omarchy-base-button-radius) !important;
     box-sizing: border-box !important;
     flex: 0 0 24px !important;
     height: 24px !important;
@@ -2503,7 +2639,7 @@ scrollbox[orient="horizontal"] ~ #scrollbutton-down[disabled] {
         --input-text-color: var(--omarchy-fg) !important;
         --input-text-border-color: var(--omarchy-control-border) !important;
         --input-text-border: 1px solid var(--input-text-border-color) !important;
-        --input-text-border-radius: 0px !important;
+        --input-text-border-radius: var(--omarchy-radius-input, 0px) !important;
     }
 
     /* moz-input-search carries the public class on its host and paints the real
@@ -2528,7 +2664,7 @@ scrollbox[orient="horizontal"] ~ #scrollbutton-down[disabled] {
         appearance: none !important;
         background: var(--omarchy-field) !important;
         border: 1px solid var(--omarchy-control-border) !important;
-        border-radius: 0 !important;
+        border-radius: var(--omarchy-base-entry-radius) !important;
         box-shadow: none !important;
         color: var(--omarchy-fg) !important;
         outline: 0 !important;
@@ -2543,7 +2679,7 @@ scrollbox[orient="horizontal"] ~ #scrollbutton-down[disabled] {
         ):is(:focus, :focus-visible, [focused]),
     #searchbar:focus-within {
         border-color: transparent !important;
-        box-shadow: inset 0 0 0 1px var(--omarchy-focus-accent) !important;
+        box-shadow: var(--omarchy-ring-focus) !important;
         outline: 0 !important;
     }
 
@@ -2603,14 +2739,14 @@ scrollbox[orient="horizontal"] ~ #scrollbutton-down[disabled] {
             .widget-overflow-list .toolbarbutton-1,
             .all-tabs-item
         ):is(:focus-visible, :-moz-focusring) {
-        outline: 1px solid var(--omarchy-focus-accent) !important;
-        outline-offset: -1px !important;
+        box-shadow: var(--omarchy-ring-focus) !important;
+        outline: none !important;
     }
 
     /* Compact binary controls keep their semantic shape but use the same edge and
      * selected color as the rest of the shell instead of a stock platform ring. */
     :is(input[type="checkbox"], checkbox:not(.treenode-checkbox) > .checkbox-check) {
-        border-radius: 0 !important;
+        border-radius: var(--omarchy-base-entry-radius) !important;
     }
 
     :is(
@@ -2624,9 +2760,7 @@ scrollbox[orient="horizontal"] ~ #scrollbutton-down[disabled] {
             input[type="checkbox"]:not(:checked):hover,
             checkbox:not(.treenode-checkbox) > .checkbox-check:not([checked]):hover
         ) {
-        box-shadow: inset 0 0 0 1px var(
-                --omarchy-control-hover-border
-            ) !important;
+        box-shadow: var(--omarchy-ring-hover) !important;
     }
 
     :is(

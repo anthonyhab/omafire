@@ -310,7 +310,8 @@ spacer[part=overflow-start-indicator], spacer[part=overflow-end-indicator] {
 		/* Close button overlay */
 		&:not([pinned])::before {
 			background: linear-gradient(to left, var(--omarchy-base-tabbar-tab-close-overlay-bg) 50%, transparent);
-			border-radius: 0 4px 4px 0;
+			border-radius: 0 var(--omarchy-base-button-radius)
+				var(--omarchy-base-button-radius) 0;
 			bottom: 2px;
 			content: "";
 			height: calc(100% - 5px);
@@ -887,7 +888,8 @@ tab-group {
 
 	/* Round and pad tab-bar */
 	:root[customtitlebar][sizemode="normal"]:not([gtktiledwindow="true"]) #TabsToolbar {
-		border-radius: env(-moz-gtk-csd-titlebar-radius) env(-moz-gtk-csd-titlebar-radius) 0 0 !important
+		border-radius: var(--omarchy-radius-container, env(-moz-gtk-csd-titlebar-radius))
+			var(--omarchy-radius-container, env(-moz-gtk-csd-titlebar-radius)) 0 0 !important
 	}
 	:root[customtitlebar]:not([inFullscreen], [sizemode="maximized"]) #TabsToolbar .toolbar-items {
 		padding: 0 46px;

@@ -26,13 +26,18 @@ still needs a focused pass so future work does not restart the same audit.
 
 1. `theme/base-theme.css` (audited Firefox-GNOME/Adwaita lineage) remains the
    base theme.
-2. `userChrome.css` imports generated radius and GTK tokens, the base theme,
+2. `userChrome.css` imports the generated radius tokens, the base theme,
    maintained `omarchy-chrome.css`, the privileged-content bridge, and the
    geometry-safe state cues. Ignored `customChrome.css` remains the final
-   user-owned override.
+   user-owned override. The GTK-token import (`generated-gtk-colors.css`)
+   was retired on 2026-08-21: cold-start palette ownership moved to the
+   built-in `firefox-compact-dark@mozilla.org` theme (see the evidence log),
+   with `customChrome.css` as the no-lwtheme degradation net.
 3. `userContent.css` imports `omarchy-content.css` for Firefox View and
-   built-in sidebar documents without touching ordinary websites; it does not
-   import generated chrome tokens globally.
+   built-in sidebar documents without touching ordinary websites. It also
+   imports the generated `omarchy-radius.css` so privileged content surfaces
+   share the same Hyprland rounding as chrome; the import defines custom
+   properties only and changes nothing on ordinary websites.
 4. `scripts/generate-omarchy-radius.sh` generates optional live radius and
    border tokens from Hyprland, with legacy settings as fallback. It writes
    beside either the direct development entrypoint or the standard nested
@@ -47,8 +52,10 @@ still needs a focused pass so future work does not restart the same audit.
 
 - Maintained source includes the named Omarchy layers, the audited base theme,
   icon assets, and checks.
-- `generated-gtk-colors.css` and `omarchy-radius.css` are generated profile
-  state. `customChrome.css` and `customContent.css` are user-owned overrides.
+- `omarchy-radius.css` is generated profile state. `customChrome.css` and
+  `customContent.css` are user-owned overrides. The `generated-gtk-colors.css`
+  layer is retired (see the layer list above); `scripts/autothemer.sh` and its
+  test remain only as unused tooling.
 - There is no runtime installer script; the end goal is a static AUR package
   (`pkgname=omarchy-chrome`, a payload staged under `/usr/share/omarchy-chrome/`)
   plus the manual `omarchy-chrome` checkout/symlink and `@import` steps
@@ -271,3 +278,86 @@ errors, binding loops, unknown properties, shell crashes, or IPC failures.
   lower-confidence selectors (Activity Stream class names, PDF.js/Reader Mode
   toolbar internals) should be spot-checked first since Firefox can rename
   those between releases.
+- `2026-08-21` (startup flashbang fix): the cold-start white flash was
+  `extensions.activeThemeID` pointing at `omarchy-boot-theme@bb.hab.rip`, a
+  static theme XPI that release Firefox never installed — unsigned sideloads
+  dropped into the profile `extensions/` dir are silently refused, so the ID
+  dangled and every launch fell back to the default LIGHT theme until
+  Pywalfox's runtime `theme.update()` landed. Proven in the
+  `omarchy-firefox-test` VM with per-frame whiteness captures: control run
+  spiked to 94% white for a frame; staging the XPI changed nothing (it never
+  registered in `extensions.json`); switching to the built-in signed
+  `firefox-compact-dark@mozilla.org` — applied from Firefox's own startup
+  data ahead of any extension — produced zero white frames across 80
+  consecutive startup captures with dark chrome from the first painted
+  frame. Shipped: profile `user.js` now pins compact-dark as the cold-start
+  theme (pywalfox re-tints live moments later; dark->dark handoff), the
+  page-base prefs were darkened (`browser.display.background_color`
+  `#eee`->`#000000` plus explicit white foreground), the `customChrome.css`
+  no-lwtheme fallbacks were retuned to the live palette, and the
+  never-generated `generated-gtk-colors.css` import was retired. The
+  `firefox-boot-theme-gen.sh` hook remains in place but its output only
+  loads on signing-exempt builds (Nightly/Dev/ESR); do not wire it into
+  theme pipelines for release Firefox.
+- `2026-09` (Firefox 155 urlbar/rail repair): Firefox 155 replaced the XUL
+  urlbar with `html:moz-urlbar` + `moz-button`/`moz-input-box` custom
+  elements. Retired selectors: `#urlbar-searchmode-switcher` (now
+  `.searchmode-switcher`, flattened via `--button-*` tokens on the host),
+  `#urlbar-go-button` (now `html:img.urlbar-go-button`, sized with
+  `border-box` + `object-fit: contain`), `.urlbar-textbox-container` (now
+  `.urlbar-input-container`), `.urlbar-icon-wrapper`, and `#sidebar-main`
+  (now the `sidebar-main` element). New tokens wired: FF155's
+  `--toolbar-field-background-color-focus`, `--toolbar-field-border-color*`,
+  `--urlbar-box-*`, and `--urlbar-margin-inline` (zeroed — it fed a one-sided
+  breakout-extend drift). Field paint model: `.urlbar-background` (absolute,
+  inset:0) carries field color + the 1px frame; `.urlbar-input-container` and
+  input layers stay transparent so they cannot cover the frame; focus swaps
+  the border for an inset accent shadow at the same geometry, so nothing
+  moves. Collapsed rail: tabs fill the rail (`width: 100%`,
+  `transform: none` — the old 3px `translateX` left icons off-center), and
+  the 32px `.tab-background`/`.tab-content` cells center via
+  `margin-inline: auto`/`justify-self: center`; `#tabs-newtab-button` (the
+  live one — `#vertical-tabs-newtab-button` is a hidden twin) joins the same
+  centered 32px cell and gets the shared hover ring. Interaction cues are now
+  tokenized as `--omarchy-ring{,-hover,-focus,-inactive,-kbd}` = inset
+  `0 0 0 1px` shadows; borders and outline-offset tricks that could shift
+  layout on state change were removed or pre-reserved (e.g. the selected
+  tab's `border-inline-start: 1px` is always allocated, only its color
+  changes). Follow-up fixes: the focused urlbar's `margin: -1px` (a native
+  compensation for a border that no longer grows) shifted the whole input
+  cluster 1px — pinned to 0. The rail's newtab button needs both ids covered
+  (`#tabs-newtab-button` and `#vertical-tabs-newtab-button` trade visibility
+  depending on state). `#nav-bar` gained `padding-inline: 3px` so its first
+  button centers at x=23 — the same column as the rail's cells. Collapsed
+  `#tabbrowser-tabs` gets `padding-block-start` and the group label collapses
+  to a 22x4 group-colour bar; both needed a `#main-window` prefix to beat
+  native `!important` resets.
+- `2026-09-16` (radius bridge + exact live palette): the Ctrl+L rounded
+  corner was Firefox's own design tokens — nothing set
+  `--urlbarview-border-radius`, so the focused urlbar fell back to
+  `calc(var(--button-border-radius) + 2px)` = 10px and `.search-one-offs`
+  hardcoded `0 0 8px 8px`. `omarchy-chrome.css` now re-derives every
+  `--omarchy-base-*-radius` from generated `--omarchy-radius-container`/
+  `--omarchy-radius-input` and repoints the whole Firefox token family
+  (`--border-radius-*`, `--button-*`, `--toolbarbutton-*`, `--tab-*`,
+  `--menuitem-*`, `--input-text-*`, `--card-*`, `--panel-*`,
+  `--arrowpanel-*`, `--urlbar*`) at them; `--border-radius-circle` stays a
+  pill. Every visible `border-radius: 0` on buttons/fields/tabs/rows was
+  tokenized; inner transparent wrappers and edge-attached panels
+  (`.browserContainer`, sidebar, infobars) stay structurally flat.
+  `userContent.css` now imports the generated radius tokens so privileged
+  content surfaces (newtab tiles, private-browsing card, addon cards,
+  Megalist sidebar, video control bar) follow the same Hyprland rounding.
+  Palette side: `customChrome.css`'s stale hand-tuned fallback
+  (`#1d1d1d`/`#252525`) was deleted — generated `omafox-palette.css` owns
+  first paint exactly. The maintained `--toolbar-field-*` pins moved under
+  `:root:not([lwtheme])` because under a live theme Firefox writes the
+  omafox palette straight into `--toolbar-field-background-color`,
+  `--panel-background-color`, `--toolbarseparator-color`,
+  `--toolbar-field-border-color`, `--lwt-text-color`, and
+  `--lwt-tab-line-color`; a new `:root[lwtheme]` block re-derives
+  `--omarchy-{fg,muted,field,panel,border,accent}` from those instead of
+  the old color-mix approximations, so the applied theme and the generated
+  first-paint palette are the same values. The stale Rosé-Pine-hardcoded
+  places.xhtml block was removed — Library windows have no `[lwtheme]`, so
+  the generated palette already covers them.

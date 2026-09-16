@@ -13,23 +13,3 @@
 [data-extensionid="pywalfox@bb.hab.rip"] .toolbarbutton-icon {
     list-style-image: url("custom/wolf.svg") !important;
 }
-
-/* Startup pre-theme flash fix: Firefox's first paint happens before any
- * theme sets lwtheme, so light-dark() resolves against the default light
- * scheme -> white chrome for the first frames. Force dark until a theme
- * applies (lwtheme present) — self-disabling, no effect on runtime flips. */
-:root:not([lwtheme]) {
-    color-scheme: dark !important;
-    --toolbar-background-color: rgb(43, 42, 51) !important;
-    --toolbox-background-color: rgb(43, 42, 51) !important;
-    --toolbar-field-background-color: rgb(30, 30, 32) !important;
-}
-
-/* Pre-document content area: before the restored page's document paints,
- * the tabbox shows its own background (light gray), which reads as a white
- * flash on dark themes. Follow the live accent color — updates on theme
- * flips, no !important var override, so runtime switching is unaffected. */
-#tabbrowser-tabbox,
-#tabbrowser-tabpanels {
-    background-color: var(--lwt-accent-color, #1c1c1e) !important;
-}

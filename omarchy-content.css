@@ -91,7 +91,7 @@
             --background-color-box: var(--omarchy-content-panel) !important;
             --card-background-color: var(--omarchy-content-panel) !important;
             --card-border: 1px solid var(--omarchy-content-border) !important;
-            --card-border-radius: 0px !important;
+            --card-border-radius: var(--omarchy-radius-container, 0px) !important;
             --card-box-shadow: none !important;
             --text-color: var(--omarchy-content-fg) !important;
             --text-color-deemphasized: var(
@@ -134,11 +134,11 @@
             --input-text-border-color: var(
                 --omarchy-content-border
             ) !important;
-            --input-text-border-radius: 0px !important;
-            --border-radius-xsmall: 0px !important;
-            --border-radius-small: 0px !important;
-            --border-radius-medium: 0px !important;
-            --border-radius-large: 0px !important;
+            --input-text-border-radius: var(--omarchy-radius-input, 0px) !important;
+            --border-radius-xsmall: var(--omarchy-radius-container, 0px) !important;
+            --border-radius-small: var(--omarchy-radius-container, 0px) !important;
+            --border-radius-medium: var(--omarchy-radius-container, 0px) !important;
+            --border-radius-large: var(--omarchy-radius-container, 0px) !important;
 
             scrollbar-color: var(--omarchy-content-muted) transparent;
             scrollbar-width: thin;
@@ -159,7 +159,7 @@
         input#input:not(.input-field) {
             background: var(--omarchy-content-field) !important;
             border: 1px solid var(--omarchy-content-border) !important;
-            border-radius: 0 !important;
+            border-radius: var(--omarchy-radius-input, 0px) !important;
             box-shadow: none !important;
             color: var(--omarchy-content-fg) !important;
             outline: 0 !important;
@@ -297,7 +297,7 @@
             --background-color-box: var(--omarchy-content-panel) !important;
             --card-background-color: var(--omarchy-content-panel) !important;
             --card-border: 1px solid var(--omarchy-content-border) !important;
-            --card-border-radius: 0px !important;
+            --card-border-radius: var(--omarchy-radius-container, 0px) !important;
             --card-box-shadow: none !important;
             --text-color: var(--omarchy-content-fg) !important;
             --text-color-deemphasized: var(
@@ -350,7 +350,7 @@
             --input-text-border: 1px solid var(
                     --input-text-border-color
                 ) !important;
-            --input-text-border-radius: 0px !important;
+            --input-text-border-radius: var(--omarchy-radius-input, 0px) !important;
             --checkbox-background-color: transparent !important;
             --checkbox-background-color-hover: var(
                 --omarchy-content-hover
@@ -373,10 +373,10 @@
             --checkbox-border-color-checked: var(
                 --omarchy-content-focus
             ) !important;
-            --border-radius-xsmall: 0px !important;
-            --border-radius-small: 0px !important;
-            --border-radius-medium: 0px !important;
-            --border-radius-large: 0px !important;
+            --border-radius-xsmall: var(--omarchy-radius-container, 0px) !important;
+            --border-radius-small: var(--omarchy-radius-container, 0px) !important;
+            --border-radius-medium: var(--omarchy-radius-container, 0px) !important;
+            --border-radius-large: var(--omarchy-radius-container, 0px) !important;
 
             background: var(--omarchy-content-surface) !important;
             color: var(--omarchy-content-fg) !important;
@@ -406,7 +406,7 @@
         }
 
         .sidebar-panel {
-            border-radius: 0 !important;
+            border-radius: var(--omarchy-radius-container, 0px) !important;
         }
 
         /* Firefox-GNOME's broad entry rule also reaches privileged shadow
@@ -453,7 +453,7 @@
         input#input:not(.input-field) {
             background: var(--omarchy-content-panel) !important;
             border: 1px solid var(--omarchy-content-border) !important;
-            border-radius: 0 !important;
+            border-radius: var(--omarchy-radius-input, 0px) !important;
             box-shadow: none !important;
             color: var(--omarchy-content-fg) !important;
             outline: 0 !important;
@@ -713,7 +713,7 @@
             --background-color-box: var(--omarchy-content-panel) !important;
             --card-background-color: var(--omarchy-content-panel) !important;
             --card-border: 1px solid var(--omarchy-content-border) !important;
-            --card-border-radius: 0px !important;
+            --card-border-radius: var(--omarchy-radius-container, 0px) !important;
             --card-box-shadow: none !important;
             --text-color: var(--omarchy-content-fg) !important;
             --text-color-deemphasized: var(
@@ -749,7 +749,7 @@
             --input-text-border-color: var(
                 --omarchy-content-border
             ) !important;
-            --input-text-border-radius: 0px !important;
+            --input-text-border-radius: var(--omarchy-radius-input, 0px) !important;
             --checkbox-background-color: transparent !important;
             --checkbox-background-color-hover: var(
                 --omarchy-content-hover
@@ -766,10 +766,10 @@
             --checkbox-border-color-checked: var(
                 --omarchy-content-focus
             ) !important;
-            --border-radius-xsmall: 0px !important;
-            --border-radius-small: 0px !important;
-            --border-radius-medium: 0px !important;
-            --border-radius-large: 0px !important;
+            --border-radius-xsmall: var(--omarchy-radius-container, 0px) !important;
+            --border-radius-small: var(--omarchy-radius-container, 0px) !important;
+            --border-radius-medium: var(--omarchy-radius-container, 0px) !important;
+            --border-radius-large: var(--omarchy-radius-container, 0px) !important;
 
             scrollbar-color: var(--omarchy-content-muted) transparent;
             scrollbar-width: thin;
@@ -801,7 +801,7 @@
         groupbox {
             --card-gap: 8px !important;
             --card-padding: 12px !important;
-            border-radius: 0 !important;
+            border-radius: var(--omarchy-radius-container, 0px) !important;
         }
 
         a {

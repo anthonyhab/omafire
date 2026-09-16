@@ -310,9 +310,13 @@ button.close::before {
 	}
 	/* Forward button */	
 	#nav-bar #forward-button,
-	#urlbar-go-button,
 	.search-go-button { 
 		list-style-image: var(--omarchy-base-icon-go-next-symbolic) !important;
+	}
+	/* Firefox 155's urlbar go button is an html:img — its glyph is replaced
+	 * through content rather than list-style-image. */
+	.urlbar-go-button {
+		content: var(--omarchy-base-icon-go-next-symbolic) !important;
 	}
 	#context-forward {
 		--menuitem-icon: var(--omarchy-base-icon-go-next-symbolic) !important;

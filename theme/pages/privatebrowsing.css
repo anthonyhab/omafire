@@ -20,7 +20,7 @@
     .info-border {
         background: var(--omarchy-base-card-background) !important;
         box-shadow: var(--omarchy-base-card-shadow) !important;
-        border-radius: 0 !important;
+        border-radius: var(--omarchy-radius-container, 0px) !important;
         padding: 0 !important;
 
         .info {
