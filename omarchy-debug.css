@@ -1,0 +1,38 @@
+/* Debug instrumentation — gated behind omarchy.debug (about:config, bool).
+ *
+ * Pure CSS cannot do parent-aware parity ("purple if the parent is red"),
+ * so this uses depth bands instead: each nesting level gets its own
+ * outline color, which surfaces the same information — who is adding the
+ * unexpected box — plus the nesting depth at a glance. The translucent
+ * fill stacks with depth, so deeply nested wrappers read darker.
+ *
+ *   depth 0  red        depth 3  orange
+ *   depth 1  purple     depth 4  cyan
+ *   depth 2  green      depth 5+ magenta
+ */
+@media -moz-pref("omarchy.debug") {
+    * {
+        outline: 1px solid rgba(255, 0, 0, 0.55) !important;
+        background-color: rgba(255, 0, 0, 0.03) !important;
+    }
+    * * {
+        outline-color: rgba(160, 32, 240, 0.55) !important;
+        background-color: rgba(160, 32, 240, 0.03) !important;
+    }
+    * * * {
+        outline-color: rgba(0, 160, 0, 0.55) !important;
+        background-color: rgba(0, 160, 0, 0.03) !important;
+    }
+    * * * * {
+        outline-color: rgba(255, 140, 0, 0.55) !important;
+        background-color: rgba(255, 140, 0, 0.03) !important;
+    }
+    * * * * * {
+        outline-color: rgba(0, 180, 200, 0.55) !important;
+        background-color: rgba(0, 180, 200, 0.03) !important;
+    }
+    * * * * * * {
+        outline-color: rgba(255, 0, 160, 0.55) !important;
+        background-color: rgba(255, 0, 160, 0.03) !important;
+    }
+}
