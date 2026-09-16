@@ -112,6 +112,24 @@
     /* Keyboard-navigation cue stays max-contrast regardless of accent. */
     --omarchy-ring-kbd: inset 0 0 0 1px var(--omarchy-fg);
     --omarchy-tab-selected-hover: var(--omarchy-control-active);
+    /* Shared interaction timing. Firefox mixes 0.1s-1s transitions across
+     * surfaces (the sidebar splitter alone eases for 0.5s); one duration and
+     * easing applied everywhere keeps the whole chrome feeling like the
+     * Omarchy shell. Only colour-ish properties belong in the state set —
+     * geometry/opacity transitions are functional and stay per-component. */
+    --omarchy-motion-duration: 90ms;
+    --omarchy-motion-easing: cubic-bezier(0.2, 0, 0, 1);
+    --omarchy-motion-state:
+        background-color var(--omarchy-motion-duration)
+            var(--omarchy-motion-easing),
+        box-shadow var(--omarchy-motion-duration)
+            var(--omarchy-motion-easing),
+        color var(--omarchy-motion-duration) var(--omarchy-motion-easing),
+        border-color var(--omarchy-motion-duration)
+            var(--omarchy-motion-easing),
+        outline-color var(--omarchy-motion-duration)
+            var(--omarchy-motion-easing),
+        fill var(--omarchy-motion-duration) var(--omarchy-motion-easing);
     --omarchy-selection: color-mix(
         in srgb,
         var(--omarchy-fg) 18%,
@@ -191,8 +209,8 @@
     --omarchy-base-secondary-sidebar-background: var(--omarchy-field) !important;
     --omarchy-base-sidebar-text-color: var(--omarchy-fg) !important;
     --omarchy-base-view-selected-background: var(--omarchy-selection) !important;
-    --omarchy-base-view-selected-hover-background: var(--omarchy-active) !important;
-    --omarchy-base-view-selected-active-background: var(--omarchy-active) !important;
+    --omarchy-base-view-selected-hover-background: var(--omarchy-control-active) !important;
+    --omarchy-base-view-selected-active-background: var(--omarchy-control-active) !important;
     --omarchy-base-headerbar-background: var(--omarchy-surface) !important;
     --omarchy-base-toolbar-background: var(--omarchy-surface) !important;
     --omarchy-base-toolbar-icon-fill: var(--omarchy-fg) !important;
@@ -216,21 +234,27 @@
     --omarchy-base-accent-bg: var(--omarchy-accent) !important;
     --omarchy-base-accent: var(--omarchy-accent) !important;
     --omarchy-base-selected-background: var(--omarchy-selection) !important;
-    --omarchy-base-hover-color: var(--omarchy-hover) !important;
-    --omarchy-base-active-color: var(--omarchy-active) !important;
+    --omarchy-base-hover-color: var(--omarchy-control-hover) !important;
+    --omarchy-base-active-color: var(--omarchy-control-active) !important;
     --omarchy-base-selected-color: var(--omarchy-selection) !important;
-    --omarchy-base-selected-hover-color: var(--omarchy-active) !important;
-    --omarchy-base-selected-active-color: var(--omarchy-active) !important;
+    --omarchy-base-selected-hover-color: var(--omarchy-control-active) !important;
+    --omarchy-base-selected-active-color: var(--omarchy-control-active) !important;
     --omarchy-base-card-background: var(--omarchy-panel) !important;
     --omarchy-base-card-shade-color: var(--omarchy-border) !important;
     --omarchy-base-card-shadow: none !important;
     --omarchy-base-menu-shadow: none !important;
     --omarchy-base-tabbar-background: var(--omarchy-surface) !important;
-    --omarchy-base-tabbar-tab-hover-background: var(--omarchy-hover) !important;
+    --omarchy-base-tabbar-tab-hover-background: var(--omarchy-control-hover) !important;
     --omarchy-base-tabbar-tab-active-background: var(--omarchy-selection) !important;
-    --omarchy-base-tabbar-tab-active-background-contrast: var(--omarchy-active) !important;
-    --omarchy-base-tabbar-tab-active-hover-background: var(--omarchy-active) !important;
+    --omarchy-base-tabbar-tab-active-background-contrast: var(--omarchy-control-active) !important;
+    --omarchy-base-tabbar-tab-active-hover-background: var(--omarchy-control-active) !important;
     --omarchy-base-tabbar-tab-active-border-bottom-color: var(--omarchy-focus-accent) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --omarchy-motion-duration: 0ms;
+    }
 }
 
 /* Before the extension theme lands, own the field tokens so first paint and

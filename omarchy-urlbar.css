@@ -191,9 +191,13 @@
 #urlbar .urlbar-page-action {
     max-width: var(--omarchy-nav-control-size) !important;
     overflow: hidden !important;
+    /* The reveal is functional animation, but its timing still rides the
+     * shared motion tokens so it matches every other state change. */
     transition:
-        max-width 140ms ease-out,
-        opacity 140ms ease-out !important;
+        var(--omarchy-motion-state),
+        max-width var(--omarchy-motion-duration) var(--omarchy-motion-easing),
+        opacity var(--omarchy-motion-duration) var(--omarchy-motion-easing)
+            !important;
 }
 
 @media not -moz-pref("omarchy.urlbar-actions") {
@@ -319,11 +323,11 @@
 }
 
 .urlbarView-row:not([selected]):hover {
-    background: var(--omarchy-hover) !important;
+    background: var(--omarchy-control-hover) !important;
 }
 
 .urlbarView-row:not([selected]):active {
-    background: var(--omarchy-active) !important;
+    background: var(--omarchy-control-active) !important;
 }
 
 .urlbarView-row-inner,

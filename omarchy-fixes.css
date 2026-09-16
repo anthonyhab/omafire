@@ -17,7 +17,7 @@ treechildren::-moz-tree-cell-text(selected) {
 }
 
 treechildren::-moz-tree-row(hover) {
-    background-color: var(--omarchy-hover) !important;
+    background-color: var(--omarchy-control-hover) !important;
 }
 
 findbar {
