@@ -160,12 +160,13 @@ fi
 
 SOURCE_PREF=$ROOT_DIR/configuration/autoconfig.js
 SOURCE_CONFIG=$ROOT_DIR/configuration/mozilla.cfg
-HELPERS=(favicon-contrast.uc.js omarchy-features.uc.js)
+HELPERS=(favicon-contrast.uc.js omarchy-features.uc.js omarchy-workspaces.uc.js)
 TARGET_PREF=$FIREFOX_DIR/defaults/pref/autoconfig.js
 TARGET_CONFIG=$FIREFOX_DIR/mozilla.cfg
 PROFILE_CHROME=$PROFILE_DIR/chrome
 MARKER=$PROFILE_CHROME/.omarchy-favicon-contrast-enabled
 MARKER_FEATURES=$PROFILE_CHROME/.omarchy-features-enabled
+MARKER_WORKSPACES=$PROFILE_CHROME/.omarchy-workspaces-enabled
 
 for source in "$SOURCE_PREF" "$SOURCE_CONFIG"; do
     if [[ ! -f $source || -L $source ]]; then
@@ -268,7 +269,7 @@ if [[ $ACTION == uninstall ]]; then
     fi
 
     if ((DRY_RUN)); then
-        printf 'Would remove profile markers: %s %s\n' "$MARKER" "$MARKER_FEATURES"
+        printf 'Would remove profile markers: %s %s %s\n' "$MARKER" "$MARKER_FEATURES" "$MARKER_WORKSPACES"
         if ((PURGE)); then
             printf 'Would remove recognized global files:\n'
             printf '  %s\n' "$TARGET_CONFIG" "$TARGET_PREF"
@@ -281,7 +282,7 @@ if [[ $ACTION == uninstall ]]; then
         exit 0
     fi
 
-    rm -f -- "$MARKER" "$MARKER_FEATURES"
+    rm -f -- "$MARKER" "$MARKER_FEATURES" "$MARKER_WORKSPACES"
     printf 'Disabled Omarchy helpers for %s\n' "$PROFILE_DIR"
     if ((!PURGE)); then
         printf '%s\n' 'Global files remain available for other profiles; restart Firefox.'
@@ -348,7 +349,7 @@ if ((DRY_RUN)); then
             printf 'Would install application helper: %s\n' "$(helper_target "$helper")"
         done
         printf 'Would install autoconfig loader: %s and %s\n' "$TARGET_PREF" "$TARGET_CONFIG"
-        printf 'Would create profile markers: %s %s\n' "$MARKER" "$MARKER_FEATURES"
+        printf 'Would create profile markers: %s %s %s\n' "$MARKER" "$MARKER_FEATURES" "$MARKER_WORKSPACES"
     fi
     exit 0
 fi
@@ -401,7 +402,7 @@ if [[ $ACTION == install ]]; then
     atomic_install "$SOURCE_CONFIG" "$TARGET_CONFIG"
     atomic_install "$SOURCE_PREF" "$TARGET_PREF"
     mkdir -p -- "$PROFILE_CHROME"
-    for marker in "$MARKER" "$MARKER_FEATURES"; do
+    for marker in "$MARKER" "$MARKER_FEATURES" "$MARKER_WORKSPACES"; do
         temporary_marker=$marker.$$.tmp
         printf '%s\n' 'Installed by scripts/install-favicon-contrast.sh; this file is not executable.' > "$temporary_marker"
         chmod 0644 "$temporary_marker"
