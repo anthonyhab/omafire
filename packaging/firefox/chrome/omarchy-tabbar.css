@@ -950,3 +950,65 @@ sidebar-pins-promo {
 ) {
     --identity-icon-color: var(--identity-tab-color) !important;
 }
+
+/* === Tab-strip interaction feel ===
+ * The expanded rail is where Zen/Arc make tab management feel alive. Layer
+ * the same cues onto the native vertical strip without forking behaviour:
+ *
+ *  1. A newly opened row slides in from the rail edge. Firefox leaves
+ *     [fadein] on a tab for its whole life, so the keyframe only replays on
+ *     stylesheet reloads — a harmless one-shot cascade, never a loop.
+ *  2. During a reorder drag, untouched siblings glide into their new slots
+ *     while the grabbed row tracks the pointer with no transition lag.
+ *  3. The close control stays invisible until the row is hovered or
+ *     keyboard-focused — the list stays quiet, the action stays one
+ *     gesture away. Audio state still shows via the favicon badge.
+ *  4. The selected row carries an accent bar on the rail edge — the same
+ *     convention the collapsed rail already uses. */
+@keyframes omarchy-tab-open {
+    from {
+        opacity: 0;
+        transform: translateX(calc(-1 * var(--omarchy-rail-gap)));
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+#tabbrowser-tabs[orient="vertical"][expanded]
+    .tabbrowser-tab[fadein]
+    .tab-background {
+    animation: omarchy-tab-open 160ms var(--omarchy-motion-easing) !important;
+}
+
+#tabbrowser-tabs[orient="vertical"][movingtab]
+    .tabbrowser-tab:not([dragtarget]) {
+    transition: transform var(--omarchy-motion-duration)
+        var(--omarchy-motion-easing) !important;
+}
+
+#tabbrowser-tabs[orient="vertical"][expanded]
+    .tabbrowser-tab:not(:hover):not(:focus-within)
+    .tab-close-button {
+    opacity: 0 !important;
+}
+
+#tabbrowser-tabs[orient="vertical"][expanded]
+    .tabbrowser-tab[selected]
+    .tab-background {
+    border-block-end: 0 !important;
+    box-shadow: inset 2px 0 0 var(--omarchy-accent) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #tabbrowser-tabs[orient="vertical"][expanded]
+        .tabbrowser-tab[fadein]
+        .tab-background {
+        animation: none !important;
+    }
+    #tabbrowser-tabs[orient="vertical"][movingtab]
+        .tabbrowser-tab:not([dragtarget]) {
+        transition: none !important;
+    }
+}
