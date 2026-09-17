@@ -26,6 +26,17 @@
 /* Theme Firefox-owned content pages without affecting ordinary websites. */
 @import "omarchy-content.css";
 
+/* Translucent pages (omarchy.content-glass): where a site does not paint,
+ * the chrome glass shows through instead of an opaque white/Field canvas.
+ * The window-side half lives in omarchy-translucency.css. Opt-in — sites
+ * that rely on their own painted background are unaffected until enabled. */
+@media -moz-pref("omarchy.translucency") and -moz-pref("omarchy.content-glass") {
+    html, body, main {
+        background-color: transparent !important;
+        background-image: none !important;
+    }
+}
+
 /* Import a custom stylesheet
  * Everything you add in your customContent.css file (it doesn't exist by
  * default) will be included here and preserved between updates.

@@ -147,6 +147,32 @@
                         changed = true;
                     }
                 }
+                /* Translucent pages needs the platform flag that lets
+                 * <browser> composite without an opaque backing; tied to
+                 * the feature pair so the default returns when either half
+                 * is off. The pref also tracks the file exactly — a stale
+                 * omarchy.content-glass=true must not keep stripping page
+                 * backgrounds after the key disappears from the file. */
+                if (!("content-glass" in features)
+                        && prefs.getBoolPref(
+                               "omarchy.content-glass", false)) {
+                    prefs.setBoolPref("omarchy.content-glass", false);
+                    changed = true;
+                }
+                if (features["content-glass"] === true
+                        && features["translucency"] === true) {
+                    if (!prefs.getBoolPref(
+                            "browser.tabs.allow_transparent_browser", false)) {
+                        prefs.setBoolPref(
+                            "browser.tabs.allow_transparent_browser", true);
+                        changed = true;
+                    }
+                } else if (prefs.prefHasUserValue(
+                               "browser.tabs.allow_transparent_browser")) {
+                    prefs.clearUserPref(
+                        "browser.tabs.allow_transparent_browser");
+                    changed = true;
+                }
                 pushWindowVars(vars);
                 if (changed) {
                     observers.notifyObservers(null, "chrome-flush-skin-caches");
