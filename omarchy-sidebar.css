@@ -68,8 +68,24 @@ sidebar-main {
     width: var(--space-medium, var(--splitter-width)) !important;
 }
 
+/* Hover/drag paints the accent: a translucent accent wash over the grab
+ * zone and the 1px seam line itself turning accent, ramping while held. */
 :is(#sidebar-launcher-splitter, #sidebar-splitter):hover {
-    background-color: var(--omarchy-focus-accent) !important;
+    background-color: color-mix(
+        in srgb,
+        var(--omarchy-accent) 22%,
+        transparent
+    ) !important;
+    border-right-color: var(--omarchy-accent) !important;
+}
+
+:is(#sidebar-launcher-splitter, #sidebar-splitter):is(:active, [state="dragging"]) {
+    background-color: color-mix(
+        in srgb,
+        var(--omarchy-accent) 38%,
+        transparent
+    ) !important;
+    border-right-color: var(--omarchy-accent) !important;
 }
 
 #sidebar-splitter:focus-visible {
