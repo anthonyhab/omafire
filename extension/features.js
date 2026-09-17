@@ -39,6 +39,13 @@
       label: "Glass opacity",
       description:
         "Surface opacity while Translucent chrome is enabled; lower is clearer"
+    },
+    {
+      id: "content-glass",
+      dependsOn: "translucency",
+      label: "Translucent pages",
+      description:
+        "Page backgrounds join the glass — the wallpaper shows through where the site does not paint"
     }
   ];
 

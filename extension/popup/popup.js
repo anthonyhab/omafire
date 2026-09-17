@@ -194,6 +194,10 @@
       const input = document.createElement("input");
       input.type = "checkbox";
       input.checked = enabled[feature.id] === true;
+      input.disabled = gated;
+      if (gated) {
+        label.classList.add("feature-gated");
+      }
       input.addEventListener("change", async () => {
         const ok = await sendFeature(feature.id, input.checked);
         if (ok) {

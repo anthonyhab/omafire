@@ -194,6 +194,11 @@ function waitFor(predicate, message) {
     translucency: true
   });
   assert.deepEqual(featuresApi.normalizeFeatures({ translucency: 1 }), {});
+  // Translucent pages is a plain boolean feature dependent on translucency.
+  assert.deepEqual(featuresApi.normalizeFeatures({ "content-glass": true }), {
+    "content-glass": true
+  });
+  assert.deepEqual(featuresApi.normalizeFeatures({ "content-glass": 1 }), {});
 
   // A numeric feature relays through the same merge + host path.
   await runtimeMessageListener({

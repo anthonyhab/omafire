@@ -109,8 +109,13 @@ richlistbox#items {
         color: var(--omarchy-fg) !important;
     }
 
+    /* Same overlay model as the sidebar splitters: the grab zone slides
+     * over the tree pane so the divider costs no layout width. */
     #placesView > splitter {
         border-color: var(--omarchy-border) !important;
+        width: 4px !important;
+        min-width: 1px !important;
+        margin-left: -4px !important;
     }
 
     #placesView > splitter + #contentView {

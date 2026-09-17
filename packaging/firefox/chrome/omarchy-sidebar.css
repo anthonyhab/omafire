@@ -51,11 +51,15 @@ sidebar-main {
 
 /* Keep Firefox's resize hit targets and keyboard focus cue while letting the
  * splitter disappear into the flat sidebar until it is hovered or focused. */
+/* The grab zone overlays the rail's last pixels instead of reserving its
+ * own strip: the negative margin makes the next element start flush at the
+ * seam, so the 1px line is the entire visible divider. */
 #sidebar-launcher-splitter,
 #sidebar-splitter {
     --splitter-width: 4px;
     background-color: transparent !important;
     flex: 0 0 auto !important;
+    margin-left: calc(-1 * var(--splitter-width)) !important;
     max-width: none !important;
     min-width: 1px !important;
     position: relative !important;
@@ -65,7 +69,6 @@ sidebar-main {
 
 #sidebar-splitter {
     -moz-user-focus: normal !important;
-    width: var(--space-medium, var(--splitter-width)) !important;
 }
 
 /* Hover/drag paints the accent: a translucent accent wash over the grab

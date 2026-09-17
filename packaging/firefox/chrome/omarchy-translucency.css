@@ -175,13 +175,26 @@
         -moz-appearance: none !important;
     }
 
-    /* The 4px splitter gaps sit between glass regions; fill them with the
-     * same glass so the wall behind never peeks through as a crack. The
+    /* Translucent pages (omarchy.content-glass): the content canvas drops
+     * its opaque backdrop so the tabbox glass — and the blurred wallpaper
+     * behind the window — becomes the page's surface. The web-side half
+     * lives in userContent.css. */
+    @media -moz-pref("omarchy.content-glass") {
+        #tabbrowser-tabpanels,
+        #tabbrowser-tabbox .browserContainer,
+        browser {
+            background-color: transparent !important;
+            background-image: none !important;
+        }
+    }
+
+    /* The splitters overlay their left neighbour via negative margin, so
+     * they stay transparent and let that region's glass show through. The
      * accent hover/drag states are re-declared here because this file wins
      * the cascade over the base rules in omarchy-sidebar.css. */
     #sidebar-launcher-splitter,
     #sidebar-splitter {
-        background-color: var(--omarchy-glass) !important;
+        background-color: transparent !important;
     }
     :is(#sidebar-launcher-splitter, #sidebar-splitter):hover {
         background-color: color-mix(
