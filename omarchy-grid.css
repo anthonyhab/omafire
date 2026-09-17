@@ -721,8 +721,25 @@ scrollbox[orient="horizontal"] ~ #scrollbutton-down[disabled] {
  * and focus cues stay with their components. Enabling omarchy.chrome-gap
  * restores the full Nova card treatment. */
 @media not -moz-pref("omarchy.chrome-gap") {
+    /* One deliberate hairline under the whole navigation strip and one at
+     * the viewport's left edge — the pre-Nova separator treatment. The rail
+     * container and the splitter each painted their own borders with a 4px
+     * gap between, which read as a thick seam; the line now lives only on
+     * the splitter's right edge, flush with the content. */
     #navigator-toolbox {
-        border-bottom: 0 !important;
+        border-bottom: 1px solid var(--omarchy-border) !important;
+    }
+
+    #sidebar-container,
+    #sidebar-box {
+        border-top: 0 !important;
+        border-right: 0 !important;
+    }
+
+    #sidebar-launcher-splitter,
+    #sidebar-splitter {
+        border: 0 !important;
+        border-right: 1px solid var(--omarchy-border) !important;
     }
 
     @media -moz-pref("browser.nova.enabled") {
