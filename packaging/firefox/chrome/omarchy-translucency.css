@@ -176,10 +176,31 @@
     }
 
     /* The 4px splitter gaps sit between glass regions; fill them with the
-     * same glass so the wall behind never peeks through as a crack. */
+     * same glass so the wall behind never peeks through as a crack. The
+     * accent hover/drag states are re-declared here because this file wins
+     * the cascade over the base rules in omarchy-sidebar.css. */
     #sidebar-launcher-splitter,
     #sidebar-splitter {
         background-color: var(--omarchy-glass) !important;
+    }
+    :is(#sidebar-launcher-splitter, #sidebar-splitter):hover {
+        background-color: color-mix(
+            in srgb,
+            var(--omarchy-accent) 22%,
+            transparent
+        ) !important;
+        border-right-color: var(--omarchy-accent) !important;
+    }
+    :is(#sidebar-launcher-splitter, #sidebar-splitter):is(
+            :active,
+            [state="dragging"]
+        ) {
+        background-color: color-mix(
+            in srgb,
+            var(--omarchy-accent) 38%,
+            transparent
+        ) !important;
+        border-right-color: var(--omarchy-accent) !important;
     }
 
     /* Floating surfaces inside chrome keep their own glass layer — they
