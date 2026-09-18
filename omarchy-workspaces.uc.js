@@ -38,7 +38,14 @@
         } catch (error) {
             state = null;
         }
-        if (!state || !Array.isArray(state.order) || state.order.length === 0) {
+        if (
+            !state
+            || !Array.isArray(state.order)
+            || state.order.length === 0
+            || typeof state.names !== "object"
+            || !state.names
+            || typeof state.active !== "string"
+        ) {
             state = {
                 order: [DEFAULT_ID],
                 names: { main: "Main" },
@@ -56,10 +63,22 @@
         }
     }
 
+    function setTabWorkspace(tab, workspaceId) {
+        try {
+            SS.setCustomTabValue(tab, TAB_KEY, workspaceId);
+        } catch (error) {
+            Cu.reportError("[omarchy-workspaces] " + error);
+        }
+    }
+
     function workspaceOf(tab) {
         try {
             var id = SS.getCustomTabValue(tab, TAB_KEY);
-            if (id) {
+            /* A stored id that no longer exists in this window's order is a
+             * stranded id (deleted workspace, cross-window adopt, undo-close
+             * residue) — treat the tab as belonging to the active space so
+             * it can never be hidden with no pill to reach it. */
+            if (id && readState().order.indexOf(id) !== -1) {
                 return id;
             }
         } catch (error) {
@@ -70,8 +89,10 @@
 
     function claimTab(tab) {
         try {
-            if (!SS.getCustomTabValue(tab, TAB_KEY)) {
-                SS.setCustomTabValue(tab, TAB_KEY, readState().active);
+            var stored = SS.getCustomTabValue(tab, TAB_KEY);
+            var state = readState();
+            if (!stored || state.order.indexOf(stored) === -1) {
+                setTabWorkspace(tab, state.active);
             }
         } catch (error) {
             Cu.reportError("[omarchy-workspaces] " + error);
@@ -164,21 +185,28 @@
             )) {
             return;
         }
+        /* Compute the destination FIRST: when the deleted space was active,
+         * remapping its tabs to `state.active` would write the dead id back
+         * into them and strand them under a pill that no longer exists. */
+        var target = state.active;
+        if (state.active === workspaceId) {
+            target = state.order.filter(function (id) {
+                return id !== workspaceId;
+            })[0];
+        }
         for (var i = 0; i < gBrowser.tabs.length; i++) {
             var tab = gBrowser.tabs[i];
             if (workspaceOf(tab) === workspaceId) {
-                SS.setCustomTabValue(tab, TAB_KEY, state.active);
+                setTabWorkspace(tab, target);
             }
         }
         state.order = state.order.filter(function (id) {
             return id !== workspaceId;
         });
         delete state.names[workspaceId];
-        if (state.active === workspaceId) {
-            state.active = state.order[0];
-        }
+        state.active = target;
         writeState(state);
-        switchTo(state.active);
+        switchTo(target);
     }
 
     function moveSelectedTo(workspaceId) {
@@ -186,7 +214,7 @@
         if (tab.pinned) {
             return;
         }
-        SS.setCustomTabValue(tab, TAB_KEY, workspaceId);
+        setTabWorkspace(tab, workspaceId);
         switchTo(workspaceId);
     }
 
@@ -213,12 +241,11 @@
                     "Click: switch — Shift+click: move this tab — "
                         + "Double-click: rename — Right-click: delete",
                 );
-                button.addEventListener("click", function (event) {
-                    /* detail>1 is the second click of a double-click —
-                     * dblclick owns rename, so the switch path skips it. */
-                    if (event.button !== 0 || event.detail > 1) {
-                        return;
-                    }
+                /* `command` covers mouse AND keyboard activation (Enter/
+                 * Space). The second click of a double-click also fires
+                 * command, but switching to the already-active space is a
+                 * no-op, so no detail guard is needed. */
+                button.addEventListener("command", function (event) {
                     if (event.shiftKey) {
                         moveSelectedTo(id);
                     } else {
@@ -239,9 +266,48 @@
 
     function onTabOpen(event) {
         var tab = event.target;
-        if (tab && tab.tagName === "tab") {
-            claimTab(tab);
+        if (!tab || tab.tagName !== "tab") {
+            return;
         }
+        claimTab(tab);
+        /* A restored/adopted tab that belongs to a *valid but non-active*
+         * space must hide immediately — otherwise it sits visible in the
+         * wrong space until the next switch. */
+        var state = readState();
+        if (!tab.pinned && workspaceOf(tab) !== state.active) {
+            gBrowser.hideTab(tab);
+        }
+    }
+
+    /* When the selected tab closes and no *visible* tab remains, Firefox's
+     * removeTab calls window.close() before TabClose even dispatches —
+     * hidden tabs in other spaces don't count as selectable. Intercept
+     * removeTab and seed the active space first so the window survives. */
+    var originalRemoveTab = null;
+
+    function wrappedRemoveTab(aTab) {
+        if (
+            enabled()
+            && aTab
+            && !aTab.pinned
+            && typeof gBrowser !== "undefined"
+            && workspaceOf(aTab) === readState().active
+        ) {
+            var visible = 0;
+            for (var i = 0; i < gBrowser.tabs.length; i++) {
+                var t = gBrowser.tabs[i];
+                if (t !== aTab && !t.pinned && !t.hidden) {
+                    visible++;
+                }
+            }
+            if (visible === 0) {
+                gBrowser.addTab("about:newtab", {
+                    triggeringPrincipal:
+                        Services.scriptSecurityManager.getSystemPrincipal(),
+                });
+            }
+        }
+        return originalRemoveTab.apply(this, arguments);
     }
 
     function init() {
@@ -253,7 +319,7 @@
          * The switcher must become its first child to land as a fixed top
          * row rather than a parallel column. */
         var tabsElement = document.getElementById("tabbrowser-tabs");
-        if (!tabsElement) {
+        if (!tabsElement || tabsElement.getAttribute("orient") !== "vertical") {
             return;
         }
 
@@ -273,6 +339,10 @@
 
         if (!listening) {
             tabsElement.addEventListener("TabOpen", onTabOpen);
+            if (typeof gBrowser !== "undefined" && !originalRemoveTab) {
+                originalRemoveTab = gBrowser.removeTab;
+                gBrowser.removeTab = wrappedRemoveTab;
+            }
             listening = true;
         }
         for (var i = 0; i < gBrowser.tabs.length; i++) {
@@ -289,10 +359,18 @@
         var tabsElement = document.getElementById("tabbrowser-tabs");
         if (tabsElement && listening) {
             tabsElement.removeEventListener("TabOpen", onTabOpen);
+            if (typeof gBrowser !== "undefined" && originalRemoveTab) {
+                gBrowser.removeTab = originalRemoveTab;
+                originalRemoveTab = null;
+            }
             listening = false;
         }
         /* Never strand hidden tabs: turning the feature off reveals every
-         * tab this window hid. */
+         * tab this window hid. Non-browser windows (Library etc.) have no
+         * gBrowser — nothing to unhide there. */
+        if (typeof gBrowser === "undefined" || !gBrowser.tabs) {
+            return;
+        }
         for (var i = 0; i < gBrowser.tabs.length; i++) {
             if (gBrowser.tabs[i].hidden) {
                 gBrowser.showTab(gBrowser.tabs[i]);
