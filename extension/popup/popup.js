@@ -117,11 +117,20 @@
 
   async function sendFeature(id, value) {
     try {
-      await browser.runtime.sendMessage({
+      const delivered = await browser.runtime.sendMessage({
         type: "features-set",
         features: { [id]: value }
       });
-      showError("");
+      /* The handler returns false when the native helper is unreachable —
+       * the toggle IS persisted (and pushes on reconnect), so keep the
+       * control applied but say so instead of faking success. */
+      if (delivered === false) {
+        showError(
+          "Native helper is disconnected — saved, applies on reconnect"
+        );
+      } else {
+        showError("");
+      }
       return true;
     } catch (error) {
       showError(error instanceof Error ? error.message : String(error));

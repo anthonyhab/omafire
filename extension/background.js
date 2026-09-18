@@ -147,7 +147,10 @@
           new Error("Native helper is disconnected; toggles saved for retry")
         )
       });
+      return false;
     }
+    await browser.storage.local.remove(ERROR_KEY);
+    return true;
   }
 
   function scheduleNativeReconnect() {
@@ -242,10 +245,11 @@
 
   browser.alarms.onAlarm.addListener((alarm) => {
     if (alarm && alarm.name === UNLOAD_ALARM) {
-      unloadIdleTabs().catch((error) =>
+      return unloadIdleTabs().catch((error) =>
         console.error("Omafox idle-tab sweep failed", error)
       );
     }
+    return undefined;
   });
   browser.alarms.create(UNLOAD_ALARM, { periodInMinutes: 1 });
 
@@ -258,16 +262,16 @@
     const features = normalizeFeatures(stored[FEATURES_KEY]);
     await browser.contextMenus.remove(GLANCE_MENU).catch(() => {});
     if (features["glance"] === true) {
-      try {
-        browser.contextMenus.create({
-          id: GLANCE_MENU,
-          title: "Peek in Glance",
-          contexts: ["link"]
-        });
-        glanceMenuPresent = true;
-      } catch (error) {
-        glanceMenuPresent = true;
-      }
+      browser.contextMenus.create({
+        id: GLANCE_MENU,
+        title: "Peek in Glance",
+        contexts: ["link"]
+      });
+      /* create reports failures through runtime.lastError — a duplicate-id
+       * complaint still means the item is registered. */
+      const err = browser.runtime.lastError;
+      glanceMenuPresent =
+        !err || /duplicate|already exists/i.test(err.message || "");
     } else {
       glanceMenuPresent = false;
     }
@@ -287,16 +291,14 @@
     const stored = await browser.storage.local.get(FEATURES_KEY);
     const want = normalizeFeatures(stored[FEATURES_KEY])["glance"] === true;
     if (want && !glanceMenuPresent) {
-      try {
-        browser.contextMenus.create({
-          id: GLANCE_MENU,
-          title: "Peek in Glance",
-          contexts: ["link"]
-        });
-      } catch (error) {
-        /* already registered — Firefox kept it across the wake */
-      }
-      glanceMenuPresent = true;
+      browser.contextMenus.create({
+        id: GLANCE_MENU,
+        title: "Peek in Glance",
+        contexts: ["link"]
+      });
+      const err = browser.runtime.lastError;
+      glanceMenuPresent =
+        !err || /duplicate|already exists/i.test(err.message || "");
       await browser.contextMenus.refresh().catch(() => {});
     } else if (!want && glanceMenuPresent) {
       await browser.contextMenus.remove(GLANCE_MENU).catch(() => {});
