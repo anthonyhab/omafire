@@ -167,7 +167,10 @@
         );
         input.disabled = gated;
         const renderValue = () => {
-          readout.textContent = `${Math.round(Number(input.value) * 100)}%`;
+          const value = Number(input.value);
+          readout.textContent = feature.unit
+            ? `${value} ${feature.unit}`
+            : `${Math.round(value * 100)}%`;
         };
         renderValue();
         input.addEventListener("input", () => {

@@ -1012,3 +1012,69 @@ sidebar-pins-promo {
         transition: none !important;
     }
 }
+
+/* === Workspace switcher (omarchy.workspaces) ===
+ * A quiet strip above the tab list: small label pills, accent on the
+ * active space, the same hover wash as tabs. Hidden in the collapsed rail
+ * — there is no room for labels in the 46px icon column. */
+#omarchy-workspaces {
+    align-items: center;
+    border-block-end: 1px solid var(--omarchy-border);
+    flex-shrink: 0;
+    gap: var(--omarchy-rail-gap);
+    min-height: 26px;
+    padding-block: calc(var(--omarchy-control-gap) / 2);
+    padding-inline: var(--omarchy-rail-gap);
+}
+
+#omarchy-workspaces-list {
+    align-items: center;
+    flex: 1;
+    gap: 2px;
+    min-width: 0;
+    overflow: hidden;
+}
+
+toolbarbutton.omarchy-workspace {
+    -moz-appearance: none !important;
+    border: 0 !important;
+    border-radius: var(--omarchy-base-button-radius) !important;
+    color: var(--omarchy-muted) !important;
+    cursor: default;
+    font-size: 0.85em;
+    margin: 0 !important;
+    padding: 2px 7px !important;
+    transition: var(--omarchy-motion-state) !important;
+    white-space: nowrap;
+}
+
+toolbarbutton.omarchy-workspace:hover {
+    background: var(--omarchy-control-hover) !important;
+    color: var(--omarchy-fg) !important;
+}
+
+toolbarbutton.omarchy-workspace[active] {
+    background: var(--omarchy-control-selected) !important;
+    box-shadow: inset 0 -2px 0 var(--omarchy-accent) !important;
+    color: var(--omarchy-fg) !important;
+}
+
+#omarchy-workspaces-add {
+    -moz-appearance: none !important;
+    border: 0 !important;
+    border-radius: var(--omarchy-base-button-radius) !important;
+    color: var(--omarchy-muted) !important;
+    margin: 0 !important;
+    padding: 0 6px !important;
+    transition: var(--omarchy-motion-state) !important;
+}
+
+#omarchy-workspaces-add:hover {
+    background: var(--omarchy-control-hover) !important;
+    color: var(--omarchy-fg) !important;
+}
+
+#vertical-tabs:has(#tabbrowser-tabs[orient="vertical"]:not([expanded]))
+    #omarchy-workspaces {
+    display: none !important;
+}

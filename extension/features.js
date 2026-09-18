@@ -46,6 +46,36 @@
       label: "Translucent pages",
       description:
         "Page backgrounds join the glass — the wallpaper shows through where the site does not paint"
+    },
+    {
+      id: "workspaces",
+      label: "Workspaces",
+      description:
+        "Named tab spaces on the rail — click to switch, Shift+click moves a tab, double-click renames, right-click deletes"
+    },
+    {
+      id: "glance",
+      label: "Glance (peek links)",
+      description:
+        "Right-click a link → Peek in Glance previews it in a floating window without opening a tab"
+    },
+    {
+      id: "tab-unload",
+      label: "Auto-unload idle tabs",
+      description:
+        "Suspend background tabs after a stretch of inactivity — favicons stay, they reload on focus"
+    },
+    {
+      id: "unload-minutes",
+      type: "range",
+      min: 5,
+      max: 120,
+      step: 5,
+      default: 30,
+      unit: "min",
+      dependsOn: "tab-unload",
+      label: "Idle timeout",
+      description: "Minutes before a background tab is unloaded"
     }
   ];
 
