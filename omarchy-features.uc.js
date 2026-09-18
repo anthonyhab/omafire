@@ -107,8 +107,170 @@
         }
     }
 
+    /* Privileged content surfaces — the sidebar's Places/megalist
+     * documents and friends — are chrome-docshell children, so they get
+     * the userChrome sheet set (including generated omafox-palette.css
+     * pins) but cannot see lwtheme vars the live theme sets on the
+     * browser window root. Firefox's sheet cache holds the palette file
+     * for the whole session, so a theme switch only reached them after
+     * restart. Copy the window root's computed values into each sidebar
+     * document's :root as inline styles instead: inline beats the stale
+     * sheet, and the tick refreshes them within ~1.5s of any palette
+     * change. */
+    var CONTENT_PALETTE_VARS = [
+        "--omarchy-surface", "--omarchy-fg", "--omarchy-muted",
+        "--omarchy-panel", "--omarchy-field", "--omarchy-border",
+        "--omarchy-accent", "--omarchy-focus-accent", "--omarchy-selection",
+        "--omarchy-control-hover", "--omarchy-control-active",
+        "--omarchy-control-selected", "--omarchy-control-border",
+        "--omarchy-color-scheme", "--omarchy-ui-font",
+        "--omarchy-ui-font-size", "--omarchy-ui-label-size",
+        "--omarchy-radius-container", "--omarchy-radius-input",
+        "--omarchy-transparency", "--omarchy-border-active-color",
+        "--omarchy-border-inactive-color", "--omarchy-ring-focus",
+        "--omarchy-ring-hover", "--omarchy-ring-inactive",
+        "--omarchy-base-button-radius", "--omarchy-base-entry-radius",
+    ];
+
+    var LWT_MIRROR_ATTRS = ["lwtheme", "lwthemetextcolor", "lwtheme-brighttext"];
+
+    function pushContentVars() {
+        var mediator = Cc["@mozilla.org/appshell/window-mediator;1"]
+            .getService(Ci.nsIWindowMediator);
+        var windows = mediator.getEnumerator("navigator:browser");
+        while (windows.hasMoreElements()) {
+            var win = windows.getNext();
+            try {
+                /* SidebarController._loadUrl can swap the browser element
+                 * at runtime (remoteType changes), dropping the load hook
+                 * — re-arm here; the flag makes it a no-op when hooked. */
+                hookSidebarContent(win);
+                var browser = win.document.getElementById("sidebar");
+                if (!browser || !browser.contentDocument) {
+                    continue;
+                }
+                var doc = browser.contentDocument;
+                var docRoot = doc.documentElement;
+                if (
+                    !docRoot ||
+                    !docRoot.style ||
+                    !doc.nodePrincipal ||
+                    !doc.nodePrincipal.isSystemPrincipal
+                ) {
+                    continue;
+                }
+                var winRoot = win.document.documentElement;
+                var cs = win.getComputedStyle(winRoot);
+                var values = {};
+                var signature = "";
+                for (var i = 0; i < CONTENT_PALETTE_VARS.length; i++) {
+                    var name = CONTENT_PALETTE_VARS[i];
+                    var value = cs.getPropertyValue(name).trim();
+                    if (value !== "") {
+                        values[name] = value;
+                        signature += name + "=" + value + ";";
+                    } else if (
+                        name !== "--omarchy-color-scheme" &&
+                        docRoot.style.getPropertyValue(name) !== ""
+                    ) {
+                        /* Var went empty on the window — release the
+                         * pushed value so the doc falls back to its own
+                         * sheets the same way the window does.
+                         * --omarchy-color-scheme is synthesized below, so
+                         * it is exempt here. */
+                        docRoot.style.removeProperty(name);
+                    }
+                }
+                /* Numeric feature vars are pushed onto the window root by
+                 * pushWindowVars; merge them so future feature vars reach
+                 * the sidebar without growing this list. */
+                for (var extra in lastVars) {
+                    if (
+                        extra.indexOf("--omarchy-") === 0 &&
+                        !(extra in values)
+                    ) {
+                        var extraValue = cs.getPropertyValue(extra).trim();
+                        if (extraValue !== "") {
+                            values[extra] = extraValue;
+                            signature += extra + "=" + extraValue + ";";
+                        }
+                    }
+                }
+                /* --omarchy-color-scheme lives only in the content
+                 * palette, so the window root cannot supply it; derive it
+                 * from the same lwtheme markers tokens.css keys on. */
+                if (winRoot.hasAttribute("lwtheme")) {
+                    var scheme = winRoot.hasAttribute("lwtheme-brighttext")
+                        ? "dark"
+                        : "light";
+                    values["--omarchy-color-scheme"] = scheme;
+                    signature += "--omarchy-color-scheme=" + scheme + ";";
+                } else if (
+                    docRoot.style.getPropertyValue("--omarchy-color-scheme") !== ""
+                ) {
+                    docRoot.style.removeProperty("--omarchy-color-scheme");
+                }
+                /* The generated palette pins --omarchy-* under
+                 * :root:not([lwtheme]) with !important, and user-level
+                 * !important beats author-level inline. Mirroring the
+                 * window's lwtheme markers disengages those pins here
+                 * exactly like on the chrome root so the pushed values
+                 * actually win. */
+                for (var a = 0; a < LWT_MIRROR_ATTRS.length; a++) {
+                    var attr = LWT_MIRROR_ATTRS[a];
+                    var desired = winRoot.getAttribute(attr);
+                    signature += "|" + attr + "=" + String(desired);
+                    if (desired !== null) {
+                        if (docRoot.getAttribute(attr) !== desired) {
+                            docRoot.setAttribute(attr, desired);
+                        }
+                    } else if (docRoot.hasAttribute(attr)) {
+                        docRoot.removeAttribute(attr);
+                    }
+                }
+                if (doc.__omarchyPaletteSignature === signature) {
+                    continue;
+                }
+                for (var applied in values) {
+                    docRoot.style.setProperty(
+                        applied,
+                        values[applied],
+                        "important",
+                    );
+                }
+                doc.__omarchyPaletteSignature = signature;
+            } catch (error) {
+                Cu.reportError("[omarchy-features] " + error);
+            }
+        }
+    }
+
+    function hookSidebarContent(win) {
+        try {
+            var browser = win.document.getElementById("sidebar");
+            if (!browser || browser.__omarchyContentHooked) {
+                return;
+            }
+            browser.__omarchyContentHooked = true;
+            browser.addEventListener(
+                "load",
+                function () {
+                    try {
+                        pushContentVars();
+                    } catch (error) {
+                        Cu.reportError("[omarchy-features] " + error);
+                    }
+                },
+                true,
+            );
+        } catch (error) {
+            Cu.reportError("[omarchy-features] " + error);
+        }
+    }
+
     if (typeof window !== "undefined" && window.document) {
         registerZenKey(window);
+        hookSidebarContent(window);
     }
 
     // Windows opened after the last file change inherit nothing from the
@@ -120,6 +282,7 @@
                 try {
                     if (subject && subject.document) {
                         registerZenKey(subject);
+                        hookSidebarContent(subject);
                     }
                 } catch (error) {
                     Cu.reportError("[omarchy-features] " + error);
@@ -164,6 +327,7 @@
          * idempotent — it compares before setting. */
         try {
             pushWindowVars(lastVars);
+            pushContentVars();
         } catch (error) {
             Cu.reportError("[omarchy-features] " + error);
         }
