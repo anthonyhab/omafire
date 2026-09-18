@@ -9,6 +9,15 @@
  */
 @media (-moz-pref("omarchy.zen-mode")) and (-moz-pref("omarchy.zen-mode-active")) {
 
+    /* lwtheme scopes --lwt-accent-color per-subtree (it goes black inside
+     * the urlbar), so --omarchy-surface resolves differently down there.
+     * Capture it once at :root — var() in a custom property resolves at
+     * the declaring element, and children inherit the literal color. */
+    :root {
+        --omarchy-launcher-bg: var(--omarchy-surface);
+        --omarchy-launcher-border: var(--omarchy-control-border);
+    }
+
     /* ── Top chrome collapses to zero height ─────────────────────────
      * #nav-bar is zeroed rather than display:none because the urlbar
      * lives inside it — a fixed-position child keeps rendering even
@@ -46,13 +55,71 @@
         opacity: 0;
         pointer-events: none;
         transition: opacity 140ms ease;
+        /* A launcher reads taller than a toolbar field. */
+        --urlbar-height: 42px !important;
+        --urlbar-toolbar-height: 42px !important;
+        height: 42px !important;
+        max-height: 42px !important;
+        min-height: 42px !important;
     }
 
     #urlbar:focus-within {
         opacity: 1;
         pointer-events: all;
-        background-color: var(--omarchy-surface) !important;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+    }
+
+    /* ── Launcher card — field and results are ONE opaque surface ──
+     * Raycast-style: the results sit flush under the input sharing its
+     * width and border; the field's bottom edge becomes the divider and
+     * one shadow wraps the whole card. Both layers paint
+     * --omarchy-surface so translucency can never split the card into
+     * two mismatched glass panes. */
+    #urlbar > .urlbar-background,
+    #urlbar:has(#urlbar-input:focus) > .urlbar-background,
+    #urlbar:is([focused], :focus-within, [breakout][breakout-extend])
+        > .urlbar-background {
+        background: var(--omarchy-launcher-bg, var(--omarchy-surface)) !important;
+        height: 42px !important;
+        max-height: 42px !important;
+        min-height: 42px !important;
+    }
+
+    #urlbar .urlbar-input-container {
+        height: 42px !important;
+        max-height: 42px !important;
+        min-height: 42px !important;
+    }
+
+    #urlbar .urlbar-input {
+        font-size: 15px !important;
+    }
+
+    #urlbar[open] > .urlbar-background {
+        border-radius: var(--omarchy-radius-input, 0px)
+            var(--omarchy-radius-input, 0px) 0 0 !important;
+    }
+
+    #urlbar .urlbarView {
+        margin-top: 0 !important;
+        margin-inline: 0 !important;
+        /* Firefox's UA sheet pins box-sizing:content-box !important on the
+         * view, so width:100% renders 2px wider than the field once the
+         * side borders land. Auto width fills the block regardless. */
+        width: auto !important;
+        background: var(--omarchy-launcher-bg, var(--omarchy-surface)) !important;
+        border: 1px solid var(--omarchy-launcher-border, var(--omarchy-control-border)) !important;
+        border-top: none !important;
+        border-image: none !important;
+        border-radius: 0 0 var(--omarchy-radius-container, 0px)
+            var(--omarchy-radius-container, 0px) !important;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5) !important;
+        overflow: hidden !important;
+    }
+
+    /* The field alone casts the card's shadow when the view is closed;
+     * when open, the view's own shadow takes over at the bottom edge. */
+    #urlbar:not([open]) > .urlbar-background {
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5) !important;
     }
 
     /* The vertical tab rail is intentionally untouched — it stays put
