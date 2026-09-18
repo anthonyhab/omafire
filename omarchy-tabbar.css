@@ -1092,3 +1092,21 @@ toolbarbutton.omarchy-workspace[active] {
 .tabbrowser-tab[pending]:not([selected]):hover .tab-label-container {
     opacity: 0.8 !important;
 }
+
+/* Audio badge — the playing/muted indicator is a corner badge on the
+ * favicon stack. The base layer offsets it for horizontal tabs (where
+ * the stack is the row's trailing cell); in the vertical rail that left
+ * it floating over the label. Anchor it to the stack's bottom inline-end
+ * corner instead: a 4px overhang reads as a badge, the glyph stays off
+ * the label's baseline, and the same placement works collapsed. Radius
+ * follows the button-radius token so square themes get a square chip. */
+.tab-icon-overlay {
+    height: 10px !important;
+    width: 10px !important;
+    padding: 2px !important;
+    left: auto !important;
+    top: auto !important;
+    inset-inline-end: -4px !important;
+    bottom: -4px !important;
+    border-radius: var(--omarchy-base-button-radius, 50%) !important;
+}
