@@ -63,12 +63,63 @@
         }
     }
 
+    /* Zen Mode keybind: Ctrl+Alt+Z flips the runtime pref
+     * "omarchy.zen-mode-active". It only takes effect while the
+     * "zen-mode" feature pref is on, so the stylesheet can require both
+     * and a disabled feature can never leave chrome hidden. Kept out of
+     * features.json on purpose — this is runtime state, not config, so
+     * the file bridge can never overwrite it mid-toggle. */
+    var ZEN_ACTIVE_PREF = "omarchy.zen-mode-active";
+    var ZEN_FEATURE_PREF = "omarchy.zen-mode";
+
+    function toggleZenMode() {
+        if (!prefs.getBoolPref(ZEN_FEATURE_PREF, false)) {
+            return;
+        }
+        prefs.setBoolPref(
+            ZEN_ACTIVE_PREF,
+            !prefs.getBoolPref(ZEN_ACTIVE_PREF, false),
+        );
+    }
+
+    function registerZenKey(win) {
+        try {
+            var keyset = win.document.getElementById("mainKeyset");
+            if (!keyset
+                    || win.document.getElementById("omarchy-zen-mode-key")) {
+                return;
+            }
+            var key = win.document.createXULElement("key");
+            key.id = "omarchy-zen-mode-key";
+            key.setAttribute("key", "Z");
+            key.setAttribute("modifiers", "control,alt");
+            key.addEventListener("command", function (event) {
+                event.preventDefault();
+                toggleZenMode();
+            });
+            keyset.appendChild(key);
+        } catch (error) {
+            Cu.reportError("[omarchy-features] " + error);
+        }
+    }
+
+    if (typeof window !== "undefined" && window.document) {
+        registerZenKey(window);
+    }
+
     // Windows opened after the last file change inherit nothing from the
     // inline-style push, so re-apply the latest vars as each browser window
     // finishes starting up.
     observers.addObserver(
         {
-            observe: function () {
+            observe: function (subject) {
+                try {
+                    if (subject && subject.document) {
+                        registerZenKey(subject);
+                    }
+                } catch (error) {
+                    Cu.reportError("[omarchy-features] " + error);
+                }
                 try {
                     var keys = [];
                     for (var name in lastVars) {
