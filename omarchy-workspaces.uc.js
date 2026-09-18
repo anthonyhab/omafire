@@ -23,6 +23,7 @@
     var prefs = Services.prefs;
     var built = null;
     var listening = false;
+    var boundElement = null;
 
     function enabled() {
         return prefs.getBoolPref(PREF, false);
@@ -51,6 +52,12 @@
                 names: { main: "Main" },
                 active: DEFAULT_ID,
             };
+        }
+        /* An active id that is not in order is just as stranded as a tab
+         * with a stale id — normalize it to the first real space so
+         * claimTab/switchTo never chase a dead id. */
+        if (state.order.indexOf(state.active) === -1) {
+            state.active = state.order[0];
         }
         return state;
     }
@@ -286,25 +293,32 @@
     var originalRemoveTab = null;
 
     function wrappedRemoveTab(aTab) {
-        if (
-            enabled()
-            && aTab
-            && !aTab.pinned
-            && typeof gBrowser !== "undefined"
-            && workspaceOf(aTab) === readState().active
-        ) {
-            var visible = 0;
-            for (var i = 0; i < gBrowser.tabs.length; i++) {
-                var t = gBrowser.tabs[i];
-                if (t !== aTab && !t.pinned && !t.hidden) {
-                    visible++;
+        if (enabled() && typeof gBrowser !== "undefined") {
+            /* removeTab()'s default param resolves selectedTab — mirror it
+             * so a bare call still gets the seed check. */
+            var closing = aTab || gBrowser.selectedTab;
+            if (closing && !closing.pinned
+                    && workspaceOf(closing) === readState().active) {
+                /* Firefox closes the window only when NO selectable tab
+                 * remains — pinned tabs are selectable, so they count. */
+                var visible = 0;
+                for (var i = 0; i < gBrowser.tabs.length; i++) {
+                    var t = gBrowser.tabs[i];
+                    if (t !== closing && !t.hidden) {
+                        visible++;
+                    }
                 }
-            }
-            if (visible === 0) {
-                gBrowser.addTab("about:newtab", {
-                    triggeringPrincipal:
-                        Services.scriptSecurityManager.getSystemPrincipal(),
-                });
+                if (visible === 0) {
+                    try {
+                        gBrowser.addTab("about:newtab", {
+                            triggeringPrincipal: Services
+                                .scriptSecurityManager.getSystemPrincipal(),
+                        });
+                    } catch (error) {
+                        /* A failed seed must not veto the user's close. */
+                        Cu.reportError("[omarchy-workspaces] " + error);
+                    }
+                }
             }
         }
         return originalRemoveTab.apply(this, arguments);
@@ -339,6 +353,7 @@
 
         if (!listening) {
             tabsElement.addEventListener("TabOpen", onTabOpen);
+            boundElement = tabsElement;
             if (typeof gBrowser !== "undefined" && !originalRemoveTab) {
                 originalRemoveTab = gBrowser.removeTab;
                 gBrowser.removeTab = wrappedRemoveTab;
@@ -356,9 +371,9 @@
             built.bar.remove();
             built = null;
         }
-        var tabsElement = document.getElementById("tabbrowser-tabs");
-        if (tabsElement && listening) {
-            tabsElement.removeEventListener("TabOpen", onTabOpen);
+        if (boundElement && listening) {
+            boundElement.removeEventListener("TabOpen", onTabOpen);
+            boundElement = null;
             if (typeof gBrowser !== "undefined" && originalRemoveTab) {
                 gBrowser.removeTab = originalRemoveTab;
                 originalRemoveTab = null;
