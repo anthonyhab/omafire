@@ -60,6 +60,12 @@
         "Right-click a link → Peek in Glance previews it in a floating window without opening a tab"
     },
     {
+      id: "zen-mode",
+      label: "Zen Mode (Ctrl+Alt+Z)",
+      description:
+        "Enables the Zen-mode toggle — collapses all chrome to a floating urlbar and icon rail while Ctrl+Alt+Z is pressed in"
+    },
+    {
       id: "tab-unload",
       label: "Auto-unload idle tabs",
       description:

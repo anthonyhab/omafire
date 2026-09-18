@@ -1078,3 +1078,17 @@ toolbarbutton.omarchy-workspace[active] {
     #omarchy-workspaces {
     display: none !important;
 }
+
+/* Unloaded (discarded) tabs dim to a dormant state — favicon and label
+ * fade together so a suspended tab reads at a glance, matching Zen's
+ * unloaded treatment. The audio/close affordances stay interactive. */
+.tabbrowser-tab[pending]:not([selected]) .tab-icon-stack,
+.tabbrowser-tab[pending]:not([selected]) .tab-label-container {
+    opacity: 0.45 !important;
+    transition: opacity 140ms ease !important;
+}
+
+.tabbrowser-tab[pending]:not([selected]):hover .tab-icon-stack,
+.tabbrowser-tab[pending]:not([selected]):hover .tab-label-container {
+    opacity: 0.8 !important;
+}
