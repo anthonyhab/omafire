@@ -82,22 +82,26 @@
         );
     }
 
+    /* A capture-phase window listener, not a <key> element: dynamically
+     * added keys don't reliably re-register with the keyset, and this
+     * path is what most userChrome modules use anyway. */
     function registerZenKey(win) {
         try {
-            var keyset = win.document.getElementById("mainKeyset");
-            if (!keyset
-                    || win.document.getElementById("omarchy-zen-mode-key")) {
+            if (win.__omarchyZenKey) {
                 return;
             }
-            var key = win.document.createXULElement("key");
-            key.id = "omarchy-zen-mode-key";
-            key.setAttribute("key", "Z");
-            key.setAttribute("modifiers", "control,alt");
-            key.addEventListener("command", function (event) {
-                event.preventDefault();
-                toggleZenMode();
-            });
-            keyset.appendChild(key);
+            win.__omarchyZenKey = function (event) {
+                if (
+                    event.ctrlKey
+                    && event.altKey
+                    && (event.key === "z" || event.key === "Z")
+                ) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    toggleZenMode();
+                }
+            };
+            win.addEventListener("keydown", win.__omarchyZenKey, true);
         } catch (error) {
             Cu.reportError("[omarchy-features] " + error);
         }
