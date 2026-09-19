@@ -216,10 +216,24 @@ function waitFor(predicate, message) {
   assert.equal(themeUpdates.at(-1).properties.color_scheme, "dark");
   assert.equal(memory.nativeStatus.connected, true);
 
+  // A real MV3 wake is a fresh JS context: re-require the module so the
+  // in-memory dedup signature resets exactly like it does in Firefox. The
+  // persistent storage mock keeps the stored theme across the boundary.
   const updatesBeforeRestart = themeUpdates.length;
-  await startupListener();
-  assert.equal(themeUpdates.length, updatesBeforeRestart + 1);
+  delete require.cache[require.resolve("../extension/background.js")];
+  require("../extension/background.js");
+  await waitFor(
+    () => themeUpdates.length === updatesBeforeRestart + 1,
+    "stored theme was not re-applied on restart"
+  );
   assert.equal(themeUpdates.at(-1).colors.frame, "#654321");
+
+  // Within one context, a same-payload resend (the host re-pushes
+  // theme.json on every connect) must not trigger a second restyle.
+  const updatesBeforeResend = themeUpdates.length;
+  nativeMessageListener(nativeMessage);
+  await new Promise((resolve) => setTimeout(resolve, 20));
+  assert.equal(themeUpdates.length, updatesBeforeResend);
 
   const originalConsoleError = console.error;
   console.error = () => {};
