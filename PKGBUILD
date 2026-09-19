@@ -4,7 +4,7 @@
 
 pkgname=omafox
 pkgver=1.1.0
-pkgrel=1
+pkgrel=3
 pkgdesc="Keeps Firefox and Zen Browser in sync with the current Omarchy theme"
 arch=('x86_64' 'aarch64')
 url="https://github.com/cover/omafox"

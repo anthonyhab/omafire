@@ -12,6 +12,12 @@
   let nativePort = null;
   let reconnectTimer = null;
   let reconnectDelay = 1000;
+  /* Signature of the last applied theme — repeat pushes (wake restore plus
+   * the host's connect-time resend of the same theme.json) must not trigger
+   * a second full-chrome restyle. */
+  let lastAppliedSignature = null;
+  /* Last palette color the action icon was tinted with. */
+  let lastTintedIconColor = null;
 
   function errorRecord(error) {
     return {
@@ -47,6 +53,9 @@
   }
 
   async function resetActionIcon() {
+    /* The next push must fully re-apply so the icon is re-tinted. */
+    lastAppliedSignature = null;
+    lastTintedIconColor = null;
     try {
       await browser.action.setIcon({
         path: browser.runtime.getManifest().action.default_icon
@@ -56,11 +65,20 @@
     }
   }
 
+  function recordSignature(record) {
+    return `${record.themeName}\n${JSON.stringify(record.palette)}`;
+  }
+
   async function applyRecord(record) {
+    const signature = recordSignature(record);
+    if (signature === lastAppliedSignature) return;
     const theme = toFirefoxTheme(record);
     await browser.theme.update(theme);
+    lastAppliedSignature = signature;
+    if (theme.colors.icons === lastTintedIconColor) return;
     try {
       await tintActionIcon(theme);
+      lastTintedIconColor = theme.colors.icons;
     } catch (error) {
       console.error("Omafox could not tint its toolbar icon", error);
     }

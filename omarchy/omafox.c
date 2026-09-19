@@ -658,15 +658,19 @@ static void read_palette(palette_t *p) {
 /* -------------------------------------------------------------- quattro */
 
 static void require_quattro(void) {
-  char version[64] = {0};
-  char *const argv[] = {"omarchy", "version", NULL};
-  if (run_command(argv, version, sizeof(version)) != 0)
-    fail("Omarchy is not installed");
-  /* Development builds report "dev (<sha>)" and are newer than Quattro. */
-  if (strncmp(version, "dev", 3) != 0) {
-    long major = strtol(version, NULL, 10);
-    if (major < 4)
-      fail("Omarchy Quattro (version 4) or newer is required");
+  /* The theme-set hook proves Omarchy is installed by existing; skipping the
+   * `omarchy version` subprocess there takes fork+exec off the sync path. */
+  if (!getenv("OMAFOX_SKIP_VERSION_CHECK")) {
+    char version[64] = {0};
+    char *const argv[] = {"omarchy", "version", NULL};
+    if (run_command(argv, version, sizeof(version)) != 0)
+      fail("Omarchy is not installed");
+    /* Development builds report "dev (<sha>)" and are newer than Quattro. */
+    if (strncmp(version, "dev", 3) != 0) {
+      long major = strtol(version, NULL, 10);
+      if (major < 4)
+        fail("Omarchy Quattro (version 4) or newer is required");
+    }
   }
   if (!is_regular_file(xasprintf("%s/colors.toml", g_theme_dir)))
     fail("Quattro palette not found: %s/colors.toml", g_theme_dir);
