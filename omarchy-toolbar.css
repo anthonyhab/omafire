@@ -186,13 +186,16 @@
 
 /* Omarchy uses accent only as a focus/edge cue. Firefox's keyboard focus can
  * land on XUL toolbar buttons and anonymous tab-row controls, so restore a
- * visible inset ring after flattening their native cards. */
+ * visible inset ring after flattening their native cards. Keep the ring
+ * only — painting the hover fill too makes a focused-but-idle button read
+ * as permanently hovered (Firefox retains :focus-visible on toolbarbuttons
+ * after a click). */
 #navigator-toolbox
     :is(toolbarbutton, .urlbar-page-action, .tab-close-button):is(
         :focus-visible,
         :-moz-focusring
     ) {
-    background: var(--omarchy-control-hover) !important;
+    background: transparent !important;
     box-shadow: var(--omarchy-ring-focus) !important;
     outline: none !important;
 }
@@ -217,15 +220,55 @@
     border-radius: var(--omarchy-base-button-radius) !important;
 }
 
+/* The base button blocks (buttons.css) disagree on [open]/[checked]/
+ * [selected]: the flat block paints the accent selection tile, the general
+ * block a white card. The flat block's :not(#hack)-armed nesting outranks
+ * every rule above, so a stale [open]/[checked] attribute leaves a
+ * permanent tile that looks like a stuck hover — and the tile differs per
+ * button. Pin all nav-bar checked/open/selected states to the same quiet
+ * active tint; the #main-window anchor clears their specificity. */
+#main-window
+    #navigator-toolbox
+    #nav-bar
+    toolbarbutton:not(
+        #urlbar-zoom-button,
+        .subviewbutton,
+        .titlebar-button,
+        .searchmode-switcher,
+        .searchmode-switcher-close
+    ):is([open], [checked], [selected]) {
+    background-color: var(--omarchy-control-active) !important;
+    background-image: none !important;
+}
+
 /* Native and extension buttons may paint a second hover tile on their icon or
  * badge stack. Keep those layers transparent so only the outer cell owns
  * interaction color. */
 #nav-bar
-    toolbarbutton:is(:hover, :active, [open])
-    :is(.toolbarbutton-icon, .toolbarbutton-badge-stack) {
+    toolbarbutton:is(:hover, :active, [open], [checked], [selected])
+    :is(.toolbarbutton-icon, .toolbarbutton-badge-stack, .toolbarbutton-text) {
     background: transparent !important;
     border-color: transparent !important;
     box-shadow: none !important;
+}
+
+/* Extension count badges (uBlock's "16" and friends) carry the
+ * extension's own API color as an inline style — usually a dark pill
+ * that disappears onto a dark glyph. Only API-styled badges carry an
+ * inline `style`, so `[style]` selects them without touching Firefox's
+ * native attention dots. Recolor onto the same field/border chip the
+ * tab-icon overlay wears so every corner nub shares one treatment.
+ * --omarchy-field can resolve empty under [lwtheme] when the
+ * translucency layer is active, so fall back to the always-solid
+ * surface. */
+#nav-bar .toolbarbutton-badge[style] {
+    background-color: var(
+        --omarchy-field,
+        var(--omarchy-surface)
+    ) !important;
+    box-shadow: 0 0 0 1px var(--omarchy-border) !important;
+    color: var(--omarchy-fg) !important;
+    border-radius: var(--omarchy-base-button-radius) !important;
 }
 
 /* Extension buttons use a badge stack, so size the icon inside the stack as
