@@ -318,7 +318,7 @@ spacer[part=overflow-start-indicator], spacer[part=overflow-end-indicator] {
 			opacity: 0;
 			position: absolute;
 			right: 2px;
-			transition: all var(--omarchy-base-tab-animation-time) linear;
+			transition: opacity var(--omarchy-base-tab-animation-time) linear;
 			width: 55px;
 			z-index: 99;
 		}
@@ -390,7 +390,11 @@ spacer[part=overflow-start-indicator], spacer[part=overflow-end-indicator] {
 	background-image: none !important;
 	background-color: transparent !important;
 	background-size: 24px;
-	transition: all var(--omarchy-base-animation-time) ease-out !important;
+	/* `all` would animate the layout props (display/margin/padding/inset) that
+	   stock flips on expand/collapse, making the buttons drift in late. */
+	transition: background-color var(--omarchy-base-animation-time) ease-out,
+		background-image var(--omarchy-base-animation-time) ease-out,
+		opacity var(--omarchy-base-animation-time) ease-out !important;
 
 	&:hover {
 		background-color: var(--omarchy-base-hover-color) !important;

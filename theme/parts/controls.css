@@ -34,6 +34,22 @@ checkbox:not(.treenode-checkbox) > .checkbox-check[checked] {
 	-moz-context-properties: fill;
 }
 
+/* moz-checkbox / moz-radio-group inner inputs live in shadow DOM with
+   -moz-theme: non-native — Gecko paints the check itself via accent-color
+   and suppresses background-image entirely (even inline !important computes
+   to none), so the rules above can never paint there. Restore native paint
+   and drive it with accent-color instead. */
+input#input[type="checkbox"],
+input#input[type="radio"] {
+	appearance: auto !important;
+	border: 0 !important;
+	box-shadow: none !important;
+	background-image: none !important;
+	background-color: transparent !important;
+	accent-color: var(--omarchy-base-accent-bg) !important;
+	padding: 0 !important;
+}
+
 /* Radio */
 input[type="radio"],
 radio > .radio-check {
