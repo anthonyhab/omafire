@@ -707,7 +707,7 @@ scrollbox[orient="horizontal"] ~ #scrollbutton-down[disabled] {
     :is(checkbox, radio):is(:focus-visible, :-moz-focusring)
         > :is(.checkbox-check, .radio-check) {
         outline: 1px solid var(--omarchy-focus-accent) !important;
-        outline-offset: 2px !important;
+        outline-offset: var(--omarchy-outline-offset, 2px) !important;
     }
 }
 

@@ -111,6 +111,12 @@
         var(--omarchy-border-inactive-color, transparent);
     /* Keyboard-navigation cue stays max-contrast regardless of accent. */
     --omarchy-ring-kbd: inset 0 0 0 1px var(--omarchy-fg);
+    /* Edge-offset convention: bordered controls keep the same border width
+     * at every state (only the colour moves), so interaction never shifts
+     * layout. Where a true outline is used it paints outside the border
+     * edge — --omarchy-outline-offset keeps a deliberate gap so the ring
+     * reads as an offset frame rather than a doubled edge. */
+    --omarchy-outline-offset: 2px;
     --omarchy-tab-selected-hover: var(--omarchy-control-active);
     /* Shared interaction timing. Firefox mixes 0.1s-1s transitions across
      * surfaces (the sidebar splitter alone eases for 0.5s); one duration and
