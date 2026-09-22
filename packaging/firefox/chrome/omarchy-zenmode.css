@@ -55,36 +55,6 @@
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
     }
 
-    /* ── Tab rail → icon strip with hover reveal ───────────────────
-     * Pinned tiles already render as icons; for unpinned rows the
-     * label/close affordances hide while collapsed. Hover expands the
-     * strip back to full width — Zen's reveal without needing the
-     * expandOnHover pref. */
-    #sidebar-container {
-        width: 48px !important;
-        min-width: 48px !important;
-        transition: width 160ms ease 80ms;
-    }
-
-    #sidebar-container:hover {
-        width: 237px !important;
-        transition-delay: 0ms;
-    }
-
-    #sidebar-container:not(:hover) .tab-label-container,
-    #sidebar-container:not(:hover) .tab-close-button,
-    #sidebar-container:not(:hover) .tab-secondary-label,
-    #sidebar-container:not(:hover) #omarchy-workspaces {
-        display: none !important;
-    }
-
-    #sidebar-container:not(:hover) .tabbrowser-tab {
-        justify-content: center;
-    }
-
-    /* The workspace rail and pinned splitter have no room at 48px;
-     * they return while the strip is revealed. */
-    #sidebar-container:not(:hover) #vertical-pinned-tabs-splitter {
-        display: none !important;
-    }
+    /* The vertical tab rail is intentionally untouched — it stays put
+     * at its normal width. Only the top navigation chrome hides. */
 }
