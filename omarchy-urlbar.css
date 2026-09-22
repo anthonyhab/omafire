@@ -77,10 +77,21 @@
     --button-background-color-hover: var(--omarchy-control-hover) !important;
     --button-background-color-active: var(--omarchy-control-active) !important;
     --button-border: none !important;
+    /* The visible face is a shadow-DOM .button-background — host padding
+     * never reaches it. --button-padding is the real lever; stock feeds
+     * it 0 0.5rem (~7.3px per side). */
+    --button-padding: 0 2px !important;
     border-radius: var(--omarchy-radius-input, 0px) !important;
     margin-inline: 0 !important;
     min-height: 26px !important;
-    padding-inline: 7px !important;
+    padding-inline: 2px !important;
+}
+
+/* The automation indicator is 24px of dead chrome ahead of the engine
+ * chip whenever Marionette/remote debugging runs — not part of the
+ * launcher design. */
+#remote-control-box {
+    display: none !important;
 }
 
 #urlbar[searchmode] .searchmode-switcher {
@@ -145,20 +156,11 @@
     width: var(--omarchy-nav-control-size) !important;
 }
 
+/* Invalid state (newtab/blank) renders a placeholder icon — 30px of dead
+ * space between the engine chip and the field. Stock hides the whole box;
+ * match that instead of force-showing it. */
 #urlbar #identity-box[pageproxystate="invalid"] {
-    align-items: center !important;
-    background: transparent !important;
-    border-radius: var(--omarchy-radius-input, 0px) !important;
-    display: flex !important;
-    flex-shrink: 0 !important;
-    margin-inline: 0 4px !important;
-    min-width: 32px !important;
-    padding-inline: 6px !important;
-}
-
-#urlbar #identity-box[pageproxystate="invalid"] > .identity-box-button {
-    margin: 0 !important;
-    padding-inline: 4px !important;
+    display: none !important;
 }
 
 #page-action-buttons {
@@ -298,10 +300,9 @@
 .urlbarView {
     background: var(--omarchy-panel) !important;
     border-style: solid !important;
-    border-width: var(--omarchy-border-width, 0px) !important;
-    border-color: var(--omarchy-border-active-color, transparent) !important;
-    border-image-source: var(--omarchy-border-active-source, none) !important;
-    border-image-slice: 1 !important;
+    border-width: 1px !important;
+    border-color: var(--omarchy-border) !important;
+    border-image: none !important;
     border-radius: var(--omarchy-radius-container, 0px) !important;
     box-shadow: none !important;
     color: var(--omarchy-fg) !important;
@@ -347,7 +348,9 @@
     color: var(--omarchy-muted) !important;
 }
 
+/* Same flat edge when unfocused — the gradient tokens would resurrect the
+ * Hyprland window-border mimicry inside the results card. */
 :root:-moz-window-inactive .urlbarView {
-    border-color: var(--omarchy-border-inactive-color, transparent) !important;
-    border-image-source: var(--omarchy-border-inactive-source, none) !important;
+    border-color: var(--omarchy-border) !important;
+    border-image-source: none !important;
 }
