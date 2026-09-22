@@ -15,3 +15,5 @@ omafox-content-palette.css
 omarchy-firefox/
 PKGBUILD
 .omarchy-workspaces-enabled
+tests/favicon-corpus/
+__pycache__/

@@ -210,7 +210,8 @@ is_exact_legacy_install() {
             [[ $digest == b7e660c466194db6a4731c7ac2b6a47e85d6664529c8107970b62847280d6b44 ]]
             ;;
         helper)
-            [[ $digest == e691f665b4871e9a422dd273d91eebcce4d4c372e93099ea4f68579fe722561e ]]
+            [[ $digest == e691f665b4871e9a422dd273d91eebcce4d4c372e93099ea4f68579fe722561e \
+                || $digest == 38e71fb8e98065a9c3654198a5d8169ebd14c9e0b137f8b8b8f24c2d53249df1 ]]
             ;;
     esac
 }
