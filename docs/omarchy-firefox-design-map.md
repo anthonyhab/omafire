@@ -151,27 +151,155 @@ URL bar (upstream warns of long-session slowdown), draggable URL bars, one-line
 or autohide toolbars, hover-only controls, browser-owned window controls, and
 wholesale alternate tab/toolbar layouts.
 
-## External VM test workflow
+## Live test workflow (`tools/fxlab`)
 
-The following commands belong to the user-local `omarchy-firefox-test` harness,
-not this repository. The retained evidence paths are therefore historical
-local evidence rather than branch CI artifacts.
+`tools/fxlab` is the single entry point for live verification. It owns the
+scratch profile, the Marionette transport, and screenshots — agents write JS
+or CSS in files and pass paths, never inline shell-quoted blobs. One active
+session at a time; state under `~/.local/state/fxlab/`, evidence under
+`~/.local/state/fxlab/runs/<ts>/`.
 
 ```bash
-omarchy-firefox-test up --host-shell --headless
-omarchy-firefox-test profile-sync
-# Run one interaction group and capture screenshots.
-omarchy-firefox-test check --json
-omarchy-firefox-test down
+tools/fxlab up                    # scratch profile (chrome -> ./theme symlink,
+                                  # profile/user.js + fxlab prefs), firefox
+                                  # -marionette inside test-launch headless sway
+tools/fxlab js probe.js           # chrome-context JS; JSON result. Prelude:
+                                  # win doc q qpart deepq qa rect attrs rules
+                                  # selof pathof sleep reg reguri unreg
+                                  # (Cc/Ci/Cu/Services too)
+tools/fxlab eval 'rect("urlbar")' # one-expression eval, implicit return —
+                                  # replaces throwaway probe.js files
+tools/fxlab probe urlbar          # the bundle: path (shadow-aware), attrs,
+                                  # rect+screen, ~40 computed props, ::before/
+                                  # ::after, shadow children. --styles adds
+                                  # props, --rules appends the cascade tail
+tools/fxlab probe 'searchmode-switcher >> .button-background'
+                                  # >> descends into a shadowRoot — works in
+                                  # every selector-taking command
+tools/fxlab diff back-button PanelUI-menu-button --all
+                                  # computed-style diff — "why is this tile
+                                  # darker" in one call
+tools/fxlab zen on|off|toggle|status
+                                  # real pref path (same as Ctrl+Alt+Z)
+tools/fxlab sidebar expand|collapse|show|hide|hover|positionend|positionstart|vtabs-on|vtabs-off
+                                  # drives SidebarController.debouncedMouseEnter
+                                  # / _collapseLauncher / sidebar.* prefs —
+                                  # never attribute poking; returns live state
+tools/fxlab inspect urlbar        # rect + attrs (XUL flex/hidden/collapsed!)
+                                  # + computed styles via --styles a,b
+tools/fxlab rules urlbar --props flex,margin-inline-start
+                                  # cascade drill-down: every matching rule
+                                  # with sheet href + line — answers
+                                  # "who owns this property, why did I lose"
+tools/fxlab dom nav-bar --depth 2 # indented subtree (tag#id.class + flex +
+                                  # rect) — find the right element first
+tools/fxlab state back-button hover   # deterministic pseudo-lock
+tools/fxlab state back-button none    # clear locks
+tools/fxlab css tweak.css         # register file as USER_SHEET via file://
+                                  # URI + content-hash query: @import resolves
+                                  # relative to the file, edits re-register
+                                  # clean, and `rules` shows the real path
+tools/fxlab css - --name probe    # stdin variant (data: URI)
+tools/fxlab css --unreg probe / --list
+tools/fxlab shot urlbar -o u.png  # element crop via compositor geometry;
+                                  # always writes u.png.meta.json
+tools/fxlab shot --grid           # labeled 100px coordinate grid overlay
+tools/fxlab shot --during 'win.gURLBar.inputField.focus()' --settle 350
+                                  # run JS then capture — holds transient UI
+                                  # open (--settle for reveal animations)
+tools/fxlab at 350 80             # elements under a point, shadow-pierced:
+                                  # light stack + deep chain with paths you
+                                  # can feed back to probe/rules/why
+tools/fxlab at --img u.png 60 40  # image px -> window css via the sidecar
+tools/fxlab at 350 80 --during 'win.gURLBar.inputField.focus()' --settle 300
+tools/fxlab key ctrl+l / type txt / open URL / focus SEL / settle MS
+tools/fxlab logs [--grep re]      # browser console (CSS parse errors land here)
+tools/fxlab restart               # down+up same config — userChrome edits
+                                  # are not hot-reloadable; ~3s cycle
+tools/fxlab down                  # kills only the instance it spawned
+                                  # (attach mode: only forgets the record)
 ```
 
-The real-profile sync excludes cookies, history, saved passwords, session
-restore data, extension storage, and account identifiers. It copies extension
-packages and toolbar/profile layout state. The default test palette is stored
-at `~/.config/omarchy-firefox-test/colors.json`; set
-`OMARCHY_FIREFOX_TEST_WAL_COLORS` to use another Pywal colors file.
+### Attaching to the real browser
 
-Evidence is retained under `~/.local/state/omarchy-firefox-test/runs/`.
+`fxlab attach` points the whole probe surface at an already-running
+Firefox — the user's real window, real tabs, real extensions — instead of
+the scratch clone. The target needs Marionette bound on a known port:
+`marionette.port` pref (the real profile carries `2929` in `user.js`) plus
+a launch with `-marionette`. There is no `--marionette-port` flag; the
+pref is the only control.
+
+```bash
+firefox -marionette -remote-allow-system-access
+                                 # user relaunches once; the second flag
+                                 # is required for chrome-context probes
+tools/fxlab attach               # connects on :2929, read-only
+tools/fxlab shot --grid          # grim on the real output, window-cropped
+tools/fxlab at --img shot.png x y
+                                 # sidecar OR full-output OS screenshot —
+                                 # mapped via live hyprctl geometry
+tools/fxlab attach --write       # re-attach to unlock css/key/zen/…
+tools/fxlab down                 # forgets the record; browser stays up
+```
+
+Read-only is the default because this is someone's live session:
+`css/key/type/open/restart/focus/state` and non-status `zen`/`sidebar`
+refuse until re-attached `--write`. Probes (`at`, `probe`, `inspect`,
+`rules`, `diff`, `eval`, `js`, `why`, `vars`, `shot`, `logs`, `dom`) all
+work. `shot` resolves the window via `hyprctl -j clients`/`monitors` and
+crops `grim -o <monitor>` to the window rect.
+
+### Source layer (Firefox's own shipped source)
+
+The running build is its own documentation: `src`/`grep` read the actual
+`chrome/` + `modules/` corpus extracted from both `omni.ja` archives
+(toolkit + `browser/`) via Firefox's `nsIZipReader`, cached per buildID at
+`~/.local/state/fxlab/gecko-src/<version>-<buildid>/`. `chrome://` and
+`resource://` refs resolve through the extracted `chrome.manifest` files —
+same map the browser registers, including `os=` flags, `override` lines,
+and indirect resource targets — so a href from `rules` output feeds
+straight into `src` (append `:LINE` for context). `grep` requires `rg`.
+All source-layer commands need a live session (`fxlab up` first) even when
+the corpus is already cached — the cache key comes from the running build.
+
+```bash
+tools/fxlab src chrome://browser/skin/browser.css:112   # read shipped source
+tools/fxlab grep "urlbar-container"                     # search the corpus
+tools/fxlab grep "urlbar-container" --path urlbar.css
+tools/fxlab why urlbar-container flex   # who sets this prop? (setter=null
+                                  # selector/href → attribute presentational
+                                  # hint, not a stylesheet rule)
+tools/fxlab vars urlbar --prefix urlbar # resolved --vars + setting rule/line
+tools/fxlab sheets                    # all loaded sheets incl. UA sheets
+tools/fxlab cssprops anchor           # property-name search
+tools/fxlab cssprops --values display # legal values for a property
+```
+
+`dom`/`inspect`/`state`/`why` are shadow-DOM aware: `q` descends shadow
+roots (FF156 `menupopup`, `arrowscrollbox`, `moz-button`, `panel`,
+`moz-badge` have them; `moz-urlbar`/`moz-input-box` are plain light-DOM
+custom elements — do not assume shadow boundaries) and `dom` marks shadow
+children `<shadow>`.
+
+`tools/fxlab up --vm` runs the same commands against the disposable Omarchy
+VM (`omarchy-firefox-test`): boots the sealed base if needed, pushes the repo
+worktree into the guest profile (authoritative for what gets tested), relaunches
+guest Firefox with `-marionette`, and forwards it to localhost:12828. VM
+screenshots go through the harness's in-guest `grim`; element regions use
+`hyprctl clients` geometry because Wayland clients cannot see their own
+screen position — the same reason host shots use `swaymsg` rather than
+`window.screenX`/`mozInnerScreen*`. `down` stops guest Firefox and the port
+forward; the VM itself stays up until `omarchy-firefox-test down`.
+
+`--no-sync` skips the harness `profile-sync`. Note the sync currently refuses
+this host's profile because its `chrome` is a symlink to `theme/`; fxlab
+always pushes the repo worktree afterward, so guest chrome matches the
+working tree either way. The guest's Firefox install lacks the autoconfig
+loader (`configuration/mozilla.cfg` lives in GreD), so `.uc.js` helpers do
+not run in VM sessions — chrome CSS does.
+
+Known probe caveat: `.tab-background` transitions `background`, so computed
+reads must wait ~250 ms after toggling drag attributes (`fxlab settle 300`).
 
 ## Current evidence
 
@@ -398,3 +526,91 @@ errors, binding loops, unknown properties, shell crashes, or IPC failures.
   tabs stop sitting flush against the divider. Lesson for future token
   bridges: check whether the native default is transparent before
   assigning a real colour.
+2026-09-21 — moz-checkbox glyph suppression + rail divider/expand fixes.
+  Three findings, all diagnosed live via fxlab:
+
+  * moz-checkbox/moz-radio checkmarks vanished: FF156 renders the real
+    control as a shadow-DOM `input#input` carrying `-moz-theme: non-native`
+    (moz-input-common.css). Gecko paints the glyph itself via accent-color
+    and suppresses `background-image` *below the CSS layer* — even inline
+    `!important` computes `none`. Fix lives in theme/parts/controls.css:
+    restore `appearance: auto` + `accent-color` on
+    `input#input[type="checkbox"|"radio"]`. XUL `.checkbox-check` and
+    light-DOM inputs are unaffected code paths.
+  * The pinned/unpinned rail divider was painted by the authored layer
+    (omarchy-tabbar.css #vertical-pinned-tabs-splitter,
+    `border-block-start: 1px solid var(--omarchy-border)`), NOT by a
+    splitter.css leak — omarchy-*.css loads after theme/parts/, so it wins
+    `!important` ties on equal specificity. Replaced the flat 122-grey
+    edge with a 1px background-image hairline that fades to transparent at
+    both ends at 55% alpha. Lesson: `fxlab rules` lists *matching* rules in
+    cascade order — the LAST entry wins, not the first.
+  * Tab expand/collapse jumpiness: parts/tabsbar.css had two
+    `transition: all` rules — on .tab-close-button/.tab-icon-overlay
+    (0.3s) and the ::before selected/hover indicator. Firefox's
+    _animateSidebarContainer snaps layout (display/margin/padding/inset/
+    position all flip instantly) while WAAPI-sliding #sidebar-container's
+    translate; `transition: all` made those layout props animate over
+    300ms, so close buttons and indicators drifted in late. Narrowed to
+    visual props only (opacity; background-color/background-image/opacity).
+    Verified via doc.getAnimations() during expand: only stock WAAPI
+    translate + visual-prop transitions remain.
+
+  * Zen mode rail overlap + centring: the floating #nav-bar row and
+    #urlbar card centre on the window via position:fixed, so the expanded
+    vertical-tab rail (overlay, ~240px) slid under them; an edge-to-edge
+    inset version then read as pinned right, and region-centring still
+    left a lopsided gap beside the rail. omarchy-zenmode.css now
+    centres a max-width card on the window itself with a rail floor:
+    --omarchy-zen-rail resolves the rail footprint (46px collapsed strip,
+    var(--sidebar-expanded-launcher-width, 240px) while
+    *|sidebar-main[expanded] on a non-hidden #sidebar-container — the
+    tabbox's sidebar-launcher-expanded attr lingers after the rail has
+    visually collapsed, which floor-anchored the card against a phantom
+    rail — or always-on vertical tabs, 0 when hidden).
+    --omarchy-zen-card-w = `min(max(720px, 62%), 100% - rail - 2*edge-gap)`
+    (cap outermost — clamp()'s floor would beat the cap when the bounds
+    invert under `iw < rail + 792`) and both elements take
+    `left: max(rail + edge-gap, 50% - card-w/2)` — centred on the
+    *window* (not the region: region-centring still read as
+    right-anchored), with --omarchy-zen-edge-gap (36px) as the floor
+    keeping the card off the rail when centring would underlap it.
+    :has(#tabbrowser-tabbox[sidebar-positionend]) mirrors via
+    `left:auto; right:max(...)`. `left`/`right`/`width` transition at
+    400ms ease-in-out to track
+    sidebar.animation.expand-on-hover.duration-ms. #urlbar keeps
+    transform:none so its fixed-position popups (search-mode switcher,
+    tooltips, context menus) anchor to the viewport. .urlbarView is a
+    flow child of #urlbar, so the results dropdown inherits the same
+    edges. Reveal rests at clamp(80px, 11vh, 120px) — unbounded 12vh
+    sinks too far on tall monitors. Reveal gate is :focus-within plus
+    :has([open]) — panels open as separate top-level widgets so focus
+    can leave the urlbar's focus-within scope while the engine picker
+    or a button menu is up; the opener's [open] attribute survives
+    that and keeps the card on screen.
+    Nav-row cluster pills: visible toolbarbutton/toolbaritem children of
+    #nav-bar/#nav-bar-customization-target get the launcher surface
+    (border-block + bg), with run-start/run-end caps detected purely by
+    sibling adjacency — an item not immediately preceded/followed by a
+    visible run-item is a cap and gets the inline border + radius.
+    [disabled] dimming is moved off the item onto .toolbarbutton-icon
+    (0.45): stock opacity:0.5 on the element dims the pill surface too,
+    so disabled tiles read as darker/shifted against the page — now
+    every tile paints the same launcher surface and only the glyph
+    greys out.
+    Verified live at 1600px: card is 992px wide (62%) centred on the
+    window at 800 in all four rail states (expanded/collapsed/hidden/
+    positionend all 304→1296 — the floor doesn't engage at this width);
+    cap wins when bounds invert (rail forced to 900px → w=628 with exact
+    36px margins). Disabled nav items keep the full-opacity pill surface
+    with the glyph dimmed to 0.45. Field leading: engine chip 49px at
+    4px inset (--button-padding pierces the moz-button shadow face —
+    stock feeds it 0.5rem ≈7.3px), the invalid-state identity-box is
+    display:none (was a force-visible 30px dead box), input starts at
+    361px. #remote-control-box is display:none'd — the automation
+    indicator is dead chrome in a themed launcher.
+    Known limits: a resized-by-drag launcher or open sidebar panel adds
+    width CSS can't read; a zero-content toolbarbutton (e.g. a 1px-wide
+    empty alltabs slot) can absorb a run cap since CSS can't test
+    rendered width — invisible at 0 radius, a small notch on rounded
+    palettes.
