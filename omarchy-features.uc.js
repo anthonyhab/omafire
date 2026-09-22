@@ -107,6 +107,34 @@
         }
     }
 
+    /* Private-window mark: the stylesheet can only gate real elements —
+     * XUL boxes never paint generated content, and the translucency layer
+     * pins every rail element's own background — so the rail's private
+     * indicator needs an injected <image>. sidebar-main is a shadow-DOM
+     * custom element whose extra children never get a slot, so the mark
+     * goes inside #vertical-tabs; CSS anchors it to the rail's bottom edge
+     * and shows it only in private mode. */
+    function injectPrivateMark(win) {
+        try {
+            var tabs = win.document.getElementById("tabbrowser-tabs");
+            var host = win.document.getElementById("vertical-tabs");
+            if (
+                !tabs ||
+                !host ||
+                tabs.getAttribute("orient") !== "vertical" ||
+                win.document.getElementById("omarchy-private-mark")
+            ) {
+                return;
+            }
+            var mark = win.document.createXULElement("image");
+            mark.id = "omarchy-private-mark";
+            mark.setAttribute("tooltiptext", "Private window");
+            host.appendChild(mark);
+        } catch (error) {
+            Cu.reportError("[omarchy-features] " + error);
+        }
+    }
+
     /* Privileged content surfaces — the sidebar's Places/megalist
      * documents and friends — are chrome-docshell children, so they get
      * the userChrome sheet set (including generated omafox-palette.css
@@ -145,6 +173,10 @@
                  * at runtime (remoteType changes), dropping the load hook
                  * — re-arm here; the flag makes it a no-op when hooked. */
                 hookSidebarContent(win);
+                /* The tab strip can switch orientations after startup;
+                 * this is idempotent, so a later switch to the vertical
+                 * rail still gets its private mark. */
+                injectPrivateMark(win);
                 var browser = win.document.getElementById("sidebar");
                 if (!browser || !browser.contentDocument) {
                     continue;
@@ -271,6 +303,7 @@
     if (typeof window !== "undefined" && window.document) {
         registerZenKey(window);
         hookSidebarContent(window);
+        injectPrivateMark(window);
     }
 
     // Windows opened after the last file change inherit nothing from the
@@ -283,6 +316,7 @@
                     if (subject && subject.document) {
                         registerZenKey(subject);
                         hookSidebarContent(subject);
+                        injectPrivateMark(subject);
                     }
                 } catch (error) {
                     Cu.reportError("[omarchy-features] " + error);

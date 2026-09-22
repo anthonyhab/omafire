@@ -357,10 +357,16 @@
     border-radius: var(--omarchy-radius-container, 0px) !important;
 }
 
+/* FF153's swatch is a <label> whose text node is the colour name; stock
+ * hides it inside a fixed-size box. Our 20px square re-exposes the clipped
+ * text, so kill the glyphs outright and let the swatch read as pure colour. */
 .tab-group-editor-panel .tab-group-editor-swatch {
     box-sizing: border-box !important;
+    font-size: 0 !important;
     height: 20px !important;
+    overflow: hidden !important;
     padding: 2px !important;
+    text-indent: 999px !important;
     width: 20px !important;
 }
 
@@ -509,30 +515,261 @@
 
 /* Keep Firefox's per-group paint ownership while flattening its component
  * geometry. The label, line, count, hover and picker now resolve through the
- * same named palette tokens instead of being flattened to one neutral card. */
+ * same named palette tokens instead of being flattened to one neutral card.
+ * The label itself carries a whisper of its group colour so it reads as a
+ * group marker at rest — quiet enough for epaper, present enough to answer
+ * a drag heading toward it. */
 #tabbrowser-tabs[orient="vertical"] .tab-group-label {
+    background: color-mix(
+        in srgb,
+        var(--tab-group-color) 12%,
+        transparent
+    ) !important;
     border-radius: var(--omarchy-base-button-radius) !important;
     box-shadow: none !important;
+    color: var(--tab-group-color) !important;
     outline: 0 !important;
+}
+
+#tabbrowser-tabs[orient="vertical"] .tab-group-label:hover {
+    background: color-mix(
+        in srgb,
+        var(--tab-group-color) 22%,
+        transparent
+    ) !important;
+}
+
+/* ── Folder glyph (Parfait-derived, MPL-2.0) ─────────────────────────
+ * In the expanded rail the group label reads as a folder: a stroked
+ * glyph that skews open while the group is expanded or a drag targets
+ * it, plus a mini card overlaying it — three dots when a collapsed
+ * group still holds the active tab, an audio cue when a member is
+ * playing. The collapsed icon rail keeps its colour bar: a 22px glyph
+ * has no room in a 4px slot. */
+#tabbrowser-tabs[orient="vertical"][expanded] .tab-group-label {
+    position: relative !important;
+}
+
+#tabbrowser-tabs[orient="vertical"][expanded] .tab-group-label::before {
+    content: "";
+    min-width: 22px;
+    height: 22px;
+    margin-inline: calc((var(--tab-min-height) - 22px) / 2)
+        var(--omarchy-control-gap);
+    background: no-repeat 0 0 / 22px
+        url("theme/icons/custom/folder-out.svg");
+    fill: var(--tab-group-color);
+    -moz-context-properties: fill;
+    transition: transform var(--omarchy-motion-duration)
+        var(--omarchy-motion-easing);
+}
+
+#tabbrowser-tabs[orient="vertical"][expanded] .tab-group-label::after {
+    content: "";
+    width: 18px;
+    height: 14px;
+    position: absolute;
+    left: calc((var(--tab-min-height) - 18px) / 2);
+    margin-block-start: 4px;
+    border-radius: 3px;
+    background: var(--omarchy-surface)
+        url("theme/icons/custom/folder-dots.svg") center / 12px no-repeat;
+    box-shadow: inset 0 0 0 1.5px var(--tab-group-color);
+    fill: var(--tab-group-color);
+    fill-opacity: 0;
+    -moz-context-properties: fill, fill-opacity;
+    transition:
+        transform var(--omarchy-motion-duration)
+            var(--omarchy-motion-easing),
+        fill-opacity var(--omarchy-motion-duration);
+}
+
+#tabbrowser-tabs[orient="vertical"][expanded]
+    .tab-group-label:is([aria-expanded="true"], [dragover-groupTarget])::before {
+    transform: skewX(16deg) scale(0.85);
+}
+
+#tabbrowser-tabs[orient="vertical"][expanded]
+    .tab-group-label:is([aria-expanded="true"], [dragover-groupTarget])::after {
+    transform: skewX(-16deg) scale(0.85) translate(4.5px, 0);
+}
+
+#tabbrowser-tabs[orient="vertical"][expanded]
+    tab-group[collapsed][hasactivetab]
+    .tab-group-label::after {
+    fill-opacity: 1;
+}
+
+#tabbrowser-tabs[orient="vertical"][expanded]
+    tab-group[collapsed]:not([hasactivetab]):has(
+        > .tabbrowser-tab[soundplaying]
+    )
+    .tab-group-label::after {
+    background-image: url("theme/icons/custom/equalizer.svg") !important;
+    background-size: 10px !important;
+    fill-opacity: 1;
+}
+
+/* Collapsed groups keep their members in the DOM and fold them flat —
+ * Parfait's max-height collapse. The selected tab stays visible, so a
+ * folded group still shows which of its tabs is live (in the icon rail
+ * too, where the label is only a colour bar). Native display:none can't
+ * animate; this can. */
+#tabbrowser-tabs[orient="vertical"]
+    tab-group[collapsed]
+    > .tabbrowser-tab:not([selected]) {
+    display: unset !important;
+    pointer-events: none;
+}
+
+#tabbrowser-tabs[orient="vertical"]
+    tab-group[collapsed]
+    > .tabbrowser-tab:not([selected])
+    > .tab-stack {
+    max-height: 0 !important;
+    opacity: 0;
+}
+
+#tabbrowser-tabs[orient="vertical"]
+    tab-group
+    > .tabbrowser-tab
+    > .tab-stack {
+    transition: max-height var(--omarchy-motion-duration)
+            var(--omarchy-motion-easing),
+        opacity var(--omarchy-motion-duration);
+}
+
+/* ── Micro-motion (Parfait-derived) ──────────────────────────────────
+ * Favicon bounce when a background tab's title changes, a squish when a
+ * tab becomes selected, and press scale on the tab buttons. All gated
+ * to no-preference — the reduce block above owns the off switch. */
+@media (prefers-reduced-motion: no-preference) {
+    .tabbrowser-tab[titlechanged] .tab-icon-image {
+        animation: omarchy-tab-icon-bounce 0.5s
+            var(--omarchy-motion-easing);
+    }
+
+    #tabbrowser-tabs[orient="vertical"]
+        .tabbrowser-tab:not([pinned])[selected]
+        .tab-background {
+        animation: omarchy-tab-select 0.25s var(--omarchy-motion-easing);
+    }
+
+    .tab-close-button,
+    .tab-audio-button {
+        transition: scale var(--omarchy-motion-duration)
+            var(--omarchy-motion-easing);
+    }
+
+    .tab-close-button:hover:active,
+    .tab-audio-button:hover:active {
+        scale: 0.9175;
+    }
+}
+
+@keyframes omarchy-tab-icon-bounce {
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+    }
+    50% {
+        transform: translateY(-4px) scale(1.125);
+    }
+}
+
+@keyframes omarchy-tab-select {
+    0% {
+        scale: 1.025 1.125;
+    }
+    100% {
+        scale: 1;
+    }
+}
+
+/* ── Drag feedback (Parfait-derived) ─────────────────────────────────
+ * Firefox's drop machinery is intact — [movingtab] fires on the strip,
+ * [dragover-groupTarget] marks the receiver, and --dragover-tab-group-color
+ * is the one token every native cue resolves through. What was missing was
+ * the *state layer*: the dragged tab never answered, the group label kept
+ * static styling, and nothing transitioned. These rules give each cue one
+ * flat surface change at constant geometry — colour is the feedback, never
+ * a border that would shift the rail. */
+:root {
+    --dragover-tab-group-color: var(--omarchy-focus-accent);
+    --dragover-tab-group-color-pale: var(--omarchy-control-hover);
+    /* Matches Firefox's native 11px member indent (measured on .tabbrowser-
+     * tab under [expanded]) so the preview lands where the drop commits. */
+    --omarchy-tab-group-indent: 11px;
+}
+
+/* The dragged tab physically previews group membership — Parfait's
+ * movingtab-addToGroup indent. Ungrouping slides it back out. Expanded-
+ * rail only: the collapsed icon strip has no inline room to express an
+ * indent — the wash cues above carry the answer there instead. */
+#tabbrowser-tabs[orient="vertical"][expanded][movingtab-addToGroup]:not(
+        [movingtab-group],
+        [movingtab-ungroup]
+    )
+    .tabbrowser-tab:is([multiselected], [selected])
+    > .tab-stack {
+    margin-inline-start: var(--omarchy-tab-group-indent) !important;
+}
+
+#tabbrowser-tabs[orient="vertical"][expanded][movingtab]:is(
+        [movingtab-addToGroup],
+        [movingtab-ungroup]
+    )
+    .tabbrowser-tab:is([multiselected], [selected]) {
+    margin-inline-start: 0 !important;
+}
+
+/* Indent previews must animate, not snap — same motion budget as the
+ * console. Two surfaces move: the dragged row's .tab-stack margin (the
+ * addToGroup preview) and the dragged .tabbrowser-tab's own margin (the
+ * ungroup release of Firefox's native member indent). The scoped
+ * transition on the tab itself beats the movingtab `transition: none`
+ * above by specificity while leaving pointer-tracking transforms
+ * untransitioned. */
+#tabbrowser-tabs[orient="vertical"][expanded][movingtab]:is(
+        [movingtab-addToGroup],
+        [movingtab-ungroup]
+    )
+    .tabbrowser-tab:is([multiselected], [selected]) {
+    transition: margin-inline-start var(--omarchy-motion-duration)
+        var(--omarchy-motion-easing) !important;
+}
+
+#tabbrowser-tabs[orient="vertical"][expanded][movingtab]:is(
+        [movingtab-addToGroup],
+        [movingtab-ungroup]
+    )
+    .tabbrowser-tab:is([multiselected], [selected])
+    > .tab-stack {
+    transition: margin-inline var(--omarchy-motion-duration)
+        var(--omarchy-motion-easing) !important;
+}
+
+/* A collapsed group being dragged into expands to show its target — the
+ * label container fills, not just the label, so the whole row answers.
+ * The label sits one level deep inside .tab-group-label-hover-highlight,
+ * so this must be a descendant :has(), not a child combinator. */
+.tab-group-label-container:has(.tab-group-label[dragover-groupTarget]) {
+    background: color-mix(
+        in srgb,
+        var(--dragover-tab-group-color) 16%,
+        transparent
+    ) !important;
 }
 
 #tabbrowser-tabs[orient="vertical"]
     .tab-group-label[dragover-groupTarget] {
-    --omarchy-group-drag-border: color-mix(
-        in srgb,
-        var(--tab-group-color-invert) 35%,
-        var(--omarchy-fg) 65%
-    );
     background: color-mix(
         in srgb,
-        var(--dragover-tab-group-color, var(--omarchy-focus-accent)) 25%,
+        var(--dragover-tab-group-color) 30%,
         transparent
     ) !important;
-    border: 2px solid var(--omarchy-group-drag-border) !important;
-    box-shadow: inset 0 0 0 2px var(--omarchy-group-drag-border) !important;
-    box-sizing: border-box !important;
-    outline: 2px solid var(--omarchy-group-drag-border) !important;
-    outline-offset: -2px !important;
+    box-shadow: inset 0 0 0 1px var(--dragover-tab-group-color) !important;
+    outline: 0 !important;
 }
 
 /* Drag affordances. Firefox marks a grouping drop with
@@ -584,7 +821,7 @@
         var(--omarchy-focus-accent) 26%,
         transparent
     ) !important;
-    outline-style: solid !important;
+    outline: 1px solid var(--omarchy-focus-accent) !important;
 }
 
 /* Multi-tab drags stack a second edge under the dragged tab. The flat
@@ -592,7 +829,7 @@
  * accent at the tab's trailing edge — two stacked edges for big-stack. */
 #main-window
     #tabbrowser-tabs[orient="vertical"][movingtab]
-    :is(.tabbrowser-tab[small-stack], tab-split-view-wrapper[small-stack])
+    .tabbrowser-tab[small-stack]
     > .tab-stack
     > .tab-background,
 #main-window
@@ -606,7 +843,7 @@
 
 #main-window
     #tabbrowser-tabs[orient="vertical"][movingtab]
-    :is(.tabbrowser-tab[big-stack], tab-split-view-wrapper[big-stack])
+    .tabbrowser-tab[big-stack]
     > .tab-stack
     > .tab-background,
 #main-window
@@ -622,7 +859,7 @@
 
 #main-window
     #tabbrowser-tabs[orient="horizontal"][movingtab]
-    :is(.tabbrowser-tab[small-stack], tab-split-view-wrapper[small-stack])
+    .tabbrowser-tab[small-stack]
     > .tab-stack
     > .tab-background,
 #main-window
@@ -636,7 +873,7 @@
 
 #main-window
     #tabbrowser-tabs[orient="horizontal"][movingtab]
-    :is(.tabbrowser-tab[big-stack], tab-split-view-wrapper[big-stack])
+    .tabbrowser-tab[big-stack]
     > .tab-stack
     > .tab-background,
 #main-window
@@ -761,11 +998,19 @@ sidebar-pins-promo {
     width: var(--omarchy-rail-cell-size) !important;
 }
 
-#tabbrowser-tabs[orient="vertical"]:not([expanded])
-    :is(.tab-icon-image, .tab-icon-overlay) {
+#tabbrowser-tabs[orient="vertical"]:not([expanded]) .tab-icon-image {
     height: 16px !important;
     margin: 0 !important;
     width: 16px !important;
+}
+
+/* The audio/mute overlay keeps its own chip size — the vendored copy of
+ * this rule still pins it to the icon's 16px, which let the badge cover
+ * the whole favicon in the rail. */
+#tabbrowser-tabs[orient="vertical"]:not([expanded]) .tab-icon-overlay {
+    height: 10px !important;
+    margin: 0 !important;
+    width: 10px !important;
 }
 
 /* Keep the first rail item off the navbar divider with the same inset the
@@ -776,43 +1021,120 @@ sidebar-pins-promo {
 }
 
 /* The pinned/unpinned splitter natively has only inline margins, so the
- * neighbouring tabs sit flush against the line. Give it the rail's gap on
- * both sides — symmetric breathing room around the divider. */
+ * neighbouring tabs sit flush against the line — but the element itself
+ * paints nothing, leaving a dead 12px zone. Give it the rail's gap on both
+ * sides and a centred hairline so the separation reads as a divider. */
 #vertical-pinned-tabs-splitter {
+    border: 0 !important;
     margin-block: var(--omarchy-control-gap) !important;
+    margin-inline: 10px !important;
+    background-image: linear-gradient(
+        to right,
+        transparent,
+        color-mix(in srgb, var(--omarchy-border) 55%, transparent) 25%,
+        color-mix(in srgb, var(--omarchy-border) 55%, transparent) 75%,
+        transparent
+    ) !important;
+    background-size: 100% 1px !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
 }
 
-/* Collapsed rail: a tab-group label has no room for its expanded row. Render
- * it as a short centered bar in the group's own colour — a grouping cue, not
- * a 24px solid swatch. */
+/* Collapsed rail: the group label becomes a folder glyph in the group's
+ * own colour — the same Parfait-derived treatment as the expanded rail,
+ * sized to one icon cell. The label text has no room at 46px, so it is
+ * clipped away and the ::before glyph carries the meaning. The ::after
+ * mini card still reports collapsed-group state (active tab dots /
+ * audio cue) inside the glyph. */
 #main-window
     #tabbrowser-tabs[orient="vertical"]:not([expanded])
     .tab-group-label-container {
-    height: 12px !important;
-    min-height: 12px !important;
-    max-height: 12px !important;
+    height: var(--omarchy-rail-cell-size) !important;
+    min-height: var(--omarchy-rail-cell-size) !important;
+    max-height: var(--omarchy-rail-cell-size) !important;
 }
 
 #main-window
     #tabbrowser-tabs[orient="vertical"]:not([expanded])
     .tab-group-label-hover-highlight {
-    height: 12px !important;
-    min-height: 12px !important;
-    max-height: 12px !important;
+    height: var(--omarchy-rail-cell-size) !important;
+    min-height: var(--omarchy-rail-cell-size) !important;
+    max-height: var(--omarchy-rail-cell-size) !important;
 }
 
 #main-window
     #tabbrowser-tabs[orient="vertical"]:not([expanded])
     .tab-group-label {
+    background: transparent !important;
     border-radius: var(--omarchy-radius-container, 0px) !important;
-    height: 4px !important;
+    color: transparent !important;
+    height: var(--omarchy-rail-cell-size) !important;
     margin-inline: auto !important;
-    max-height: 4px !important;
-    max-width: 22px !important;
-    min-height: 4px !important;
-    min-width: 22px !important;
+    max-height: var(--omarchy-rail-cell-size) !important;
+    max-width: var(--omarchy-rail-cell-size) !important;
+    min-height: var(--omarchy-rail-cell-size) !important;
+    min-width: var(--omarchy-rail-cell-size) !important;
+    overflow: hidden !important;
     padding: 0 !important;
-    width: 22px !important;
+    position: relative !important;
+    width: var(--omarchy-rail-cell-size) !important;
+}
+
+#main-window
+    #tabbrowser-tabs[orient="vertical"]:not([expanded])
+    .tab-group-label::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 20px;
+    height: 20px;
+    background: no-repeat center / 20px
+        url("theme/icons/custom/folder-out.svg");
+    fill: var(--tab-group-color);
+    -moz-context-properties: fill;
+    transition: transform var(--omarchy-motion-duration)
+        var(--omarchy-motion-easing);
+}
+
+#main-window
+    #tabbrowser-tabs[orient="vertical"]:not([expanded])
+    .tab-group-label::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 12px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -35%);
+    border-radius: 3px;
+    background: var(--omarchy-surface)
+        url("theme/icons/custom/folder-dots.svg") center / 10px no-repeat;
+    box-shadow: inset 0 0 0 1.5px var(--tab-group-color);
+    fill: var(--tab-group-color);
+    fill-opacity: 0;
+    -moz-context-properties: fill, fill-opacity;
+    transition: transform var(--omarchy-motion-duration)
+        var(--omarchy-motion-easing), fill-opacity
+        var(--omarchy-motion-duration);
+}
+
+#main-window
+    #tabbrowser-tabs[orient="vertical"]:not([expanded])
+    tab-group[collapsed][hasactivetab]
+    .tab-group-label::after {
+    fill-opacity: 1;
+}
+
+#main-window
+    #tabbrowser-tabs[orient="vertical"]:not([expanded])
+    tab-group[collapsed]:not([hasactivetab]):has(
+        > .tabbrowser-tab[soundplaying]
+    )
+    .tab-group-label::after {
+    background-image: url("theme/icons/custom/equalizer.svg") !important;
+    background-size: 9px !important;
+    fill-opacity: 1;
 }
 
 /* Firefox 155 keeps two periphery buttons: #tabs-newtab-button is the live
@@ -844,6 +1166,15 @@ sidebar-pins-promo {
     .tab-background {
     background-color: var(--omarchy-control-selected) !important;
     border-inline-start-color: var(--omarchy-focus-accent) !important;
+}
+
+/* During a drag the picked-up inset shadow (below) is the edge cue —
+ * keep the 1px border for geometry but drop its colour so the collapsed
+ * rail does not stack a 1px accent line on a 2px accent shadow. */
+#tabbrowser-tabs[orient="vertical"]:not([expanded])[movingtab]
+    .tabbrowser-tab[selected]
+    .tab-background {
+    border-inline-start-color: transparent !important;
 }
 
 #tabbrowser-tabs[orient="vertical"]:not([expanded])
@@ -983,9 +1314,29 @@ sidebar-pins-promo {
 }
 
 #tabbrowser-tabs[orient="vertical"][movingtab]
-    .tabbrowser-tab:not([dragtarget]) {
+    .tabbrowser-tab:not([selected], [multiselected]) {
     transition: transform var(--omarchy-motion-duration)
         var(--omarchy-motion-easing) !important;
+}
+
+/* Firefox tracks the dragged row with an inline transform, not an
+ * attribute — there is no [dragtarget] on tabs (the vendored exclusion is
+ * vacuous and would transition the dragged row, lagging it behind the
+ * pointer). The grabbed tab is always the selected/multiselected one, so
+ * it is the explicit exception: no transform transition, and a borrowed
+ * selected-row edge so the piece in hand reads as a solid card instead of
+ * a transparent ghost of bare text. */
+#tabbrowser-tabs[orient="vertical"][movingtab]
+    .tabbrowser-tab:is([selected], [multiselected]) {
+    transition: none !important;
+}
+
+#tabbrowser-tabs[orient="vertical"][movingtab]
+    .tabbrowser-tab:is([selected], [multiselected])
+    > .tab-stack
+    > .tab-background {
+    background: var(--omarchy-control-selected) !important;
+    box-shadow: inset 2px 0 0 var(--omarchy-focus-accent) !important;
 }
 
 #tabbrowser-tabs[orient="vertical"][expanded]
@@ -994,7 +1345,7 @@ sidebar-pins-promo {
     opacity: 0 !important;
 }
 
-#tabbrowser-tabs[orient="vertical"][expanded]
+#tabbrowser-tabs[orient="vertical"]:is([expanded], [movingtab])
     .tabbrowser-tab[selected]
     .tab-background {
     border-block-end: 0 !important;
@@ -1007,8 +1358,23 @@ sidebar-pins-promo {
         .tab-background {
         animation: none !important;
     }
-    #tabbrowser-tabs[orient="vertical"][movingtab]
-        .tabbrowser-tab:not([dragtarget]) {
+    #tabbrowser-tabs[orient="vertical"][movingtab] .tabbrowser-tab,
+    #tabbrowser-tabs[orient="vertical"][expanded][movingtab]
+        .tabbrowser-tab
+        > .tab-stack,
+    /* The group-drag indent transitions carry higher specificity than the
+     * broad selectors above — mirror them exactly so reduce still wins. */
+    #tabbrowser-tabs[orient="vertical"][expanded][movingtab]:is(
+            [movingtab-addToGroup],
+            [movingtab-ungroup]
+        )
+        .tabbrowser-tab:is([multiselected], [selected]),
+    #tabbrowser-tabs[orient="vertical"][expanded][movingtab]:is(
+            [movingtab-addToGroup],
+            [movingtab-ungroup]
+        )
+        .tabbrowser-tab:is([multiselected], [selected])
+        > .tab-stack {
         transition: none !important;
     }
 }
@@ -1097,16 +1463,130 @@ toolbarbutton.omarchy-workspace[active] {
  * favicon stack. The base layer offsets it for horizontal tabs (where
  * the stack is the row's trailing cell); in the vertical rail that left
  * it floating over the label. Anchor it to the stack's bottom inline-end
- * corner instead: a 4px overhang reads as a badge, the glyph stays off
- * the label's baseline, and the same placement works collapsed. Radius
- * follows the button-radius token so square themes get a square chip. */
+ * corner instead: a 12px chip overhanging ~4px kisses the favicon's
+ * corner instead of covering it (a 14–20px box on a 16px icon read as a
+ * second tile eating the glyph). Radius follows the button-radius token
+ * so square themes get a square chip. */
 .tab-icon-overlay {
     height: 10px !important;
     width: 10px !important;
-    padding: 2px !important;
+    padding: 1px !important;
     left: auto !important;
     top: auto !important;
+    inset-inline-start: auto !important;
+    inset-inline-end: -8px !important;
+    bottom: -6px !important;
+    border-radius: var(--omarchy-base-button-radius, 50%) !important;
+}
+
+/* The base layer's :not([crashed]) padding is (0,2,0) — without the
+ * qualifier the chip would ship at 14px instead of the intended 12. */
+.tab-icon-overlay:not([crashed]) {
+    padding: 1px !important;
+}
+
+/* On horizontal tabs the icon stack is the row's trailing cell, so a deep
+ * end overhang pushes the chip past the tab edge into the next tab. Keep
+ * the original modest overhang there. */
+#tabbrowser-tabs[orient="horizontal"] .tab-icon-overlay {
     inset-inline-end: -4px !important;
     bottom: -4px !important;
-    border-radius: var(--omarchy-base-button-radius, 50%) !important;
+}
+
+/* Playing (unmuted) tabs swap the static speaker for an animated equalizer —
+ * three bars breathing at offset periods, SMIL inside the SVG image. The
+ * muted state keeps the stock mute glyph so the semantic stays legible. */
+.tabbrowser-tab[soundplaying]:not([muted]) .tab-icon-overlay {
+    -moz-context-properties: fill !important;
+    fill: var(--omarchy-fg) !important;
+    list-style-image: url("theme/icons/custom/equalizer.svg") !important;
+}
+
+/* Busy edge — a loading tab gets a 2px accent line pulsing along the bottom
+ * of its favicon cell (Zen's loading edge). The ::after rides on the icon
+ * stack so it works collapsed and expanded without touching tab geometry. */
+@keyframes omarchy-busy-edge {
+    0%,
+    100% {
+        opacity: 0.45;
+        transform: scaleX(0.4);
+    }
+    50% {
+        opacity: 1;
+        transform: scaleX(1);
+    }
+}
+
+.tabbrowser-tab[busy] .tab-icon-stack {
+    position: relative !important;
+}
+
+.tabbrowser-tab[busy] .tab-icon-stack::after {
+    animation: omarchy-busy-edge 1.15s ease-in-out infinite !important;
+    background: var(--omarchy-accent) !important;
+    border-radius: 1px;
+    bottom: -1px;
+    content: "";
+    height: 2px;
+    inset-inline: 2px;
+    position: absolute;
+}
+
+/* Tab hover preview — the rail's native preview panel gets the Omarchy
+ * interior: monospace chrome type, muted URI, container pill on the field
+ * tint. The flat 1px edge comes from omarchy-popups' .panel-arrowcontent. */
+#tab-preview-panel .tab-preview-title {
+    font-family: var(--omarchy-ui-font) !important;
+    font-size: var(--omarchy-ui-font-size) !important;
+}
+
+#tab-preview-panel .tab-preview-uri {
+    color: var(--omarchy-muted) !important;
+    font-family: var(--omarchy-ui-font) !important;
+    font-size: calc(var(--omarchy-ui-font-size) - 1px) !important;
+}
+
+#tab-preview-panel .tab-preview-pid,
+#tab-preview-panel .tab-preview-activeness {
+    font-family: var(--omarchy-ui-font) !important;
+    font-size: calc(var(--omarchy-ui-font-size) - 1px) !important;
+}
+
+#tab-preview-panel .tab-preview-container-indicator {
+    background-color: var(--omarchy-field) !important;
+    border-radius: var(--omarchy-radius-input, 0px) !important;
+    padding: 1px 6px !important;
+}
+
+/* Private-window mark — the base theme paints the eye on the nav bar, which
+ * the collapsed rail never shows and zen folds away entirely. A real
+ * <image> is appended to #vertical-tabs by omarchy-features.uc.js (XUL boxes
+ * never paint generated content or decorative backgrounds, and sidebar-main
+ * only renders its slotted children); it's anchored to the rail's bottom
+ * edge, above the native sidebar footer, and only shows in private mode. */
+#omarchy-private-mark {
+    display: none;
+}
+
+:root[privatebrowsingmode="temporary"]
+    #sidebar-container:has(#tabbrowser-tabs[orient="vertical"])
+    #vertical-tabs {
+    position: relative;
+}
+
+:root[privatebrowsingmode="temporary"]
+    #sidebar-container:has(#tabbrowser-tabs[orient="vertical"])
+    #omarchy-private-mark {
+    -moz-context-properties: fill, fill-opacity;
+    bottom: 4px;
+    display: block;
+    fill: var(--omarchy-muted);
+    fill-opacity: 0.7;
+    height: 14px;
+    left: 0;
+    list-style-image: var(--omarchy-base-icon-eye-not-looking-symbolic);
+    margin: 0 auto;
+    position: absolute;
+    right: 0;
+    width: 14px;
 }
