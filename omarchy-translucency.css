@@ -54,10 +54,15 @@
         --panel-background-color: var(--omarchy-glass-panel) !important;
         --omarchy-panel: var(--omarchy-glass-panel) !important;
         /* The urlbar field keeps a floor on its alpha: it is a text entry
-         * and must stay legible even when the rest of the chrome is glass. */
+         * and must stay legible even when the rest of the chrome is glass.
+         * Mix from --omarchy-surface, not --omarchy-field: under [lwtheme]
+         * --omarchy-field aliases --toolbar-field-background-color, which
+         * this block overrides — the same self-reference the glass-panel
+         * note above warns about, one hop deeper (field → toolbar-field →
+         * glass-field → field invalidated every consumer). */
         --omarchy-glass-field: color-mix(
             in srgb,
-            var(--omarchy-field)
+            var(--omarchy-surface)
                 calc(min(1, var(--omarchy-glass-alpha) + 0.15) * 100%),
             transparent
         ) !important;
@@ -218,7 +223,7 @@
 
     /* Floating surfaces inside chrome keep their own glass layer — they
      * stack over content, not over chrome, so their alpha reads correctly. */
-    #statuspanel .statuspanel-label,
+    #statuspanel-label,
     .container.infobar,
     .notificationbox-stack notification-message {
         background-color: var(--omarchy-glass-panel) !important;

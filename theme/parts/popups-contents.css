@@ -87,6 +87,23 @@
 	}
 }
 
+/* Bookmark editor fields — the html:input rows take the field surface and
+ * the accent focus edge like every other chrome input. */
+#editBMPanel_namePicker,
+#editBMPanel_locationField,
+#editBMPanel_tagsField {
+	background-color: var(--omarchy-field) !important;
+	border: 1px solid var(--omarchy-border) !important;
+	border-radius: var(--omarchy-base-button-radius) !important;
+	color: var(--omarchy-fg) !important;
+}
+#editBMPanel_namePicker:focus,
+#editBMPanel_locationField:focus,
+#editBMPanel_tagsField:focus {
+	border-color: var(--omarchy-focus-accent) !important;
+	outline: none !important;
+}
+
 /* Downloads popover */
 #downloadsFooterButtons toolbarseparator {
 	padding-inline: 0 !important;
@@ -127,6 +144,25 @@
 }
 #downloadsPanel-mainView .download-state toolbarseparator {
 	display: none;
+}
+
+/* Downloads: row hover uses the control wash like every other list, and the
+ * progress track/fill pin to the palette instead of the native attention
+ * token. */
+#downloadsPanel-mainView .download-state:hover {
+	background-color: var(--omarchy-control-hover) !important;
+}
+
+.downloadProgress {
+	background-color: var(--omarchy-field) !important;
+	border-radius: var(--omarchy-base-button-radius) !important;
+}
+.downloadProgress::-moz-progress-bar {
+	--download-progress-fill-color: var(--omarchy-accent) !important;
+	border-radius: var(--omarchy-base-button-radius) !important;
+}
+.downloadProgress[paused]::-moz-progress-bar {
+	background-color: var(--omarchy-muted) !important;
 }
 
 /* Customization overflow menu position */
