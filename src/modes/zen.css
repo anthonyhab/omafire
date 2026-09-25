@@ -77,38 +77,56 @@
         height: var(--oc-trigger) !important;
       }
 
+      /* Where the row's top edge is: parked one row plus a gap above the
+       * window, or docked. Both the row and the field (a top-layer
+       * popover that anchor positioning does not track while the row
+       * moves) take their top from it with the same transition, so they
+       * slide as one. */
+      --oc-zen-top: calc((var(--oc-zen-open) - 1) * (var(--oc-toolbar) + var(--oc-gap)));
+
+      & #tabbrowser-tabbox {
+        anchor-name: --oc-page !important;
+      }
+
+      /* A title bar: one solid slab with a hairline under it, painted
+       * inside the box so buttons and field centre on the same line. */
       & #nav-bar {
-        top: calc((var(--oc-zen-open) - 1) * (var(--oc-toolbar) + var(--oc-gap))) !important;
+        top: var(--oc-zen-top) !important;
         bottom: auto !important;
         left: 0 !important;
         width: 100vw !important;
+        height: var(--oc-toolbar) !important;
         min-height: var(--oc-toolbar) !important;
         padding-block: 0 !important;
-        /* One solid slab, ruled on its open edges like the console. */
+        /* Buttons can be taller than the row (compact density): centre
+         * the line, not its top, on the field's axis. */
+        align-items: center !important;
+        align-content: center !important;
         background-color: var(--oc-console) !important;
-        border: var(--oc-rule) solid var(--oc-focus) !important;
+        border: none !important;
         border-radius: 0 !important;
-        box-shadow: none !important;
+        box-shadow: inset 0 -1px 0 var(--oc-line-strong) !important;
         transition: top var(--oc-zen-motion) !important;
       }
 
-      /* The field fills the row between navigation and actions. The
-       * urlbar itself is a top-layer popover, so it is pinned onto its
-       * slot with an anchor and rides the row as it slides. */
+      /* The field is centred on the page, as VS Code's command centre.
+       * Its slot in the row only keeps the buttons clear of it: auto
+       * margins push navigation to the row's start and actions to its
+       * end, springs or not. */
       & #urlbar-container {
-        anchor-name: --oc-field !important;
-        flex: 1 1 auto !important;
+        flex: 0 1 min(var(--oc-field-width), 50%) !important;
         min-width: 0 !important;
         max-width: none !important;
-        margin-inline: var(--oc-gap) !important;
+        margin: 0 auto !important;
       }
 
       & #urlbar[breakout] {
-        top: calc(anchor(--oc-field center, 0px) - var(--urlbar-height) / 2) !important;
-        left: anchor(--oc-field left, 0px) !important;
-        width: anchor-size(--oc-field width, 0px) !important;
+        top: calc(var(--oc-zen-top) + (var(--oc-toolbar) - var(--urlbar-height)) / 2) !important;
+        left: anchor(--oc-page center, 50vw) !important;
+        width: min(var(--oc-field-width), calc(anchor-size(--oc-page width, 100vw) / 2)) !important;
         margin: 0 !important;
-        translate: none !important;
+        translate: -50% 0 !important;
+        transition: top var(--oc-zen-motion) !important;
         /* Open, the results hang from the field as one card its width. */
         --urlbar-background-inset-breakout: 0px !important;
       }
@@ -117,32 +135,29 @@
         border-radius: 0 !important;
       }
 
-      /* The results unroll down out of the field, inside the card's rule
+      /* The results unroll down out of the field, inside the card's edge
        * (Nova pads the view to its own bleed, which the card lacks). */
       & #urlbar[breakout-extend] .urlbarView {
         box-sizing: border-box !important;
-        padding-inline: calc(var(--oc-rule) + var(--oc-u)) !important;
+        padding-inline: var(--oc-u) !important;
         animation: oc-unroll var(--oc-console-in) var(--oc-ease-enter) !important;
       }
 
       & #nav-bar toolbarspring {
-        flex: 0 1 0 !important;
+        flex: 0 0 0 !important;
+        min-width: 0 !important;
       }
 
-      /* Vertical tabs: the row docks on the page, spanning it only, and slides down from the same
-       * parked height; the tab column stays put beside it. */
+      /* Vertical tabs: the row docks on the page, spanning it only; the
+       * tab column stays put beside it. */
       @media -moz-pref("sidebar.verticalTabs") {
+        --oc-zen-top: calc(anchor(--oc-page top, 0px) * var(--oc-zen-open)
+                           + (var(--oc-zen-open) - 1) * (var(--oc-toolbar) + var(--oc-gap)));
+
         & #nav-bar {
-          top: calc(anchor(--oc-page top, 0px) * var(--oc-zen-open)
-                    + (var(--oc-zen-open) - 1) * (var(--oc-toolbar) + var(--oc-gap))) !important;
           left: anchor(--oc-page left, 0px) !important;
           right: anchor(--oc-page right, 0px) !important;
           width: auto !important;
-        }
-
-        /* The row docks on the page's box, as the launcher does. */
-        & #tabbrowser-tabbox {
-          anchor-name: --oc-page !important;
         }
 
         /* The trigger spans the page, not the tab column. */

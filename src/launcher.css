@@ -37,40 +37,43 @@
 
 /* ---- console look ---------------------------------------------------
  *
- * Brutalist: one opaque slab ruled all round in the focus colour, no
- * shadow and no scrim; results are outlined, not filled. Shared by the
- * drop launcher and zen mode's inline field. */
+ * Brutalist, on the theme's one edge rule: the card is a solid slab with
+ * a hairline edge (no shadow, no scrim); hover and selection are fills;
+ * the single accent is the focus bar under the field, like the active
+ * tab's. Shared by the drop launcher and zen mode's inline field. */
 
 @media -moz-pref("omarchy.layout", "sidebar") and (not -moz-pref("omarchy.launcher", "center")),
        -moz-pref("omarchy.zen-mode") and -moz-pref("omarchy.zen-mode-active") and (not -moz-pref("omarchy.launcher", "center")) {
   #main-window:not([customizing]) #urlbar[breakout]:is([breakout-extend], [focused]) {
     & > .urlbar-background {
       background-color: var(--oc-console) !important;
-      border: var(--oc-rule) solid var(--oc-focus) !important;
+      border: 1px solid var(--oc-line-strong) !important;
       border-radius: 0 !important;
-      box-shadow: none !important;
+      box-shadow: inset 0 calc(-1 * var(--oc-rule)) 0 var(--oc-focus) !important;
     }
 
     & .urlbarView {
-      border-top: 1px solid var(--oc-line-strong) !important;
+      border-top: var(--oc-rule) solid var(--oc-focus) !important;
     }
 
     & :is(.urlbarView-row, .urlbarView-row-inner) {
       border-radius: 0 !important;
+      outline: none !important;
     }
     & .urlbarView-row-inner {
       background-color: transparent !important;
     }
     & .urlbarView-row:not([selected]):hover {
-      background-color: transparent !important;
-      outline: 1px solid var(--oc-line-strong) !important;
-      outline-offset: -1px !important;
+      background-color: var(--oc-hover) !important;
     }
     & .urlbarView-row[selected] {
-      background-color: transparent !important;
-      outline: var(--oc-rule) solid var(--oc-focus) !important;
-      outline-offset: calc(-1 * var(--oc-rule)) !important;
+      background-color: var(--oc-active) !important;
     }
+  }
+
+  /* With results open the bar sits between field and results instead. */
+  #main-window:not([customizing]) #urlbar[breakout][breakout-extend] > .urlbar-background {
+    box-shadow: none !important;
   }
 }
 

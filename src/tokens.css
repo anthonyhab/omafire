@@ -46,6 +46,8 @@
   /* Invisible strip at a window edge that reveals hidden chrome
    * (compact's column, zen's navigation row). */
   --oc-trigger: 6px;
+  /* Zen mode's inline address field, centred in its row. */
+  --oc-field-width: 640px;
   --oc-launcher-width: min(720px, 80vw);
   --oc-launcher-top: 16vh;
   /* How far the open urlbar card extends past the field (urlbar.css). */
