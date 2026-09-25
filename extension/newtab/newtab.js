@@ -12,9 +12,10 @@
   const root = document.documentElement;
 
   const DEFAULTS = {
-    background: "wallpaper", // solid | wallpaper | custom
+    background: "wallpaper", // solid | wallpaper | custom | desktop
     blur: 24,
     dim: 55,
+    tint: 0, // desktop's dim: the window glass already tints it
     glass: true,
     clock: true,
     hour12: false,
@@ -30,6 +31,7 @@
     align: "top", // top | center
     width: "normal", // normal | wide
     custom: [], // [{ url, title }]
+    pinned: [], // [{ url, title }], dragged into place; they lead the grid
     hidden: [] // urls
   };
 
@@ -96,6 +98,7 @@
 
   function applySettings() {
     const d = root.dataset;
+    d.background = settings.background;
     d.siteStyle = settings.siteStyle;
     d.align = settings.align;
     d.width = settings.width;
@@ -103,7 +106,7 @@
     d.numbers = settings.numbers;
     d.hosts = settings.hosts;
     root.style.setProperty("--blur", `${settings.blur}px`);
-    root.style.setProperty("--dim", `${settings.dim}%`);
+    root.style.setProperty("--dim", `${settings.background === "desktop" ? settings.tint : settings.dim}%`);
     document.querySelector("#time").hidden = !settings.clock && !settings.greeting;
     clock.hidden = !settings.clock;
     greeting.hidden = !settings.greeting;
@@ -228,9 +231,10 @@
     }
     icon.classList.add("icon");
 
+    /* Only the tiles a digit key opens are numbered. */
     const number = document.createElement("span");
     number.className = "index";
-    number.textContent = String(index + 1).padStart(2, "0");
+    if (index < 9) number.textContent = String(index + 1).padStart(2, "0");
 
     const title = document.createElement("span");
     title.className = "title";
@@ -248,14 +252,17 @@
     hide.title = site.custom ? "Remove shortcut" : "Hide shortcut";
     hide.textContent = "×";
     hide.addEventListener("click", () => {
+      const pinned = settings.pinned.filter((entry) => entry.url !== site.url);
       if (site.custom) {
-        save({ custom: settings.custom.filter((entry) => entry.url !== site.url) });
+        save({ pinned, custom: settings.custom.filter((entry) => entry.url !== site.url) });
       } else {
-        save({ hidden: [...settings.hidden, site.url] });
+        save({ pinned, hidden: [...settings.hidden, site.url] });
       }
     });
 
     item.append(link, hide);
+    item.dataset.url = site.url;
+    item.draggable = true;
     return item;
   }
 
@@ -269,7 +276,8 @@
     /* newtab: true is Firefox's own shortcut list (pinned first); it is
      * empty while Firefox's shortcuts feed is off, so fall back to
      * frecency. Ask for extra so hidden ones leave no gaps. */
-    const limit = settings.siteCount + settings.hidden.length + settings.custom.length;
+    const limit = settings.siteCount + settings.hidden.length + settings.custom.length
+      + settings.pinned.length;
     let list = [];
     try {
       list = await browser.topSites.get({ newtab: true, includeFavicon: true, limit });
@@ -282,7 +290,12 @@
     if (request !== sitesRequest) return;
     const hidden = new Set(settings.hidden);
     const seen = new Set();
-    const merged = [...settings.custom.map((site) => ({ ...site, custom: true })), ...list]
+    const custom = new Set(settings.custom.map((site) => site.url));
+    const merged = [
+      ...settings.pinned.map((site) => ({ ...site, custom: custom.has(site.url) })),
+      ...settings.custom.map((site) => ({ ...site, custom: true })),
+      ...list
+    ]
       .filter((site) => {
         if (hidden.has(site.url) || seen.has(site.url)) return false;
         seen.add(site.url);
@@ -292,8 +305,77 @@
     /* Custom shortcuts get the favicon Firefox already knows, if any. */
     const known = new Map(list.map((site) => [site.url, site.favicon]));
     for (const site of merged) site.favicon ??= known.get(site.url);
+    shownSites = merged;
     sites.replaceChildren(...merged.map(tile));
+    fitGrid();
   }
+
+  /* Tiles fill whole rows: as few rows as the width allows, then as few
+   * columns as still hold every tile, so 12 tiles that would run 9 + 3
+   * sit as 6 + 6. Icons keep their fixed square. */
+  const TILE_MIN = { tiles: 22, list: 44, icons: 10 }; // in --u
+  function fitGrid() {
+    const count = sites.children.length;
+    if (!count) return;
+    const unit = parseFloat(getComputedStyle(root).getPropertyValue("--u")) || 8;
+    const min = TILE_MIN[settings.siteStyle] * unit;
+    const fit = Math.max(1, Math.floor((sites.clientWidth - 2 + 1) / (min + 1)));
+    const rows = Math.ceil(count / fit);
+    const columns = Math.ceil(count / rows);
+    sites.style.setProperty("--columns", String(columns));
+  }
+  new ResizeObserver(fitGrid).observe(sites);
+
+  /* ---- reordering ----------------------------------------------------
+   * Dragging a tile onto another moves it there and pins every tile up to
+   * the further of the two spots, so the order holds while Firefox's own
+   * ranking keeps filling the tiles after them. */
+
+  let shownSites = [];
+  let dragged = null;
+
+  sites.addEventListener("dragstart", (event) => {
+    const item = event.target.closest?.(".site");
+    if (!item) return;
+    dragged = item;
+    item.classList.add("dragging");
+    event.dataTransfer.effectAllowed = "copyMove";
+    event.dataTransfer.setData("text/uri-list", item.dataset.url);
+    event.dataTransfer.setData("text/plain", item.dataset.url);
+  });
+
+  sites.addEventListener("dragover", (event) => {
+    const target = event.target.closest?.(".site");
+    if (!dragged || !target) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+    for (const item of sites.querySelectorAll(".drop-target")) {
+      if (item !== target) item.classList.remove("drop-target");
+    }
+    if (target !== dragged) target.classList.add("drop-target");
+  });
+
+  sites.addEventListener("drop", (event) => {
+    const target = event.target.closest?.(".site");
+    if (!dragged || !target) return;
+    event.preventDefault();
+    const items = [...sites.children];
+    const from = items.indexOf(dragged);
+    const to = items.indexOf(target);
+    if (from < 0 || to < 0 || from === to) return;
+    const order = [...shownSites];
+    const [moved] = order.splice(from, 1);
+    order.splice(to, 0, moved);
+    save({
+      pinned: order.slice(0, Math.max(from, to) + 1).map(({ url, title }) => ({ url, title }))
+    });
+  });
+
+  sites.addEventListener("dragend", () => {
+    dragged?.classList.remove("dragging");
+    dragged = null;
+    for (const item of sites.querySelectorAll(".drop-target")) item.classList.remove("drop-target");
+  });
 
   /* ---- settings panel ----------------------------------------------- */
 
@@ -305,13 +387,17 @@
    * apply to the current settings. */
   const SCHEMA = [
     ["Background", [
-      { key: "background", type: "choice", label: "Source",
-        options: [["solid", "Solid"], ["wallpaper", "Wallpaper"], ["custom", "Image"]] },
+      { key: "background", type: "choice", label: "Source", wide: true,
+        options: [["solid", "Solid"], ["desktop", "Desktop"], ["wallpaper", "Wallpaper"], ["custom", "Image"]] },
       { type: "file", label: "Image", when: (s) => s.background === "custom" },
       { key: "blur", type: "range", label: "Blur", min: 0, max: 48, unit: "px",
-        when: (s) => s.background !== "solid" },
+        when: (s) => s.background === "wallpaper" || s.background === "custom" },
       { key: "dim", type: "range", label: "Dim", min: 0, max: 90, unit: "%",
-        when: (s) => s.background !== "solid" },
+        when: (s) => s.background === "wallpaper" || s.background === "custom" },
+      { key: "tint", type: "range", label: "Tint", min: 0, max: 90, unit: "%",
+        when: (s) => s.background === "desktop" },
+      { type: "note", label: "", text: "Glass chrome shows the desktop",
+        when: (s) => s.background === "desktop" },
       { type: "note", label: "", text: "No wallpaper from Omarchy yet",
         when: (s) => s.background === "wallpaper" && root.dataset.backdrop !== "true" },
       { key: "glass", type: "toggle", label: "Glass", when: (s) => s.background !== "solid" }
@@ -333,7 +419,8 @@
       { key: "numbers", type: "toggle", label: "Numbers", when: (s) => s.sites },
       { key: "hosts", type: "toggle", label: "Addresses", when: (s) => s.sites && s.siteStyle !== "icons" },
       { type: "add-site", label: "Add", when: (s) => s.sites },
-      { type: "restore", label: "Hidden", when: (s) => s.sites && s.hidden.length > 0 }
+      { type: "restore", label: "Hidden", when: (s) => s.sites && s.hidden.length > 0 },
+      { type: "unpin", label: "Order", when: (s) => s.sites && s.pinned.length > 0 }
     ]],
     ["Layout", [
       { key: "align", type: "choice", label: "Position", options: [["top", "Top"], ["center", "Center"]] },
@@ -369,13 +456,16 @@
       const group = document.createElement("div");
       group.className = "choice";
       group.setAttribute("role", "radiogroup");
+      group.setAttribute("aria-label", field.label);
       for (const [value, text] of field.options) {
         const option = button(text, () => save({ [field.key]: value }));
         option.setAttribute("role", "radio");
         option.setAttribute("aria-checked", String(settings[field.key] === value));
         group.append(option);
       }
-      return row(field.label, group);
+      const element = row(field.label, group);
+      element.classList.toggle("wide", Boolean(field.wide));
+      return element;
     },
     toggle(field) {
       const input = document.createElement("input");
@@ -458,11 +548,16 @@
       const text = document.createElement("p");
       text.className = "note";
       text.textContent = field.text;
-      return row(field.label, text);
+      const element = row(field.label, text);
+      element.classList.add("wide");
+      return element;
     },
     restore(field) {
       const count = settings.hidden.length;
       return row(field.label, button(`Restore ${count}`, () => save({ hidden: [] })));
+    },
+    unpin(field) {
+      return row(field.label, button("Unpin", () => save({ pinned: [] })));
     },
     reset(field) {
       return row(field.label, button("Defaults", () => save({ ...DEFAULTS })));

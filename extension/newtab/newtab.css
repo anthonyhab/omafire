@@ -37,7 +37,7 @@
   font: 13px/1.5 monospace;
 }
 
-:root[data-backdrop="true"][data-glass="true"] {
+:root:is([data-backdrop="true"], [data-background="desktop"])[data-glass="true"] {
   --tile: color-mix(in srgb, var(--bg) 62%, transparent);
   --hover: color-mix(in srgb, var(--fg) 10%, var(--tile));
 }
@@ -97,13 +97,27 @@ main {
   opacity: 1;
 }
 
+/* Desktop: the page is left clear and the chrome drops its canvas behind
+ * it (the theme's frame.css), so the window surface shows through: with
+ * glass chrome, the desktop under Hyprland's blur, seamless with the
+ * sidebar. Only the tint is painted. */
+:root[data-background="desktop"] {
+  background: transparent;
+
+  & #backdrop {
+    inset: 0;
+    filter: none;
+    background: none;
+    opacity: 1;
+  }
+}
+
 /* ---- clock ---------------------------------------------------------- */
 
 header {
   display: flex;
   /* The date sits on the clock's baseline, under a greeting. */
   align-items: last baseline;
-  justify-content: space-between;
   gap: calc(var(--u) * 3);
   padding-bottom: calc(var(--u) * 3);
   margin-bottom: calc(var(--u) * 3);
@@ -138,7 +152,6 @@ header:has(> #time[hidden]):has(> #date[hidden]) {
 }
 
 #date {
-  margin-left: auto;
   color: var(--dim-text);
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -147,9 +160,10 @@ header:has(> #time[hidden]):has(> #date[hidden]) {
 
 /* ---- shortcuts ------------------------------------------------------ */
 
+/* newtab.js sets --columns so the tiles fill whole rows. */
 #sites {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(calc(var(--u) * 22), 1fr));
+  grid-template-columns: repeat(var(--columns, 4), minmax(0, 1fr));
   gap: 1px;
   padding: 1px;
 }
@@ -177,6 +191,15 @@ header:has(> #time[hidden]):has(> #date[hidden]) {
 
 .site:hover {
   background: var(--hover);
+}
+
+/* Reordering: the tile in hand fades, the drop spot takes the accent edge. */
+.site.dragging {
+  opacity: 0.4;
+}
+
+.site.drop-target {
+  box-shadow: inset 0 0 0 1px var(--accent);
 }
 
 .site:has(> a:focus-visible) {
@@ -253,6 +276,11 @@ header:has(> #time[hidden]):has(> #date[hidden]) {
   opacity: 1;
 }
 
+/* The button sits on the index; a glass tile would show it through. */
+.site:is(:hover, :focus-within) .index {
+  visibility: hidden;
+}
+
 .hide:hover {
   background: var(--active);
   color: var(--strong);
@@ -265,9 +293,6 @@ header:has(> #time[hidden]):has(> #date[hidden]) {
 
 /* List: one row per shortcut, on the tile grid's hairlines. */
 :root[data-site-style="list"] {
-  & #sites {
-    grid-template-columns: repeat(auto-fill, minmax(calc(var(--u) * 44), 1fr));
-  }
   & .site > a {
     grid-template: "icon title host index" auto / auto minmax(0, auto) minmax(0, 1fr) auto;
     align-items: center;
@@ -288,7 +313,7 @@ header:has(> #time[hidden]):has(> #date[hidden]) {
 /* Icons: a dock of square tiles; the title is the tooltip. */
 :root[data-site-style="icons"] {
   & #sites {
-    grid-template-columns: repeat(auto-fill, calc(var(--u) * 10));
+    grid-template-columns: repeat(var(--columns, 8), calc(var(--u) * 10));
   }
   & .site > a {
     grid-template: "icon" 1fr / 1fr;
@@ -421,6 +446,22 @@ header:has(> #time[hidden]):has(> #date[hidden]) {
 
 .row-label {
   color: var(--fg);
+}
+
+/* A wide row gives the whole width to one control whose section heading
+ * already names it (the background source's four options). */
+.row.wide {
+  grid-template-columns: minmax(0, 1fr);
+
+  & .row-label {
+    display: none;
+  }
+  & .choice {
+    flex: 1 1 auto;
+  }
+  & .choice button {
+    flex: 1 1 0;
+  }
 }
 
 .row-body {
