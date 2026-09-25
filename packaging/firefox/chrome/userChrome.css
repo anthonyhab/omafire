@@ -1,5 +1,5 @@
 /* OMAFOX FIREFOX BRIDGE MANAGED FILE */
-/* Generated from Omarchy Chrome 1dbc1cf242c7 by omafox scripts/sync-firefox-payload.sh. */
+/* Generated from Omarchy Chrome a3459698de8b by omafox scripts/sync-firefox-payload.sh. */
 /* Omarchy Chrome — Firefox 156+ with Nova (browser.nova.enabled).
  *
  * Load order: generated inputs, then tokens, then components. Components
@@ -20,6 +20,9 @@
 @import "src/sidebar.css";
 @import "src/tabs.css";
 @import "src/popups.css";
+
+/* Extension glyphs; off with omarchy.extension-glyphs = false. */
+@import "src/icons.css";
 
 /* Layouts. The default is the top toolbar; each alternative is a module
  * gated on omarchy.layout, so adding one never touches the others. */

@@ -29,20 +29,33 @@
 }
 
 #tabbrowser-tabs[orient="vertical"] {
+  /* Nova spaces pinned tiles, rule and rows with a flex gap; the rule
+   * below owns that rhythm. */
+  gap: 0 !important;
   --tab-min-height: var(--oc-row) !important;
   --tab-block-margin: 1px !important;
   /* Nova pads each row on top of the background margin; one spacing is
    * enough (row pitch = --oc-row + 4px, as before Nova). */
   --tab-padding-block-start: 0px !important;
   --tab-padding-block-end: 0px !important;
-  --tab-inline-padding: 10px !important;
-  --tab-icon-end-margin: 10px !important;
+  --tab-inline-padding: var(--oc-inset) !important;
+  --tab-icon-end-margin: var(--oc-inset) !important;
 
   /* ---- rows ------------------------------------------------------ */
 
+  /* Row background on the --oc-inset axis, icon one inset further in. */
   & .tabbrowser-tab {
-    padding-inline: var(--oc-gap) !important;
+    padding-inline: 0 !important;
     color: var(--oc-text-dim) !important;
+  }
+
+  & .tabbrowser-tab:not([pinned]) {
+    & .tab-background {
+      margin-inline: var(--oc-inset) !important;
+    }
+    & .tab-content {
+      padding-inline: calc(var(--oc-inset) * 2) !important;
+    }
   }
 
   & .tabbrowser-tab:is([selected], [multiselected], :hover) {
@@ -110,26 +123,31 @@
    * hides the container when empty; feed it our tile size instead of
    * replacing its layout. */
   & #pinned-tabs-container {
+    /* Firefox grids pinned tabs in a shadow part that userChrome (a user
+     * sheet) cannot reach with ::part(), and its columns always stretch to
+     * fill the row. So tiles are slabs that fill their cells: equal blocks
+     * one unit apart, flush with the --oc-inset axis on both sides. */
     --tab-pinned-min-width-expanded: var(--oc-pinned) !important;
-    --tab-pinned-margin-inline-expanded: 3px !important;
-    --tab-pinned-container-margin-inline-expanded: calc(var(--oc-gap) - 3px) !important;
-    /* Row height of the native pinned grid. */
-    --tab-height-with-margin-padding: calc(var(--oc-pinned) + 6px) !important;
+    --tab-pinned-margin-inline-expanded: 0px !important;
+    --tab-pinned-container-margin-inline-expanded: calc(var(--oc-inset) - var(--oc-u) / 2) !important;
+    --tab-height-with-margin-padding: calc(var(--oc-pinned) + var(--oc-u)) !important;
+    padding-block: var(--oc-inset) 0 !important;
 
-    /* The native grid auto-fits its columns, so a lone pinned tab would
-     * stretch across the column; cap the tile and centre it in its cell. */
     & .tabbrowser-tab {
-      padding-inline: 0 !important;
-      max-width: calc(var(--oc-pinned) + 6px) !important;
-      justify-self: center !important;
+      padding: 0 calc(var(--oc-u) / 2) !important;
+      height: var(--oc-pinned) !important;
+    }
+
+    & .tab-background {
+      margin: 0 !important;
     }
 
     & .tabbrowser-tab:not([selected]) .tab-background {
-      background-color: transparent !important;
+      background-color: var(--oc-hover) !important;
     }
 
     & .tabbrowser-tab:hover:not([selected]) .tab-background {
-      background-color: var(--oc-hover) !important;
+      background-color: var(--oc-active) !important;
     }
 
     & .tabbrowser-tab[selected] .tab-background {
@@ -138,18 +156,47 @@
     }
   }
 
+  /* Pinned tiles, rule, tabs: the rule sits 3 units below the last tile
+   * row and 3 above the first tab row, as wide as a tab row. (The tile
+   * grid's own row pitch adds 1 unit under the last tiles.) */
   & #vertical-pinned-tabs-splitter {
     border: none !important;
-    background: linear-gradient(var(--oc-line), var(--oc-line)) center / calc(100% - 2 * var(--oc-gap) - 12px) 1px no-repeat !important;
-    min-height: 9px !important;
+    /* Hard stops over the full box, not a 1px background tile: a 1px tile
+     * can snap to nothing at fractional display scales. */
+    background: linear-gradient(transparent calc(var(--oc-u) * 2), var(--oc-line) 0,
+      var(--oc-line) calc(var(--oc-u) * 2 + 1px), transparent 0)
+      center / calc(100% - 2 * var(--oc-inset)) 100% no-repeat !important;
+    min-height: calc(var(--oc-u) * 4 + 2px) !important;
+    height: calc(var(--oc-u) * 4 + 2px) !important;
     margin: 0 !important;
+  }
+
+  /* Nova pads the first row once more; the rule above already spaces it. */
+  & .tabbrowser-tab:nth-child(1 of :not([hidden], [pinned])) {
+    padding-block-start: 0 !important;
   }
 
   /* ---- new tab row ------------------------------------------------ */
 
+  /* Laid out exactly like a tab row: same axes, height and pitch. */
   & #tabs-newtab-button {
-    margin-inline: var(--oc-gap) !important;
+    margin: 2px var(--oc-inset) !important;
+    padding: 0 var(--oc-inset) !important;
+    min-height: var(--oc-row) !important;
+    gap: var(--oc-inset) !important;
     border-radius: var(--oc-radius-small) !important;
+
+    & .toolbarbutton-icon {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 16px !important;
+      height: 16px !important;
+    }
+
+    & .toolbarbutton-text {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
     color: var(--oc-text-dim) !important;
     fill: var(--oc-text-dim) !important;
 
@@ -190,3 +237,4 @@
 #tabbrowser-arrowscrollbox[orient="vertical"]::part(scrollbutton-down) {
   display: none !important;
 }
+

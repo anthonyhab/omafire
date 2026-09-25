@@ -5,15 +5,23 @@
  * row (layouts/sidebar.css) or hide it (modes/zen.css); this file only
  * styles it. */
 
+/* Buttons are --oc-button squares, --oc-u apart; the row's padding puts
+ * the first one on the --oc-inset axis. */
 #nav-bar {
   min-height: var(--oc-toolbar) !important;
-  padding-inline: calc(var(--oc-gap) / 2) !important;
+  padding-inline: calc(var(--oc-inset) - var(--oc-u) / 2) !important;
   --toolbarbutton-inner-padding: calc((var(--oc-button) - 16px) / 2) !important;
-  --toolbarbutton-outer-padding: 1px !important;
+  --toolbarbutton-outer-padding: calc(var(--oc-u) / 2) !important;
+}
+
+/* Some buttons (the sidebar toggle) carry their own padding; normalise. */
+#nav-bar .toolbarbutton-1 {
+  padding-inline: var(--toolbarbutton-outer-padding) !important;
 }
 
 #urlbar-container {
-  margin-inline: calc(var(--oc-gap) / 2) !important;
+  margin-inline: var(--oc-u) !important;
+  padding-inline: 0 !important;
 }
 
 /* ---- buttons -------------------------------------------------------- */

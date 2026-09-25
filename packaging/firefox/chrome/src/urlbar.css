@@ -8,6 +8,7 @@
   --urlbar-background-color: var(--oc-hover) !important;
   --urlbar-background-color-focus: var(--oc-panel) !important;
   --urlbar-border-radius: var(--oc-radius-small) !important;
+  --urlbar-background-border-radius: var(--oc-radius-small) !important;  /* Nova: a 24px pill */
   --urlbar-box-background-color: transparent !important;
   --urlbar-box-background-color-hover: var(--oc-hover) !important;
   --urlbar-box-background-color-active: var(--oc-active) !important;
@@ -45,21 +46,64 @@
   animation: none !important;
 }
 
-/* ---- results -------------------------------------------------------- */
+/* ---- results --------------------------------------------------------
+ *
+ * One line per result, on the tab grid: --oc-row rows at the same pitch
+ * as vertical tabs, highlights flush with the field's inner edge, icons on
+ * the field's leading-icon axis, the URL trailing the title. */
 
 .urlbarView {
-  margin-inline: 6px !important;
-  width: calc(100% - 12px) !important;
+  margin: 0 !important;
+  width: 100% !important;
+  padding-block: var(--oc-gap) !important;
   border-top: 1px solid var(--oc-line) !important;
 }
 
 .urlbarView-row {
+  --urlbarView-icon-margin-start: 0px !important;
+  --urlbarView-icon-margin-end-base: var(--oc-inset) !important;
+  min-height: var(--oc-row) !important;
+  /* Block flow collapses adjacent margins: one unit between rows, the
+   * same pitch as tab rows. */
+  margin-block: var(--oc-u) !important;
+  padding: 0 !important;
+  /* Nova keeps a transparent focus-ring border on every row. */
+  border: 0 !important;
   border-radius: var(--oc-radius-small) !important;
 }
 
-.urlbarView-row[selected] .urlbarView-row-inner,
-.urlbarView-row:hover .urlbarView-row-inner {
+.urlbarView-row-inner {
+  min-height: var(--oc-row) !important;
+  padding: 0 var(--oc-inset) !important;
+  align-items: center !important;
   border-radius: var(--oc-radius-small) !important;
+}
+
+/* Title and URL share one line (Nova stacks them). */
+.urlbarView-row-body-top {
+  display: flex !important;
+  flex-flow: row nowrap !important;
+  align-items: baseline !important;
+  gap: calc(var(--oc-gap) * 2) !important;
+  min-width: 0 !important;
+}
+
+.urlbarView-row-body-top-no-wrap {
+  flex: 0 1 auto !important;
+  min-width: 0 !important;
+}
+
+.urlbarView-row-body-top > .urlbarView-url {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+.urlbarView-row-body-description {
+  display: none !important;
 }
 
 .urlbarView-action,
