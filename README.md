@@ -81,7 +81,7 @@ installs the Omafox CSS bridge into each existing profile, and enables the two
 Zen preferences it needs. Firefox profiles in `~/.mozilla/firefox/profiles.ini`
 receive the packaged `omarchy-firefox` theme payload, managed
 `userChrome.css`/`userContent.css` imports, the palette-synced first-paint
-stylesheet, a geometry stylesheet matching Hyprland's window rounding, and the
+stylesheet, a geometry stylesheet matching Hyprland's window rounding and borders, and the
 required `user.js` preferences. A profile whose `chrome/` is itself an Omarchy
 Chrome checkout gets only the generated stylesheets. Restart each browser once
 after setup. Run setup once for each desktop user who wants to use Omafox, and
@@ -136,7 +136,8 @@ Omafox is made up of a few small parts:
   managed block in `user.js`. On every `omafox sync` it also regenerates
   `chrome/omafox-palette.css`, a `:root:not([lwtheme])` fallback holding the
   *current* palette, `chrome/omarchy-radius.css` from Hyprland's
-  `decoration:rounding` (left alone when `hyprctl` is unavailable), plus
+  rounding, border width, and border colors (left alone when `hyprctl` is
+  unavailable), plus
   the mode-matched `layout.css.prefers-color-scheme.content-override` and
   `browser.display` canvas prefs — so the first painted frame, restored
   pages, and pages with native dark-mode CSS all start on the real palette

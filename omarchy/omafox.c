@@ -1636,22 +1636,74 @@ static void write_content_palette_css(const palette_t *p, const char *path) {
 /* Hyprland geometry: the chrome rounds its cards like the desktop rounds
  * windows. Left untouched when hyprctl is unavailable (no Hyprland session,
  * e.g. a TTY or a test sandbox) so the last good value survives. */
-static void write_radius_css(const char *path) {
+static bool hypr_option(const char *option, char *out, size_t size) {
+  char *argv[] = {"hyprctl", "getoption", (char *)option, "-j", NULL};
+  return run_command(argv, out, size) == 0;
+}
+
+/* Integer field of a `hyprctl getoption -j` reply, within [0, max]. */
+static bool hypr_int(const char *option, long max, long *value) {
   char out[512];
-  char *argv[] = {"hyprctl", "getoption", "decoration:rounding", "-j", NULL};
-  if (run_command(argv, out, sizeof(out)) != 0)
-    return;
+  if (!hypr_option(option, out, sizeof(out)))
+    return false;
   const char *field = strstr(out, "\"int\"");
   if (!field || !(field = strchr(field, ':')))
-    return;
+    return false;
   char *end;
-  long rounding = strtol(field + 1, &end, 10);
-  if (end == field + 1 || rounding < 0 || rounding > 64)
+  long v = strtol(field + 1, &end, 10);
+  if (end == field + 1 || v < 0 || v > max)
+    return false;
+  *value = v;
+  return true;
+}
+
+/* First color of a border option as CSS #RRGGBBAA. Hyprland serialises
+ * gradients as "AARRGGBB AARRGGBB ... <angle>deg" under "gradient" (older
+ * releases: "str"). */
+static bool hypr_border_color(const char *option, char css[10]) {
+  char out[512];
+  if (!hypr_option(option, out, sizeof(out)))
+    return false;
+  const char *field = strstr(out, "\"gradient\"");
+  if (!field)
+    field = strstr(out, "\"str\"");
+  if (!field || !(field = strchr(field, ':')) || !(field = strchr(field, '"')))
+    return false;
+  field++;
+  if (field[0] == '0' && (field[1] == 'x' || field[1] == 'X'))
+    field += 2;
+  for (int i = 0; i < 8; i++)
+    if (!isxdigit((unsigned char)field[i]))
+      return false;
+  if (isxdigit((unsigned char)field[8]))
+    return false;
+  snprintf(css, 10, "#%.6s%.2s", field + 2, field);
+  return true;
+}
+
+/* Hyprland window geometry for the theme. Left untouched when hyprctl is
+ * unavailable, so a sync outside Hyprland keeps the last good values. */
+static void write_radius_css(const char *path) {
+  long rounding;
+  if (!hypr_int("decoration:rounding", 64, &rounding))
     return;
+  char *borders = xstrdup("");
+  long border_size;
+  char active[10], inactive[10];
+  if (hypr_int("general:border_size", 32, &border_size)
+      && hypr_border_color("general:col.active_border", active)
+      && hypr_border_color("general:col.inactive_border", inactive)) {
+    free(borders);
+    borders = xasprintf("  --omarchy-border-width: %ldpx;\n"
+                        "  --omarchy-border-active-color: %s;\n"
+                        "  --omarchy-border-inactive-color: %s;\n",
+                        border_size, active, inactive);
+  }
   char *css = xasprintf(
-      "%s\n:root {\n  --omarchy-radius-container: %ldpx;\n}\n",
-      FF_RADIUS_MARKER, rounding);
+      "%s\n:root {\n  --omarchy-radius-container: %ldpx;\n%s}\n",
+      FF_RADIUS_MARKER, rounding, borders);
   atomic_write(path, css, strlen(css), 0600, false);
+  free(borders);
   free(css);
 }
 

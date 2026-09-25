@@ -44,7 +44,13 @@ install -m 755 "$TEST_DIR/fixtures/bin/omarchy" "$MOCK_BIN/omarchy"
 # Hermetic Hyprland: sync reads decoration:rounding for the radius file.
 cat > "$MOCK_BIN/hyprctl" <<'EOF'
 #!/bin/sh
-[ "$2" = decoration:rounding ] && echo '{"option":"decoration:rounding","int":9,"set":true}'
+case $2 in
+  decoration:rounding) echo '{"option":"decoration:rounding","int":9,"set":true}' ;;
+  general:border_size) echo '{"option":"general:border_size","int":2,"set":true}' ;;
+  general:col.active_border) echo '{"option":"general:col.active_border","gradient":"ffe68e0d 0deg","set":true}' ;;
+  general:col.inactive_border) echo '{"option":"general:col.inactive_border","gradient":"aa595959 0deg","set":true}' ;;
+  *) exit 1 ;;
+esac
 EOF
 chmod 755 "$MOCK_BIN/hyprctl"
 install -m 755 "$PROJECT_DIR/packaging/omafox-hook" "$HOOK_SOURCE"
@@ -151,6 +157,9 @@ for profile in "$RELATIVE_PROFILE" "$ABSOLUTE_PROFILE"; do
   grep -Fq -- '--tabpanel-background-color: #111c18 !important;' \
     "$profile/chrome/omafox-palette.css"
   grep -Fqx '  --omarchy-radius-container: 9px;' "$profile/chrome/omarchy-radius.css"
+  grep -Fqx '  --omarchy-border-width: 2px;' "$profile/chrome/omarchy-radius.css"
+  grep -Fqx '  --omarchy-border-active-color: #e68e0dff;' "$profile/chrome/omarchy-radius.css"
+  grep -Fqx '  --omarchy-border-inactive-color: #595959aa;' "$profile/chrome/omarchy-radius.css"
   grep -Fqx 'user_pref("layout.css.prefers-color-scheme.content-override", 0);' \
     "$profile/user.js"
 done
