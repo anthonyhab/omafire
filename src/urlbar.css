@@ -92,7 +92,6 @@
   display: flex !important;
   flex-flow: row nowrap !important;
   align-items: baseline !important;
-  gap: calc(var(--oc-gap) * 2) !important;
   min-width: 0 !important;
 }
 
@@ -101,10 +100,18 @@
   min-width: 0 !important;
 }
 
+/* Exactly one two-unit space after the title, whichever follows it: the
+ * action ("Search with…", "Switch to tab") or the URL. Replaces Nova's
+ * "•" separator. */
+.urlbarView-action:not(:empty),
+.urlbarView-row-body-top > .urlbarView-url {
+  margin-inline-start: calc(var(--oc-gap) * 2) !important;
+}
+
 .urlbarView-row-body-top > .urlbarView-url {
   flex: 1 1 0 !important;
   min-width: 0 !important;
-  margin: 0 !important;
+  margin-block: 0 !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
