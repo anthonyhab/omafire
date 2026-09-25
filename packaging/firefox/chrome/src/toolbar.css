@@ -10,7 +10,7 @@
 #nav-bar {
   min-height: var(--oc-toolbar) !important;
   padding-inline: calc(var(--oc-inset) - var(--oc-u) / 2) !important;
-  --toolbarbutton-inner-padding: calc((var(--oc-button) - 16px) / 2) !important;
+  --toolbarbutton-inner-padding: var(--oc-icon-pad) !important;
   --toolbarbutton-outer-padding: calc(var(--oc-u) / 2) !important;
 }
 

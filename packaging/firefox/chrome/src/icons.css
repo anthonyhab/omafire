@@ -2,9 +2,10 @@
  *
  * Replaces extension icons with monochrome glyphs from icons/extensions/
  * that tint like Firefox's own (context-fill; needs
- * svg.context-properties.content.enabled). One family: a 16px grid, 1.5px
- * walls with outer edges on whole pixels, square ends, only 90° and 45°
- * corners, and at most one solid mass per glyph.
+ * svg.context-properties.content.enabled). One family with Firefox's Nova
+ * toolbar icons: 1.5px strokes with round caps and joins, straight 90°/45°
+ * geometry with tight corner radii, solids only as Nova-sized accents, and
+ * ink coverage in the native band. Sources: design/glyphs/.
  *
  * Browser actions are matched on the action button, which paints the icon
  * in the toolbar, the extensions panel and the overflow menu alike.

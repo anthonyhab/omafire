@@ -1,21 +1,88 @@
-/* Omarchy Chrome — centred urlbar launcher (Zen's command bar).
+/* Omarchy Chrome — urlbar launcher (Zen's command bar) and the console
+ * look it shares with zen mode's inline field.
  *
- * Used by layouts where the resting urlbar is narrow or hidden: the single
- * sidebar and zen mode. Firefox 156 keeps the urlbar in the top layer as a
- * popover while it can break out ([breakout]); while extended, JS writes
- * only an inline `top`. So the launcher is plain inset overrides on
- * [breakout-extend]: the top layer escapes every containing block, and
- * ::backdrop gives the scrim for free. */
+ * The launcher is used where the resting urlbar is narrow: the single
+ * sidebar, and zen mode's "center" shape. Two shapes, picked by
+ * omarchy.launcher:
+ *   (unset) / "drop"  a quake console over the page, sliding down out of
+ *                     the page's top edge; the tab column stays in view.
+ *   "center"          a floating card in the middle of the window
+ * Zen mode's default keeps the field inline in its navigation row
+ * (zen.css) and only borrows the console look from here.
+ *
+ * Firefox 156 keeps the urlbar in the top layer as a popover while it can
+ * break out ([breakout]); while extended, JS writes only an inline `top`.
+ * So the launcher is plain inset overrides: the top layer escapes every
+ * containing block, and ::backdrop gives the scrim.
+ *
+ * Firefox extends ([breakout-extend]) only while the results view is
+ * open, and a new tab focuses the field without opening it. The launcher
+ * therefore also opens on [focused] alone, as a bare field. */
+
+/* The drop: the slab slides down out of its own top edge, the way
+ * Omarchy's quake console leaves the screen's. The clip holds that edge
+ * still while the slab travels its own height. `transform`, because the
+ * !important translate below outranks a translate animation. The end
+ * state reaches past the card so its bleed shows. */
+@keyframes oc-drop {
+  from {
+    transform: translateY(-100%);
+    clip-path: inset(100% -100vw -100vh -100vw);
+  }
+  to {
+    transform: none;
+    clip-path: inset(0 -100vw -100vh -100vw);
+  }
+}
+
+/* ---- console look ---------------------------------------------------
+ *
+ * Brutalist, on the theme's one edge rule: the card is a solid slab with
+ * a hairline edge (no shadow, no scrim); hover and selection are fills;
+ * the single accent is the focus bar under the field, like the active
+ * tab's. Shared by the drop launcher and zen mode's inline field. */
+
+@media -moz-pref("omarchy.layout", "sidebar") and (not -moz-pref("omarchy.launcher", "center")),
+       -moz-pref("omarchy.zen-mode") and -moz-pref("omarchy.zen-mode-active") and (not -moz-pref("omarchy.launcher", "center")) {
+  #main-window:not([customizing]) #urlbar[breakout]:is([breakout-extend], [focused]) {
+    & > .urlbar-background {
+      background-color: var(--oc-console) !important;
+      border: 1px solid var(--oc-line-strong) !important;
+      border-radius: 0 !important;
+      box-shadow: inset 0 calc(-1 * var(--oc-rule)) 0 var(--oc-focus) !important;
+    }
+
+    & .urlbarView {
+      border-top: var(--oc-rule) solid var(--oc-focus) !important;
+    }
+
+    & :is(.urlbarView-row, .urlbarView-row-inner) {
+      border-radius: 0 !important;
+      outline: none !important;
+    }
+    & .urlbarView-row-inner {
+      background-color: transparent !important;
+    }
+    & .urlbarView-row:not([selected]):hover {
+      background-color: var(--oc-hover) !important;
+    }
+    & .urlbarView-row[selected] {
+      background-color: var(--oc-active) !important;
+    }
+  }
+
+  /* With results open the bar sits between field and results instead. */
+  #main-window:not([customizing]) #urlbar[breakout][breakout-extend] > .urlbar-background {
+    box-shadow: none !important;
+  }
+}
+
+/* ---- launcher -------------------------------------------------------- */
 
 @media -moz-pref("omarchy.layout", "sidebar"),
-       -moz-pref("omarchy.zen-mode") and -moz-pref("omarchy.zen-mode-active") {
-  #main-window:not([customizing]) #urlbar[breakout][breakout-extend] {
-    top: var(--oc-launcher-top) !important;
-    left: calc(50vw - var(--oc-launcher-width) / 2) !important;
-    width: var(--oc-launcher-width) !important;
+       -moz-pref("omarchy.zen-mode") and -moz-pref("omarchy.zen-mode-active") and -moz-pref("omarchy.launcher", "center") {
+  #main-window:not([customizing]) #urlbar[breakout]:is([breakout-extend], [focused]) {
     margin: 0 !important;
-    /* Floating: the card bleeds evenly on every side. */
-    --urlbar-background-inset-breakout: calc(-1 * var(--oc-launcher-bleed)) !important;
     /* Firefox shifts the popover along with a sliding toolbar
      * (--toolbar-shift-translate); the launcher is window-anchored. */
     translate: none !important;
@@ -29,8 +96,57 @@
     }
 
     &::backdrop {
-      background: var(--oc-scrim) !important;
       pointer-events: none !important;
+    }
+  }
+
+  /* Drop: the console belongs to the page, not the window. It is anchored
+   * to the page's box (the tabbox; CSS anchor positioning reaches from the
+   * top layer), so it follows the column's resizable width, the sidebar
+   * side, the collapsed rail and the floating card without knowing any of
+   * them. The field and rows sit on the chrome's inset axis; the card
+   * bleeds to the page's edges. */
+  @media not -moz-pref("omarchy.launcher", "center") {
+    #main-window:not([customizing]) {
+      & #tabbrowser-tabbox {
+        anchor-name: --oc-page !important;
+      }
+
+      & #urlbar[breakout]:is([breakout-extend], [focused]) {
+        top: anchor(--oc-page top, 0px) !important;
+        left: calc(anchor(--oc-page left, 0px) + var(--oc-inset)) !important;
+        right: calc(anchor(--oc-page right, 0px) + var(--oc-inset)) !important;
+        width: auto !important;
+        --urlbar-background-inset-breakout:
+          0 calc(-1 * var(--oc-inset)) calc(-1 * var(--oc-launcher-bleed)) !important;
+        animation: oc-drop var(--oc-console-in) var(--oc-ease-enter) !important;
+      }
+    }
+
+    /* Compact mode floats the column over the page, and reveals it while
+     * the urlbar is focused: start past the column instead. */
+    @media -moz-pref("omarchy.compact") and -moz-pref("omarchy.layout", "sidebar") {
+      #main-window:not([customizing]) #sidebar-container {
+        anchor-name: --oc-column !important;
+      }
+      #main-window:not([customizing]):has(sidebar-main[expanded]) #urlbar[breakout]:is([breakout-extend], [focused]) {
+        left: calc(anchor(--oc-column right, 0px) + var(--oc-gap) + var(--oc-inset)) !important;
+      }
+    }
+  }
+
+  @media -moz-pref("omarchy.launcher", "center") {
+    #main-window:not([customizing]) #urlbar[breakout]:is([breakout-extend], [focused]) {
+      top: var(--oc-launcher-top) !important;
+      left: calc(50vw - var(--oc-launcher-width) / 2) !important;
+      width: var(--oc-launcher-width) !important;
+      /* Floating: the card bleeds evenly on every side. */
+      --urlbar-background-inset-breakout: calc(-1 * var(--oc-launcher-bleed)) !important;
+
+      /* A floating card over a dimmed window. */
+      &::backdrop {
+        background: var(--oc-scrim) !important;
+      }
     }
   }
 }
