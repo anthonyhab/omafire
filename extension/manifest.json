@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Omarchy FF Sync",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Keeps Firefox and Zen Browser in sync with the current Omarchy theme.",
   "browser_specific_settings": {
     "gecko": {
@@ -23,6 +23,7 @@
   "background": {
     "scripts": [
       "theme.js",
+      "tabglow.js",
       "background.js"
     ]
   },
@@ -45,5 +46,8 @@
   },
   "chrome_url_overrides": {
     "newtab": "newtab/newtab.html"
-  }
+  },
+  "optional_host_permissions": [
+    "<all_urls>"
+  ]
 }

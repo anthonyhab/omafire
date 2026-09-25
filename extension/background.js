@@ -73,6 +73,8 @@
     const theme = toFirefoxTheme(record);
     await browser.theme.update(theme);
     lastAppliedSignature = signature;
+    /* Per-window site-coloured tab glow sits on top of this theme. */
+    await globalThis.OmafoxTabGlow?.onBaseTheme(theme, record.palette.mode);
     if (theme.colors.icons === lastTintedIconColor) return;
     try {
       await tintActionIcon(theme);
@@ -177,6 +179,7 @@
     return undefined;
   });
 
+  globalThis.OmafoxTabGlow?.start();
   browser.runtime.onStartup.addListener(handleBrowserLifecycle);
   browser.runtime.onInstalled.addListener(handleBrowserLifecycle);
   void handleBrowserLifecycle();

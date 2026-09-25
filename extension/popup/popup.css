@@ -113,3 +113,16 @@ button:disabled {
   font-size: 0.85em;
   opacity: 0.7;
 }
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  cursor: pointer;
+}
+
+.toggle input {
+  margin: 0;
+  accent-color: var(--ofs-accent, AccentColor);
+}

@@ -264,7 +264,9 @@
         tab_text: selectedTabText,
         tab_selected: color.lighter_background,
         tab_line: color.accent,
-        tab_loading: color.bright_cyan,
+        /* The theme's active-tab glow (and the throbber); tabglow.js swaps
+         * in the site's colour per window when enabled. */
+        tab_loading: color.accent,
         toolbar: color.dark_background,
         toolbar_text: toolbarText,
         toolbar_field: color.darker_background,

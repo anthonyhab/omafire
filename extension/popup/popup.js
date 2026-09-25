@@ -111,5 +111,33 @@
     }
   });
 
+  /* Opt-in site colours: the host permission is requested here, from the
+   * click, since permissions.request needs a user gesture. */
+  const siteColors = document.querySelector("#site-colors");
+  const SITE_KEY = "siteColorTabs";
+  const ORIGINS = { origins: ["<all_urls>"] };
+
+  async function loadSiteColors() {
+    const stored = (await browser.storage.local.get(SITE_KEY))[SITE_KEY] === true;
+    siteColors.checked = stored && (await browser.permissions.contains(ORIGINS));
+  }
+
+  siteColors.addEventListener("change", async () => {
+    try {
+      if (siteColors.checked) {
+        const granted = await browser.permissions.request(ORIGINS);
+        siteColors.checked = granted;
+        await browser.storage.local.set({ [SITE_KEY]: granted });
+      } else {
+        await browser.storage.local.set({ [SITE_KEY]: false });
+        await browser.permissions.remove(ORIGINS);
+      }
+    } catch (error) {
+      showError(error instanceof Error ? error.message : String(error));
+      await loadSiteColors();
+    }
+  });
+
   void loadState().catch((error) => showError(error.message));
+  void loadSiteColors().catch(() => {});
 })();
