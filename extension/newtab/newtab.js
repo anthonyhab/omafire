@@ -7,6 +7,9 @@
    * is already right; storage.local is async and would flash defaults. */
   const CACHE_KEY = "omafox-newtab-palette";
   const SETTINGS_CACHE_KEY = "omafox-newtab-settings";
+  /* The last shortcuts shown, so the grid is whole on the first frame
+   * instead of arriving after the async topSites query. */
+  const SITES_CACHE_KEY = "omafox-newtab-sites";
   const { readableTextColor } = globalThis.OmafoxTheme;
   const Wallpaper = globalThis.OmafoxWallpaper;
   const root = document.documentElement;
@@ -310,9 +313,22 @@
     /* Custom shortcuts get the favicon Firefox already knows, if any. */
     const known = new Map(list.map((site) => [site.url, site.favicon]));
     for (const site of merged) site.favicon ??= known.get(site.url);
-    shownSites = merged;
-    sites.replaceChildren(...merged.map(tile));
+    showSites(merged);
+    try {
+      localStorage.setItem(SITES_CACHE_KEY, JSON.stringify(merged));
+    } catch {
+      /* quota: the next tab just waits for the query */
+    }
+  }
+
+  function showSites(list) {
+    const focused = sites.contains(document.activeElement)
+      ? [...sites.children].findIndex((item) => item.contains(document.activeElement))
+      : -1;
+    shownSites = list;
+    sites.replaceChildren(...list.map(tile));
     fitGrid();
+    sites.children[focused]?.querySelector("a")?.focus();
   }
 
   /* Tiles fill whole rows: as few rows as the width allows, then as few
@@ -628,6 +644,21 @@
       setPanel(panel.hidden);
       return;
     }
+    /* Arrows walk the grid; from nowhere they start at the first tile. */
+    const step = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: "up", ArrowDown: "down" }[event.key];
+    if (step !== undefined && settings.sites && sites.children.length
+        && !panel.contains(event.target)) {
+      const items = [...sites.children];
+      const current = items.findIndex((item) => item.contains(document.activeElement));
+      const columns = Number(sites.style.getPropertyValue("--columns")) || 1;
+      const delta = step === "up" ? -columns : step === "down" ? columns : step;
+      const next = current < 0 ? 0 : current + delta;
+      if (items[next]) {
+        event.preventDefault();
+        items[next].querySelector("a").focus();
+      }
+      return;
+    }
     /* Digits open the matching shortcut while the page has focus. */
     if (/^[1-9]$/.test(event.key)) {
       sites.children[Number(event.key) - 1]?.querySelector("a")?.click();
@@ -637,6 +668,8 @@
   /* ---- start -------------------------------------------------------- */
 
   settings = normalize(readCache(SETTINGS_CACHE_KEY));
+  const cachedSites = readCache(SITES_CACHE_KEY);
+  if (settings.sites && Array.isArray(cachedSites)) showSites(cachedSites);
   applySettings();
 
   browser.storage.local.get([STORAGE_KEY, SETTINGS_KEY]).then((result) => {
