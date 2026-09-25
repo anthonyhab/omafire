@@ -22,6 +22,9 @@
 @import "src/tabs.css";
 @import "src/popups.css";
 
+/* Extension glyphs; off with omarchy.extension-glyphs = false. */
+@import "src/icons.css";
+
 /* Layouts. The default is the top toolbar; each alternative is a module
  * gated on omarchy.layout, so adding one never touches the others. */
 @import "src/layouts/sidebar.css";

@@ -40,6 +40,7 @@ Optional, all applied live without a restart:
 | `omarchy.chrome-gap` | `true` | Float the page as a card with a gap, Hyprland rounding and a hairline shadow. |
 | `omarchy.translucency` | `true` | Glass chrome (frosted with a Hyprland blur rule for Firefox). |
 | `omarchy.transparency` | `"0.50"`–`"1.00"` | Glass opacity in 0.01 steps (default 0.85). |
+| `omarchy.extension-glyphs` | `false` | Keep extensions' own icons. By default known extensions get monochrome glyphs that tint with the toolbar (needs `svg.context-properties.content.enabled`, which omafox sets). |
 
 Personal tweaks go in `customChrome.css` / `customContent.css` beside the
 entrypoints. They load last and are never shipped.
@@ -57,6 +58,7 @@ src/urlbar.css          address field and results
 src/sidebar.css         sidebar rail, tools, and panel
 src/tabs.css            vertical tabs, pinned tiles, tab groups
 src/popups.css          menus, panels, notification bars, findbar
+src/icons.css           extension id → glyph (src/icons/extensions/*.svg)
 src/launcher.css        centred urlbar launcher (used by sidebar layout and zen mode)
 src/layouts/sidebar.css omarchy.layout = "sidebar"
 src/modes/zen.css       omarchy.zen-mode
