@@ -45,3 +45,23 @@ sidebar-main {
   border-bottom: 1px solid var(--oc-line) !important;
   padding: 6px var(--oc-gap) !important;
 }
+
+/* ---- column edge ------------------------------------------------------
+ *
+ * Where the page sits flush against the tab column (no floating card), a
+ * hairline on the column's page-facing edge separates the two surfaces,
+ * as in Zed or VS Code; the quake console then slides down against a
+ * ruled edge instead of blending into the column. The card layouts
+ * (single sidebar, omarchy.chrome-gap) already separate by their gap. */
+@media -moz-pref("sidebar.verticalTabs") and (not -moz-pref("omarchy.layout", "sidebar")) and (not -moz-pref("omarchy.chrome-gap")) {
+  :root:not([inDOMFullscreen]) #sidebar-container {
+    border-inline-end: 1px solid var(--oc-line-strong) !important;
+  }
+
+  @media not -moz-pref("sidebar.position_start") {
+    :root:not([inDOMFullscreen]) #sidebar-container {
+      border-inline-start: 1px solid var(--oc-line-strong) !important;
+      border-inline-end: none !important;
+    }
+  }
+}

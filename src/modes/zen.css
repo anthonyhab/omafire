@@ -8,9 +8,9 @@
  * Focusing the urlbar (Ctrl+L) opens the launcher (launcher.css) with the
  * navigation row as part of one console, so every address-bar-adjacent
  * control is one keystroke away. By default it is a quake console: it
- * drops from the window's top edge, or with vertical tabs slides out of
- * the tab column over the page; omarchy.launcher = "center" floats it as
- * a card instead.
+ * slides down from the window's top edge (over the page only, with
+ * vertical tabs), moving like Omarchy's own quake console;
+ * omarchy.launcher = "center" floats it as a card instead.
  *
  * The row is parked above the top edge with position: fixed rather than
  * hidden, so Ctrl+L can still focus the urlbar inside it. It is placed
@@ -20,11 +20,16 @@
 @media -moz-pref("omarchy.zen-mode") and -moz-pref("omarchy.zen-mode-active") and (not -moz-pref("omarchy.layout", "sidebar")) {
   :root:not([customizing], [popup-window], [taskbartab], [chromehidden~="toolbar"], [inDOMFullscreen]) {
     --oc-zen-open: 0;
+    /* The row's own transition, chosen by direction: the console's exit
+     * curve, after a beat so a pointer that overshoots the row on its way
+     * to a button doesn't send it away; its enter curve at once. */
+    --oc-zen-motion: var(--oc-console-out) var(--oc-ease-exit) 180ms;
 
     /* Open while editing the address, while anything in the row is open
      * (extension popups, menus), or while the row has keyboard focus. */
-    &:has(#urlbar[breakout-extend], #nav-bar [open], #nav-bar:focus-within) {
+    &:has(#urlbar:is([breakout-extend], [focused]), #nav-bar [open], #nav-bar:focus-within) {
       --oc-zen-open: 1;
+      --oc-zen-motion: var(--oc-console-in) var(--oc-ease-enter) 0s;
     }
 
     /* The row hangs out of the toolbox's now zero-height box. Firefox
@@ -54,6 +59,7 @@
        * and the row it reveals are one continuous :hover. */
       &:has(#navigator-toolbox:hover) {
         --oc-zen-open: 1;
+        --oc-zen-motion: var(--oc-console-in) var(--oc-ease-enter) 0s;
       }
 
       & #navigator-toolbox::before {
@@ -79,31 +85,24 @@
         border-bottom: 1px solid var(--oc-line-strong) !important;
         border-radius: 0 !important;
         box-shadow: none !important;
-        transition: top var(--oc-slow) var(--oc-ease) !important;
-        /* Closing waits a beat, so a pointer that overshoots the row on
-         * its way to a button doesn't send it away. */
-        transition-delay: calc((1 - var(--oc-zen-open)) * 180ms) !important;
+        transition: top var(--oc-zen-motion) !important;
       }
 
       /* Peeked alone, its bottom is an open edge too. */
-      &:not(:has(#urlbar[breakout-extend])) #nav-bar {
+      &:not(:has(#urlbar:is([breakout-extend], [focused]))) #nav-bar {
         border-bottom: var(--oc-rule) solid var(--oc-focus) !important;
       }
 
       /* Vertical tabs: the row docks on the page (the --oc-page anchor,
-       * launcher.css) and wipes out of the tab column's edge with the
-       * console instead. Clipped shut it paints and hits nothing, yet
-       * stays focusable. */
+       * launcher.css), spanning it only, and slides down from the same
+       * parked height; the tab column stays put beside it. */
       @media -moz-pref("sidebar.verticalTabs") {
         & #nav-bar {
-          --oc-zen-shut: calc((1 - var(--oc-zen-open)) * 100%);
-          top: anchor(--oc-page top, 0px) !important;
+          top: calc(anchor(--oc-page top, 0px) * var(--oc-zen-open)
+                    + (var(--oc-zen-open) - 1) * (var(--oc-toolbar) + var(--oc-gap))) !important;
           left: anchor(--oc-page left, 0px) !important;
           right: anchor(--oc-page right, 0px) !important;
           width: auto !important;
-          clip-path: inset(0 var(--oc-zen-shut) 0 0) !important;
-          transition: clip-path var(--oc-slow) var(--oc-ease) !important;
-          transition-delay: calc((1 - var(--oc-zen-open)) * 180ms) !important;
         }
 
         /* The trigger spans the page, not the tab column. */
@@ -111,12 +110,6 @@
           top: anchor(--oc-page top, 0px) !important;
           left: anchor(--oc-page left, 0px) !important;
           right: anchor(--oc-page right, 0px) !important;
-        }
-
-        @media not -moz-pref("sidebar.position_start") {
-          & #nav-bar {
-            clip-path: inset(0 0 0 var(--oc-zen-shut)) !important;
-          }
         }
       }
     }
@@ -151,7 +144,7 @@
       padding: 0 !important;
     }
 
-    & #urlbar:not([breakout-extend]) {
+    & #urlbar:not([breakout-extend], [focused]) {
       opacity: 0 !important;
     }
 
@@ -173,7 +166,7 @@
       & #browser {
         transition: filter var(--oc-slow) var(--oc-ease) !important;
       }
-      &:has(#urlbar[breakout-extend]) #browser {
+      &:has(#urlbar:is([breakout-extend], [focused])) #browser {
         filter: brightness(0.72) !important;
       }
     }

@@ -119,10 +119,19 @@
   --oc-ease: cubic-bezier(0.2, 0.9, 0.25, 1);
   --oc-fast: 120ms;
   --oc-slow: 220ms;
+  /* The quake console moves like Omarchy's own (hypr/qconsole.lua):
+   * slides in with easeOutQuint over 300ms, out with easeInOutCubic
+   * over 200ms. */
+  --oc-ease-enter: cubic-bezier(0.23, 1, 0.32, 1);
+  --oc-ease-exit: cubic-bezier(0.65, 0.05, 0.36, 1);
+  --oc-console-in: 300ms;
+  --oc-console-out: 200ms;
 
   @media (prefers-reduced-motion: reduce) {
     --oc-fast: 0s;
     --oc-slow: 0s;
+    --oc-console-in: 0s;
+    --oc-console-out: 0s;
   }
 }
 

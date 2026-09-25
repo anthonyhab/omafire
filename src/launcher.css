@@ -2,42 +2,41 @@
  *
  * Used where the resting urlbar is narrow or hidden: the single sidebar
  * and zen mode. Two shapes, picked by omarchy.launcher:
- *   (unset) / "drop"  a quake console. Horizontal tabs: full width,
- *                     sliding down from the window's top edge under the
+ *   (unset) / "drop"  a quake console sliding down from the window's
+ *                     top edge. Horizontal tabs: full width, under the
  *                     navigation row. Vertical tabs: it spans the page
- *                     only and slides out sideways from the tab column,
- *                     which stays in view.
+ *                     only; the tab column stays in view beside it.
  *   "center"          a floating card in the middle of the window
  *
  * Firefox 156 keeps the urlbar in the top layer as a popover while it can
  * break out ([breakout]); while extended, JS writes only an inline `top`.
- * So the launcher is plain inset overrides on [breakout-extend]: the top
- * layer escapes every containing block, and ::backdrop gives the scrim. */
+ * So the launcher is plain inset overrides: the top layer escapes every
+ * containing block, and ::backdrop gives the scrim.
+ *
+ * Firefox extends ([breakout-extend]) only while the results view is
+ * open, and a new tab focuses the field without opening it. The launcher
+ * therefore also opens on [focused] alone, as a bare field. */
 
-/* The drop: the console unrolls down from the navigation row. clip-path,
- * because the !important translate below would outrank a translate
- * animation (and Firefox doesn't interpolate registered custom
- * properties). The end state reaches past the card so its shadow shows. */
+/* The drop: the whole slab slides down from the window's top edge, the
+ * way Omarchy's quake console does. It travels its own height plus the
+ * navigation row's travel, and the clip keeps its top at the row's
+ * moving bottom edge, so row and console read as one slab. `transform`,
+ * because the !important translate below outranks a translate animation.
+ * The end state reaches past the card so its bleed shows. */
 @keyframes oc-drop {
-  from { clip-path: inset(0 0 100% 0); }
-  to { clip-path: inset(0 -100vw -100vh -100vw); }
-}
-
-/* The slide: the same console unrolls out of the tab column's edge. The
- * clip runs between the card's two edges (the field's, plus the inset the
- * card bleeds by), so it keeps pace with the navigation row's own wipe. */
-@keyframes oc-slide-start {
-  from { clip-path: inset(0 calc(100% + var(--oc-inset)) -100vh -100vw); }
-  to { clip-path: inset(0 calc(-1 * var(--oc-inset)) -100vh -100vw); }
-}
-@keyframes oc-slide-end {
-  from { clip-path: inset(0 -100vw -100vh calc(100% + var(--oc-inset))); }
-  to { clip-path: inset(0 -100vw -100vh calc(-1 * var(--oc-inset))); }
+  from {
+    transform: translateY(calc(-100% - var(--oc-toolbar) - var(--oc-gap)));
+    clip-path: inset(100% -100vw -100vh -100vw);
+  }
+  to {
+    transform: none;
+    clip-path: inset(0 -100vw -100vh -100vw);
+  }
 }
 
 @media -moz-pref("omarchy.layout", "sidebar"),
        -moz-pref("omarchy.zen-mode") and -moz-pref("omarchy.zen-mode-active") {
-  #main-window:not([customizing]) #urlbar[breakout][breakout-extend] {
+  #main-window:not([customizing]) #urlbar[breakout]:is([breakout-extend], [focused]) {
     margin: 0 !important;
 
     /* A tall field whose leading chip starts at the same inner edge as
@@ -54,7 +53,7 @@
   }
 
   @media not -moz-pref("omarchy.launcher", "center") {
-    #main-window:not([customizing]) #urlbar[breakout][breakout-extend] {
+    #main-window:not([customizing]) #urlbar[breakout]:is([breakout-extend], [focused]) {
       /* Under the navigation row, edge to edge: the field and rows sit on
        * the chrome's inset axis, the card bleeds to the window edges.
        * Brutalist: one opaque slab, ruled on its open edges in the focus
@@ -65,7 +64,7 @@
       --urlbar-background-inset-breakout:
         0 calc(-1 * var(--oc-inset)) calc(-1 * var(--oc-launcher-bleed)) !important;
       translate: none !important;
-      animation: oc-drop var(--oc-slow) var(--oc-ease) !important;
+      animation: oc-drop var(--oc-console-in) var(--oc-ease-enter) !important;
 
       & > .urlbar-background {
         background-color: var(--oc-console) !important;
@@ -110,12 +109,11 @@
           anchor-name: --oc-page !important;
         }
 
-        & #urlbar[breakout][breakout-extend] {
+        & #urlbar[breakout]:is([breakout-extend], [focused]) {
           top: anchor(--oc-page top, 0px) !important;
           left: calc(anchor(--oc-page left, 0px) + var(--oc-inset)) !important;
           right: calc(anchor(--oc-page right, 0px) + var(--oc-inset)) !important;
           width: auto !important;
-          animation-name: oc-slide-start !important;
 
           /* Its own slab beside the column, ruled all round. */
           & > .urlbar-background {
@@ -124,16 +122,10 @@
         }
       }
 
-      @media not -moz-pref("sidebar.position_start") {
-        #main-window:not([customizing]) #urlbar[breakout][breakout-extend] {
-          animation-name: oc-slide-end !important;
-        }
-      }
-
       /* Zen mode: under the docked navigation row, which carries the
        * slab's top rule. */
       @media -moz-pref("omarchy.zen-mode") and -moz-pref("omarchy.zen-mode-active") and (not -moz-pref("omarchy.layout", "sidebar")) {
-        #main-window:not([customizing]) #urlbar[breakout][breakout-extend] {
+        #main-window:not([customizing]) #urlbar[breakout]:is([breakout-extend], [focused]) {
           top: calc(anchor(--oc-page top, 0px) + var(--oc-toolbar)) !important;
 
           & > .urlbar-background {
@@ -148,7 +140,7 @@
         #main-window:not([customizing]) #sidebar-container {
           anchor-name: --oc-column !important;
         }
-        #main-window:not([customizing]):has(sidebar-main[expanded]) #urlbar[breakout][breakout-extend] {
+        #main-window:not([customizing]):has(sidebar-main[expanded]) #urlbar[breakout]:is([breakout-extend], [focused]) {
           left: calc(anchor(--oc-column right, 0px) + var(--oc-gap) + var(--oc-inset)) !important;
         }
       }
@@ -156,7 +148,7 @@
   }
 
   @media -moz-pref("omarchy.launcher", "center") {
-    #main-window:not([customizing]) #urlbar[breakout][breakout-extend] {
+    #main-window:not([customizing]) #urlbar[breakout]:is([breakout-extend], [focused]) {
       top: var(--oc-launcher-top) !important;
       left: calc(50vw - var(--oc-launcher-width) / 2) !important;
       width: var(--oc-launcher-width) !important;
