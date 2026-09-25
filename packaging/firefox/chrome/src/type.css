@@ -1,0 +1,25 @@
+/* Omarchy Chrome — typography.
+ *
+ * Chrome text uses the shell's monospace (fontconfig), like the rest of
+ * Omarchy. Setting it on containers is not enough: Firefox's native skin
+ * puts `font: menu` / `font: caption` on menuitems, toolbar buttons and
+ * labels, which would split one popup into two typefaces. So the leaves
+ * are named. */
+
+#mainPopupSet > :is(menupopup, panel),
+#mainPopupSet :is(menupopup, panel, panelview)
+  :is(menu, menuitem, toolbarbutton, toolbaritem, label, description, input,
+      checkbox, radio, button, moz-button, richlistitem, menulist, select,
+      .toolbarbutton-text, .menu-iconic-text, .menu-accel),
+#navigator-toolbox :is(toolbarbutton, toolbaritem, label, .toolbarbutton-text, toolbarbadge),
+#sidebar-box :is(label, description, #sidebar-title),
+#tabbrowser-tabs .tab-group-label,
+#tabs-newtab-button {
+  font-family: var(--oc-font) !important;
+  font-size: var(--oc-font-size) !important;
+}
+
+:is(#urlbar-input, .tab-label, .urlbarView-row) {
+  font-family: var(--oc-font) !important;
+  font-size: var(--oc-label-size) !important;
+}

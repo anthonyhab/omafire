@@ -1,13 +1,8 @@
-/* Omarchy Chrome — urlbar.
+/* Omarchy Chrome — urlbar field and results.
  *
- * Resting: a quiet field at the top of the sidebar. Focused: Zen's floating
- * launcher, centred over the window.
- *
- * Firefox 156 keeps the urlbar in the top layer as a popover whenever it
- * can break out ([breakout]); while extended, JS writes only an inline
- * `top`. So the launcher is plain inset overrides on [breakout-extend]:
- * the top layer already escapes every containing block, and ::backdrop
- * gives the scrim for free. */
+ * A quiet flat field at rest; on focus it opens in place on the panel
+ * surface. Layouts that want Zen's centred launcher get it from
+ * launcher.css. */
 
 #urlbar {
   --urlbar-background-color: var(--oc-hover) !important;
@@ -34,40 +29,20 @@
   background-color: var(--oc-active) !important;
 }
 
-/* Page actions are noise in a narrow sidebar field; reveal them on hover
- * and while editing. The bookmark star stays. */
+/* Page actions are noise at rest; reveal them on hover and while editing.
+ * The bookmark star stays. */
 #urlbar:not([focused], :hover) #page-action-buttons > :not(#star-button-box, [open]) {
   display: none !important;
 }
 
-/* ---- launcher ------------------------------------------------------- */
-
-#main-window #urlbar[breakout][breakout-extend] {
-  top: 16vh !important;
-  left: calc(50vw - var(--oc-launcher-width) / 2) !important;
-  width: var(--oc-launcher-width) !important;
-  margin: 0 !important;
-  /* Firefox shifts the popover along with a sliding toolbar
-   * (--toolbar-shift-translate); the launcher is window-anchored. */
-  translate: none !important;
-
-  & > .urlbar-background {
-    background-color: var(--oc-panel) !important;
-    border-radius: var(--oc-radius) !important;
-    box-shadow: var(--oc-shadow-float) !important;
-    animation: none !important;
-  }
-
-  & > .urlbar-input-container {
-    height: 52px !important;
-    padding-inline: 14px !important;
-    font-size: 1.15em !important;
-  }
-
-  &::backdrop {
-    background: var(--oc-scrim) !important;
-    pointer-events: none !important;
-  }
+/* In-place dropdown (top layout): the field lifts onto the panel surface
+ * with the focus edge; geometry stays Firefox's own. The centred launcher
+ * lives in launcher.css. */
+#urlbar[breakout][breakout-extend] > .urlbar-background {
+  background-color: var(--oc-panel) !important;
+  border-radius: var(--oc-radius) !important;
+  box-shadow: inset 0 0 0 1px var(--oc-focus), var(--oc-shadow-float) !important;
+  animation: none !important;
 }
 
 /* ---- results -------------------------------------------------------- */

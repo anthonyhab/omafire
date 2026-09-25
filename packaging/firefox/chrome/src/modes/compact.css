@@ -1,4 +1,4 @@
-/* Omarchy Chrome — compact mode (omarchy.compact).
+/* Omarchy Chrome — compact mode (omarchy.compact, sidebar layout only).
  *
  * Zen's compact mode: the content card takes the whole window and the
  * sidebar column (toolbox + tabs) floats over it as one card, parked off
@@ -10,7 +10,7 @@
  * (it uses it for the fullscreen toolbar slide); we feed it the same
  * distance, expressed in the urlbar's own width. */
 
-@media -moz-pref("omarchy.compact") and -moz-pref("sidebar.verticalTabs") {
+@media -moz-pref("omarchy.compact") and -moz-pref("omarchy.layout", "sidebar") and -moz-pref("sidebar.verticalTabs") {
   :root:not([customizing], [popup-window], [taskbartab], [chromehidden~="toolbar"], [inDOMFullscreen]):has(sidebar-main[expanded]) {
     --oc-reveal: 0;
     --oc-trigger: 6px;

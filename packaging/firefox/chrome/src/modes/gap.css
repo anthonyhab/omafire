@@ -1,0 +1,13 @@
+/* Omarchy Chrome — floating content card (omarchy.chrome-gap).
+ *
+ * Off: the page sits flush against the chrome. On: it floats with a gap,
+ * Hyprland's rounding, and a hairline shadow. The single-sidebar layout
+ * always floats. */
+
+@media -moz-pref("omarchy.chrome-gap") {
+  :root {
+    --oc-frame-gap: var(--oc-gap);
+    --oc-card-radius: var(--oc-radius);
+    --oc-card-shadow: var(--oc-shadow);
+  }
+}

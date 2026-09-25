@@ -1,0 +1,32 @@
+/* Omarchy Chrome — centred urlbar launcher (Zen's command bar).
+ *
+ * Used by layouts where the resting urlbar is narrow or hidden: the single
+ * sidebar and zen mode. Firefox 156 keeps the urlbar in the top layer as a
+ * popover while it can break out ([breakout]); while extended, JS writes
+ * only an inline `top`. So the launcher is plain inset overrides on
+ * [breakout-extend]: the top layer escapes every containing block, and
+ * ::backdrop gives the scrim for free. */
+
+@media -moz-pref("omarchy.layout", "sidebar"),
+       -moz-pref("omarchy.zen-mode") and -moz-pref("omarchy.zen-mode-active") {
+  #main-window:not([customizing]) #urlbar[breakout][breakout-extend] {
+    top: var(--oc-launcher-top) !important;
+    left: calc(50vw - var(--oc-launcher-width) / 2) !important;
+    width: var(--oc-launcher-width) !important;
+    margin: 0 !important;
+    /* Firefox shifts the popover along with a sliding toolbar
+     * (--toolbar-shift-translate); the launcher is window-anchored. */
+    translate: none !important;
+
+    & > .urlbar-input-container {
+      height: 52px !important;
+      padding-inline: 14px !important;
+      font-size: 1.15em !important;
+    }
+
+    &::backdrop {
+      background: var(--oc-scrim) !important;
+      pointer-events: none !important;
+    }
+  }
+}

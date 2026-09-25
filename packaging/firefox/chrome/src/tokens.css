@@ -17,21 +17,38 @@
 :root {
   /* ---- geometry ---------------------------------------------------- */
 
-  /* Frame gap between the window edge, the sidebar, and the content card. */
+  /* Spacing unit inside chrome (toolbar padding, launcher offsets). */
   --oc-gap: 8px;
+  /* Space around the content area. 0 = page flush against the chrome;
+   * omarchy.chrome-gap turns it into a floating card (modes/gap.css). */
+  --oc-frame-gap: 0px;
+  --oc-card-radius: 0px;
+  --oc-card-shadow: none;
   /* Corners follow Hyprland's decoration:rounding (omarchy-radius.css). */
   --oc-radius: var(--omarchy-radius-container, 10px);
   --oc-radius-small: clamp(0px, calc(var(--oc-radius) - 3px), 8px);
-  --oc-row: 36px;           /* tab and urlbar row height */
+  --oc-toolbar: 40px;       /* top toolbar row */
+  --oc-row: 32px;           /* vertical tab row */
   --oc-button: 32px;        /* toolbar button tile */
   --oc-pinned: 44px;        /* pinned tab tile */
   --oc-launcher-width: min(720px, 80vw);
+  --oc-launcher-top: 16vh;
+  /* Firefox paints the open urlbar's background this far outside its box. */
+  --oc-launcher-bleed: 8px;
 
   &[uidensity="compact"] {
-    --oc-row: 32px;
+    --oc-toolbar: 34px;
+    --oc-row: 28px;
     --oc-button: 28px;
     --oc-pinned: 38px;
   }
+
+  /* ---- type -------------------------------------------------------- */
+
+  /* The shell's fontconfig monospace, like every other Omarchy app. */
+  --oc-font: monospace;
+  --oc-font-size: 12px;     /* buttons, menus */
+  --oc-label-size: 13px;    /* tab labels, urlbar */
 
   /* ---- color: live from the lightweight theme ---------------------- */
 
@@ -41,7 +58,9 @@
   --oc-field: var(--toolbar-field-background-color, var(--omarchy-darker_background));
   --oc-field-text: var(--toolbar-field-text-color, var(--oc-text));
   --oc-accent: var(--lwt-tab-line-color, var(--omarchy-accent, AccentColor));
-  --oc-focus: var(--toolbar-field-border-color-focus, var(--oc-accent));
+  /* Focus rings and selected edges use Hyprland's active window border
+   * (omarchy-radius.css), so the browser marks focus like the desktop. */
+  --oc-focus: var(--omarchy-border-active-color, var(--toolbar-field-border-color-focus, var(--oc-accent)));
 
   /* ---- color: derived --------------------------------------------- */
 
@@ -49,12 +68,16 @@
    * they stack (hover over selected stays visible). */
   --oc-text-dim: color-mix(in srgb, var(--oc-text) 62%, transparent);
   --oc-line: color-mix(in srgb, var(--oc-text) 11%, transparent);
+  --oc-line-strong: color-mix(in srgb, var(--oc-text) 22%, transparent);
   --oc-hover: color-mix(in srgb, var(--oc-text) 8%, transparent);
-  --oc-active: color-mix(in srgb, var(--oc-text) 14%, transparent);
+  --oc-active: color-mix(in srgb, var(--oc-text) 18%, transparent);
   --oc-selected: color-mix(in srgb, var(--oc-text) 12%, transparent);
   --oc-accent-wash: color-mix(in srgb, var(--oc-accent) 22%, transparent);
 
-  /* Opaque raised surface for panels and the floating launcher. */
+  /* Window surface behind all chrome. Opaque unless omarchy.translucency
+   * (modes/translucency.css) turns it to glass. */
+  --oc-surface: var(--oc-frame);
+  /* Raised surface for panels and the floating launcher. */
   --oc-panel: color-mix(in srgb, var(--oc-frame), var(--oc-text) 5%);
   --oc-shadow: 0 1px 2px rgb(0 0 0 / 0.14), 0 0 0 1px var(--oc-line);
   --oc-shadow-float: 0 12px 40px rgb(0 0 0 / 0.36), 0 0 0 1px var(--oc-line);

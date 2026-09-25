@@ -1,0 +1,80 @@
+/* Omarchy Chrome — window frame, shared by every layout.
+ *
+ * One surface (--oc-surface) paints the whole window behind the chrome;
+ * toolbars and the sidebar are transparent on top of it, so translucency
+ * has exactly one layer to swap. The content area is flush by default;
+ * the --oc-frame-gap / --oc-card-* tokens turn it into a card
+ * (modes/gap.css). */
+
+:root:not([inDOMFullscreen]) {
+  & body {
+    background-color: var(--oc-surface) !important;
+    color: var(--oc-text) !important;
+  }
+
+  & #browser,
+  & #navigator-toolbox,
+  & #sidebar-container,
+  & #nav-bar,
+  & #PersonalToolbar {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  & #tabbrowser-tabbox {
+    margin: var(--oc-frame-gap) !important;
+    background: transparent !important;
+  }
+
+  & #tabbrowser-tabpanels {
+    background-color: transparent !important;
+  }
+
+  & .browserContainer {
+    border: none !important;
+    border-radius: var(--oc-card-radius) !important;
+    overflow: clip !important;
+    box-shadow: var(--oc-card-shadow) !important;
+    background-color: var(--oc-canvas) !important;
+    -moz-window-dragging: no-drag !important;
+  }
+
+  /* Split view: the focused page is outlined with the focus edge. */
+  & #tabbrowser-tabpanels[splitview] {
+    & .split-view-panel > .browserContainer {
+      border: none !important;
+      outline: none !important;
+    }
+    & .split-view-panel.deck-selected > .browserContainer {
+      box-shadow: var(--oc-card-shadow), inset 0 0 0 1px var(--oc-focus) !important;
+    }
+    & .split-view-splitter {
+      width: max(var(--oc-frame-gap), 4px) !important;
+      margin: 0 !important;
+      background: transparent !important;
+
+      &:hover {
+        background: linear-gradient(var(--oc-line), var(--oc-line)) center / 2px 48px no-repeat !important;
+      }
+    }
+  }
+}
+
+/* Hyprland owns window controls; Firefox's close/minimize/maximize are
+ * dead weight in a tiling compositor. */
+.titlebar-buttonbox-container,
+.titlebar-spacer {
+  display: none !important;
+}
+
+/* XUL [collapsed] boxes (idle AI window, splitters) must never claim room. */
+#browser > [collapsed] {
+  display: none !important;
+}
+
+/* DOM fullscreen (video): no frame at all. */
+:root[inDOMFullscreen] {
+  & #tabbrowser-tabbox { margin: 0 !important; }
+  & .browserContainer { border-radius: 0 !important; box-shadow: none !important; }
+}

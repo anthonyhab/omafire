@@ -1,4 +1,4 @@
-/* Omarchy Chrome — window layout.
+/* Omarchy Chrome — single-sidebar layout (omarchy.layout = "sidebar").
  *
  * Zen's single-sidebar layout, in pure CSS. The body becomes a grid and
  * #browser is flattened with display: contents, so the navigation toolbox
@@ -16,18 +16,21 @@
  * panel = #sidebar-box (bookmarks, history, …) with its own splitter.
  *
  * Only vertical-tabs browser windows get this; popups, taskbar tabs and
- * horizontal tabs keep Firefox's stock layout. */
+ * horizontal tabs keep the default top layout. */
 
-@media -moz-pref("sidebar.verticalTabs") {
+@media -moz-pref("omarchy.layout", "sidebar") and -moz-pref("sidebar.verticalTabs") {
   :root:not([popup-window], [taskbartab], [chromehidden~="toolbar"]) {
+    /* Zen's look: the page floats as a card beside the column. */
+    --oc-frame-gap: var(--oc-gap);
+    --oc-card-radius: var(--oc-radius);
+    --oc-card-shadow: var(--oc-shadow);
+
     & body {
       display: grid !important;
       grid-template-columns:
         [side] auto [launcher-split] auto [panel] auto [panel-split] auto
         [main] minmax(0, 1fr) [ai-split] auto [ai] auto !important;
       grid-template-rows: [top] auto [mid] minmax(0, 1fr) [rest] auto !important;
-      background-color: var(--oc-frame) !important;
-      color: var(--oc-text) !important;
     }
 
     /* Everything else in body (popupset, a11y live region, fullscreen
@@ -41,28 +44,18 @@
       display: contents !important;
     }
 
-    /* XUL [collapsed] only zeroes an item's size in flex layout; as grid
-     * items the collapsed boxes (AI window, idle splitters) would still
-     * claim their width. */
-    & #browser > [collapsed] {
-      display: none !important;
-    }
-
     & #navigator-toolbox {
       grid-column: side !important;
       grid-row: top !important;
       /* Contribute no width to the column: the sidebar owns it. */
       contain: inline-size !important;
       min-width: 0 !important;
-      background: transparent !important;
-      border: none !important;
     }
 
     & #sidebar-container {
       grid-column: side !important;
       grid-row: mid !important;
       min-height: 0 !important;
-      background: transparent !important;
     }
 
     & #sidebar-launcher-splitter {
@@ -99,18 +92,15 @@
       grid-row: top / rest !important;
       min-width: 0 !important;
       min-height: 0 !important;
-      margin: var(--oc-gap) var(--oc-gap) var(--oc-gap) 0 !important;
-      background: transparent !important;
+    }
+
+    /* The launcher splitter is the gap beside the card. */
+    &:has(#sidebar-container:not([hidden])) #tabbrowser-tabbox {
+      margin-inline-start: 0 !important;
     }
 
     & #ai-window-splitter { grid-column: ai-split !important; grid-row: top / rest !important; }
     & #ai-window-box { grid-column: ai !important; grid-row: top / rest !important; }
-
-    /* The launcher splitter is the only gap beside the card; when the
-     * sidebar is hidden it collapses, so the card needs its own margin. */
-    &:has(#sidebar-container[hidden]) #tabbrowser-tabbox {
-      margin-inline-start: var(--oc-gap) !important;
-    }
 
     /* Collapsed icon rail: no room for the urlbar in the column, so the
      * toolbox becomes an ordinary strip across the top instead. */
@@ -138,56 +128,45 @@
           [ai] auto [ai-split] auto [main] minmax(0, 1fr) [panel-split] auto
           [panel] auto [launcher-split] auto [side] auto !important;
       }
-      & #tabbrowser-tabbox {
-        margin: var(--oc-gap) 0 var(--oc-gap) var(--oc-gap) !important;
-      }
-      &:has(#sidebar-container[hidden]) #tabbrowser-tabbox {
-        margin-inline-end: var(--oc-gap) !important;
+      &:has(#sidebar-container:not([hidden])) #tabbrowser-tabbox {
+        margin-inline: var(--oc-frame-gap) 0 !important;
       }
     }
   }
 }
 
-/* ---- content card --------------------------------------------------- */
-
-:root:not([inDOMFullscreen]) {
-  & #tabbrowser-tabpanels {
-    background-color: transparent !important;
-  }
-
-  & .browserContainer {
-    border: none !important;
-    border-radius: var(--oc-radius) !important;
-    overflow: clip !important;
-    box-shadow: var(--oc-shadow) !important;
-    background-color: var(--oc-canvas) !important;
-    -moz-window-dragging: no-drag !important;
-  }
-
-  /* Split view: two cards side by side, the focused one outlined. */
-  & #tabbrowser-tabpanels[splitview] {
-    & .split-view-panel > .browserContainer {
-      border: none !important;
-      outline: none !important;
+/* The nav-bar becomes a two-row block at the top of the column: buttons
+ * first, the urlbar filling the second row. The customization target is
+ * flattened so its buttons and #nav-bar's own wrap together. Customize
+ * mode keeps the stock single row so drag-and-drop targets stay intact. */
+@media -moz-pref("omarchy.layout", "sidebar") and -moz-pref("sidebar.verticalTabs") {
+  :root:not([customizing], [popup-window], [taskbartab], [chromehidden~="toolbar"]):has(sidebar-main[expanded]) {
+    & #nav-bar {
+      flex-wrap: wrap !important;
+      align-items: center !important;
+      row-gap: 6px !important;
+      padding: var(--oc-gap) var(--oc-gap) 6px !important;
     }
-    & .split-view-panel.deck-selected > .browserContainer {
-      box-shadow: var(--oc-shadow), 0 0 0 1px var(--oc-focus) !important;
+
+    & #nav-bar-customization-target {
+      display: contents !important;
     }
-    & .split-view-splitter {
-      width: var(--oc-gap) !important;
+
+    & #urlbar-container {
+      order: 100 !important;
+      flex: 1 1 100% !important;
+      min-width: 0 !important;
+      max-width: none !important;
       margin: 0 !important;
-      border-radius: 99px !important;
-      background: transparent !important;
+      padding: 0 !important;
+    }
 
-      &:hover {
-        background: linear-gradient(var(--oc-line), var(--oc-line)) center / 2px 48px no-repeat !important;
-      }
+    /* Springs (Nova's #vertical-spacer by default) split the button row:
+     * navigation on the left, actions on the right. */
+    & #nav-bar toolbarspring {
+      flex: 1 1 0 !important;
+      min-width: 0 !important;
+      max-width: none !important;
     }
   }
-}
-
-/* DOM fullscreen (video): no frame at all. */
-:root[inDOMFullscreen] {
-  & #tabbrowser-tabbox { margin: 0 !important; }
-  & .browserContainer { border-radius: 0 !important; box-shadow: none !important; }
 }

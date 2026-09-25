@@ -1,5 +1,5 @@
 /* OMAFOX FIREFOX BRIDGE MANAGED FILE */
-/* Generated from Omarchy Chrome fb212ecbfbcc by omafox scripts/sync-firefox-payload.sh. */
+/* Generated from Omarchy Chrome 1dbc1cf242c7 by omafox scripts/sync-firefox-payload.sh. */
 /* Omarchy Chrome — Firefox 156+ with Nova (browser.nova.enabled).
  *
  * Load order: generated inputs, then tokens, then components. Components
@@ -11,13 +11,26 @@
 @import "../omarchy-radius.css";
 
 @import "src/tokens.css";
-@import "src/layout.css";
+@import "src/type.css";
+
+/* Surfaces: what every layout shares. */
+@import "src/frame.css";
 @import "src/toolbar.css";
 @import "src/urlbar.css";
 @import "src/sidebar.css";
 @import "src/tabs.css";
 @import "src/popups.css";
-@import "src/compact.css";
+
+/* Layouts. The default is the top toolbar; each alternative is a module
+ * gated on omarchy.layout, so adding one never touches the others. */
+@import "src/layouts/sidebar.css";
+@import "src/launcher.css";
+
+/* Modes: optional behaviour on top of a layout, each gated on its pref. */
+@import "src/modes/zen.css";
+@import "src/modes/compact.css";
+@import "src/modes/gap.css";
+@import "src/modes/translucency.css";
 
 /* Personal overrides; never shipped or maintained here. */
 @import "../customChrome.css";

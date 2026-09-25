@@ -2,8 +2,7 @@
  *
  * sidebar-main is a custom element: its tools strip lives in a shadow root
  * and is styled through the design-system variables it inherits. The
- * #sidebar-box panel (bookmarks, history, …) is a card beside the tabs;
- * layout.css places it. */
+ * #sidebar-box panel (bookmarks, history, …) sits beside the tabs. */
 
 sidebar-main {
   background: transparent !important;
@@ -17,11 +16,16 @@ sidebar-main {
   --border-color: var(--oc-line) !important;
 }
 
-/* The splitter above the tools strip becomes a short centred hairline. */
+/* The splitter above the tools strip is a drag handle, not a divider:
+ * invisible until hovered. */
 #sidebar-tools-and-extensions-splitter {
   border: none !important;
-  background: linear-gradient(var(--oc-line), var(--oc-line)) center / 40% 1px no-repeat !important;
+  background: transparent !important;
   min-height: 9px !important;
+
+  &:hover {
+    background: linear-gradient(var(--oc-line), var(--oc-line)) center / 40% 1px no-repeat !important;
+  }
 }
 
 /* ---- panel ---------------------------------------------------------- */
