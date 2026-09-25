@@ -18,7 +18,7 @@ rm -f "$ARTIFACT"
 (
   cd "$SCRIPT_DIR"
   zip -q -r "$ARTIFACT" \
-    manifest.json background.js theme.js tabglow.js icons newtab popup THIRD_PARTY_NOTICES.md \
+    manifest.json background.js theme.js wallpaper.js tabglow.js icons newtab popup THIRD_PARTY_NOTICES.md \
     -x '*.DS_Store'
 )
 

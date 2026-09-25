@@ -4,6 +4,7 @@ const assert = require("node:assert/strict");
 const manifest = require("../extension/manifest.json");
 const nativeManifest = require("../packaging/org.omarchy.omafox.json");
 const themeApi = require("../extension/theme.js");
+require("../extension/wallpaper.js");
 
 const memory = {};
 const themeUpdates = [];

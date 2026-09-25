@@ -5,7 +5,13 @@
  * each block draws a 1px outline into the 1px gap, where it overlaps its
  * neighbour's, so blocks share their edges instead of floating as cards.
  * Colors are the live Omarchy palette (newtab.js); the fallbacks only cover
- * the frame before the stored palette is read. */
+ * the frame before the stored palette is read.
+ *
+ * Edges follow the chrome's rule: a hairline is a surface's own edge, a
+ * fill is interaction, the accent marks what is active or focused.
+ *
+ * Settings (newtab.js) land as data-* attributes on the root and the
+ * --blur / --dim custom properties. */
 
 :root {
   --u: 8px;
@@ -14,9 +20,16 @@
   --fg: #e6e6e6;
   --strong: #ffffff;
   --accent: #e68e0d;
-  --dim: color-mix(in srgb, var(--fg) 55%, transparent);
+  --dim-text: color-mix(in srgb, var(--fg) 55%, transparent);
   --line: color-mix(in srgb, var(--fg) 12%, transparent);
+  --line-strong: color-mix(in srgb, var(--fg) 22%, transparent);
   --hover: color-mix(in srgb, var(--fg) 6%, var(--bg));
+  --active: color-mix(in srgb, var(--fg) 11%, var(--bg));
+  /* Tile surface: the page itself, or glass over a backdrop. */
+  --tile: var(--bg);
+  --blur: 24px;
+  --dim: 55%;
+  --ease: cubic-bezier(0.23, 1, 0.32, 1);
 
   color-scheme: dark;
   background: var(--bg);
@@ -24,9 +37,18 @@
   font: 13px/1.5 monospace;
 }
 
+:root[data-backdrop="true"][data-glass="true"] {
+  --tile: color-mix(in srgb, var(--bg) 62%, transparent);
+  --hover: color-mix(in srgb, var(--fg) 10%, var(--tile));
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
+}
+
+[hidden] {
+  display: none !important;
 }
 
 body {
@@ -36,15 +58,51 @@ body {
   padding: calc(var(--u) * 20) calc(var(--u) * 4) calc(var(--u) * 6);
 }
 
+:root[data-align="center"] body {
+  place-items: center;
+  padding-block: calc(var(--u) * 6);
+}
+
 main {
+  position: relative;
   width: min(100%, calc(var(--u) * 112));
+}
+
+:root[data-width="wide"] main {
+  width: min(100%, calc(var(--u) * 160));
+}
+
+/* ---- backdrop -------------------------------------------------------
+ * The wallpaper, blurred and dimmed toward the palette background. It
+ * overscans by the blur radius so the soft edge stays off-screen. */
+
+#backdrop {
+  position: fixed;
+  inset: calc(-2 * var(--blur));
+  z-index: -1;
+  background: center / cover no-repeat;
+  filter: blur(var(--blur));
+  opacity: 0;
+}
+
+#backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  opacity: var(--dim);
+}
+
+:root[data-backdrop="true"] #backdrop.ready {
+  opacity: 1;
 }
 
 /* ---- clock ---------------------------------------------------------- */
 
 header {
   display: flex;
-  align-items: baseline;
+  /* The date sits on the clock's baseline, under a greeting. */
+  align-items: last baseline;
   justify-content: space-between;
   gap: calc(var(--u) * 3);
   padding-bottom: calc(var(--u) * 3);
@@ -52,17 +110,36 @@ header {
   border-bottom: 1px solid var(--line);
 }
 
+header:has(> #time[hidden]):has(> #date[hidden]) {
+  display: none;
+}
+
+#greeting {
+  color: var(--dim-text);
+  letter-spacing: 0.08em;
+  margin-bottom: var(--u);
+}
+
 #clock {
+  display: block;
   color: var(--strong);
   font-size: clamp(56px, 10vw, 128px);
   font-weight: 700;
   line-height: 0.9;
   letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+#time:has(#clock[hidden]) #greeting {
+  margin-bottom: 0;
+  color: var(--strong);
+  font-size: 24px;
 }
 
 #date {
-  color: var(--dim);
+  margin-left: auto;
+  color: var(--dim-text);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -82,26 +159,31 @@ header {
 }
 
 .site {
+  position: relative;
+  background: var(--tile);
+  outline: 1px solid var(--line);
+}
+
+.site > a {
   display: grid;
   grid-template: "icon index" auto "gap gap" 1fr "title title" auto "host host" auto / 1fr auto;
+  height: 100%;
   min-height: calc(var(--u) * 14);
   padding: calc(var(--u) * 2);
-  background: var(--bg);
   color: inherit;
   text-decoration: none;
-  outline: 1px solid var(--line);
+  outline: none;
 }
 
 .site:hover {
   background: var(--hover);
 }
 
-.site:focus-visible {
+.site:has(> a:focus-visible) {
   box-shadow: inset 0 0 0 1px var(--accent);
 }
 
-.site:hover .index,
-.site:focus-visible .index {
+.site:is(:hover, :has(> a:focus-visible)) .index {
   color: var(--accent);
 }
 
@@ -116,14 +198,14 @@ header {
   display: grid;
   place-items: center;
   background: var(--surface);
-  color: var(--dim);
+  color: var(--dim-text);
   font-weight: 700;
   text-transform: uppercase;
 }
 
 .index {
   grid-area: index;
-  color: var(--dim);
+  color: var(--dim-text);
   font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
@@ -138,14 +220,362 @@ header {
 .host {
   grid-area: host;
   overflow: hidden;
-  color: var(--dim);
+  color: var(--dim-text);
   font-size: 11px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+:root[data-numbers="false"] .index,
+:root[data-hosts="false"] .host {
+  display: none;
+}
+
+/* Hide / remove: a square in the tile's corner, over the index, shown
+ * with the pointer or keyboard focus inside the tile. */
+.hide {
+  position: absolute;
+  top: calc(var(--u) * 1.5);
+  right: calc(var(--u) * 1.5);
+  width: calc(var(--u) * 3);
+  height: calc(var(--u) * 3);
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  background: var(--tile);
+  color: var(--dim-text);
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.site:is(:hover, :focus-within) .hide {
+  opacity: 1;
+}
+
+.hide:hover {
+  background: var(--active);
+  color: var(--strong);
+}
+
+.hide:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: -1px;
+}
+
+/* List: one row per shortcut, on the tile grid's hairlines. */
+:root[data-site-style="list"] {
+  & #sites {
+    grid-template-columns: repeat(auto-fill, minmax(calc(var(--u) * 44), 1fr));
+  }
+  & .site > a {
+    grid-template: "icon title host index" auto / auto minmax(0, auto) minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: calc(var(--u) * 2);
+    min-height: calc(var(--u) * 6);
+    padding: var(--u) calc(var(--u) * 2);
+  }
+  & .icon {
+    width: calc(var(--u) * 2);
+    height: calc(var(--u) * 2);
+  }
+  & .hide {
+    top: 50%;
+    translate: 0 -50%;
+  }
+}
+
+/* Icons: a dock of square tiles; the title is the tooltip. */
+:root[data-site-style="icons"] {
+  & #sites {
+    grid-template-columns: repeat(auto-fill, calc(var(--u) * 10));
+  }
+  & .site > a {
+    grid-template: "icon" 1fr / 1fr;
+    place-items: center;
+    min-height: calc(var(--u) * 10);
+    padding: 0;
+  }
+  & .icon {
+    width: calc(var(--u) * 4);
+    height: calc(var(--u) * 4);
+  }
+  & :is(.title, .host) {
+    display: none;
+  }
+  & .index {
+    position: absolute;
+    left: var(--u);
+    bottom: calc(var(--u) / 2);
+  }
+  & .hide {
+    top: calc(var(--u) / 2);
+    right: calc(var(--u) / 2);
+    width: calc(var(--u) * 2.5);
+    height: calc(var(--u) * 2.5);
+  }
+}
+
+/* ---- customize ------------------------------------------------------ */
+
+#settings-toggle {
+  position: fixed;
+  right: calc(var(--u) * 2);
+  bottom: calc(var(--u) * 2);
+  display: flex;
+  align-items: center;
+  gap: var(--u);
+  height: calc(var(--u) * 4);
+  padding: 0 calc(var(--u) * 1.5);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--dim-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+#settings-toggle svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: square;
+}
+
+#settings-toggle .label {
+  display: none;
+}
+
+#settings-toggle:is(:hover, :focus-visible),
+:root[data-settings="true"] #settings-toggle {
+  border-color: var(--line-strong);
+  background: var(--tile);
+  color: var(--strong);
+  outline: none;
+}
+
+#settings-toggle:is(:hover, :focus-visible) .label {
+  display: inline;
+}
+
+/* The panel: a solid slab down the right edge, ruled on its open side. */
+#settings {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  width: min(100vw, calc(var(--u) * 44));
+  overflow-y: auto;
+  background: var(--bg);
+  border-left: 1px solid var(--line-strong);
+  animation: slide-in 300ms var(--ease);
+}
+
+@keyframes slide-in {
+  from { translate: 100% 0; }
+}
+
+.settings-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(var(--u) * 2);
+  background: var(--bg);
+  border-bottom: 2px solid var(--accent);
+}
+
+.settings-head h1 {
+  color: var(--strong);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+#settings section {
+  padding: calc(var(--u) * 2);
+  border-bottom: 1px solid var(--line);
+}
+
+#settings h2 {
+  margin-bottom: var(--u);
+  color: var(--dim-text);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: calc(var(--u) * 11) minmax(0, 1fr);
+  align-items: center;
+  gap: calc(var(--u) * 2);
+  min-height: calc(var(--u) * 4);
+}
+
+.row-label {
+  color: var(--fg);
+}
+
+.row-body {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--u);
+  min-width: 0;
+}
+
+/* Controls: flat, hairline-edged; the chosen option is filled and
+ * underlined in the accent, like the active tab. */
+#settings button,
+#settings input[type="text"] {
+  height: calc(var(--u) * 3.5);
+  padding: 0 var(--u);
+  border: 1px solid var(--line-strong);
+  border-radius: 0;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+}
+
+#settings button {
+  cursor: pointer;
+}
+
+#settings button:hover {
+  background: var(--hover);
+}
+
+#settings input[type="text"] {
+  flex: 1 1 auto;
+  min-width: 0;
+  background: var(--surface);
+}
+
+#settings :is(button, input):focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.choice {
+  display: flex;
+}
+
+.choice button + button {
+  margin-left: -1px;
+}
+
+.choice button[aria-checked="true"] {
+  background: var(--active);
+  color: var(--strong);
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+
+input.switch {
+  appearance: none;
+  position: relative;
+  width: calc(var(--u) * 5);
+  height: calc(var(--u) * 2.5);
+  margin: 0;
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+input.switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: calc(var(--u) * 2.5 - 6px);
+  height: calc(var(--u) * 2.5 - 6px);
+  background: var(--dim-text);
+}
+
+input.switch:checked {
+  border-color: var(--accent);
+}
+
+input.switch:checked::after {
+  left: calc(100% - var(--u) * 2.5 + 4px);
+  background: var(--accent);
+}
+
+/* A hairline track with a square thumb; the filled part is the accent. */
+input[type="range"] {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: calc(var(--u) * 2.5);
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"]::-moz-range-track {
+  height: 1px;
+  background: var(--line-strong);
+}
+
+input[type="range"]::-moz-range-progress {
+  height: 2px;
+  background: var(--accent);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: calc(var(--u) * 1.5);
+  height: calc(var(--u) * 1.5);
+  border: 1px solid var(--accent);
+  border-radius: 0;
+  background: var(--bg);
+}
+
+input[type="range"]:hover::-moz-range-thumb {
+  background: var(--accent);
+}
+
+input[type="range"]:focus-visible {
+  outline: none;
+}
+
+input[type="range"]:focus-visible::-moz-range-thumb {
+  background: var(--accent);
+}
+
+.note {
+  color: var(--dim-text);
+  font-size: 11px;
+  text-align: right;
+}
+
+output {
+  min-width: calc(var(--u) * 5);
+  color: var(--dim-text);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
 @media (prefers-reduced-motion: no-preference) {
-  .site {
-    transition: background-color 120ms;
+  .site,
+  .hide {
+    transition: background-color 120ms, opacity 120ms;
+  }
+  #backdrop {
+    transition: opacity 300ms var(--ease);
+  }
+  input.switch::after {
+    transition: left 120ms var(--ease);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #settings {
+    animation: none;
   }
 }

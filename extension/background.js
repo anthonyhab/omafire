@@ -6,6 +6,8 @@
   const NATIVE_STATUS_KEY = "nativeStatus";
   const NATIVE_HOST = "org.omarchy.omafox";
   const { parseThemeMessage, toFirefoxTheme } = globalThis.OmafoxTheme;
+  const Wallpaper = globalThis.OmafoxWallpaper;
+  const acceptWallpaperChunk = Wallpaper.createAssembler();
   let updateQueue = Promise.resolve();
   let nativePort = null;
   let reconnectTimer = null;
@@ -115,6 +117,22 @@
     return updateQueue;
   }
 
+  /* A complete wallpaper replaces the stored one; its id in storage.local
+   * tells open new tabs to reload it. */
+  async function storeWallpaper({ id, blob }) {
+    if (blob) {
+      await Wallpaper.write(Wallpaper.OMARCHY, { id, blob });
+    } else {
+      await Wallpaper.remove(Wallpaper.OMARCHY);
+    }
+    await browser.storage.local.set({ [Wallpaper.ID_KEY]: id });
+  }
+
+  function receiveWallpaperChunk(message) {
+    const wallpaper = acceptWallpaperChunk(message);
+    if (wallpaper) void enqueue(() => storeWallpaper(wallpaper), "wallpaper");
+  }
+
   function queueRestore() {
     return enqueue(restoreStoredTheme, "restore");
   }
@@ -148,6 +166,10 @@
       port.onMessage.addListener((message) => {
         reconnectDelay = 1000;
         void setNativeStatus(true);
+        if (Wallpaper.isWallpaperMessage(message)) {
+          receiveWallpaperChunk(message);
+          return;
+        }
         void enqueue(() => receiveThemeMessage(message), "native update");
       });
 
