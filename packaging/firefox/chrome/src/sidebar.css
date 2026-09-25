@@ -1,0 +1,38 @@
+/* Omarchy Chrome — sidebar rail and panel.
+ *
+ * sidebar-main is a custom element: its tools strip lives in a shadow root
+ * and is styled through the design-system variables it inherits. The
+ * #sidebar-box panel (bookmarks, history, …) is a card beside the tabs;
+ * layout.css places it. */
+
+sidebar-main {
+  background: transparent !important;
+  color: var(--oc-text) !important;
+  --sidebar-background-color: transparent !important;
+  --button-background-color-ghost-hover: var(--oc-hover) !important;
+  --button-background-color-ghost-active: var(--oc-active) !important;
+  --button-icon-fill: var(--oc-text-dim) !important;
+  --button-text-color-ghost: var(--oc-text-dim) !important;
+  --button-text-color-ghost-hover: var(--oc-text) !important;
+  --border-color: var(--oc-line) !important;
+}
+
+/* The splitter above the tools strip becomes a short centred hairline. */
+#sidebar-tools-and-extensions-splitter {
+  border: none !important;
+  background: linear-gradient(var(--oc-line), var(--oc-line)) center / 40% 1px no-repeat !important;
+  min-height: 9px !important;
+}
+
+/* ---- panel ---------------------------------------------------------- */
+
+#sidebar-box {
+  --sidebar-background-color: var(--oc-panel) !important;
+  background-color: var(--oc-panel) !important;
+  color: var(--oc-text) !important;
+}
+
+#sidebar-header {
+  border-bottom: 1px solid var(--oc-line) !important;
+  padding: 6px var(--oc-gap) !important;
+}

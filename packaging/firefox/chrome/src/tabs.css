@@ -1,0 +1,179 @@
+/* Omarchy Chrome — vertical tabs.
+ *
+ * Zen-style rows: flat until hovered, the selected tab lifted onto a
+ * raised surface, close buttons only where the pointer is. Pinned tabs
+ * become a grid of icon tiles. Colors are overlays of the text color
+ * (tokens.css), so the rows read on any palette. */
+
+:root {
+  /* Nova's selected-tab border is a violet→orange gradient; ours is the
+   * shared hairline. */
+  --tab-border-color-selected-leading: transparent !important;
+  --tab-border-color-selected-trailing: transparent !important;
+  --tab-background-color-selected: var(--oc-selected) !important;
+  --tab-box-shadow-selected: var(--oc-shadow) !important;
+  --tab-selected-textcolor: var(--oc-text) !important;
+  --tab-loading-fill: var(--oc-accent) !important;
+  --tab-attention-dot-color: var(--oc-accent) !important;
+
+  /* Tab-group swatches follow the Omarchy palette. */
+  --tab-group-red: var(--omarchy-red) !important;
+  --tab-group-orange: var(--omarchy-orange) !important;
+  --tab-group-yellow: var(--omarchy-yellow) !important;
+  --tab-group-green: var(--omarchy-green) !important;
+  --tab-group-cyan: var(--omarchy-cyan) !important;
+  --tab-group-blue: var(--omarchy-blue) !important;
+  --tab-group-purple: var(--omarchy-magenta) !important;
+  --tab-group-pink: var(--omarchy-bright_magenta) !important;
+  --tab-group-gray: var(--omarchy-brown) !important;
+}
+
+#tabbrowser-tabs[orient="vertical"] {
+  --tab-min-height: var(--oc-row) !important;
+  --tab-block-margin: 1px !important;
+  --tab-inline-padding: 10px !important;
+  --tab-icon-end-margin: 10px !important;
+
+  /* ---- rows ------------------------------------------------------ */
+
+  & .tabbrowser-tab {
+    padding-inline: var(--oc-gap) !important;
+    color: var(--oc-text-dim) !important;
+  }
+
+  & .tabbrowser-tab:is([selected], [multiselected], :hover) {
+    color: var(--oc-text) !important;
+  }
+
+  & .tab-background {
+    border: none !important;
+    border-radius: var(--oc-radius-small) !important;
+    outline: none !important;
+    transition: background-color var(--oc-fast), box-shadow var(--oc-fast) !important;
+  }
+
+  & .tabbrowser-tab:not([selected], [multiselected]) .tab-background {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  & .tabbrowser-tab:hover:not([selected]) .tab-background {
+    background-color: var(--oc-hover) !important;
+  }
+
+  & .tabbrowser-tab:is([selected], [multiselected]) .tab-background {
+    background: var(--oc-selected) !important;
+    box-shadow: var(--oc-shadow) !important;
+  }
+
+  & .tabbrowser-tab[multiselected]:not([selected]) .tab-background {
+    background: var(--oc-accent-wash) !important;
+    box-shadow: none !important;
+  }
+
+  & .tab-context-line {
+    display: none !important;
+  }
+
+  & .tab-label {
+    font-weight: normal !important;
+  }
+
+  /* Discarded tabs recede until they are loaded again. */
+  & .tabbrowser-tab[pending]:not([selected]) :is(.tab-icon-image, .tab-label) {
+    opacity: 0.55 !important;
+  }
+
+  /* Close button: only on the hovered or selected row. */
+  &[expanded] .tabbrowser-tab:not(:hover, [selected]) .tab-close-button {
+    display: none !important;
+  }
+
+  & .tab-close-button {
+    border-radius: calc(var(--oc-radius-small) - 2px) !important;
+    fill-opacity: 0.7 !important;
+
+    &:hover {
+      background-color: var(--oc-hover) !important;
+      fill-opacity: 1 !important;
+    }
+  }
+
+  /* ---- pinned tiles ---------------------------------------------- */
+
+  /* Firefox already grids pinned tabs through ::part(items-wrapper) and
+   * hides the container when empty; feed it our tile size instead of
+   * replacing its layout. */
+  & #pinned-tabs-container {
+    --tab-pinned-min-width-expanded: var(--oc-pinned) !important;
+    --tab-pinned-margin-inline-expanded: 3px !important;
+    --tab-pinned-container-margin-inline-expanded: calc(var(--oc-gap) - 3px) !important;
+    /* Row height of the native pinned grid. */
+    --tab-height-with-margin-padding: calc(var(--oc-pinned) + 6px) !important;
+
+    & .tabbrowser-tab {
+      padding-inline: 0 !important;
+    }
+
+    & .tab-background {
+      background-color: var(--oc-hover) !important;
+    }
+
+    & .tabbrowser-tab[selected] .tab-background {
+      background-color: var(--oc-selected) !important;
+      box-shadow: var(--oc-shadow) !important;
+    }
+  }
+
+  & #vertical-pinned-tabs-splitter {
+    border: none !important;
+    background: linear-gradient(var(--oc-line), var(--oc-line)) center / calc(100% - 2 * var(--oc-gap) - 12px) 1px no-repeat !important;
+    min-height: 9px !important;
+    margin: 0 !important;
+  }
+
+  /* ---- new tab row ------------------------------------------------ */
+
+  & #tabs-newtab-button {
+    margin-inline: var(--oc-gap) !important;
+    border-radius: var(--oc-radius-small) !important;
+    color: var(--oc-text-dim) !important;
+    fill: var(--oc-text-dim) !important;
+
+    &:hover {
+      background-color: var(--oc-hover) !important;
+      color: var(--oc-text) !important;
+      fill: var(--oc-text) !important;
+    }
+  }
+
+  /* ---- groups ----------------------------------------------------- */
+
+  & .tab-group-label-container {
+    padding-inline: var(--oc-gap) !important;
+  }
+
+  & .tab-group-label {
+    border-radius: var(--oc-radius-small) !important;
+    min-height: calc(var(--oc-row) - 8px) !important;
+    font-weight: 600 !important;
+  }
+
+  & .tab-group-line {
+    border-radius: 2px !important;
+  }
+
+  /* ---- drag feedback --------------------------------------------- */
+
+  & .tab-drop-indicator {
+    background: var(--oc-accent) !important;
+    border-radius: 2px !important;
+    height: 2px !important;
+  }
+}
+
+/* The vertical strip scrolls with the wheel; no arrow buttons. */
+#tabbrowser-arrowscrollbox[orient="vertical"]::part(scrollbutton-up),
+#tabbrowser-arrowscrollbox[orient="vertical"]::part(scrollbutton-down) {
+  display: none !important;
+}

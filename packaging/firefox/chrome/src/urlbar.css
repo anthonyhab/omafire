@@ -1,0 +1,109 @@
+/* Omarchy Chrome — urlbar.
+ *
+ * Resting: a quiet field at the top of the sidebar. Focused: Zen's floating
+ * launcher, centred over the window.
+ *
+ * Firefox 156 keeps the urlbar in the top layer as a popover whenever it
+ * can break out ([breakout]); while extended, JS writes only an inline
+ * `top`. So the launcher is plain inset overrides on [breakout-extend]:
+ * the top layer already escapes every containing block, and ::backdrop
+ * gives the scrim for free. */
+
+#urlbar {
+  --urlbar-background-color: var(--oc-hover) !important;
+  --urlbar-background-color-focus: var(--oc-panel) !important;
+  --urlbar-border-radius: var(--oc-radius-small) !important;
+  --urlbar-box-background-color: transparent !important;
+  --urlbar-box-background-color-hover: var(--oc-hover) !important;
+  --urlbar-box-background-color-active: var(--oc-active) !important;
+  --urlbar-box-background-color-focus: transparent !important;
+  --toolbar-field-border-color: transparent !important;
+  --toolbar-field-border-color-focus: transparent !important;
+  --toolbar-field-text-color: var(--oc-text) !important;
+  --toolbar-field-text-color-focus: var(--oc-text) !important;
+  color: var(--oc-text) !important;
+}
+
+#urlbar > .urlbar-background {
+  box-shadow: none !important;
+  border: none !important;
+  outline: none !important;
+}
+
+#urlbar:not([focused]):hover .urlbar-background {
+  background-color: var(--oc-active) !important;
+}
+
+/* Page actions are noise in a narrow sidebar field; reveal them on hover
+ * and while editing. The bookmark star stays. */
+#urlbar:not([focused], :hover) #page-action-buttons > :not(#star-button-box, [open]) {
+  display: none !important;
+}
+
+/* ---- launcher ------------------------------------------------------- */
+
+#main-window #urlbar[breakout][breakout-extend] {
+  top: 16vh !important;
+  left: calc(50vw - var(--oc-launcher-width) / 2) !important;
+  width: var(--oc-launcher-width) !important;
+  margin: 0 !important;
+  /* Firefox shifts the popover along with a sliding toolbar
+   * (--toolbar-shift-translate); the launcher is window-anchored. */
+  translate: none !important;
+
+  & > .urlbar-background {
+    background-color: var(--oc-panel) !important;
+    border-radius: var(--oc-radius) !important;
+    box-shadow: var(--oc-shadow-float) !important;
+    animation: none !important;
+  }
+
+  & > .urlbar-input-container {
+    height: 52px !important;
+    padding-inline: 14px !important;
+    font-size: 1.15em !important;
+  }
+
+  &::backdrop {
+    background: var(--oc-scrim) !important;
+    pointer-events: none !important;
+  }
+}
+
+/* ---- results -------------------------------------------------------- */
+
+.urlbarView {
+  margin-inline: 6px !important;
+  width: calc(100% - 12px) !important;
+  border-top: 1px solid var(--oc-line) !important;
+}
+
+.urlbarView-row {
+  border-radius: var(--oc-radius-small) !important;
+}
+
+.urlbarView-row[selected] .urlbarView-row-inner,
+.urlbarView-row:hover .urlbarView-row-inner {
+  border-radius: var(--oc-radius-small) !important;
+}
+
+.urlbarView-action,
+.urlbarView-url {
+  color: var(--oc-text-dim) !important;
+}
+
+.urlbarView-row[selected] :is(.urlbarView-action, .urlbarView-url) {
+  color: var(--oc-text) !important;
+}
+
+/* Search-mode chip and identity boxes read as quiet chips. */
+#urlbar-search-mode-indicator,
+#identity-box.identity-box-button,
+#tracking-protection-icon-container {
+  border-radius: calc(var(--oc-radius-small) - 2px) !important;
+}
+
+#urlbar-search-mode-indicator {
+  background-color: var(--oc-accent-wash) !important;
+  color: var(--oc-text) !important;
+}
