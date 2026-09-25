@@ -99,7 +99,7 @@ function waitFor(predicate, message) {
 
 (async () => {
   // Theme sync is the extension's only job; the permission set says so.
-  assert.deepEqual(manifest.permissions, ["nativeMessaging", "storage", "theme"]);
+  assert.deepEqual(manifest.permissions, ["nativeMessaging", "storage", "theme", "topSites"]);
   assert.equal(manifest.browser_specific_settings.gecko.strict_min_version, "156.0");
   assert.equal(Object.hasOwn(manifest, "host_permissions"), false);
   assert.equal(nativeHostName, nativeManifest.name);

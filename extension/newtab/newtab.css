@@ -1,0 +1,151 @@
+/* Omarchy new tab.
+ *
+ * One spacing unit (--u, 8px) sets every gap, margin and padding, so the
+ * page is a grid of whole units. Shortcuts are poured into a hairline grid:
+ * each block draws a 1px outline into the 1px gap, where it overlaps its
+ * neighbour's, so blocks share their edges instead of floating as cards.
+ * Colors are the live Omarchy palette (newtab.js); the fallbacks only cover
+ * the frame before the stored palette is read. */
+
+:root {
+  --u: 8px;
+  --bg: #121212;
+  --surface: #0d0d0d;
+  --fg: #e6e6e6;
+  --strong: #ffffff;
+  --accent: #e68e0d;
+  --dim: color-mix(in srgb, var(--fg) 55%, transparent);
+  --line: color-mix(in srgb, var(--fg) 12%, transparent);
+  --hover: color-mix(in srgb, var(--fg) 6%, var(--bg));
+
+  color-scheme: dark;
+  background: var(--bg);
+  color: var(--fg);
+  font: 13px/1.5 monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+  display: grid;
+  place-items: start center;
+  padding: calc(var(--u) * 20) calc(var(--u) * 4) calc(var(--u) * 6);
+}
+
+main {
+  width: min(100%, calc(var(--u) * 112));
+}
+
+/* ---- clock ---------------------------------------------------------- */
+
+header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: calc(var(--u) * 3);
+  padding-bottom: calc(var(--u) * 3);
+  margin-bottom: calc(var(--u) * 3);
+  border-bottom: 1px solid var(--line);
+}
+
+#clock {
+  color: var(--strong);
+  font-size: clamp(56px, 10vw, 128px);
+  font-weight: 700;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+#date {
+  color: var(--dim);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ---- shortcuts ------------------------------------------------------ */
+
+#sites {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(calc(var(--u) * 22), 1fr));
+  gap: 1px;
+  padding: 1px;
+}
+
+#sites:empty {
+  display: none;
+}
+
+.site {
+  display: grid;
+  grid-template: "icon index" auto "gap gap" 1fr "title title" auto "host host" auto / 1fr auto;
+  min-height: calc(var(--u) * 14);
+  padding: calc(var(--u) * 2);
+  background: var(--bg);
+  color: inherit;
+  text-decoration: none;
+  outline: 1px solid var(--line);
+}
+
+.site:hover {
+  background: var(--hover);
+}
+
+.site:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.site:hover .index,
+.site:focus-visible .index {
+  color: var(--accent);
+}
+
+.icon {
+  grid-area: icon;
+  width: calc(var(--u) * 3);
+  height: calc(var(--u) * 3);
+  object-fit: contain;
+}
+
+.icon.letter {
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+  color: var(--dim);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.index {
+  grid-area: index;
+  color: var(--dim);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.title {
+  grid-area: title;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.host {
+  grid-area: host;
+  overflow: hidden;
+  color: var(--dim);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .site {
+    transition: background-color 120ms;
+  }
+}

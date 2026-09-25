@@ -31,6 +31,7 @@ shellcheck \
 node --check "$PROJECT_DIR/extension/theme.js"
 node --check "$PROJECT_DIR/extension/background.js"
 node --check "$PROJECT_DIR/extension/popup/popup.js"
+node --check "$PROJECT_DIR/extension/newtab/newtab.js"
 node --check "$SCRIPT_DIR/native-host.test.js"
 cc -std=c17 -Wall -Wextra -Wpedantic -Werror -fsyntax-only \
   "$PROJECT_DIR/omarchy/omafox-native-host.c"
