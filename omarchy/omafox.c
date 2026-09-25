@@ -1382,6 +1382,8 @@ static void configure_ff_profile(const char *profile) {
                         ", true);\n"
                         "user_pref(\"browser.theme.dark-private-windows\""
                         ", false);\n"
+                        "user_pref(\"browser.tabs.allow_transparent_browser\""
+                        ", true);\n"
                         FF_PREFS_END "\n",
                         false, "Firefox profile file");
 
@@ -1768,6 +1770,10 @@ static void refresh_ff_profile_colors(const char *profile,
       ", true);\n"
       "user_pref(\"svg.context-properties.content.enabled\", true);\n"
       "user_pref(\"browser.theme.dark-private-windows\", false);\n"
+      /* Lets the new tab's Desktop background show the window surface;
+       * pages that paint no background fall back to the theme's canvas,
+       * which matches browser.display.background_color below. */
+      "user_pref(\"browser.tabs.allow_transparent_browser\", true);\n"
       "user_pref(\"browser.nova.enabled\", true);\n"
       "user_pref(\"browser.newtabpage.activity-stream.nova.enabled\""
       ", true);\n"
