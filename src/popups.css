@@ -11,7 +11,14 @@ panel[type="arrow"] {
   display: none !important;
 }
 
+/* 156 paints popups with the --panel-* variables, set on each popup
+ * (a menupopup defaults to the system Menu color and a 6px radius), so
+ * they are bound here rather than on :root. */
 :is(menupopup, panel) {
+  --panel-background-color: var(--oc-panel) !important;
+  --panel-color: var(--oc-text) !important;
+  --panel-border-color: var(--oc-line) !important;
+  --panel-border-radius: var(--oc-radius) !important;
   --panel-shadow: var(--oc-shadow-float) !important;
   --panel-padding: 4px !important;
   --menu-background-color: var(--oc-panel) !important;
@@ -21,10 +28,30 @@ panel[type="arrow"] {
   --menu-disabled-color: var(--oc-text-dim) !important;
 }
 
+/* Menu rows on the 4px grid: 28px tall, one unit in from the popup edge,
+ * labels one inset in from the row. */
 menupopup > menuitem,
 menupopup > menu {
+  min-height: calc(var(--oc-u) * 7) !important;
+  padding-inline: var(--oc-inset) !important;
   border-radius: var(--oc-radius-small) !important;
-  margin-inline: 4px !important;
+  margin-inline: var(--oc-u) !important;
+}
+
+/* The active row (pointer or keyboard) would paint GTK's system
+ * Highlight blue. */
+menupopup > :is(menuitem, menu)[_moz-menuactive] {
+  background-color: var(--oc-active) !important;
+  color: var(--oc-text) !important;
+
+  & > :is(label, .menu-text, .menu-iconic-text, .menu-accel, .menu-accel-container) {
+    color: inherit !important;
+  }
+}
+
+menupopup > :is(menuitem, menu)[_moz-menuactive][disabled] {
+  background-color: var(--oc-hover) !important;
+  color: var(--oc-text-dim) !important;
 }
 
 toolbarseparator,
