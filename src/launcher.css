@@ -18,9 +18,11 @@
      * (--toolbar-shift-translate); the launcher is window-anchored. */
     translate: none !important;
 
+    /* A tall field whose leading chip starts at the same inner edge as
+     * the result highlights below it. */
     & > .urlbar-input-container {
-      height: 52px !important;
-      padding-inline: 14px !important;
+      height: calc(var(--oc-u) * 12) !important;
+      padding-inline: 0 !important;
       font-size: 1.15em !important;
     }
 

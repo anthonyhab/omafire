@@ -24,7 +24,7 @@ sidebar-main {
   min-height: 9px !important;
 
   &:hover {
-    background: linear-gradient(var(--oc-line), var(--oc-line)) center / 40% 1px no-repeat !important;
+    background: linear-gradient(transparent calc(50% - 0.5px), var(--oc-line) 0, var(--oc-line) calc(50% + 0.5px), transparent 0) center / 40% 100% no-repeat !important;
   }
 }
 

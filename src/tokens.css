@@ -17,8 +17,13 @@
 :root {
   /* ---- geometry ---------------------------------------------------- */
 
-  /* Spacing unit inside chrome (toolbar padding, launcher offsets). */
-  --oc-gap: 8px;
+  /* Spacing. Everything sits on a 4px grid, and the chrome shares two
+   * vertical axes: blocks (buttons, tab rows, tiles) start --oc-inset from
+   * the window edge, and their icons --oc-inset further in, so toolbar,
+   * pinned tiles, tabs and the new-tab row line up like one column. */
+  --oc-u: 4px;
+  --oc-inset: calc(var(--oc-u) * 2);
+  --oc-gap: calc(var(--oc-u) * 2);
   /* Space around the content area. 0 = page flush against the chrome;
    * omarchy.chrome-gap turns it into a floating card (modes/gap.css). */
   --oc-frame-gap: 0px;
@@ -30,7 +35,7 @@
   --oc-toolbar: 40px;       /* top toolbar row */
   --oc-row: 32px;           /* vertical tab row */
   --oc-button: 32px;        /* toolbar button tile */
-  --oc-pinned: 44px;        /* pinned tab tile */
+  --oc-pinned: 40px;        /* pinned tab tile (square) */
   --oc-launcher-width: min(720px, 80vw);
   --oc-launcher-top: 16vh;
   /* Firefox paints the open urlbar's background this far outside its box. */
@@ -40,7 +45,7 @@
     --oc-toolbar: 34px;
     --oc-row: 28px;
     --oc-button: 28px;
-    --oc-pinned: 38px;
+    --oc-pinned: 36px;
   }
 
   /* ---- type -------------------------------------------------------- */
@@ -131,5 +136,11 @@
   --button-border-radius: var(--oc-radius-small) !important;
   --button-background-color-ghost-hover: var(--oc-hover) !important;
   --button-background-color-ghost-active: var(--oc-active) !important;
+  /* Firefox's design-system corner scale (Nova rounds chips, fields and
+   * buttons with it) follows Hyprland too. --border-radius-circle stays:
+   * real circles (avatars, dots) remain round. */
+  --border-radius-small: var(--oc-radius-small) !important;
   --border-radius-medium: var(--oc-radius) !important;
+  --border-radius-large: var(--oc-radius) !important;
+  --border-radius-xlarge: var(--oc-radius) !important;
 }
