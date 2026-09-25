@@ -13,8 +13,9 @@ const root = join(import.meta.dirname, "..");
 const files = [
   "userChrome.css",
   "userContent.css",
-  ...readdirSync(join(root, "src"))
+  ...readdirSync(join(root, "src"), { recursive: true })
     .filter((f) => f.endsWith(".css"))
+    .sort()
     .map((f) => join("src", f)),
 ];
 

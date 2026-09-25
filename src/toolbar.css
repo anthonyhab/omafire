@@ -1,61 +1,24 @@
 /* Omarchy Chrome — navigation toolbar.
  *
- * In the single-sidebar layout the nav-bar is a two-row block at the top
- * of the sidebar column: buttons on the first row, the urlbar filling the
- * second (Zen's arrangement). The customization target is flattened so
- * its buttons and #nav-bar's own buttons wrap together. Customize mode
- * keeps the stock single row so drag-and-drop targets stay intact. */
+ * One flat row: navigation on the left, the urlbar filling the middle,
+ * extensions and the app menu on the right. Layout modules may move the
+ * row (layouts/sidebar.css) or hide it (modes/zen.css); this file only
+ * styles it. */
 
 #nav-bar {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
+  min-height: var(--oc-toolbar) !important;
+  padding-inline: calc(var(--oc-gap) / 2) !important;
   --toolbarbutton-inner-padding: calc((var(--oc-button) - 16px) / 2) !important;
   --toolbarbutton-outer-padding: 1px !important;
 }
 
-/* Wrapped layout only while the toolbox lives in the sidebar column. */
-@media -moz-pref("sidebar.verticalTabs") {
-  :root:not([customizing], [popup-window], [taskbartab], [chromehidden~="toolbar"]):has(sidebar-main[expanded]) {
-    & #nav-bar {
-      flex-wrap: wrap !important;
-      align-items: center !important;
-      row-gap: 6px !important;
-      padding: var(--oc-gap) var(--oc-gap) 6px !important;
-    }
-
-    & #nav-bar-customization-target {
-      display: contents !important;
-    }
-
-    & #urlbar-container {
-      order: 100 !important;
-      flex: 1 1 100% !important;
-      min-width: 0 !important;
-      max-width: none !important;
-      margin: 0 !important;
-      padding: 0 !important;
-    }
-
-    /* Springs (Nova's #vertical-spacer by default) split the button row:
-     * navigation on the left, actions on the right. */
-    & #nav-bar toolbarspring {
-      flex: 1 1 0 !important;
-      min-width: 0 !important;
-      max-width: none !important;
-    }
-
-    /* Window controls end the button row rather than wrapping below the
-     * urlbar. */
-    & #nav-bar .titlebar-buttonbox-container {
-      order: 50 !important;
-    }
-  }
+#urlbar-container {
+  margin-inline: calc(var(--oc-gap) / 2) !important;
 }
 
 /* ---- buttons -------------------------------------------------------- */
 
-:is(#nav-bar, #TabsToolbar) .toolbarbutton-1 {
+:is(#nav-bar, #TabsToolbar, #PersonalToolbar) .toolbarbutton-1 {
   fill: var(--oc-text-dim) !important;
 
   &:not([disabled]):hover,
@@ -69,8 +32,7 @@
   }
 }
 
-/* The sidebar's own toggle lives in the rail; the tab list button is
- * redundant with vertical tabs. */
+/* The tab list button is redundant with vertical tabs. */
 @media -moz-pref("sidebar.verticalTabs") {
   #nav-bar #alltabs-button {
     display: none !important;
@@ -82,4 +44,15 @@
   background-color: var(--oc-accent) !important;
   color: var(--oc-frame) !important;
   box-shadow: none !important;
+}
+
+/* ---- bookmarks toolbar ---------------------------------------------- */
+
+#PersonalToolbar {
+  padding-inline: calc(var(--oc-gap) / 2) !important;
+  padding-bottom: 2px !important;
+}
+
+#PersonalToolbar .bookmark-item {
+  border-radius: var(--oc-radius-small) !important;
 }

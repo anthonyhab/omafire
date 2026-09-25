@@ -1,0 +1,93 @@
+/* Omarchy Chrome — zen mode (top layout).
+ *
+ * Two prefs, kept from the original theme so existing profiles carry over:
+ *   omarchy.zen-mode         feature switch
+ *   omarchy.zen-mode-active  live state (the future Omafox toggle flips it)
+ *
+ * The toolbar leaves the window: only the tab sidebar and the page remain.
+ * Focusing the urlbar (Ctrl+L) opens the centred launcher (launcher.css)
+ * with the navigation row docked just above it as one floating console,
+ * so every address-bar-adjacent control is one keystroke away.
+ *
+ * The row is parked above the top edge with position: fixed rather than
+ * hidden, so Ctrl+L can still focus the urlbar inside it. It is placed
+ * with insets, never transforms: a transformed ancestor would become the
+ * containing block for toolbar popups and pin them to the moving row. */
+
+@media -moz-pref("omarchy.zen-mode") and -moz-pref("omarchy.zen-mode-active") and (not -moz-pref("omarchy.layout", "sidebar")) {
+  :root:not([customizing], [popup-window], [taskbartab], [chromehidden~="toolbar"], [inDOMFullscreen]) {
+    --oc-zen-open: 0;
+
+    /* Open while editing the address, while anything in the row is open
+     * (extension popups, menus), or while the row has keyboard focus. */
+    &:has(#urlbar[breakout-extend], #nav-bar [open], #nav-bar:focus-within) {
+      --oc-zen-open: 1;
+    }
+
+    /* The row hangs out of the toolbox's now zero-height box. Firefox
+     * clips the toolbox (overflow: clip), and as a flex item its z-index: 0
+     * is a stacking context under the tabbox (z-index: 2), so lift it. */
+    & #navigator-toolbox {
+      overflow: visible !important;
+      z-index: 3 !important;
+    }
+
+    /* Anchored by its bottom edge one gap above the launcher, so a row
+     * with many extension buttons wraps upward instead of overlapping it.
+     * Closed, it sits a full viewport higher. */
+    & #nav-bar {
+      position: fixed !important;
+      z-index: 10 !important;
+      top: auto !important;
+      bottom: calc(100vh - var(--oc-launcher-top) + var(--oc-launcher-bleed) + var(--oc-gap)
+                   + (1 - var(--oc-zen-open)) * 100vh) !important;
+      left: calc(50vw - var(--oc-launcher-width) / 2 - var(--oc-launcher-bleed)) !important;
+      width: calc(var(--oc-launcher-width) + 2 * var(--oc-launcher-bleed)) !important;
+      flex-wrap: wrap !important;
+      row-gap: 2px !important;
+      margin: 0 !important;
+      padding-block: 2px !important;
+      border-radius: var(--oc-radius) !important;
+      background-color: var(--oc-panel) !important;
+      box-shadow: var(--oc-shadow-float) !important;
+      transition: bottom var(--oc-slow) var(--oc-ease) !important;
+    }
+
+    & #nav-bar-customization-target {
+      display: contents !important;
+    }
+
+    /* The urlbar floats as the launcher; its slot in the row collapses.
+     * At rest the field stays invisible (it must stay focusable for
+     * Ctrl+L, so it is never display: none). */
+    & #urlbar-container {
+      flex: 0 0 0 !important;
+      min-width: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    & #urlbar:not([breakout-extend]) {
+      opacity: 0 !important;
+    }
+
+    & #nav-bar toolbarspring {
+      flex: 1 1 0 !important;
+      min-width: 0 !important;
+      max-width: none !important;
+    }
+
+    /* Dim the page and sidebar under the console. The launcher's own
+     * ::backdrop would also dim the row, which is not in the top layer. */
+    & #urlbar[breakout-extend]::backdrop {
+      background: transparent !important;
+    }
+
+    & #browser {
+      transition: filter var(--oc-slow) var(--oc-ease) !important;
+    }
+    &:has(#urlbar[breakout-extend]) #browser {
+      filter: brightness(0.72) !important;
+    }
+  }
+}
