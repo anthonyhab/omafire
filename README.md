@@ -122,6 +122,16 @@ Omafox is made up of a few small parts:
 - The native messaging host watches that file with Linux `inotify` and sends
   updates to connected browser extensions. It sleeps between changes, so no
   persistent polling or background service is needed.
+- The same host also watches the current Omarchy wallpaper
+  (`~/.local/state/omarchy/current/background`, falling back to
+  `~/.config/omarchy/current/background`) and streams it to the extension for
+  the new-tab page. JPEG, PNG, and WebP images up to 32 MiB are sent as
+  `{"protocol":"omafox","version":1,"action":"wallpaper","id":…,"mime":…,"size":…,"index":…,"count":…,"data":…}`
+  messages: `count` consecutive base64 chunks of 512 KiB raw bytes each, so
+  every message stays under the browser's 1 MB native-messaging limit. The
+  `id` changes whenever the linked file or its content changes, and an
+  unchanged wallpaper is not resent. When no usable wallpaper exists, the host
+  sends a single message with an empty `id` and `"count":0`.
 - The extension validates the message, maps the Omarchy colors to standard
   Firefox theme properties, and saves the result in the browser's local
   extension storage.
