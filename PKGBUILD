@@ -3,8 +3,8 @@
 # Firefox userChrome bridge (palette-accurate first paint).
 
 pkgname=omafox
-pkgver=1.2.0
-pkgrel=4
+pkgver=1.3.0
+pkgrel=1
 pkgdesc="Keeps Firefox and Zen Browser in sync with the current Omarchy theme"
 arch=('x86_64' 'aarch64')
 url="https://github.com/cover/omafox"
