@@ -1,0 +1,70 @@
+/* Omarchy Chrome — extension glyphs.
+ *
+ * Replaces extension icons with monochrome glyphs from icons/extensions/
+ * that tint like Firefox's own (context-fill; needs
+ * svg.context-properties.content.enabled). One family: a 16px grid, 1.5px
+ * walls with outer edges on whole pixels, square ends, only 90° and 45°
+ * corners, and at most one solid mass per glyph.
+ *
+ * Browser actions are matched on the action button, which paints the icon
+ * in the toolbar, the extensions panel and the overflow menu alike.
+ * Extensions without an action appear in the panel as a plain image.
+ * On unless omarchy.extension-glyphs is false. */
+
+@media not -moz-pref("omarchy.extension-glyphs", false) {
+  /* ---- browser actions ------------------------------------------------ */
+
+  .webextension-browser-action {
+    &[data-extensionid="{e4a8a97b-f2ed-450b-b12d-ee082ba24781}"] {
+      list-style-image: url("icons/extensions/greasemonkey.svg") !important;
+    }
+    &[data-extensionid="uBlock0@raymondhill.net"] {
+      list-style-image: url("icons/extensions/ublock.svg") !important;
+    }
+    &[data-extensionid="{d634138d-c276-4fc8-924b-40a0ea21d284}"] {
+      list-style-image: url("icons/extensions/1password.svg") !important;
+    }
+    &[data-extensionid="vimium-c@gdh1995.cn"] {
+      list-style-image: url("icons/extensions/vimium.svg") !important;
+    }
+    &:is([data-extensionid="coloreader@bb.hab.rip"],
+         [data-extensionid="darkreader@alexhulbert.com"]) {
+      list-style-image: url("icons/extensions/darkreader.svg") !important;
+    }
+    &[data-extensionid="omarchy-ff-sync@bb.hab.rip"] {
+      list-style-image: url("icons/extensions/ff-sync.svg") !important;
+    }
+    &[data-extensionid="@testpilot-containers"] {
+      list-style-image: url("icons/extensions/containers.svg") !important;
+    }
+    &[data-extensionid="sponsorBlocker@ajay.app"] {
+      list-style-image: url("icons/extensions/sponsorblock.svg") !important;
+    }
+    &[data-extensionid="deArrow@ajay.app"] {
+      list-style-image: url("icons/extensions/dearrow.svg") !important;
+    }
+    &[data-extensionid="redirector@einaregilsson.com"] {
+      list-style-image: url("icons/extensions/redirector.svg") !important;
+    }
+    &[data-extensionid="magnolia_limited_permissions@12.34"] {
+      list-style-image: url("icons/extensions/bypass-paywalls.svg") !important;
+    }
+    &[data-extensionid="{35d6291e-1d4b-f9b4-c52f-77e6410d1326}"] {
+      list-style-image: url("icons/extensions/rakuten.svg") !important;
+    }
+  }
+
+  /* ---- panel entries without an action -------------------------------- */
+
+  unified-extensions-item {
+    &[extension-id="{1be309c5-3e4f-4b99-927d-bb500eb4fa88}"] .unified-extensions-item-icon {
+      content: url("icons/extensions/augmented-steam.svg") !important;
+    }
+    &[extension-id="jid1-xUfzOsOFlzSOXg@jetpack"] .unified-extensions-item-icon {
+      content: url("icons/extensions/res.svg") !important;
+    }
+    &[extension-id="tether@tether.com"] .unified-extensions-item-icon {
+      content: url("icons/extensions/tether.svg") !important;
+    }
+  }
+}

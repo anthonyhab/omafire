@@ -1,0 +1,4 @@
+<!-- Omarchy Chrome extension glyph. Greasemonkey: monkey mask with a widow's-peak brow. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="context-fill" fill-opacity="context-fill-opacity">
+  <path fill-rule="evenodd" d="M5 1L2 4L2 6L1 6L0 7L0 9L1 10L2 10L2 12L5 15L11 15L14 12L14 10L15 10L16 9L16 7L15 6L14 6L14 4L11 1L5 1zM5.5 4L6 4L8 6.5L10 4L10.5 4L11.5 5L11.5 8.5L12.5 9.5L12.5 11L10 13.5L6 13.5L3.5 11L3.5 9.5L4.5 8.5L4.5 5L5.5 4zM5 7L5 9L7 9L7 7L5 7zM9 7L9 9L11 9L11 7L9 7zM6 11L6 12L10 12L10 11L6 11z"/>
+</svg>

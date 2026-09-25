@@ -1,0 +1,4 @@
+<!-- Omarchy Chrome extension glyph. Multi-Account Containers: three boxes and a plus. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="context-fill" fill-opacity="context-fill-opacity">
+  <path fill-rule="evenodd" d="M1 1L1 7L7 7L7 1L1 1zM11.25 1L11.25 3.25L12.75 3.25L12.75 1L11.25 1zM12.75 3.25L12.75 4.75L15 4.75L15 3.25L12.75 3.25zM12.75 4.75L11.25 4.75L11.25 7L12.75 7L12.75 4.75zM11.25 4.75L11.25 3.25L9 3.25L9 4.75L11.25 4.75zM2.5 2.5L5.5 2.5L5.5 5.5L2.5 5.5L2.5 2.5zM1 9L1 15L7 15L7 9L1 9zM9 9L9 15L15 15L15 9L9 9zM2.5 10.5L5.5 10.5L5.5 13.5L2.5 13.5L2.5 10.5zM10.5 10.5L13.5 10.5L13.5 13.5L10.5 13.5L10.5 10.5z"/>
+</svg>
