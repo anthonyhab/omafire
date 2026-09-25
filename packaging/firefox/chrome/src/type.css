@@ -19,6 +19,21 @@
   font-size: var(--oc-font-size) !important;
 }
 
+findbar :is(label, description, checkbox, input, .findbar-textbox),
+#sidebar-header {
+  font-family: var(--oc-font) !important;
+  font-size: var(--oc-font-size) !important;
+}
+
+/* Sidebar panels (bookmarks, history, synced tabs…) and the Library are
+ * their own chrome documents, some XUL, some HTML with custom elements. */
+@-moz-document url-prefix("chrome://browser/content/sidebar/"),
+               url-prefix("chrome://browser/content/places/") {
+  :root, :root * {
+    font-family: var(--oc-font) !important;
+  }
+}
+
 :is(#urlbar-input, .tab-label, .urlbarView-row) {
   font-family: var(--oc-font) !important;
   font-size: var(--oc-label-size) !important;

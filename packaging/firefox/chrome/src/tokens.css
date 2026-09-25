@@ -38,7 +38,7 @@
   --oc-pinned: 40px;        /* pinned tab tile (square) */
   --oc-launcher-width: min(720px, 80vw);
   --oc-launcher-top: 16vh;
-  /* Firefox paints the open urlbar's background this far outside its box. */
+  /* How far the open urlbar card extends past the field (urlbar.css). */
   --oc-launcher-bleed: 8px;
 
   &[uidensity="compact"] {
@@ -143,4 +143,19 @@
   --border-radius-medium: var(--oc-radius) !important;
   --border-radius-large: var(--oc-radius) !important;
   --border-radius-xlarge: var(--oc-radius) !important;
+
+  /* Design-system inputs (sidebar search, dialogs): square fields on the
+   * shared hairline, not 9999px pills. */
+  --input-search-border-radius: var(--oc-radius-small) !important;
+  --input-text-border-radius: var(--oc-radius-small) !important;
+  --input-text-border-color: var(--oc-line) !important;
+  --input-text-background-color: var(--oc-hover) !important;
+
+  accent-color: var(--oc-focus) !important;
+}
+
+/* Native checkboxes and radios set their own platform accent instead of
+ * inheriting it. */
+:is(.checkbox-check, .radio-check, input:is([type="checkbox"], [type="radio"])) {
+  accent-color: var(--oc-focus) !important;
 }

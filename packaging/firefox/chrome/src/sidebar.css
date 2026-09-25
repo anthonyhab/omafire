@@ -14,6 +14,11 @@ sidebar-main {
   --button-text-color-ghost: var(--oc-text-dim) !important;
   --button-text-color-ghost-hover: var(--oc-text) !important;
   --border-color: var(--oc-line) !important;
+  /* Tool buttons sit on the --oc-inset axis like every other rail item;
+   * in the collapsed rail this also sets the rail's width. */
+  --sidebar-launcher-button-padding-inline: var(--oc-inset) !important;
+  /* The expanded tools strip pads itself with --space-medium. */
+  --space-medium: var(--oc-inset) !important;
 }
 
 /* The splitter above the tools strip is a drag handle, not a divider:
