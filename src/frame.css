@@ -40,6 +40,19 @@
     -moz-window-dragging: no-drag !important;
   }
 
+  /* The Omafox new tab may leave its page clear to show the window
+   * surface (with glass: the blurred desktop). Only that page: everywhere
+   * else the canvas stays the backstop for pages that paint no background,
+   * and it matches browser.display.background_color, which omafox keeps on
+   * the palette. Needs browser.tabs.allow_transparent_browser (omafox sets
+   * it). The page is known by its favicon, the one trait it owns that the
+   * chrome can see: Firefox inlines it as base64, and this is the base64
+   * of its opening `<svg id="omafox-newtab" `. */
+  &:has(.tabbrowser-tab[selected][image*="PHN2ZyBpZD0ib21hZm94LW5ld3RhYiIg"])
+      #tabbrowser-tabpanels > .deck-selected .browserContainer {
+    background-color: transparent !important;
+  }
+
   /* Split view: the focused page is outlined with the focus edge. */
   & #tabbrowser-tabpanels[splitview] {
     & .split-view-panel > .browserContainer {
