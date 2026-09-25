@@ -33,7 +33,10 @@
    * below owns that rhythm. */
   gap: 0 !important;
   --tab-min-height: var(--oc-row) !important;
-  --tab-block-margin: 1px !important;
+  /* Half a unit above and below: rows repeat every --oc-row + --oc-u, the
+   * same pitch as pinned tiles and the new-tab row. Nova raises it to 4px
+   * in compact density; this holds it at any density. */
+  --tab-margin-block: calc(var(--oc-u) / 2) !important;
   /* Nova pads each row on top of the background margin; one spacing is
    * enough (row pitch = --oc-row + 4px, as before Nova). */
   --tab-padding-block-start: 0px !important;
@@ -54,7 +57,7 @@
       margin-inline: var(--oc-inset) !important;
     }
     & .tab-content {
-      padding-inline: calc(var(--oc-inset) * 2) !important;
+      padding-inline: var(--oc-icon-axis) var(--oc-inset) !important;
     }
   }
 
@@ -78,7 +81,14 @@
     background-color: var(--oc-hover) !important;
   }
 
-  /* Selected: a flat wash with a hairline edge, no raised shadow. */
+  /* One edge logic for every tab surface (rows, tiles, rail, new tab):
+   *   fill    = interaction (hover, selected)
+   *   hairline = a tile's own edge (--oc-line), stronger when selected
+   *   2px bar  = the active tab, on the edge facing its content: the
+   *              leading edge for a row, the bottom edge for a tile
+   * Nothing else paints an edge or a shadow.
+   *
+   * Selected: a flat wash with a hairline edge, no raised shadow. */
   & .tabbrowser-tab:is([selected], [multiselected]) .tab-background {
     background: var(--oc-selected) !important;
     box-shadow: inset 0 0 0 1px var(--oc-line-strong) !important;
@@ -153,12 +163,14 @@
       margin: 0 !important;
     }
 
-    & .tabbrowser-tab:not([selected]) .tab-background {
-      background-color: var(--oc-hover) !important;
+    /* A tile at rest is its edge only; hover fills it like a row. */
+    & .tabbrowser-tab:not([selected], [multiselected]) .tab-background {
+      background: transparent !important;
+      box-shadow: inset 0 0 0 1px var(--oc-line) !important;
     }
 
-    & .tabbrowser-tab:hover:not([selected]) .tab-background {
-      background-color: var(--oc-active) !important;
+    & .tabbrowser-tab:hover:not([selected], [multiselected]) .tab-background {
+      background-color: var(--oc-hover) !important;
     }
 
     /* Slabs glow from their bottom edge. */
@@ -173,8 +185,9 @@
   }
 
   /* Pinned tiles, rule, tabs: the rule sits 3 units below the last tile
-   * row and 3 above the first tab row, as wide as a tab row. (The tile
-   * grid's own row pitch adds 1 unit under the last tiles.) */
+   * and 3 above the first tab's surface, as wide as a tab row. Above: the
+   * grid's pitch leaves 1 unit under the last tiles, then 2 in here.
+   * Below: 2.5 in here, then the first tab's half-unit margin. */
   & #vertical-pinned-tabs-splitter {
     border: none !important;
     /* Hard stops over the full box, not a 1px background tile: a 1px tile
@@ -182,8 +195,8 @@
     background: linear-gradient(transparent calc(var(--oc-u) * 2), var(--oc-line) 0,
       var(--oc-line) calc(var(--oc-u) * 2 + 1px), transparent 0)
       center / calc(100% - 2 * var(--oc-inset)) 100% no-repeat !important;
-    min-height: calc(var(--oc-u) * 4 + 2px) !important;
-    height: calc(var(--oc-u) * 4 + 2px) !important;
+    min-height: calc(var(--oc-u) * 4.5 + 1px) !important;
+    height: calc(var(--oc-u) * 4.5 + 1px) !important;
     margin: 0 !important;
   }
 
@@ -196,8 +209,8 @@
 
   /* Laid out exactly like a tab row: same axes, height and pitch. */
   & #tabs-newtab-button {
-    margin: 2px var(--oc-inset) !important;
-    padding: 0 var(--oc-inset) !important;
+    margin: calc(var(--oc-u) / 2) var(--oc-inset) !important;
+    padding: 0 var(--oc-icon-pad) !important;
     min-height: var(--oc-row) !important;
     gap: var(--oc-inset) !important;
     border-radius: var(--oc-radius-small) !important;
@@ -205,8 +218,8 @@
     & .toolbarbutton-icon {
       margin: 0 !important;
       padding: 0 !important;
-      width: 16px !important;
-      height: 16px !important;
+      width: var(--oc-icon) !important;
+      height: var(--oc-icon) !important;
     }
 
     & .toolbarbutton-text {
@@ -280,8 +293,20 @@
   }
 
   & .tabbrowser-tab .tab-content {
-    padding-inline: calc(var(--oc-inset) * 2) 0 !important;
+    padding-inline: var(--oc-icon-axis) 0 !important;
     justify-content: start !important;
+  }
+
+  /* In the rail every tab is a tile, so the active one marks its bottom
+   * edge like a pinned tile; a leading bar would pull the lone icon off
+   * the column's centre line. */
+  & .tabbrowser-tab[selected] .tab-background {
+    background:
+      linear-gradient(0deg, var(--oc-glow-wash), transparent 70%),
+      var(--oc-selected) !important;
+    box-shadow:
+      inset 0 -2px 0 var(--oc-glow),
+      inset 0 0 0 1px var(--oc-line-strong) !important;
   }
 
   /* Rail tiles are tab-sized, at the tab pitch, one per row at any column

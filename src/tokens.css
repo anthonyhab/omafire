@@ -36,6 +36,16 @@
   --oc-row: 32px;           /* vertical tab row */
   --oc-button: 32px;        /* toolbar button tile */
   --oc-pinned: 40px;        /* pinned tab tile (square) */
+  --oc-icon: 16px;          /* every chrome glyph and favicon */
+  /* Where icons sit: centred in a --oc-button square that starts on the
+   * --oc-inset axis. Toolbar buttons, tabs, tiles and the new-tab row all
+   * put their icon here, so one vertical line runs through every icon at
+   * any density (compact shrinks the button, so the axis moves with it). */
+  --oc-icon-pad: calc((var(--oc-button) - var(--oc-icon)) / 2);
+  --oc-icon-axis: calc(var(--oc-inset) + var(--oc-icon-pad));
+  /* Invisible strip at a window edge that reveals hidden chrome
+   * (compact's column, zen's navigation row). */
+  --oc-trigger: 6px;
   --oc-launcher-width: min(720px, 80vw);
   --oc-launcher-top: 16vh;
   /* How far the open urlbar card extends past the field (urlbar.css). */
@@ -96,8 +106,11 @@
   --oc-panel: color-mix(in srgb, var(--oc-frame), var(--oc-text) 5%);
   --oc-shadow: 0 1px 2px rgb(0 0 0 / 0.14), 0 0 0 1px var(--oc-line);
   --oc-shadow-float: 0 12px 40px rgb(0 0 0 / 0.36), 0 0 0 1px var(--oc-line);
-  /* Hangs from a top-attached console: an edge line and a downward cast. */
-  --oc-shadow-drop: 0 1px 0 var(--oc-line), 0 16px 40px rgb(0 0 0 / 0.36);
+  /* The quake console (launcher.css, zen.css): an opaque slab held by
+   * hard rules, never shadows. Glass (translucency.css) leaves it solid so
+   * the page cannot show through the results. */
+  --oc-console: color-mix(in srgb, var(--oc-frame), var(--oc-text) 5%);
+  --oc-rule: 2px;
   /* Dims the window behind the urlbar launcher. */
   --oc-scrim: rgb(0 0 0 / 0.28);
 

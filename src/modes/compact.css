@@ -13,7 +13,6 @@
 @media -moz-pref("omarchy.compact") and -moz-pref("omarchy.layout", "sidebar") and -moz-pref("sidebar.verticalTabs") {
   :root:not([customizing], [popup-window], [taskbartab], [chromehidden~="toolbar"], [inDOMFullscreen]):has(sidebar-main[expanded]) {
     --oc-reveal: 0;
-    --oc-trigger: 6px;
 
     /* Reveal while the pointer is on the column, while anything it owns is
      * open or focused, and while a tab is being dragged. */

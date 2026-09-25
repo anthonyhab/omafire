@@ -2,8 +2,11 @@
  *
  * Used where the resting urlbar is narrow or hidden: the single sidebar
  * and zen mode. Two shapes, picked by omarchy.launcher:
- *   (unset) / "drop"  a full-width console that slides down from the
- *                     window's top edge, under the navigation row
+ *   (unset) / "drop"  a quake console. Horizontal tabs: full width,
+ *                     sliding down from the window's top edge under the
+ *                     navigation row. Vertical tabs: it spans the page
+ *                     only and slides out sideways from the tab column,
+ *                     which stays in view.
  *   "center"          a floating card in the middle of the window
  *
  * Firefox 156 keeps the urlbar in the top layer as a popover while it can
@@ -20,6 +23,18 @@
   to { clip-path: inset(0 -100vw -100vh -100vw); }
 }
 
+/* The slide: the same console unrolls out of the tab column's edge. The
+ * clip runs between the card's two edges (the field's, plus the inset the
+ * card bleeds by), so it keeps pace with the navigation row's own wipe. */
+@keyframes oc-slide-start {
+  from { clip-path: inset(0 calc(100% + var(--oc-inset)) -100vh -100vw); }
+  to { clip-path: inset(0 calc(-1 * var(--oc-inset)) -100vh -100vw); }
+}
+@keyframes oc-slide-end {
+  from { clip-path: inset(0 -100vw -100vh calc(100% + var(--oc-inset))); }
+  to { clip-path: inset(0 -100vw -100vh calc(-1 * var(--oc-inset))); }
+}
+
 @media -moz-pref("omarchy.layout", "sidebar"),
        -moz-pref("omarchy.zen-mode") and -moz-pref("omarchy.zen-mode-active") {
   #main-window:not([customizing]) #urlbar[breakout][breakout-extend] {
@@ -34,7 +49,6 @@
     }
 
     &::backdrop {
-      background: var(--oc-scrim) !important;
       pointer-events: none !important;
     }
   }
@@ -42,7 +56,9 @@
   @media not -moz-pref("omarchy.launcher", "center") {
     #main-window:not([customizing]) #urlbar[breakout][breakout-extend] {
       /* Under the navigation row, edge to edge: the field and rows sit on
-       * the chrome's inset axis, the card bleeds to the window edges. */
+       * the chrome's inset axis, the card bleeds to the window edges.
+       * Brutalist: one opaque slab, ruled on its open edges in the focus
+       * colour, no shadow and no scrim; the page stays as it is. */
       top: var(--oc-toolbar) !important;
       left: var(--oc-inset) !important;
       width: calc(100vw - 2 * var(--oc-inset)) !important;
@@ -52,8 +68,89 @@
       animation: oc-drop var(--oc-slow) var(--oc-ease) !important;
 
       & > .urlbar-background {
+        background-color: var(--oc-console) !important;
+        border: var(--oc-rule) solid var(--oc-focus) !important;
+        border-top: none !important;
         border-radius: 0 !important;
-        box-shadow: var(--oc-shadow-drop) !important;
+        box-shadow: none !important;
+      }
+
+      & .urlbarView {
+        border-top: 1px solid var(--oc-line-strong) !important;
+      }
+
+      /* Rows are outlined, not filled. */
+      & :is(.urlbarView-row, .urlbarView-row-inner) {
+        border-radius: 0 !important;
+      }
+      & .urlbarView-row-inner {
+        background-color: transparent !important;
+      }
+      & .urlbarView-row:not([selected]):hover {
+        background-color: transparent !important;
+        outline: 1px solid var(--oc-line-strong) !important;
+        outline-offset: -1px !important;
+      }
+      & .urlbarView-row[selected] {
+        background-color: transparent !important;
+        outline: var(--oc-rule) solid var(--oc-focus) !important;
+        outline-offset: calc(-1 * var(--oc-rule)) !important;
+      }
+    }
+
+    /* Vertical tabs: the console belongs to the page, not the window. It
+     * is anchored to the page's box (the tabbox; CSS anchor positioning
+     * reaches from the top layer), so it follows the column's resizable
+     * width, the sidebar side, the collapsed rail and the floating card
+     * without knowing any of them. Zen mode docks the navigation row on
+     * the same anchor (zen.css), one row above. */
+    @media -moz-pref("sidebar.verticalTabs") {
+      #main-window:not([customizing]) {
+        & #tabbrowser-tabbox {
+          anchor-name: --oc-page !important;
+        }
+
+        & #urlbar[breakout][breakout-extend] {
+          top: anchor(--oc-page top, 0px) !important;
+          left: calc(anchor(--oc-page left, 0px) + var(--oc-inset)) !important;
+          right: calc(anchor(--oc-page right, 0px) + var(--oc-inset)) !important;
+          width: auto !important;
+          animation-name: oc-slide-start !important;
+
+          /* Its own slab beside the column, ruled all round. */
+          & > .urlbar-background {
+            border-top: var(--oc-rule) solid var(--oc-focus) !important;
+          }
+        }
+      }
+
+      @media not -moz-pref("sidebar.position_start") {
+        #main-window:not([customizing]) #urlbar[breakout][breakout-extend] {
+          animation-name: oc-slide-end !important;
+        }
+      }
+
+      /* Zen mode: under the docked navigation row, which carries the
+       * slab's top rule. */
+      @media -moz-pref("omarchy.zen-mode") and -moz-pref("omarchy.zen-mode-active") and (not -moz-pref("omarchy.layout", "sidebar")) {
+        #main-window:not([customizing]) #urlbar[breakout][breakout-extend] {
+          top: calc(anchor(--oc-page top, 0px) + var(--oc-toolbar)) !important;
+
+          & > .urlbar-background {
+            border-top: none !important;
+          }
+        }
+      }
+
+      /* Compact mode floats the column over the page, and reveals it while
+       * the urlbar is focused: start past the column instead. */
+      @media -moz-pref("omarchy.compact") and -moz-pref("omarchy.layout", "sidebar") {
+        #main-window:not([customizing]) #sidebar-container {
+          anchor-name: --oc-column !important;
+        }
+        #main-window:not([customizing]):has(sidebar-main[expanded]) #urlbar[breakout][breakout-extend] {
+          left: calc(anchor(--oc-column right, 0px) + var(--oc-gap) + var(--oc-inset)) !important;
+        }
       }
     }
   }
@@ -68,6 +165,11 @@
       /* Firefox shifts the popover along with a sliding toolbar
        * (--toolbar-shift-translate); the launcher is window-anchored. */
       translate: none !important;
+
+      /* A floating card over a dimmed window. */
+      &::backdrop {
+        background: var(--oc-scrim) !important;
+      }
     }
   }
 }
