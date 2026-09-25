@@ -241,9 +241,14 @@
 
 /* ---- collapsed rail -------------------------------------------------- *
  * One 32px button column with the inset on both sides, so every rail item
- * (pinned, tabs, new tab) centres on the same icon axis as the toolbar's
+ * (pinned, tabs, new tab) sits on the same icon axis as the toolbar's
  * first button. Closing is middle-click or Ctrl+W: the rail's corner close
- * badge would sit on the favicon. */
+ * badge would sit on the favicon.
+ *
+ * Everything is placed from the left edge, never centred in the column:
+ * Firefox drops [expanded] as the collapse animation starts but keeps the
+ * column at full width while it slides, so width-relative layout would
+ * scatter the rail for those frames. */
 :root {
   --tab-collapsed-background-width: var(--oc-button) !important;
   --tab-collapsed-width: calc(var(--oc-button) + 2 * var(--oc-inset)) !important;
@@ -259,17 +264,20 @@
   }
 
   & .tabbrowser-tab .tab-content {
-    padding-inline: 0 !important;
-    justify-content: center !important;
+    padding-inline: calc(var(--oc-inset) * 2) 0 !important;
+    justify-content: start !important;
   }
 
-  /* Rail tiles are tab-sized, at the tab pitch. */
+  /* Rail tiles are tab-sized, at the tab pitch, one per row at any column
+   * width. */
   & #pinned-tabs-container {
     --tab-height-with-margin-padding: calc(var(--oc-row) + var(--oc-u)) !important;
+    --tab-pinned-min-width-expanded: 100% !important;
   }
 
   & #pinned-tabs-container .tabbrowser-tab {
     padding: 0 !important;
+    width: var(--tab-collapsed-width) !important;
     height: var(--oc-row) !important;
 
     & .tab-background {

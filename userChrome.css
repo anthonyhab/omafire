@@ -21,6 +21,7 @@
 @import "src/sidebar.css";
 @import "src/tabs.css";
 @import "src/popups.css";
+@import "src/motion.css";
 
 /* Extension glyphs; off with omarchy.extension-glyphs = false. */
 @import "src/icons.css";
