@@ -33,5 +33,31 @@
     --color-accent-primary: var(--omarchy-accent) !important;
     --link-color: var(--omarchy-accent) !important;
     --focus-outline-color: var(--omarchy-accent) !important;
+    accent-color: var(--omarchy-accent) !important;
+
+    /* Same geometry as the chrome: Hyprland's rounding everywhere, no
+     * pills (nav selection, search fields, buttons). */
+    --border-radius-small: var(--omarchy-radius-container, 0px) !important;
+    --border-radius-medium: var(--omarchy-radius-container, 0px) !important;
+    --border-radius-large: var(--omarchy-radius-container, 0px) !important;
+    --border-radius-xlarge: var(--omarchy-radius-container, 0px) !important;
+    --button-border-radius: var(--omarchy-radius-container, 0px) !important;
+    --input-search-border-radius: var(--omarchy-radius-container, 0px) !important;
+    --input-text-border-radius: var(--omarchy-radius-container, 0px) !important;
+  }
+
+  /* Settings navigation selects with a pill; square it without touching
+   * real circles (toggle knobs, avatars). */
+  moz-page-nav-button {
+    --page-nav-button-border-radius: var(--omarchy-radius-container, 0px) !important;
+    /* Monospace runs wider; the chrome's label size keeps labels on one
+     * line in the fixed-width nav. */
+    font-size: 13px !important;
+  }
+
+  /* The shell's monospace, like the chrome. Named on every element: these
+   * pages set `font` per component. */
+  :root, :root * {
+    font-family: monospace !important;
   }
 }
