@@ -61,3 +61,14 @@
     font-family: monospace !important;
   }
 }
+
+/* Omafox new tab: tell the page whether the chrome is glass, so its
+ * Desktop background can be the default where it shows the desktop and
+ * explain itself where it can't. A page can't read prefs; it reads this. */
+@-moz-document regexp("moz-extension://[^/]+/newtab/newtab\\.html.*") {
+  @media -moz-pref("omarchy.translucency") {
+    :root {
+      --omarchy-glass: 1 !important;
+    }
+  }
+}
