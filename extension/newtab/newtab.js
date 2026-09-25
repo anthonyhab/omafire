@@ -35,6 +35,11 @@
     hidden: [] // urls
   };
 
+  /* The theme marks the page when the chrome is glass (userContent), the
+   * one case where Desktop shows the desktop; there it is the default. */
+  const glass = getComputedStyle(root).getPropertyValue("--omarchy-glass").trim() === "1";
+  if (glass) DEFAULTS.background = "desktop";
+
   let settings = { ...DEFAULTS };
 
   /* ---- palette ------------------------------------------------------ */
@@ -396,8 +401,8 @@
         when: (s) => s.background === "wallpaper" || s.background === "custom" },
       { key: "tint", type: "range", label: "Tint", min: 0, max: 90, unit: "%",
         when: (s) => s.background === "desktop" },
-      { type: "note", label: "", text: "Glass chrome shows the desktop",
-        when: (s) => s.background === "desktop" },
+      { type: "note", label: "", text: "Turn on glass chrome to see the desktop",
+        when: (s) => s.background === "desktop" && !glass },
       { type: "note", label: "", text: "No wallpaper from Omarchy yet",
         when: (s) => s.background === "wallpaper" && root.dataset.backdrop !== "true" },
       { key: "glass", type: "toggle", label: "Glass", when: (s) => s.background !== "solid" }
