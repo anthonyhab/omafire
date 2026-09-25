@@ -153,6 +153,12 @@
     --tab-pinned-container-margin-inline-expanded: calc(var(--oc-inset) - var(--oc-u) / 2) !important;
     --tab-height-with-margin-padding: calc(var(--oc-pinned) + var(--oc-u)) !important;
     padding-block: var(--oc-inset) 0 !important;
+    /* Always exactly as tall as its tiles. Firefox applies the height the
+     * pinned splitter was last dragged to (per rail state) inline, which
+     * scrolls tiles away under a fade; the splitter below is only a rule
+     * here, so it no longer drags. */
+    height: auto !important;
+    max-height: none !important;
 
     & .tabbrowser-tab {
       padding: 0 calc(var(--oc-u) / 2) !important;
@@ -198,6 +204,7 @@
     min-height: calc(var(--oc-u) * 4.5 + 1px) !important;
     height: calc(var(--oc-u) * 4.5 + 1px) !important;
     margin: 0 !important;
+    pointer-events: none !important;
   }
 
   /* Nova pads the first row once more; the rule above already spaces it. */
