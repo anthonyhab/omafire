@@ -4,7 +4,6 @@ const assert = require("node:assert/strict");
 const manifest = require("../extension/manifest.json");
 const nativeManifest = require("../packaging/org.omarchy.omafox.json");
 const themeApi = require("../extension/theme.js");
-const featuresApi = require("../extension/features.js");
 
 const memory = {};
 const themeUpdates = [];
@@ -14,11 +13,7 @@ let nativeHostName;
 let nativeMessageListener;
 let nativeDisconnectListener;
 let runtimeMessageListener;
-let alarmListener;
-let menuClickListener;
-let menuShownListener;
-const discardedTabs = [];
-let fakeTabs = [];
+let connectCount = 0;
 
 const nativePort = {
   error: null,
@@ -69,6 +64,7 @@ global.browser = {
   runtime: {
     connectNative(name) {
       nativeHostName = name;
+      connectCount += 1;
       return nativePort;
     },
     onMessage: {
@@ -83,64 +79,6 @@ global.browser = {
     },
     onInstalled: {
       addListener() {}
-    }
-  },
-  alarms: {
-    create(name, info) {
-      this.created = { name, info };
-    },
-    onAlarm: {
-      addListener(listener) {
-        alarmListener = listener;
-      }
-    }
-  },
-  tabs: {
-    async query(queryInfo) {
-      return fakeTabs.filter((tab) =>
-        Object.entries(queryInfo).every(
-          ([key, value]) => tab[key] === value
-        )
-      );
-    },
-    async discard(id) {
-      discardedTabs.push(id);
-      const tab = fakeTabs.find((t) => t.id === id);
-      if (tab) tab.discarded = true;
-      return tab;
-    }
-  },
-  contextMenus: {
-    created: [],
-    refreshed: 0,
-    onClicked: {
-      addListener(listener) {
-        menuClickListener = listener;
-      }
-    },
-    onShown: {
-      addListener(listener) {
-        menuShownListener = listener;
-      }
-    },
-    create(spec) {
-      this.created.push(spec);
-    },
-    async remove(id) {
-      this.created = this.created.filter((item) => item.id !== id);
-    },
-    async refresh() {
-      this.refreshed += 1;
-    }
-  },
-  windows: {
-    created: [],
-    async getCurrent() {
-      return { left: 100, top: 100 };
-    },
-    async create(spec) {
-      this.created.push(spec);
-      return { id: 9000 + this.created.length };
     }
   }
 };
@@ -160,14 +98,9 @@ function waitFor(predicate, message) {
 }
 
 (async () => {
-  assert.deepEqual(manifest.permissions, [
-    "alarms",
-    "contextMenus",
-    "nativeMessaging",
-    "storage",
-    "tabs",
-    "theme"
-  ]);
+  // Theme sync is the extension's only job; the permission set says so.
+  assert.deepEqual(manifest.permissions, ["nativeMessaging", "storage", "theme"]);
+  assert.equal(manifest.browser_specific_settings.gecko.strict_min_version, "156.0");
   assert.equal(Object.hasOwn(manifest, "host_permissions"), false);
   assert.equal(nativeHostName, nativeManifest.name);
   assert.ok(
@@ -249,166 +182,17 @@ function waitFor(predicate, message) {
   assert.match(memory.lastError.message, /mode/);
   assert.equal(memory.storedTheme.themeName, "native-dark");
 
-  // features-set from the popup merges into storage and relays to the host;
-  // ids outside the registry and non-boolean values are dropped.
-  await runtimeMessageListener({
-    type: "features-set",
-    features: { debug: true, "not-a-feature": true, "urlbar-actions": "yes" }
-  });
-  assert.deepEqual(memory.features, { debug: true });
-  assert.deepEqual(nativeSent.at(-1), {
-    action: "features-set",
-    features: { debug: true }
-  });
-  assert.deepEqual(featuresApi.normalizeFeatures({ debug: "1" }), {});
+  // The popup's Clear resets the tinted action icon through the runtime.
+  assert.equal(typeof runtimeMessageListener, "function");
+  assert.equal(runtimeMessageListener({ type: "unknown" }), undefined);
 
-  // Range features accept finite numbers, clamp to their bounds, and reject
-  // non-numeric input.
-  assert.deepEqual(featuresApi.normalizeFeatures({ transparency: 0.7 }), {
-    transparency: 0.7
-  });
-  assert.deepEqual(featuresApi.normalizeFeatures({ transparency: 9 }), {
-    transparency: 1
-  });
-  assert.deepEqual(featuresApi.normalizeFeatures({ transparency: 0 }), {
-    transparency: 0.55
-  });
-  assert.deepEqual(featuresApi.normalizeFeatures({ transparency: "x" }), {});
-  assert.deepEqual(featuresApi.normalizeFeatures({ translucency: true }), {
-    translucency: true
-  });
-  assert.deepEqual(featuresApi.normalizeFeatures({ translucency: 1 }), {});
-  // Translucent pages is a plain boolean feature dependent on translucency.
-  assert.deepEqual(featuresApi.normalizeFeatures({ "content-glass": true }), {
-    "content-glass": true
-  });
-  assert.deepEqual(featuresApi.normalizeFeatures({ "content-glass": 1 }), {});
-  // Idle timeout is a minutes-range feature dependent on tab-unload.
-  assert.deepEqual(featuresApi.normalizeFeatures({ "unload-minutes": 45 }), {
-    "unload-minutes": 45
-  });
-  assert.deepEqual(featuresApi.normalizeFeatures({ "unload-minutes": 999 }), {
-    "unload-minutes": 120
-  });
-  assert.deepEqual(featuresApi.normalizeFeatures({ "tab-unload": true }), {
-    "tab-unload": true
-  });
-
-  // Auto-unload: only background tabs past the idle cutoff are discarded;
-  // active, pinned, audible, already-discarded, no-discard and mid-load
-  // tabs are all left alone.
-  const hour = 60 * 60 * 1000;
-  const idle = Date.now() - hour;
-  fakeTabs = [
-    { id: 1, lastAccessed: idle, status: "complete", active: false, pinned: false, audible: false, discarded: false, autoDiscardable: true },
-    { id: 2, lastAccessed: Date.now(), status: "complete", active: false, pinned: false, audible: false, discarded: false, autoDiscardable: true },
-    { id: 3, lastAccessed: idle, status: "loading", active: false, pinned: false, audible: false, discarded: false, autoDiscardable: true },
-    { id: 4, lastAccessed: idle, status: "complete", active: false, pinned: true, audible: false, discarded: false, autoDiscardable: true },
-    { id: 5, lastAccessed: idle, status: "complete", active: false, pinned: false, audible: true, discarded: false, autoDiscardable: true },
-    { id: 6, lastAccessed: idle, status: "complete", active: true, pinned: false, audible: false, discarded: false, autoDiscardable: true },
-    { id: 7, lastAccessed: idle, status: "complete", active: false, pinned: false, audible: false, discarded: false, autoDiscardable: false },
-    { id: 8, lastAccessed: idle, status: "complete", active: false, pinned: false, audible: false, discarded: true, autoDiscardable: true }
-  ];
-  discardedTabs.length = 0;
-  memory.features = { "tab-unload": true, "unload-minutes": 5 };
-  assert.equal(typeof alarmListener, "function");
-  alarmListener({ name: "omarchy-tab-unload" });
-  await waitFor(() => discardedTabs.length > 0, "idle tab was never discarded");
-  assert.deepEqual(discardedTabs, [1]);
-
-  // Feature off → the sweep is a no-op even with ancient tabs.
-  discardedTabs.length = 0;
-  memory.features = { "tab-unload": false, "unload-minutes": 5 };
-  alarmListener({ name: "omarchy-tab-unload" });
-  await new Promise((resolve) => setTimeout(resolve, 30));
-  assert.deepEqual(discardedTabs, []);
-
-  // Glance: enabling the feature installs a link-context menu entry whose
-  // click opens a floating popup window; disabling removes the entry.
-  memory.features = { glance: true };
-  await runtimeMessageListener({
-    type: "features-set",
-    features: { glance: true }
-  });
-  await waitFor(
-    () => browser.contextMenus.created.some((m) => m.id === "omarchy-glance"),
-    "glance menu entry was not created"
-  );
-  menuClickListener({ menuItemId: "omarchy-glance", linkUrl: "https://a.b/c" });
-  await waitFor(
-    () => browser.windows.created.length > 0,
-    "glance window was not opened"
-  );
-  assert.equal(browser.windows.created[0].url, "https://a.b/c");
-  assert.equal(browser.windows.created[0].type, "popup");
-  await runtimeMessageListener({
-    type: "features-set",
-    features: { glance: false }
-  });
-  await waitFor(
-    () => !browser.contextMenus.created.some((m) => m.id === "omarchy-glance"),
-    "glance menu entry was not removed"
-  );
-
-  // MV3 wake reconcile: an event-page suspension drops dynamically created
-  // menu items, so onShown must recreate the entry and refresh while the
-  // menu is already open.
-  memory.features = { glance: true };
-  browser.contextMenus.created = [];
-  await menuShownListener({ contexts: ["link"], linkUrl: "https://a.b/" });
-  assert.ok(
-    browser.contextMenus.created.some((m) => m.id === "omarchy-glance"),
-    "onShown did not recreate the glance entry"
-  );
-  assert.ok(
-    browser.contextMenus.refreshed > 0,
-    "onShown did not refresh the open menu"
-  );
-
-  // Non-link contexts must not trigger the reconcile.
-  const createdBefore = browser.contextMenus.created.length;
-  await menuShownListener({ contexts: ["page"] });
-  assert.equal(browser.contextMenus.created.length, createdBefore);
-
-  memory.features = { glance: false };
-  await menuShownListener({ contexts: ["link"], linkUrl: "https://a.b/" });
-  assert.ok(
-    !browser.contextMenus.created.some((m) => m.id === "omarchy-glance"),
-    "onShown did not remove the glance entry when disabled"
-  );
-
-  memory.features = { debug: true };
-  fakeTabs = [];
-
-  // A numeric feature relays through the same merge + host path.
-  await runtimeMessageListener({
-    type: "features-set",
-    features: { transparency: 0.9 }
-  });
-  assert.deepEqual(memory.features, { debug: true, transparency: 0.9 });
-  assert.deepEqual(nativeSent.at(-1), {
-    action: "features-set",
-    features: { debug: true, transparency: 0.9 }
-  });
-
-  // A features-ack is control traffic, not a theme payload.
-  const updatesBeforeAck = themeUpdates.length;
-  nativeMessageListener({ type: "features-ack", ok: true, applied: 1 });
-  await new Promise((resolve) => setTimeout(resolve, 20));
-  assert.equal(themeUpdates.length, updatesBeforeAck);
-
-  // Reconnecting the host re-pushes the stored toggle state.
-  nativeSent.length = 0;
+  // A dropped host connection is re-established on the next lifecycle
+  // event instead of leaving the extension deaf to theme changes.
+  const connectsBefore = connectCount;
   nativeDisconnectListener();
   await startupListener();
-  await waitFor(
-    () => nativeSent.length > 0,
-    "stored features were not re-pushed on reconnect"
-  );
-  assert.deepEqual(nativeSent.at(-1), {
-    action: "features-set",
-    features: { debug: true, transparency: 0.9 }
-  });
+  assert.equal(connectCount, connectsBefore + 1);
+  assert.equal(memory.nativeStatus.connected, true);
 
   console.log("background.test.js: ok");
 })().catch((error) => {

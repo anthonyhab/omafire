@@ -1,12 +1,12 @@
 {
   "manifest_version": 3,
   "name": "Omarchy FF Sync",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "description": "Keeps Firefox and Zen Browser in sync with the current Omarchy theme.",
   "browser_specific_settings": {
     "gecko": {
       "id": "omarchy-ff-sync@bb.hab.rip",
-      "strict_min_version": "142.0",
+      "strict_min_version": "156.0",
       "data_collection_permissions": {
         "required": [
           "none"
@@ -15,17 +15,13 @@
     }
   },
   "permissions": [
-    "alarms",
-    "contextMenus",
     "nativeMessaging",
     "storage",
-    "tabs",
     "theme"
   ],
   "background": {
     "scripts": [
       "theme.js",
-      "features.js",
       "background.js"
     ]
   },

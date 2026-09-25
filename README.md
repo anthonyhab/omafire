@@ -11,9 +11,8 @@ Omafox keeps Firefox and Zen Browser in sync with your current
 > already matches the live theme — closing the window where a light default
 > theme or an approximate fallback could flash before the extension applies.
 > The native messaging host, wire protocol, and signed `@omafox` WebExtension
-> remain wire-compatible with upstream; the WebExtension half is now forked
-  as **Omarchy FF Sync** (`omarchy-ff-sync@bb.hab.rip`) with a Hacks page for
-  live userChrome feature toggles.
+> remain wire-compatible with upstream; the WebExtension half is forked as
+> **Omarchy FF Sync** (`omarchy-ff-sync@bb.hab.rip`).
 
 ## Features
 
@@ -34,7 +33,22 @@ Omafox keeps Firefox and Zen Browser in sync with your current
 ## Requirements
 
 - Omarchy 4 (Quattro) or newer.
-- Firefox 142 or newer, or a current native Zen Browser installation.
+- Firefox 156 or newer, or a current native Zen Browser installation
+  (Zen 1.22+, Gecko 156).
+
+The packaged Firefox theme (Omarchy Chrome) is built for Firefox's Nova
+design and a single vertical-tab sidebar. Omafox does not change your layout
+preferences; set these in `about:config` once:
+
+| Preference | Value | Why |
+|---|---|---|
+| `browser.nova.enabled` | `true` | Nova design (default from Firefox 157) |
+| `sidebar.revamp` | `true` | The sidebar the layout is built on |
+| `sidebar.verticalTabs` | `true` | Tabs, toolbar, and urlbar share one sidebar column |
+| `omarchy.compact` | `true` (optional) | Hide the sidebar until the pointer reaches the window edge |
+
+Without vertical tabs the theme still colors Firefox but keeps the stock
+horizontal layout.
 
 Flatpak installations of Zen are not currently supported because their
 sandbox cannot use the host native-messaging manifest installed by the AUR
@@ -67,7 +81,9 @@ installs the Omafox CSS bridge into each existing profile, and enables the two
 Zen preferences it needs. Firefox profiles in `~/.mozilla/firefox/profiles.ini`
 receive the packaged `omarchy-firefox` theme payload, managed
 `userChrome.css`/`userContent.css` imports, the palette-synced first-paint
-stylesheet, and the required `user.js` preferences. Restart each browser once
+stylesheet, a geometry stylesheet matching Hyprland's window rounding, and the
+required `user.js` preferences. A profile whose `chrome/` is itself an Omarchy
+Chrome checkout gets only the generated stylesheets. Restart each browser once
 after setup. Run setup once for each desktop user who wants to use Omafox, and
 rerun it after creating a new browser profile.
 
@@ -119,8 +135,9 @@ Omafox is made up of a few small parts:
   and `chrome/userContent.css`, and adds the required preferences to a
   managed block in `user.js`. On every `omafox sync` it also regenerates
   `chrome/omafox-palette.css`, a `:root:not([lwtheme])` fallback holding the
-  *current* palette, plus the mode-matched
-  `layout.css.prefers-color-scheme.content-override` and
+  *current* palette, `chrome/omarchy-radius.css` from Hyprland's
+  `decoration:rounding` (left alone when `hyprctl` is unavailable), plus
+  the mode-matched `layout.css.prefers-color-scheme.content-override` and
   `browser.display` canvas prefs — so the first painted frame, restored
   pages, and pages with native dark-mode CSS all start on the real palette
   instead of an approximation. The fallback self-disables the moment the
@@ -163,8 +180,8 @@ Issues](https://github.com/cover/omafox/issues).
 
 Omafox makes no network requests and does not collect or transmit data. It
 only reads your local Omarchy palette and passes it to supported browsers
-through native messaging. Zen support additionally writes the managed local
-profile files described above. See the [privacy statement](PRIVACY.md) for
+through native messaging. Zen and Firefox support additionally write the
+managed local profile files described above. See the [privacy statement](PRIVACY.md) for
 details.
 
 ## Uninstallation

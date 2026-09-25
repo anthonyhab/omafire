@@ -38,7 +38,7 @@
 #endif
 
 #define PROGRAM_NAME "omafox"
-#define VERSION "1.1.0"
+#define VERSION "1.2.0"
 #define PROTOCOL "omafox"
 #define PROTOCOL_VERSION 1
 #define ACTION "theme-set"
@@ -60,6 +60,9 @@
 #define FF_PREFS_END "// END OMAFOX FIREFOX BRIDGE"
 #define FF_PALETTE_NAME "omafox-palette.css"
 #define FF_CONTENT_PALETTE_NAME "omafox-content-palette.css"
+#define FF_RADIUS_NAME "omarchy-radius.css"
+#define FF_RADIUS_MARKER \
+  "/* OMAFOX GENERATED GEOMETRY — written by omafox sync; do not edit. */"
 #define FF_PAYLOAD_DIRNAME "omarchy-firefox"
 #define FF_PAYLOAD_ENTRY "userChrome.css"
 
@@ -880,6 +883,41 @@ static void install_managed_block(const char *path, const char *begin,
   free(merged);
 }
 
+/* Rewrite an existing managed block where it stands (no prepend), so a
+ * tracked file keeps its import order. No-op when the block is absent. */
+static void replace_managed_block_in_place(const char *path, const char *begin,
+                                           const char *end,
+                                           const char *new_block,
+                                           const char *what) {
+  if (!path_exists(path))
+    return;
+  validate_managed_block(path, begin, end, what);
+  if (!managed_block_present(path, begin, end))
+    return;
+  char *contents = read_file(path, NULL);
+  if (!contents)
+    return;
+  char *out = xmalloc(strlen(contents) + strlen(new_block) + 1), *o = out;
+  bool managed = false;
+  for (char *line = contents; line && *line;) {
+    char *newline = strchr(line, '\n');
+    if (newline)
+      *newline = '\0';
+    if (strcmp(line, begin) == 0) {
+      managed = true;
+      o += sprintf(o, "%s", new_block);
+    } else if (strcmp(line, end) == 0) {
+      managed = false;
+    } else if (!managed) {
+      o += sprintf(o, "%s\n", line);
+    }
+    line = newline ? newline + 1 : NULL;
+  }
+  free(contents);
+  atomic_write(path, out, (size_t)(o - out), 0600, true);
+  free(out);
+}
+
 /* Strip the managed block; delete the file if nothing remains. */
 static void remove_managed_block(const char *path, const char *begin,
                                  const char *end, const char *what) {
@@ -1185,6 +1223,42 @@ static bool ff_payload_owned(const char *dir) {
   return owned;
 }
 
+/* A profile whose chrome/ is itself an Omarchy Chrome checkout (the
+ * development symlink) must not also get the packaged payload: both copies
+ * would load and the older one would shadow the checkout. Such a profile
+ * gets the prefs block and the generated files only, written beside the
+ * checkout's entrypoints, which import them relatively. The first marker is
+ * the Nova theme; the second is the pre-Nova layout, still recognised so a
+ * checkout is never mistaken for an empty profile mid-migration.
+ * Returns the checkout directory (caller frees), or NULL. */
+static void remove_ff_payload_dir(const char *dir);
+
+static char *ff_checkout_dir(const char *chrome_dir) {
+  static const char *const MARKERS[] = {"src/tokens.css",
+                                        "omarchy-chrome.css"};
+  for (size_t i = 0; i < sizeof(MARKERS) / sizeof(MARKERS[0]); i++) {
+    char *entry = path_join(chrome_dir, MARKERS[i]);
+    bool found = is_regular_file(entry);
+    free(entry);
+    if (found)
+      return xstrdup(chrome_dir);
+  }
+  return NULL;
+}
+
+static bool ff_chrome_is_checkout(const char *chrome_dir) {
+  char *dir = ff_checkout_dir(chrome_dir);
+  bool found = dir != NULL;
+  free(dir);
+  return found;
+}
+
+/* Where the generated palette files belong for this profile. */
+static char *ff_palette_dir(const char *chrome_dir) {
+  char *dir = ff_checkout_dir(chrome_dir);
+  return dir ? dir : xstrdup(chrome_dir);
+}
+
 static void validate_ff_payload(const char *dir) {
   if (path_is_symlink(dir))
     fail("refusing to replace symlinked Firefox payload: %s", dir);
@@ -1265,22 +1339,40 @@ static void configure_ff_profile(const char *profile) {
 
   if (!path_exists(chrome_dir))
     mkdir_p700(chrome_dir);
-  copy_tree(g_ff_payload_source, payload_dir);
+  char *checkout_dir = ff_checkout_dir(chrome_dir);
+  bool checkout = checkout_dir != NULL;
+  if (checkout) {
+    /* Undo what earlier releases installed into the checkout. Its marker
+     * pair is kept, narrowed to the palette import: omafox <= 1.1.0
+     * refreshes the palette only while the markers exist. */
+    char *palette_block = xasprintf("%s\n@import \"%s\";\n%s\n",
+                                    FF_CSS_BEGIN, FF_PALETTE_NAME, FF_CSS_END);
+    replace_managed_block_in_place(user_chrome, FF_CSS_BEGIN, FF_CSS_END,
+                                   palette_block, "Firefox profile file");
+    free(palette_block);
+    remove_managed_block(user_content, FF_CSS_BEGIN, FF_CSS_END,
+                         "Firefox profile file");
+    if (ff_payload_owned(payload_dir))
+      remove_ff_payload_dir(payload_dir);
+    free(checkout_dir);
+  } else {
+    copy_tree(g_ff_payload_source, payload_dir);
 
-  char *block = xasprintf(
-      "%s\n@import url(\"%s/%s\");\n@import url(\"%s\");\n\n%s\n",
-      FF_CSS_BEGIN, FF_PAYLOAD_DIRNAME, FF_PAYLOAD_ENTRY, FF_PALETTE_NAME,
-      FF_CSS_END);
-  install_managed_block(user_chrome, FF_CSS_BEGIN, FF_CSS_END, block,
-                        true, "Firefox profile file");
-  free(block);
+    char *block = xasprintf(
+        "%s\n@import url(\"%s/%s\");\n@import url(\"%s\");\n\n%s\n",
+        FF_CSS_BEGIN, FF_PAYLOAD_DIRNAME, FF_PAYLOAD_ENTRY, FF_PALETTE_NAME,
+        FF_CSS_END);
+    install_managed_block(user_chrome, FF_CSS_BEGIN, FF_CSS_END, block,
+                          true, "Firefox profile file");
+    free(block);
 
-  char *content_block = xasprintf(
-      "%s\n@import url(\"%s/userContent.css\");\n\n%s\n",
-      FF_CSS_BEGIN, FF_PAYLOAD_DIRNAME, FF_CSS_END);
-  install_managed_block(user_content, FF_CSS_BEGIN, FF_CSS_END,
-                        content_block, true, "Firefox profile file");
-  free(content_block);
+    char *content_block = xasprintf(
+        "%s\n@import url(\"%s/userContent.css\");\n\n%s\n",
+        FF_CSS_BEGIN, FF_PAYLOAD_DIRNAME, FF_CSS_END);
+    install_managed_block(user_content, FF_CSS_BEGIN, FF_CSS_END,
+                          content_block, true, "Firefox profile file");
+    free(content_block);
+  }
 
   install_managed_block(user_prefs, FF_PREFS_BEGIN, FF_PREFS_END,
                         FF_PREFS_BEGIN "\n"
@@ -1293,7 +1385,9 @@ static void configure_ff_profile(const char *profile) {
                         FF_PREFS_END "\n",
                         false, "Firefox profile file");
 
-  printf("Configured Firefox profile: %s\n", profile);
+  printf(checkout ? "Configured Firefox profile (theme checkout): %s\n"
+                  : "Configured Firefox profile: %s\n",
+         profile);
   free(chrome_dir);
   free(payload_dir);
   free(user_chrome);
@@ -1337,6 +1431,21 @@ static const char *ff_profile_status(const char *profile) {
 
   if (path_exists(payload_dir) && !ff_payload_owned(payload_dir)) {
     status = "conflict";
+  } else if (ff_chrome_is_checkout(chrome_dir)) {
+    /* A leftover payload or import block would shadow the checkout. */
+    char *uc = read_file(user_chrome, NULL);
+    char *ucontent = read_file(user_content, NULL);
+    bool stale = path_exists(payload_dir)
+        || (uc && strstr(uc, FF_PAYLOAD_DIRNAME "/"))
+        || (ucontent && strstr(ucontent, FF_PAYLOAD_DIRNAME "/"));
+    free(uc);
+    free(ucontent);
+    if (stale)
+      status = "theme checkout, outdated";
+    else if (managed_block_present(user_prefs, FF_PREFS_BEGIN, FF_PREFS_END))
+      status = "theme checkout";
+    else
+      status = "theme checkout, not configured";
   } else if (ff_payload_owned(payload_dir)
              && managed_block_present(user_chrome, FF_CSS_BEGIN, FF_CSS_END)
              && managed_block_present(user_content, FF_CSS_BEGIN,
@@ -1401,8 +1510,11 @@ static void remove_ff_payload_dir(const char *dir) {
 static void remove_ff_profile(const char *profile) {
   char *chrome_dir = path_join(profile, "chrome");
   char *payload_dir = path_join(chrome_dir, FF_PAYLOAD_DIRNAME);
-  char *palette_file = path_join(chrome_dir, FF_PALETTE_NAME);
-  char *content_palette_file = path_join(chrome_dir, FF_CONTENT_PALETTE_NAME);
+  char *palette_dir = ff_palette_dir(chrome_dir);
+  char *palette_file = path_join(palette_dir, FF_PALETTE_NAME);
+  char *content_palette_file = path_join(palette_dir, FF_CONTENT_PALETTE_NAME);
+  char *radius_file = path_join(palette_dir, FF_RADIUS_NAME);
+  free(palette_dir);
   char *user_chrome = path_join(chrome_dir, "userChrome.css");
   char *user_content = path_join(chrome_dir, "userContent.css");
   char *user_prefs = path_join(profile, "user.js");
@@ -1425,6 +1537,9 @@ static void remove_ff_profile(const char *profile) {
     unlink(palette_file);
   if (is_regular_file(content_palette_file))
     unlink(content_palette_file);
+  /* The radius file is shared with the old per-user hook; only ours goes. */
+  if (first_line_is(radius_file, FF_RADIUS_MARKER))
+    unlink(radius_file);
   if (configured)
     printf("Removed Firefox profile bridge: %s\n", profile);
 
@@ -1432,6 +1547,7 @@ static void remove_ff_profile(const char *profile) {
   free(payload_dir);
   free(palette_file);
   free(content_palette_file);
+  free(radius_file);
   free(user_chrome);
   free(user_content);
   free(user_prefs);
@@ -1455,126 +1571,86 @@ static void remove_ff_profiles(void) {
 
 /* ------------------------------------------------------- palette refresh */
 
-static char *raw_palette_vars(const palette_t *p, char *buf, size_t cap);
-
-/* Regenerate the first-paint fallback CSS in every configured profile.
- * Scoped to :root:not([lwtheme]) so it self-disables the moment the
- * extension's theme lands — the point is that first paint uses the REAL
- * palette instead of a hardcoded approximation. */
-static void write_palette_css(const palette_t *p, const char *path) {
-  const char *fg = palette_get(p, "foreground");
-  const char *muted = palette_get(p, "muted");
-  const char *accent = palette_get(p, "accent");
-  const char *bg = palette_get(p, "background");
-  const char *dark_bg = palette_get(p, "dark_background");
-  const char *darker_bg = palette_get(p, "darker_background");
-
-  char raw[4096];
-  char *css = xasprintf(
-      "/* OMAFOX GENERATED PALETTE — written by omafox sync; do not edit. */\n"
-      ":root:not([lwtheme]) {\n"
-      "    color-scheme: %s !important;\n"
-      "    --toolbar-background-color: %s !important;\n"
-      "    --toolbar-bgcolor: %s !important;\n"
-      "    --toolbar-color: %s !important;\n"
-      "    --toolbox-background-color: %s !important;\n"
-      "    --toolbar-field-background-color: %s !important;\n"
-      "    --toolbar-field-background-color-focus: %s !important;\n"
-      "    --omarchy-surface: %s !important;\n"
-      "    --omarchy-fg: %s !important;\n"
-      "    --omarchy-muted: %s !important;\n"
-      "    --omarchy-field: %s !important;\n"
-      "    --omarchy-panel: %s !important;\n"
-      "    --omarchy-border: %s !important;\n"
-      "    --omarchy-accent: %s !important;\n"
-      "    --omarchy-focus-accent: %s !important;\n"
-      "}\n\n"
-      "/* Content canvas pre-paint: keep the tabbox on the palette frame\n"
-      " * color until the restored document paints. */\n"
-      "#tabbrowser-tabbox,\n"
-      "#tabbrowser-tabpanels {\n"
-      "    background-color: %s !important;\n"
-      "}\n\n"
-      "/* Full theme palette — status colors and extra accents. Kept\n"
-      " * unconditional: even under lwtheme, theme.json owns these. */\n"
-      "%s",
-      p->mode,
-      dark_bg, dark_bg, fg, dark_bg,
-      darker_bg, darker_bg,
-      bg, fg, muted, darker_bg, dark_bg, muted,
-      accent, accent,
-      bg,
-      raw_palette_vars(p, raw, sizeof(raw)));
-  atomic_write(path, css, strlen(css), 0600, false);
-  free(css);
-}
-
-/* Render the raw palette keys (--omarchy-red, --omarchy-green, …) into buf.
- * These stay available unconditionally — even under lwtheme the theme.json
- * palette is the source of truth for status/accent colors the extension
- * does not carry. Keys already emitted as semantic aliases (accent, muted,
- * selection) are skipped so they cannot override lwtheme-derived mappings.
+/* Render every palette color as --omarchy-<key> into buf. The theme reads
+ * these only where the lightweight theme has no equivalent (tab-group
+ * swatches, about: pages); live chrome colors come from the extension.
  * Returns buf. */
 static char *raw_palette_vars(const palette_t *p, char *buf, size_t cap) {
-  static const char *const SKIP[] = {"accent", "muted", "selection"};
-  size_t off = 0;
-  off += snprintf(buf + off, cap - off, ":root {\n");
-  for (size_t i = 1; i < N_PALETTE_KEYS; i++) {
+  size_t off = (size_t)snprintf(buf, cap, ":root {\n");
+  for (size_t i = 1; i < N_PALETTE_KEYS && off < cap; i++) {
     const char *v = palette_get(p, PALETTE_KEYS[i]);
-    if (!v)
-      continue;
-    bool skip = false;
-    for (size_t j = 0; j < sizeof(SKIP) / sizeof(SKIP[0]); j++)
-      if (strcmp(PALETTE_KEYS[i], SKIP[j]) == 0)
-        skip = true;
-    if (skip)
-      continue;
-    off += snprintf(buf + off, cap - off,
-                    "    --omarchy-%s: %s !important;\n",
-                    PALETTE_KEYS[i], v);
-    if (off >= cap)
-      break;
+    if (v)
+      off += (size_t)snprintf(buf + off, cap - off, "  --omarchy-%s: %s;\n",
+                              PALETTE_KEYS[i], v);
   }
+  /* Truncated output would be invalid CSS; keep room for the closing brace. */
+  if (off + 3 > cap)
+    off = cap - 3;
   snprintf(buf + off, cap - off, "}\n");
   return buf;
 }
 
-/* Content-scope companion to write_palette_css: the same palette exposed as
- * --omarchy-* vars for userContent.css, plus an --omarchy-color-scheme token.
- * Deliberately omits the color-scheme property itself and the tabbox pre-paint
- * rules so importing it can never force a scheme onto ordinary web pages;
- * themed chrome:// and about: documents opt in via
- * color-scheme: var(--omarchy-color-scheme). */
-static void write_content_palette_css(const palette_t *p, const char *path) {
-  const char *fg = palette_get(p, "foreground");
-  const char *muted = palette_get(p, "muted");
-  const char *accent = palette_get(p, "accent");
-  const char *bg = palette_get(p, "background");
-  const char *dark_bg = palette_get(p, "dark_background");
-  const char *darker_bg = palette_get(p, "darker_background");
+/* Chrome palette. Besides the raw keys, it mirrors the Firefox theme
+ * variables the extension's lightweight theme sets, under
+ * :root:not([lwtheme]), so the first painted frame already uses the current
+ * palette; the block goes inert the moment the extension's theme lands and
+ * owns the same variables live. !important is required: userChrome is user
+ * origin and Firefox's own defaults are author origin. */
+static void write_palette_css(const palette_t *p, const char *path) {
+  char raw[4096];
+  char *css = xasprintf(
+      "/* OMAFOX GENERATED PALETTE — written by omafox sync; do not edit. */\n"
+      "%s\n"
+      ":root:not([lwtheme]) {\n"
+      "  color-scheme: %s !important;\n"
+      "  --toolbar-background-color: %s !important;\n"
+      "  --toolbar-text-color: %s !important;\n"
+      "  --toolbar-field-background-color: %s !important;\n"
+      "  --toolbar-field-text-color: %s !important;\n"
+      "  --toolbar-field-border-color-focus: %s !important;\n"
+      "  --lwt-tab-line-color: %s !important;\n"
+      "  --tabpanel-background-color: %s !important;\n"
+      "}\n",
+      raw_palette_vars(p, raw, sizeof(raw)), p->mode,
+      palette_get(p, "dark_background"), palette_get(p, "foreground"),
+      palette_get(p, "darker_background"), palette_get(p, "light_foreground"),
+      palette_get(p, "bright_blue"), palette_get(p, "accent"),
+      palette_get(p, "background"));
+  atomic_write(path, css, strlen(css), 0600, false);
+  free(css);
+}
 
+/* Content palette for userContent.css: the raw keys and the palette mode,
+ * never a color-scheme property, so importing it cannot restyle websites. */
+static void write_content_palette_css(const palette_t *p, const char *path) {
   char raw[4096];
   char *css = xasprintf(
       "/* OMAFOX GENERATED CONTENT PALETTE — written by omafox sync; do not"
       " edit. */\n"
-      ":root {\n"
-      "    --omarchy-color-scheme: %s;\n"
-      "    --omarchy-surface: %s;\n"
-      "    --omarchy-fg: %s;\n"
-      "    --omarchy-muted: %s;\n"
-      "    --omarchy-field: %s;\n"
-      "    --omarchy-panel: %s;\n"
-      "    --omarchy-border: %s;\n"
-      "    --omarchy-accent: %s;\n"
-      "    --omarchy-focus-accent: %s;\n"
-      "}\n\n"
-      "/* Full theme palette — status colors and extra accents for\n"
-      " * surfaces that need them (about: pages, dialogs, reader). */\n"
-      "%s",
-      p->mode,
-      bg, fg, muted, darker_bg, dark_bg, muted,
-      accent, accent,
-      raw_palette_vars(p, raw, sizeof(raw)));
+      ":root {\n  --omarchy-color-scheme: %s;\n}\n\n%s",
+      p->mode, raw_palette_vars(p, raw, sizeof(raw)));
+  atomic_write(path, css, strlen(css), 0600, false);
+  free(css);
+}
+
+/* Hyprland geometry: the chrome rounds its cards like the desktop rounds
+ * windows. Left untouched when hyprctl is unavailable (no Hyprland session,
+ * e.g. a TTY or a test sandbox) so the last good value survives. */
+static void write_radius_css(const char *path) {
+  char out[512];
+  char *argv[] = {"hyprctl", "getoption", "decoration:rounding", "-j", NULL};
+  if (run_command(argv, out, sizeof(out)) != 0)
+    return;
+  const char *field = strstr(out, "\"int\"");
+  if (!field || !(field = strchr(field, ':')))
+    return;
+  char *end;
+  long rounding = strtol(field + 1, &end, 10);
+  if (end == field + 1 || rounding < 0 || rounding > 64)
+    return;
+  char *css = xasprintf(
+      "%s\n:root {\n  --omarchy-radius-container: %ldpx;\n}\n",
+      FF_RADIUS_MARKER, rounding);
   atomic_write(path, css, strlen(css), 0600, false);
   free(css);
 }
@@ -1586,15 +1662,23 @@ static void refresh_ff_profile_colors(const char *profile,
   char *chrome_dir = path_join(profile, "chrome");
   char *user_chrome = path_join(chrome_dir, "userChrome.css");
   char *user_prefs = path_join(profile, "user.js");
-  char *palette_file = path_join(chrome_dir, FF_PALETTE_NAME);
-  char *content_palette_file = path_join(chrome_dir, FF_CONTENT_PALETTE_NAME);
+  char *palette_dir = ff_palette_dir(chrome_dir);
+  char *palette_file = path_join(palette_dir, FF_PALETTE_NAME);
+  char *content_palette_file = path_join(palette_dir, FF_CONTENT_PALETTE_NAME);
+  char *radius_file = path_join(palette_dir, FF_RADIUS_NAME);
+  free(palette_dir);
 
-  if (!managed_block_present(user_chrome, FF_CSS_BEGIN, FF_CSS_END)) {
+  bool bridged = ff_chrome_is_checkout(chrome_dir)
+      ? managed_block_present(user_prefs, FF_PREFS_BEGIN, FF_PREFS_END)
+            || managed_block_present(user_chrome, FF_CSS_BEGIN, FF_CSS_END)
+      : managed_block_present(user_chrome, FF_CSS_BEGIN, FF_CSS_END);
+  if (!bridged) {
     free(chrome_dir);
     free(user_chrome);
     free(user_prefs);
     free(palette_file);
     free(content_palette_file);
+    free(radius_file);
     return;
   }
 
@@ -1624,6 +1708,8 @@ static void refresh_ff_profile_colors(const char *profile,
 
   write_palette_css(p, palette_file);
   write_content_palette_css(p, content_palette_file);
+  write_radius_css(radius_file);
+  free(radius_file);
   free(chrome_dir);
   free(user_chrome);
   free(user_prefs);

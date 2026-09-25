@@ -13,6 +13,7 @@ FF_ROOT="$TEST_HOME/.mozilla/firefox"
 RELATIVE_PROFILE="$FF_ROOT/profiles/default-release"
 ABSOLUTE_PROFILE="$TEST_ROOT/external Firefox profile"
 MISSING_PROFILE="$FF_ROOT/profiles/missing"
+CHECKOUT_PROFILE="$FF_ROOT/profiles/checkout"
 NATIVE_HOST="$TEST_ROOT/package/omafox-native-host"
 NATIVE_MANIFEST="$TEST_ROOT/package/org.omarchy.omafox.json"
 HOOK_SOURCE="$TEST_ROOT/package/omafox-hook"
@@ -40,6 +41,12 @@ mkdir -p \
   "$TEST_HOME" "$MOCK_BIN" "$THEME_DIR" "$FF_ROOT/profiles" \
   "$RELATIVE_PROFILE/chrome" "$ABSOLUTE_PROFILE" "$(dirname "$NATIVE_HOST")"
 install -m 755 "$TEST_DIR/fixtures/bin/omarchy" "$MOCK_BIN/omarchy"
+# Hermetic Hyprland: sync reads decoration:rounding for the radius file.
+cat > "$MOCK_BIN/hyprctl" <<'EOF'
+#!/bin/sh
+[ "$2" = decoration:rounding ] && echo '{"option":"decoration:rounding","int":9,"set":true}'
+EOF
+chmod 755 "$MOCK_BIN/hyprctl"
 install -m 755 "$PROJECT_DIR/packaging/omafox-hook" "$HOOK_SOURCE"
 install -m 755 /dev/null "$NATIVE_HOST"
 install -m 644 "$PROJECT_DIR/packaging/org.omarchy.omafox.json" "$NATIVE_MANIFEST"
@@ -73,7 +80,24 @@ Path=profiles/default-release
 Name=missing
 IsRelative=1
 Path=profiles/missing
+
+[Profile4]
+Name=checkout
+IsRelative=1
+Path=profiles/checkout
 EOF
+
+# A theme checkout as chrome/ (the development layout), still carrying what
+# an earlier release installed into it: a payload copy and import blocks.
+mkdir -p "$CHECKOUT_PROFILE/chrome/omarchy-firefox" "$CHECKOUT_PROFILE/chrome/src"
+printf '%s\n' '/* checkout tokens */' > "$CHECKOUT_PROFILE/chrome/src/tokens.css"
+printf '%s\n' '@import "omarchy-radius.css";' "$CSS_BEGIN" \
+  '@import url("omarchy-firefox/userChrome.css");' '@import url("omafox-palette.css");' \
+  "$CSS_END" '@import "src/tokens.css";' \
+  > "$CHECKOUT_PROFILE/chrome/userChrome.css"
+printf '%s\n' "$CSS_BEGIN" '@import url("omarchy-firefox/userContent.css");' \
+  "$CSS_END" '/* checkout content */' > "$CHECKOUT_PROFILE/chrome/userContent.css"
+cp "$FF_PAYLOAD_SOURCE/userChrome.css" "$CHECKOUT_PROFILE/chrome/omarchy-firefox/"
 
 printf '%s\n' '/* my own chrome rule */' > "$RELATIVE_PROFILE/chrome/userChrome.css"
 printf '%s\n' '/* my own content rule */' > "$RELATIVE_PROFILE/chrome/userContent.css"
@@ -121,10 +145,31 @@ for profile in "$RELATIVE_PROFILE" "$ABSOLUTE_PROFILE"; do
   # Generated first-paint palette landed via sync.
   grep -Fqx '/* OMAFOX GENERATED PALETTE — written by omafox sync; do not edit. */' \
     "$profile/chrome/omafox-palette.css"
-  grep -Fq -- '--omarchy-surface: #111c18' "$profile/chrome/omafox-palette.css"
+  grep -Fq -- '--omarchy-background: #111c18;' "$profile/chrome/omafox-palette.css"
+  # Cold-start mirror of the lightweight theme, inert once it lands.
+  grep -Fqx ':root:not([lwtheme]) {' "$profile/chrome/omafox-palette.css"
+  grep -Fq -- '--tabpanel-background-color: #111c18 !important;' \
+    "$profile/chrome/omafox-palette.css"
+  grep -Fqx '  --omarchy-radius-container: 9px;' "$profile/chrome/omarchy-radius.css"
   grep -Fqx 'user_pref("layout.css.prefers-color-scheme.content-override", 0);' \
     "$profile/user.js"
 done
+
+# The checkout keeps its own entrypoints and loses the shadowing payload,
+# but still gets the prefs block and a live palette. Its marker pair stays
+# where it stood, narrowed to the palette import (older omafox releases
+# refresh the palette only while the markers exist).
+[[ $(grep -Fc "Configured Firefox profile (theme checkout): $CHECKOUT_PROFILE" <<< "$setup_output") == 1 ]]
+[[ ! -e $CHECKOUT_PROFILE/chrome/omarchy-firefox ]]
+printf '%s\n' '@import "omarchy-radius.css";' "$CSS_BEGIN" \
+  '@import "omafox-palette.css";' "$CSS_END" '@import "src/tokens.css";' \
+  | cmp - "$CHECKOUT_PROFILE/chrome/userChrome.css"
+cp "$CHECKOUT_PROFILE/chrome/userChrome.css" "$TEST_ROOT/checkout-userChrome.css"
+printf '%s\n' '/* checkout content */' | cmp - "$CHECKOUT_PROFILE/chrome/userContent.css"
+[[ $(grep -Fxc "$PREFS_BEGIN" "$CHECKOUT_PROFILE/user.js") == 1 ]]
+grep -Fq -- '--omarchy-background: #111c18;' "$CHECKOUT_PROFILE/chrome/omafox-palette.css"
+grep -Fq -- '--omarchy-background: #111c18;' "$CHECKOUT_PROFILE/chrome/omafox-content-palette.css"
+grep -Fqx '  --omarchy-radius-container: 9px;' "$CHECKOUT_PROFILE/chrome/omarchy-radius.css"
 
 [[ $(stat -c '%a' "$RELATIVE_PROFILE/chrome/userChrome.css") == 640 ]]
 [[ $(stat -c '%a' "$RELATIVE_PROFILE/user.js") == 604 ]]
@@ -135,14 +180,19 @@ grep -Fqx 'user_pref("example.existing", true);' "$RELATIVE_PROFILE/user.js"
 configured_status=$("$OMAFOX_BIN" status)
 [[ $configured_status == *"Firefox profile: $RELATIVE_PROFILE (configured)"* ]]
 [[ $configured_status == *"Firefox profile: $ABSOLUTE_PROFILE (configured)"* ]]
+[[ $configured_status == *"Firefox profile: $CHECKOUT_PROFILE (theme checkout)"* ]]
+# Setup is stable on a checkout: a second run leaves the tracked file alone.
+"$OMAFOX_BIN" setup >/dev/null 2>&1
+cmp "$TEST_ROOT/checkout-userChrome.css" "$CHECKOUT_PROFILE/chrome/userChrome.css"
 
 # Theme flip regenerates the palette CSS + flips the content override.
 cp "$TEST_DIR/fixtures/minimal-colors.toml" "$THEME_DIR/colors.toml"
 "$OMAFOX_BIN" sync
-grep -Fq -- '--omarchy-surface: #FAFAFA' "$RELATIVE_PROFILE/chrome/omafox-palette.css"
+grep -Fq -- '--omarchy-background: #FAFAFA;' "$RELATIVE_PROFILE/chrome/omafox-palette.css"
 grep -Fqx 'user_pref("layout.css.prefers-color-scheme.content-override", 1);' \
   "$RELATIVE_PROFILE/user.js"
-grep -Fqx '    color-scheme: light !important;' "$RELATIVE_PROFILE/chrome/omafox-palette.css"
+grep -Fqx '  color-scheme: light !important;' "$RELATIVE_PROFILE/chrome/omafox-palette.css"
+grep -Fq -- '--omarchy-background: #FAFAFA;' "$CHECKOUT_PROFILE/chrome/omafox-palette.css"
 cp "$TEST_DIR/fixtures/colors.toml" "$THEME_DIR/colors.toml"
 
 # Setup is idempotent and refreshes a stale payload.
@@ -181,6 +231,11 @@ for profile in "$RELATIVE_PROFILE" "$ABSOLUTE_PROFILE"; do
     assert_not_contains "$PREFS_BEGIN" "$profile/user.js"
   fi
 done
+[[ ! -e $CHECKOUT_PROFILE/chrome/omafox-palette.css ]]
+[[ ! -e $CHECKOUT_PROFILE/chrome/omarchy-radius.css ]]
+grep -Fqx '/* checkout tokens */' "$CHECKOUT_PROFILE/chrome/src/tokens.css"
+grep -Fqx '@import "src/tokens.css";' "$CHECKOUT_PROFILE/chrome/userChrome.css"
+[[ ! -e $CHECKOUT_PROFILE/user.js ]]
 cmp "$TEST_ROOT/original-userChrome.css" "$RELATIVE_PROFILE/chrome/userChrome.css"
 cmp "$TEST_ROOT/original-userContent.css" "$RELATIVE_PROFILE/chrome/userContent.css"
 cmp "$TEST_ROOT/original-user.js" "$RELATIVE_PROFILE/user.js"

@@ -106,77 +106,10 @@ button:disabled {
   opacity: 0.5;
 }
 
-
-#hacks {
+.hint {
   border-top: 1px solid color-mix(in srgb, var(--ofs-border, CanvasText) 30%, transparent);
-  margin-top: 16px;
+  margin: 16px 0 0;
   padding-top: 12px;
-}
-
-#hacks h2 {
-  font-size: 0.85em;
-  font-weight: 600;
-  margin: 0 0 8px;
-  opacity: 0.7;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.feature {
-  display: flex;
-  gap: 10px;
-  padding: 6px 4px;
-  margin-inline: -4px;
-  border-radius: var(--ofs-radius, 5px);
-  align-items: flex-start;
-  cursor: pointer;
-  transition: background-color 90ms cubic-bezier(0.2, 0, 0, 1);
-}
-
-.feature:hover {
-  background: color-mix(in srgb, var(--ofs-fg, CanvasText) 6%, transparent);
-}
-
-.feature input {
-  margin-top: 3px;
-  accent-color: var(--ofs-accent, AccentColor);
-}
-
-.feature-range {
-  flex-direction: column;
-  gap: 4px;
-}
-
-.feature-range-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-}
-
-.feature-value {
-  font-size: 0.85em;
-  font-variant-numeric: tabular-nums;
-  opacity: 0.7;
-}
-
-.feature-range input[type="range"] {
-  margin: 0;
-  width: 100%;
-}
-
-.feature-range input[type="range"]:disabled,
-.feature-gated {
-  opacity: 0.4;
-  cursor: default;
-}
-
-.feature-label {
-  display: block;
-  font-weight: 600;
-}
-
-.feature-description {
-  display: block;
   font-size: 0.85em;
   opacity: 0.7;
 }

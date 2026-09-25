@@ -11,7 +11,6 @@ const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "omafox-native-host-"));
 const sourcePath = path.join(projectDir, "omarchy", "omafox-native-host.c");
 const hostPath = path.join(testDir, "omafox-native-host");
 const stateFile = path.join(testDir, "theme.json");
-const featuresFile = path.join(testDir, "features.json");
 const firstMessage = {
   protocol: "omafox",
   version: 1,
@@ -59,11 +58,7 @@ function waitFor(predicate, message) {
   fs.writeFileSync(stateFile, `${firstPayload}\n`, { mode: 0o600 });
 
   const child = spawn(hostPath, [], {
-    env: {
-      ...process.env,
-      OMAFOX_STATE_FILE: stateFile,
-      OMAFOX_FEATURES_FILE: featuresFile
-    },
+    env: { ...process.env, OMAFOX_STATE_FILE: stateFile },
     stdio: ["pipe", "pipe", "pipe"]
   });
   const messages = [];
@@ -105,89 +100,6 @@ function waitFor(predicate, message) {
       "native host did not resend state after recreation"
     );
     assert.deepEqual(messages[2], secondMessage);
-
-    function sendMessage(object) {
-      const body = Buffer.from(JSON.stringify(object), "utf8");
-      const header = Buffer.alloc(4);
-      header.writeUInt32LE(body.length, 0);
-      child.stdin.write(Buffer.concat([header, body]));
-    }
-
-    sendMessage({
-      action: "features-set",
-      features: { debug: true, "chrome-gap": false }
-    });
-    await waitFor(
-      () => messages.length >= 4,
-      "native host did not ack features-set"
-    );
-    assert.deepEqual(messages[3], {
-      type: "features-ack",
-      ok: true,
-      applied: 2
-    });
-    assert.equal(
-      fs.readFileSync(featuresFile, "utf8"),
-      '{"debug":true,"chrome-gap":false}\n'
-    );
-
-    sendMessage({
-      action: "features-set",
-      features: { "BAD!": true, count: 1 }
-    });
-    await waitFor(
-      () => messages.length >= 5,
-      "native host did not reject a malformed features-set"
-    );
-    assert.deepEqual(messages[4], {
-      type: "features-ack",
-      ok: false,
-      applied: 0
-    });
-    assert.equal(
-      fs.readFileSync(featuresFile, "utf8"),
-      '{"debug":true,"chrome-gap":false}\n'
-    );
-
-    sendMessage({
-      action: "features-set",
-      features: { translucency: true, transparency: 0.8 }
-    });
-    await waitFor(
-      () => messages.length >= 6,
-      "native host did not ack a numeric features-set"
-    );
-    assert.deepEqual(messages[5], {
-      type: "features-ack",
-      ok: true,
-      applied: 2
-    });
-    assert.equal(
-      fs.readFileSync(featuresFile, "utf8"),
-      '{"translucency":true,"transparency":0.8}\n'
-    );
-
-    sendMessage({
-      action: "features-set",
-      features: { transparency: 2000000 }
-    });
-    await waitFor(
-      () => messages.length >= 7,
-      "native host did not reject an out-of-range feature value"
-    );
-    assert.deepEqual(messages[6], {
-      type: "features-ack",
-      ok: false,
-      applied: 0
-    });
-    assert.equal(
-      fs.readFileSync(featuresFile, "utf8"),
-      '{"translucency":true,"transparency":0.8}\n'
-    );
-
-    sendMessage({ action: "unrelated", data: { nested: true } });
-    await new Promise((resolve) => setTimeout(resolve, 50));
-    assert.equal(child.exitCode, null, "native host died on unknown action");
 
     child.stdin.end();
     const [exitCode] = await new Promise((resolve, reject) => {
