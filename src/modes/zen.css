@@ -5,17 +5,24 @@
  *   omarchy.zen-mode-active  live state (the future Omafox toggle flips it)
  *
  * The toolbar leaves the window: only the tab sidebar and the page remain.
- * Focusing the urlbar (Ctrl+L) opens the launcher (launcher.css) with the
- * navigation row as part of one console, so every address-bar-adjacent
- * control is one keystroke away. By default it is a quake console: it
+ * Focusing the urlbar (Ctrl+L) brings the navigation row back, so every
+ * address-bar-adjacent control is one keystroke away. By default the row
  * slides down from the window's top edge (over the page only, with
- * vertical tabs), moving like Omarchy's own quake console;
- * omarchy.launcher = "center" floats it as a card instead.
+ * vertical tabs), moving like Omarchy's own quake console, with the field
+ * inline between navigation and actions, as VS Code's command centre;
+ * results drop beneath the field. omarchy.launcher = "center" floats the
+ * field as a card instead (launcher.css), the row above it.
  *
  * The row is parked above the top edge with position: fixed rather than
  * hidden, so Ctrl+L can still focus the urlbar inside it. It is placed
  * with insets, never transforms: a transformed ancestor would become the
  * containing block for toolbar popups and pin them to the moving row. */
+
+/* The drop's results unroll out of the field's bottom edge. */
+@keyframes oc-unroll {
+  from { clip-path: inset(0 0 100% 0); }
+  to { clip-path: inset(0); }
+}
 
 @media -moz-pref("omarchy.zen-mode") and -moz-pref("omarchy.zen-mode-active") and (not -moz-pref("omarchy.layout", "sidebar")) {
   :root:not([customizing], [popup-window], [taskbartab], [chromehidden~="toolbar"], [inDOMFullscreen]) {
@@ -50,12 +57,11 @@
       background-color: var(--oc-panel) !important;
     }
 
-    /* Drop (default): the row is the console's top edge, sliding down from
-     * the window's top with the launcher (launcher.css). */
+    /* Drop (default): the row slides down from the window's top, the
+     * field inline in it. */
     @media not -moz-pref("omarchy.launcher", "center") {
-      /* Pointing at the window's top edge peeks the row alone (buttons
-       * and extensions, no console), for as long as the pointer stays on
-       * it. The trigger is a strip of the zero-height toolbox, so the edge
+      /* Pointing at the window's top edge peeks the row, for as long as
+       * the pointer stays on it. The trigger is a strip of the zero-height toolbox, so the edge
        * and the row it reveals are one continuous :hover. */
       &:has(#navigator-toolbox:hover) {
         --oc-zen-open: 1;
@@ -78,23 +84,52 @@
         width: 100vw !important;
         min-height: var(--oc-toolbar) !important;
         padding-block: 0 !important;
-        /* The slab's top: solid, ruled like the console below it, which
-         * it meets on a plain divider. */
+        /* One solid slab, ruled on its open edges like the console. */
         background-color: var(--oc-console) !important;
         border: var(--oc-rule) solid var(--oc-focus) !important;
-        border-bottom: 1px solid var(--oc-line-strong) !important;
         border-radius: 0 !important;
         box-shadow: none !important;
         transition: top var(--oc-zen-motion) !important;
       }
 
-      /* Peeked alone, its bottom is an open edge too. */
-      &:not(:has(#urlbar:is([breakout-extend], [focused]))) #nav-bar {
-        border-bottom: var(--oc-rule) solid var(--oc-focus) !important;
+      /* The field fills the row between navigation and actions. The
+       * urlbar itself is a top-layer popover, so it is pinned onto its
+       * slot with an anchor and rides the row as it slides. */
+      & #urlbar-container {
+        anchor-name: --oc-field !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        margin-inline: var(--oc-gap) !important;
       }
 
-      /* Vertical tabs: the row docks on the page (the --oc-page anchor,
-       * launcher.css), spanning it only, and slides down from the same
+      & #urlbar[breakout] {
+        top: calc(anchor(--oc-field center, 0px) - var(--urlbar-height) / 2) !important;
+        left: anchor(--oc-field left, 0px) !important;
+        width: anchor-size(--oc-field width, 0px) !important;
+        margin: 0 !important;
+        translate: none !important;
+        /* Open, the results hang from the field as one card its width. */
+        --urlbar-background-inset-breakout: 0px !important;
+      }
+
+      & #urlbar > .urlbar-background {
+        border-radius: 0 !important;
+      }
+
+      /* The results unroll down out of the field, inside the card's rule
+       * (Nova pads the view to its own bleed, which the card lacks). */
+      & #urlbar[breakout-extend] .urlbarView {
+        box-sizing: border-box !important;
+        padding-inline: calc(var(--oc-rule) + var(--oc-u)) !important;
+        animation: oc-unroll var(--oc-console-in) var(--oc-ease-enter) !important;
+      }
+
+      & #nav-bar toolbarspring {
+        flex: 0 1 0 !important;
+      }
+
+      /* Vertical tabs: the row docks on the page, spanning it only, and slides down from the same
        * parked height; the tab column stays put beside it. */
       @media -moz-pref("sidebar.verticalTabs") {
         & #nav-bar {
@@ -103,6 +138,11 @@
           left: anchor(--oc-page left, 0px) !important;
           right: anchor(--oc-page right, 0px) !important;
           width: auto !important;
+        }
+
+        /* The row docks on the page's box, as the launcher does. */
+        & #tabbrowser-tabbox {
+          anchor-name: --oc-page !important;
         }
 
         /* The trigger spans the page, not the tab column. */
@@ -134,24 +174,26 @@
       display: contents !important;
     }
 
-    /* The urlbar floats as the launcher; its slot in the row collapses.
-     * At rest the field stays invisible (it must stay focusable for
-     * Ctrl+L, so it is never display: none). */
-    & #urlbar-container {
-      flex: 0 0 0 !important;
-      min-width: 0 !important;
-      margin: 0 !important;
-      padding: 0 !important;
-    }
-
-    & #urlbar:not([breakout-extend], [focused]) {
-      opacity: 0 !important;
-    }
-
     & #nav-bar toolbarspring {
       flex: 1 1 0 !important;
       min-width: 0 !important;
       max-width: none !important;
+    }
+
+    /* Center: the urlbar floats as the launcher; its slot in the row
+     * collapses. At rest the field stays invisible (it must stay
+     * focusable for Ctrl+L, so it is never display: none). */
+    @media -moz-pref("omarchy.launcher", "center") {
+      & #urlbar-container {
+        flex: 0 0 0 !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      & #urlbar:not([breakout-extend], [focused]) {
+        opacity: 0 !important;
+      }
     }
 
     /* Center: dim the page and sidebar under the floating card. The

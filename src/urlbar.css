@@ -158,3 +158,9 @@
   background-color: var(--oc-accent-wash) !important;
   color: var(--oc-text) !important;
 }
+
+/* Extension pages (the Omafox new tab) keep their icon; the add-on's name
+ * beside it only crowds the field. */
+#identity-box.extensionPage #identity-icon-label {
+  display: none !important;
+}
