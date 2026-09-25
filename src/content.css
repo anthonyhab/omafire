@@ -1,0 +1,37 @@
+/* Omarchy Chrome — Firefox-owned pages (userContent).
+ *
+ * Only about: pages are touched; ordinary websites are never styled.
+ *
+ * New tab / home: the Omafox lightweight theme colors these live
+ * (Firefox marks the root [lwt-newtab] and sets --newtab-* inline). The
+ * rules below are the cold-start fallback from the generated palette and
+ * step aside as soon as the live theme arrives. */
+
+@-moz-document url-prefix("about:newtab"), url-prefix("about:home"), url-prefix("about:privatebrowsing") {
+  :root:not([lwt-newtab]) {
+    --newtab-background-color: var(--omarchy-background) !important;
+    --newtab-background-color-secondary: var(--omarchy-dark_background) !important;
+    --newtab-text-primary-color: var(--omarchy-foreground) !important;
+    --background-color-canvas: var(--omarchy-background) !important;
+  }
+
+  :root {
+    --border-radius-medium: var(--omarchy-radius-container, 10px) !important;
+    --border-radius-large: var(--omarchy-radius-container, 10px) !important;
+  }
+}
+
+/* Settings, add-ons, and the other design-system pages: put their canvas
+ * and accent on the palette so they sit inside the content card like a
+ * native page. These pages have no live theme hook, so they follow the
+ * palette as of the last restart. */
+@-moz-document url-prefix("about:preferences"), url-prefix("about:settings"), url-prefix("about:addons"), url-prefix("about:downloads"), url-prefix("about:logins"), url-prefix("about:profiling"), url-prefix("about:config") {
+  :root {
+    --background-color-canvas: var(--omarchy-background) !important;
+    --background-color-box: var(--omarchy-dark_background) !important;
+    --text-color: var(--omarchy-foreground) !important;
+    --color-accent-primary: var(--omarchy-accent) !important;
+    --link-color: var(--omarchy-accent) !important;
+    --focus-outline-color: var(--omarchy-accent) !important;
+  }
+}

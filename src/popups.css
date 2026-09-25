@@ -1,0 +1,68 @@
+/* Omarchy Chrome — panels, menus, and notifications.
+ *
+ * Panel and menu colors come from the native bridge in tokens.css; this
+ * file only handles the shape: flat cards, no arrow tips, rounded rows. */
+
+panel[type="arrow"] {
+  --panel-shadow-margin: 12px !important;
+}
+
+.panel-arrowbox {
+  display: none !important;
+}
+
+:is(menupopup, panel) {
+  --panel-shadow: var(--oc-shadow-float) !important;
+  --panel-padding: 4px !important;
+  --menu-background-color: var(--oc-panel) !important;
+  --menu-color: var(--oc-text) !important;
+  --menu-border-color: var(--oc-line) !important;
+  --menuitem-hover-background-color: var(--oc-hover) !important;
+  --menu-disabled-color: var(--oc-text-dim) !important;
+}
+
+menupopup > menuitem,
+menupopup > menu {
+  border-radius: var(--oc-radius-small) !important;
+  margin-inline: 4px !important;
+}
+
+toolbarseparator,
+menuseparator {
+  border-color: var(--oc-line) !important;
+}
+
+/* App-menu and panel rows. */
+.subviewbutton,
+.PanelUI-subView .toolbarbutton-1 {
+  border-radius: var(--oc-radius-small) !important;
+}
+
+/* Infobars ride inside the content card, flush with its edge. */
+.notificationbox-stack notification-message {
+  --info-bar-background-color: var(--oc-panel) !important;
+  --info-bar-text-color: var(--oc-text) !important;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  border-bottom: 1px solid var(--oc-line) !important;
+}
+
+/* ---- findbar -------------------------------------------------------- */
+
+findbar {
+  background-color: var(--oc-panel) !important;
+  color: var(--oc-text) !important;
+  border-top: 1px solid var(--oc-line) !important;
+}
+
+.findbar-textbox {
+  background-color: var(--oc-hover) !important;
+  color: var(--oc-text) !important;
+  border: none !important;
+  border-radius: var(--oc-radius-small) !important;
+  outline: none !important;
+
+  &:focus {
+    box-shadow: 0 0 0 1px var(--oc-focus) !important;
+  }
+}

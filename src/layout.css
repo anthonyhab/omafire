@@ -1,0 +1,193 @@
+/* Omarchy Chrome — window layout.
+ *
+ * Zen's single-sidebar layout, in pure CSS. The body becomes a grid and
+ * #browser is flattened with display: contents, so the navigation toolbox
+ * and the vertical-tab sidebar share one column: the urlbar sits directly on
+ * top of the tabs, the column keeps Firefox's own (resizable) sidebar width,
+ * and the content card spans the full window height beside it.
+ *
+ *   +---------+----+-------+----------------------+
+ *   | toolbox |    |       |                      |
+ *   +---------+ ls | panel |     content card     |
+ *   | sidebar |    |       |                      |
+ *   +---------+----+-------+----------------------+
+ *
+ * ls = #sidebar-launcher-splitter, which doubles as the gap beside the card.
+ * panel = #sidebar-box (bookmarks, history, …) with its own splitter.
+ *
+ * Only vertical-tabs browser windows get this; popups, taskbar tabs and
+ * horizontal tabs keep Firefox's stock layout. */
+
+@media -moz-pref("sidebar.verticalTabs") {
+  :root:not([popup-window], [taskbartab], [chromehidden~="toolbar"]) {
+    & body {
+      display: grid !important;
+      grid-template-columns:
+        [side] auto [launcher-split] auto [panel] auto [panel-split] auto
+        [main] minmax(0, 1fr) [ai-split] auto [ai] auto !important;
+      grid-template-rows: [top] auto [mid] minmax(0, 1fr) [rest] auto !important;
+      background-color: var(--oc-frame) !important;
+      color: var(--oc-text) !important;
+    }
+
+    /* Everything else in body (popupset, a11y live region, fullscreen
+     * warnings) is zero-height or fixed: park it in the last row. */
+    & body > :not(#navigator-toolbox, #browser) {
+      grid-column: 1 / -1 !important;
+      grid-row: rest !important;
+    }
+
+    & #browser {
+      display: contents !important;
+    }
+
+    /* XUL [collapsed] only zeroes an item's size in flex layout; as grid
+     * items the collapsed boxes (AI window, idle splitters) would still
+     * claim their width. */
+    & #browser > [collapsed] {
+      display: none !important;
+    }
+
+    & #navigator-toolbox {
+      grid-column: side !important;
+      grid-row: top !important;
+      /* Contribute no width to the column: the sidebar owns it. */
+      contain: inline-size !important;
+      min-width: 0 !important;
+      background: transparent !important;
+      border: none !important;
+    }
+
+    & #sidebar-container {
+      grid-column: side !important;
+      grid-row: mid !important;
+      min-height: 0 !important;
+      background: transparent !important;
+    }
+
+    & #sidebar-launcher-splitter {
+      grid-column: launcher-split !important;
+      grid-row: top / rest !important;
+      width: var(--oc-gap) !important;
+      min-width: var(--oc-gap) !important;
+      margin: 0 !important;
+      border: none !important;
+      background: transparent !important;
+    }
+
+    & #sidebar-box {
+      grid-column: panel !important;
+      grid-row: top / rest !important;
+      margin-block: var(--oc-gap) !important;
+      border-radius: var(--oc-radius) !important;
+      overflow: clip !important;
+      box-shadow: var(--oc-shadow) !important;
+    }
+
+    & #sidebar-splitter {
+      grid-column: panel-split !important;
+      grid-row: top / rest !important;
+      width: var(--oc-gap) !important;
+      min-width: var(--oc-gap) !important;
+      margin: 0 !important;
+      border: none !important;
+      background: transparent !important;
+    }
+
+    & #tabbrowser-tabbox {
+      grid-column: main !important;
+      grid-row: top / rest !important;
+      min-width: 0 !important;
+      min-height: 0 !important;
+      margin: var(--oc-gap) var(--oc-gap) var(--oc-gap) 0 !important;
+      background: transparent !important;
+    }
+
+    & #ai-window-splitter { grid-column: ai-split !important; grid-row: top / rest !important; }
+    & #ai-window-box { grid-column: ai !important; grid-row: top / rest !important; }
+
+    /* The launcher splitter is the only gap beside the card; when the
+     * sidebar is hidden it collapses, so the card needs its own margin. */
+    &:has(#sidebar-container[hidden]) #tabbrowser-tabbox {
+      margin-inline-start: var(--oc-gap) !important;
+    }
+
+    /* Collapsed icon rail: no room for the urlbar in the column, so the
+     * toolbox becomes an ordinary strip across the top instead. */
+    &:has(sidebar-main:not([expanded])) {
+      & #navigator-toolbox {
+        grid-column: 1 / -1 !important;
+        contain: none !important;
+      }
+      & #sidebar-container,
+      & #sidebar-launcher-splitter,
+      & #sidebar-box,
+      & #sidebar-splitter,
+      & #tabbrowser-tabbox {
+        grid-row: mid / rest !important;
+      }
+      & #tabbrowser-tabbox {
+        margin-top: 0 !important;
+      }
+    }
+
+    /* Sidebar on the right: mirror the column order. */
+    @media not -moz-pref("sidebar.position_start") {
+      & body {
+        grid-template-columns:
+          [ai] auto [ai-split] auto [main] minmax(0, 1fr) [panel-split] auto
+          [panel] auto [launcher-split] auto [side] auto !important;
+      }
+      & #tabbrowser-tabbox {
+        margin: var(--oc-gap) 0 var(--oc-gap) var(--oc-gap) !important;
+      }
+      &:has(#sidebar-container[hidden]) #tabbrowser-tabbox {
+        margin-inline-end: var(--oc-gap) !important;
+      }
+    }
+  }
+}
+
+/* ---- content card --------------------------------------------------- */
+
+:root:not([inDOMFullscreen]) {
+  & #tabbrowser-tabpanels {
+    background-color: transparent !important;
+  }
+
+  & .browserContainer {
+    border: none !important;
+    border-radius: var(--oc-radius) !important;
+    overflow: clip !important;
+    box-shadow: var(--oc-shadow) !important;
+    background-color: var(--oc-canvas) !important;
+    -moz-window-dragging: no-drag !important;
+  }
+
+  /* Split view: two cards side by side, the focused one outlined. */
+  & #tabbrowser-tabpanels[splitview] {
+    & .split-view-panel > .browserContainer {
+      border: none !important;
+      outline: none !important;
+    }
+    & .split-view-panel.deck-selected > .browserContainer {
+      box-shadow: var(--oc-shadow), 0 0 0 1px var(--oc-focus) !important;
+    }
+    & .split-view-splitter {
+      width: var(--oc-gap) !important;
+      margin: 0 !important;
+      border-radius: 99px !important;
+      background: transparent !important;
+
+      &:hover {
+        background: linear-gradient(var(--oc-line), var(--oc-line)) center / 2px 48px no-repeat !important;
+      }
+    }
+  }
+}
+
+/* DOM fullscreen (video): no frame at all. */
+:root[inDOMFullscreen] {
+  & #tabbrowser-tabbox { margin: 0 !important; }
+  & .browserContainer { border-radius: 0 !important; box-shadow: none !important; }
+}

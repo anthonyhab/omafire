@@ -1,0 +1,112 @@
+/* Omarchy Chrome — design tokens.
+ *
+ * The only file that chooses colors and geometry. Everything else reads the
+ * --oc-* tokens below.
+ *
+ * Colors come from Firefox's own theme variables, which the Omafox
+ * extension's lightweight theme sets live on every Omarchy theme change.
+ * Reading them (instead of the generated --omarchy-* palette) is what keeps a
+ * live theme switch repaint-only: omafox-palette.css is loaded once at
+ * startup and only matters until the extension's theme lands.
+ *
+ * Tokens are declared once on :root and inherit as computed values, so the
+ * native variables can later be overridden on descendants (toolbars, panels)
+ * without feeding back into the tokens. Never redefine a native variable on
+ * :root in terms of a token that reads it. */
+
+:root {
+  /* ---- geometry ---------------------------------------------------- */
+
+  /* Frame gap between the window edge, the sidebar, and the content card. */
+  --oc-gap: 8px;
+  /* Corners follow Hyprland's decoration:rounding (omarchy-radius.css). */
+  --oc-radius: var(--omarchy-radius-container, 10px);
+  --oc-radius-small: clamp(0px, calc(var(--oc-radius) - 3px), 8px);
+  --oc-row: 36px;           /* tab and urlbar row height */
+  --oc-button: 32px;        /* toolbar button tile */
+  --oc-pinned: 44px;        /* pinned tab tile */
+  --oc-launcher-width: min(720px, 80vw);
+
+  &[uidensity="compact"] {
+    --oc-row: 32px;
+    --oc-button: 28px;
+    --oc-pinned: 38px;
+  }
+
+  /* ---- color: live from the lightweight theme ---------------------- */
+
+  --oc-frame: var(--toolbar-background-color, var(--omarchy-dark_background));
+  --oc-text: var(--toolbar-text-color, var(--omarchy-foreground));
+  --oc-canvas: var(--tabpanel-background-color, var(--omarchy-background, var(--oc-frame)));
+  --oc-field: var(--toolbar-field-background-color, var(--omarchy-darker_background));
+  --oc-field-text: var(--toolbar-field-text-color, var(--oc-text));
+  --oc-accent: var(--lwt-tab-line-color, var(--omarchy-accent, AccentColor));
+  --oc-focus: var(--toolbar-field-border-color-focus, var(--oc-accent));
+
+  /* ---- color: derived --------------------------------------------- */
+
+  /* Translucent overlays of the text color: legible on any palette, and
+   * they stack (hover over selected stays visible). */
+  --oc-text-dim: color-mix(in srgb, var(--oc-text) 62%, transparent);
+  --oc-line: color-mix(in srgb, var(--oc-text) 11%, transparent);
+  --oc-hover: color-mix(in srgb, var(--oc-text) 8%, transparent);
+  --oc-active: color-mix(in srgb, var(--oc-text) 14%, transparent);
+  --oc-selected: color-mix(in srgb, var(--oc-text) 12%, transparent);
+  --oc-accent-wash: color-mix(in srgb, var(--oc-accent) 22%, transparent);
+
+  /* Opaque raised surface for panels and the floating launcher. */
+  --oc-panel: color-mix(in srgb, var(--oc-frame), var(--oc-text) 5%);
+  --oc-shadow: 0 1px 2px rgb(0 0 0 / 0.14), 0 0 0 1px var(--oc-line);
+  --oc-shadow-float: 0 12px 40px rgb(0 0 0 / 0.36), 0 0 0 1px var(--oc-line);
+  /* Dims the window behind the urlbar launcher. */
+  --oc-scrim: rgb(0 0 0 / 0.28);
+
+  /* ---- motion ------------------------------------------------------ */
+
+  --oc-ease: cubic-bezier(0.2, 0.9, 0.25, 1);
+  --oc-fast: 120ms;
+  --oc-slow: 220ms;
+
+  @media (prefers-reduced-motion: reduce) {
+    --oc-fast: 0s;
+    --oc-slow: 0s;
+  }
+}
+
+/* ---- native bridge ---------------------------------------------------
+ * Point Firefox's own variables at the tokens so native stylesheets paint
+ * the shared vocabulary. These are consumers only: none of them feeds a
+ * token above. */
+:root {
+  --toolbox-background-image: none !important;   /* Nova's gradient */
+  --toolbarbutton-border-radius: var(--oc-radius-small) !important;
+  --toolbarbutton-background-color-hover: var(--oc-hover) !important;
+  --toolbarbutton-background-color-active: var(--oc-active) !important;
+  --tab-border-radius: var(--oc-radius-small) !important;
+  --tab-hover-background-color: var(--oc-hover) !important;
+  --tab-background-color-hover: var(--oc-hover) !important;
+  --focus-outline-color: var(--oc-focus) !important;
+  --chrome-content-separator-color: transparent !important;
+  --sidebar-border-color: transparent !important;
+  --content-area-shadow: none !important;
+
+  --panel-background-color: var(--oc-panel) !important;
+  --panel-border-color: var(--oc-line) !important;
+  --panel-border-radius: var(--oc-radius) !important;
+  --arrowpanel-background: var(--oc-panel) !important;
+  --arrowpanel-border-color: var(--oc-line) !important;
+  --arrowpanel-border-radius: var(--oc-radius) !important;
+  --menuitem-border-radius: var(--oc-radius-small) !important;
+  --panel-item-hover-bgcolor: var(--oc-hover) !important;
+  --panel-item-active-bgcolor: var(--oc-active) !important;
+
+  --urlbarview-background-color-hover: var(--oc-hover) !important;
+  --urlbarview-background-color-selected: var(--oc-accent-wash) !important;
+  --urlbarview-text-color-selected: var(--oc-text) !important;
+  --urlbarview-separator-color: var(--oc-line) !important;
+
+  --button-border-radius: var(--oc-radius-small) !important;
+  --button-background-color-ghost-hover: var(--oc-hover) !important;
+  --button-background-color-ghost-active: var(--oc-active) !important;
+  --border-radius-medium: var(--oc-radius) !important;
+}
