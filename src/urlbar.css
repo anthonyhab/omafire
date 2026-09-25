@@ -9,6 +9,14 @@
   --urlbar-background-color-focus: var(--oc-panel) !important;
   --urlbar-border-radius: var(--oc-radius-small) !important;
   --urlbar-background-border-radius: var(--oc-radius-small) !important;  /* Nova: a 24px pill */
+  /* Nova derives the open card's inset from its pill radius (height/2 -
+   * radius); with square corners that would shrink the card inside the
+   * field. The card frames field and results by one bleed instead, and
+   * in the toolbar its top stops at the toolbar's edge. */
+  --urlbar-background-inset-breakout:
+    calc((var(--oc-button) - var(--oc-toolbar)) / 2) calc(-1 * var(--oc-launcher-bleed))
+    calc(-1 * var(--oc-launcher-bleed)) !important;
+  --urlbar-background-inset-breakout-compact: var(--urlbar-background-inset-breakout) !important;
   --urlbar-box-background-color: transparent !important;
   --urlbar-box-background-color-hover: var(--oc-hover) !important;
   --urlbar-box-background-color-active: var(--oc-active) !important;
@@ -104,6 +112,23 @@
 
 .urlbarView-row-body-description {
   display: none !important;
+}
+
+/* The gap separates title and URL; Nova's "•" separator and the source
+ * badge it pins to every favicon (history clock, bookmark star) are noise.
+ * The action text still says "Switch to tab" where it matters. */
+.urlbarView-title-separator,
+.urlbarView-row:not([type="switchtab"], [type="remotetab"]) .urlbarView-type-icon {
+  display: none !important;
+}
+
+/* Search engine chip: a ghost button like every other chrome control. */
+#urlbar .searchmode-switcher {
+  /* It is a "muted" moz-button. */
+  --button-background-color-muted: transparent !important;
+  --button-background-color-muted-hover: var(--oc-hover) !important;
+  --button-background-color-muted-active: var(--oc-active) !important;
+  --button-border-radius: var(--oc-radius-small) !important;
 }
 
 .urlbarView-action,

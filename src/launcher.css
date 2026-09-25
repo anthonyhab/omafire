@@ -14,6 +14,8 @@
     left: calc(50vw - var(--oc-launcher-width) / 2) !important;
     width: var(--oc-launcher-width) !important;
     margin: 0 !important;
+    /* Floating: the card bleeds evenly on every side. */
+    --urlbar-background-inset-breakout: calc(-1 * var(--oc-launcher-bleed)) !important;
     /* Firefox shifts the popover along with a sliding toolbar
      * (--toolbar-shift-translate); the launcher is window-anchored. */
     translate: none !important;
