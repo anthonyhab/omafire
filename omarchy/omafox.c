@@ -1681,6 +1681,29 @@ static bool hypr_border_color(const char *option, char css[10]) {
   return true;
 }
 
+/* The accent native widgets (checkboxes, `outline: auto` focus rings) paint
+ * with: Hyprland's active border, like the theme's focus color, else the
+ * palette accent. `out` gets #RRGGBB. */
+static void native_accent(const palette_t *p, char out[8]) {
+  char border[10];
+  if (hypr_border_color("general:col.active_border", border))
+    snprintf(out, 8, "%.7s", border);
+  else
+    snprintf(out, 8, "%.7s", palette_get(p, "accent"));
+}
+
+/* Readable text on `hex` (#RRGGBB): the darker or lighter palette end. */
+static const char *text_on(const palette_t *p, const char *hex) {
+  unsigned r, g, b;
+  if (sscanf(hex, "#%2x%2x%2x", &r, &g, &b) != 3)
+    return palette_get(p, "foreground");
+  double luma = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255.0;
+  bool dark_mode = strcmp(p->mode, "dark") == 0;
+  const char *darkest = palette_get(p, dark_mode ? "darker_background" : "foreground");
+  const char *lightest = palette_get(p, dark_mode ? "bright_foreground" : "background");
+  return luma > 0.5 ? darkest : lightest;
+}
+
 /* Hyprland window geometry for the theme. Left untouched when hyprctl is
  * unavailable, so a sync outside Hyprland keeps the last good values. */
 static void write_radius_css(const char *path) {
@@ -1737,6 +1760,8 @@ static void refresh_ff_profile_colors(const char *profile,
   /* content-override: 0=dark, 1=light — pages with native dark CSS render
    * correctly before any content-script theme engine wakes up. */
   int override = strcmp(p->mode, "light") == 0 ? 1 : 0;
+  char accent[8];
+  native_accent(p, accent);
   char *block = xasprintf(
       "%s\n"
       "user_pref(\"toolkit.legacyUserProfileCustomizations.stylesheets\""
@@ -1751,9 +1776,11 @@ static void refresh_ff_profile_colors(const char *profile,
       ", %d);\n"
       "user_pref(\"browser.display.background_color\", \"%s\");\n"
       "user_pref(\"browser.display.foreground_color\", \"%s\");\n"
+      "user_pref(\"ui.accentcolor\", \"%s\");\n"
+      "user_pref(\"ui.accentcolortext\", \"%s\");\n"
       "%s\n",
       FF_PREFS_BEGIN, override, palette_get(p, "background"),
-      palette_get(p, "foreground"), FF_PREFS_END);
+      palette_get(p, "foreground"), accent, text_on(p, accent), FF_PREFS_END);
   install_managed_block(user_prefs, FF_PREFS_BEGIN, FF_PREFS_END, block,
                         false, "Firefox profile file");
   free(block);

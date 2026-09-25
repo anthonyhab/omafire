@@ -160,6 +160,9 @@ for profile in "$RELATIVE_PROFILE" "$ABSOLUTE_PROFILE"; do
   grep -Fqx '  --omarchy-border-width: 2px;' "$profile/chrome/omarchy-radius.css"
   grep -Fqx '  --omarchy-border-active-color: #e68e0dff;' "$profile/chrome/omarchy-radius.css"
   grep -Fqx '  --omarchy-border-inactive-color: #595959aa;' "$profile/chrome/omarchy-radius.css"
+  # Native widgets (checkboxes, GTK focus rings) follow Hyprland's border.
+  grep -Fqx 'user_pref("ui.accentcolor", "#e68e0d");' "$profile/user.js"
+  grep -Fq 'user_pref("ui.accentcolortext", "#' "$profile/user.js"
   grep -Fqx 'user_pref("layout.css.prefers-color-scheme.content-override", 0);' \
     "$profile/user.js"
 done
