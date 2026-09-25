@@ -66,6 +66,15 @@
   /* Focus rings and selected edges use Hyprland's active window border
    * (omarchy-radius.css), so the browser marks focus like the desktop. */
   --oc-focus: var(--omarchy-border-active-color, var(--toolbar-field-border-color-focus, var(--oc-accent)));
+  /* The active tab's glow: the palette accent, or the page's own colour
+   * when Omafox's site-coloured tabs are on (it sets the lightweight
+   * theme's tab_loading per window). Outside a lightweight theme Firefox's
+   * own --tab-loading-fill is its default blue, so it only counts there. */
+  --oc-glow: var(--oc-accent);
+
+  &[lwtheme] {
+    --oc-glow: var(--tab-loading-fill, var(--oc-accent));
+  }
 
   /* ---- color: derived --------------------------------------------- */
 
@@ -78,6 +87,7 @@
   --oc-active: color-mix(in srgb, var(--oc-text) 18%, transparent);
   --oc-selected: color-mix(in srgb, var(--oc-text) 12%, transparent);
   --oc-accent-wash: color-mix(in srgb, var(--oc-accent) 22%, transparent);
+  --oc-glow-wash: color-mix(in srgb, var(--oc-glow) 16%, transparent);
 
   /* Window surface behind all chrome. Opaque unless omarchy.translucency
    * (modes/translucency.css) turns it to glass. */

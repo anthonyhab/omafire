@@ -84,6 +84,17 @@
     box-shadow: inset 0 0 0 1px var(--oc-line-strong) !important;
   }
 
+  /* The active tab glows: a hard 2px edge in the glow colour and a wash
+   * that fades out across the row, over the selected surface. */
+  & .tabbrowser-tab[selected] .tab-background {
+    background:
+      linear-gradient(90deg, var(--oc-glow-wash), transparent 70%),
+      var(--oc-selected) !important;
+    box-shadow:
+      inset 2px 0 0 var(--oc-glow),
+      inset 0 0 0 1px var(--oc-line-strong) !important;
+  }
+
   & .tabbrowser-tab[multiselected]:not([selected]) .tab-background {
     background: var(--oc-accent-wash) !important;
     box-shadow: none !important;
@@ -150,9 +161,14 @@
       background-color: var(--oc-active) !important;
     }
 
+    /* Slabs glow from their bottom edge. */
     & .tabbrowser-tab[selected] .tab-background {
-      background-color: var(--oc-selected) !important;
-      box-shadow: inset 0 0 0 1px var(--oc-line-strong) !important;
+      background:
+        linear-gradient(0deg, var(--oc-glow-wash), transparent 70%),
+        var(--oc-selected) !important;
+      box-shadow:
+        inset 0 -2px 0 var(--oc-glow),
+        inset 0 0 0 1px var(--oc-line-strong) !important;
     }
   }
 
