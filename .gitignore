@@ -19,3 +19,6 @@ omarchy-firefox/
 .pi/
 .pi-subagents/
 __pycache__/
+
+# Personal assets referenced by customChrome.css.
+custom/
