@@ -86,6 +86,8 @@
   --oc-panel: color-mix(in srgb, var(--oc-frame), var(--oc-text) 5%);
   --oc-shadow: 0 1px 2px rgb(0 0 0 / 0.14), 0 0 0 1px var(--oc-line);
   --oc-shadow-float: 0 12px 40px rgb(0 0 0 / 0.36), 0 0 0 1px var(--oc-line);
+  /* Hangs from a top-attached console: an edge line and a downward cast. */
+  --oc-shadow-drop: 0 1px 0 var(--oc-line), 0 16px 40px rgb(0 0 0 / 0.36);
   /* Dims the window behind the urlbar launcher. */
   --oc-scrim: rgb(0 0 0 / 0.28);
 

@@ -36,6 +36,7 @@ Optional, all applied live without a restart:
 |---|---|---|
 | `omarchy.layout` | `"sidebar"` | Zen's single sidebar: toolbar and urlbar at the top of the tab column, floating page, centred launcher. Unset (or `"top"`) is the default top toolbar. |
 | `omarchy.zen-mode` + `omarchy.zen-mode-active` | `true` + `true` | Top layout: hide the toolbar. Ctrl+L opens a centred launcher with the navigation row docked above it. |
+| `omarchy.launcher` | `"center"` | Launcher shape (sidebar layout and zen mode). Unset (or `"drop"`) slides a full-width console down from the window's top edge like a quake terminal; `"center"` floats it as a card. |
 | `omarchy.compact` | `true` | Sidebar layout: hide the column until the pointer reaches the edge. |
 | `omarchy.chrome-gap` | `true` | Float the page as a card with a gap, Hyprland rounding and a hairline shadow. |
 | `omarchy.translucency` | `true` | Glass chrome (frosted with a Hyprland blur rule for Firefox). |
@@ -59,7 +60,8 @@ src/sidebar.css         sidebar rail, tools, and panel
 src/tabs.css            vertical tabs, pinned tiles, tab groups
 src/popups.css          menus, panels, notification bars, findbar
 src/icons.css           extension id → glyph (src/icons/extensions/*.svg)
-src/launcher.css        centred urlbar launcher (used by sidebar layout and zen mode)
+src/launcher.css        urlbar launcher: quake drop or centred card (sidebar layout, zen mode)
+src/motion.css          sidebar expand/collapse and resize motion
 src/layouts/sidebar.css omarchy.layout = "sidebar"
 src/modes/zen.css       omarchy.zen-mode
 src/modes/compact.css   omarchy.compact

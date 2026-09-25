@@ -1,24 +1,29 @@
-/* Omarchy Chrome — centred urlbar launcher (Zen's command bar).
+/* Omarchy Chrome — urlbar launcher (Zen's command bar, quake-style).
  *
- * Used by layouts where the resting urlbar is narrow or hidden: the single
- * sidebar and zen mode. Firefox 156 keeps the urlbar in the top layer as a
- * popover while it can break out ([breakout]); while extended, JS writes
- * only an inline `top`. So the launcher is plain inset overrides on
- * [breakout-extend]: the top layer escapes every containing block, and
- * ::backdrop gives the scrim for free. */
+ * Used where the resting urlbar is narrow or hidden: the single sidebar
+ * and zen mode. Two shapes, picked by omarchy.launcher:
+ *   (unset) / "drop"  a full-width console that slides down from the
+ *                     window's top edge, under the navigation row
+ *   "center"          a floating card in the middle of the window
+ *
+ * Firefox 156 keeps the urlbar in the top layer as a popover while it can
+ * break out ([breakout]); while extended, JS writes only an inline `top`.
+ * So the launcher is plain inset overrides on [breakout-extend]: the top
+ * layer escapes every containing block, and ::backdrop gives the scrim. */
+
+/* The drop: the console unrolls down from the navigation row. clip-path,
+ * because the !important translate below would outrank a translate
+ * animation (and Firefox doesn't interpolate registered custom
+ * properties). The end state reaches past the card so its shadow shows. */
+@keyframes oc-drop {
+  from { clip-path: inset(0 0 100% 0); }
+  to { clip-path: inset(0 -100vw -100vh -100vw); }
+}
 
 @media -moz-pref("omarchy.layout", "sidebar"),
        -moz-pref("omarchy.zen-mode") and -moz-pref("omarchy.zen-mode-active") {
   #main-window:not([customizing]) #urlbar[breakout][breakout-extend] {
-    top: var(--oc-launcher-top) !important;
-    left: calc(50vw - var(--oc-launcher-width) / 2) !important;
-    width: var(--oc-launcher-width) !important;
     margin: 0 !important;
-    /* Floating: the card bleeds evenly on every side. */
-    --urlbar-background-inset-breakout: calc(-1 * var(--oc-launcher-bleed)) !important;
-    /* Firefox shifts the popover along with a sliding toolbar
-     * (--toolbar-shift-translate); the launcher is window-anchored. */
-    translate: none !important;
 
     /* A tall field whose leading chip starts at the same inner edge as
      * the result highlights below it. */
@@ -31,6 +36,38 @@
     &::backdrop {
       background: var(--oc-scrim) !important;
       pointer-events: none !important;
+    }
+  }
+
+  @media not -moz-pref("omarchy.launcher", "center") {
+    #main-window:not([customizing]) #urlbar[breakout][breakout-extend] {
+      /* Under the navigation row, edge to edge: the field and rows sit on
+       * the chrome's inset axis, the card bleeds to the window edges. */
+      top: var(--oc-toolbar) !important;
+      left: var(--oc-inset) !important;
+      width: calc(100vw - 2 * var(--oc-inset)) !important;
+      --urlbar-background-inset-breakout:
+        0 calc(-1 * var(--oc-inset)) calc(-1 * var(--oc-launcher-bleed)) !important;
+      translate: none !important;
+      animation: oc-drop var(--oc-slow) var(--oc-ease) !important;
+
+      & > .urlbar-background {
+        border-radius: 0 !important;
+        box-shadow: var(--oc-shadow-drop) !important;
+      }
+    }
+  }
+
+  @media -moz-pref("omarchy.launcher", "center") {
+    #main-window:not([customizing]) #urlbar[breakout][breakout-extend] {
+      top: var(--oc-launcher-top) !important;
+      left: calc(50vw - var(--oc-launcher-width) / 2) !important;
+      width: var(--oc-launcher-width) !important;
+      /* Floating: the card bleeds evenly on every side. */
+      --urlbar-background-inset-breakout: calc(-1 * var(--oc-launcher-bleed)) !important;
+      /* Firefox shifts the popover along with a sliding toolbar
+       * (--toolbar-shift-translate); the launcher is window-anchored. */
+      translate: none !important;
     }
   }
 }

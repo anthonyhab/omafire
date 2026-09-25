@@ -26,9 +26,15 @@ const COLOR = /#[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?|oklch|lab|lch)\(/;
 const stripComments = (s) =>
   s.replace(/\/\*[\s\S]*?\*\//g, (c) => c.replace(/[^\n]/g, " "));
 
+// @property descriptors and @keyframes steps are not cascaded
+// declarations (!important is invalid there); blank them out too.
+const stripAtBlocks = (s) =>
+  s.replace(/@(property|keyframes)[^{]*\{(?:[^{}]|\{[^{}]*\})*\}/g, (b) =>
+    b.replace(/[^\n]/g, " "));
+
 const findings = [];
 for (const file of files) {
-  const src = stripComments(readFileSync(join(root, file), "utf8"));
+  const src = stripAtBlocks(stripComments(readFileSync(join(root, file), "utf8")));
   for (const m of src.matchAll(DECL)) {
     const [, prop, value] = m;
     const line = src.slice(0, m.index).split("\n").length;
