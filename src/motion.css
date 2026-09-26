@@ -24,8 +24,11 @@
     transition: width var(--oc-slow) var(--oc-ease) !important;
   }
 
+  /* The rail is its tiles plus an inset each side; the column's edge
+   * line (sidebar.css), where there is one, comes on top rather than out
+   * of the page-side inset. */
   #sidebar-container:has(sidebar-main:not([expanded])) {
-    width: var(--tab-collapsed-width) !important;
+    width: calc(var(--tab-collapsed-width) + var(--oc-column-edge, 0px)) !important;
   }
 
   :root:has(#sidebar-launcher-splitter[state="dragging"]) #sidebar-container {
