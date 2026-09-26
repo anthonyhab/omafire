@@ -43,6 +43,12 @@
    * any density (compact shrinks the button, so the axis moves with it). */
   --oc-icon-pad: calc((var(--oc-button) - var(--oc-icon)) / 2);
   --oc-icon-axis: calc(var(--oc-inset) + var(--oc-icon-pad));
+  /* The window's head band, shared by the tab column and the page's
+   * navigation row (zen mode) so both read as one street: pinned tiles
+   * or the address field fill [--oc-inset, --oc-inset + --oc-pinned],
+   * one inset clears them, and the band's last pixel is the rule under
+   * it. The column's rule and the row's rule are the same line. */
+  --oc-head: calc(var(--oc-pinned) + 2 * var(--oc-inset) + 1px);
   /* Invisible strip at a window edge that reveals hidden chrome
    * (compact's column, zen's navigation row). */
   --oc-trigger: 6px;
