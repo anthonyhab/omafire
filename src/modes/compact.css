@@ -15,14 +15,23 @@
     --oc-reveal: 0;
 
     /* Reveal while the pointer is on the column, while anything it owns is
-     * open or focused, and while a tab is being dragged. */
+     * open or focused, and while a tab is being dragged. The column's
+     * popups (tab and group menus, the group editor, tab notes, the
+     * new-tab container menu, the tools overflow) live outside it, so the
+     * pointer leaves the column to use them. */
     &:has(#navigator-toolbox:hover,
           #sidebar-container:hover,
           #urlbar[focused],
           #nav-bar [open],
           #tabbrowser-tabs[movingtab],
           #sidebar-context-menu[open],
-          #tabContextMenu[open]) {
+          #tabContextMenu[open],
+          #open-tab-group-context-menu[open],
+          #saved-tab-group-context-menu[open],
+          #new-tab-button-popup[open],
+          #tab-group-editor panel[panelopen],
+          #tab-note-menu panel[panelopen],
+          #sidebar-tools-overflow[panelopen]) {
       --oc-reveal: 1;
     }
 

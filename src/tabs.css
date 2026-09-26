@@ -72,6 +72,20 @@
     color: var(--oc-text) !important;
   }
 
+  /* Container tabs carry their identity colour as one more edge: a 2px
+   * bar on the trailing edge of every surface (row, tile, rail), which no
+   * active bar uses, so identity and state never share an edge. Every
+   * tab surface lists --oc-ident first in its box-shadow; it is a no-op
+   * shadow on ordinary tabs. The colours stay Firefox's own: an Omarchy
+   * palette can be monochrome, and identity has to stay tellable apart. */
+  & .tabbrowser-tab {
+    --oc-ident: 0 0 transparent;
+  }
+
+  & .tabbrowser-tab[usercontextid] {
+    --oc-ident: inset -2px 0 0 var(--identity-tab-color);
+  }
+
   & .tab-background {
     border: none !important;
     border-radius: var(--oc-radius-small) !important;
@@ -81,7 +95,7 @@
 
   & .tabbrowser-tab:not([selected], [multiselected]) .tab-background {
     background: transparent !important;
-    box-shadow: none !important;
+    box-shadow: var(--oc-ident) !important;
   }
 
   & .tabbrowser-tab:hover:not([selected]) .tab-background {
@@ -93,12 +107,13 @@
    *   hairline = a tile's own edge (--oc-line), stronger when selected
    *   2px bar  = the active tab, on the edge facing its content: the
    *              leading edge for a row, the bottom edge for a tile
+   *   ident   = a container tab's colour, on the trailing edge
    * Nothing else paints an edge or a shadow.
    *
    * Selected: a flat wash with a hairline edge, no raised shadow. */
   & .tabbrowser-tab:is([selected], [multiselected]) .tab-background {
     background: var(--oc-selected) !important;
-    box-shadow: inset 0 0 0 1px var(--oc-line-strong) !important;
+    box-shadow: var(--oc-ident), inset 0 0 0 1px var(--oc-line-strong) !important;
   }
 
   /* The active tab glows: a hard 2px edge in the glow colour and a wash
@@ -108,15 +123,17 @@
       linear-gradient(90deg, var(--oc-glow-wash), transparent 70%),
       var(--oc-selected) !important;
     box-shadow:
+      var(--oc-ident),
       inset 2px 0 0 var(--oc-glow),
       inset 0 0 0 1px var(--oc-line-strong) !important;
   }
 
   & .tabbrowser-tab[multiselected]:not([selected]) .tab-background {
     background: var(--oc-accent-wash) !important;
-    box-shadow: none !important;
+    box-shadow: var(--oc-ident) !important;
   }
 
+  /* Nova's context line is replaced by the --oc-ident edge above. */
   & .tab-context-line {
     display: none !important;
   }
@@ -179,7 +196,7 @@
     /* A tile at rest is its edge only; hover fills it like a row. */
     & .tabbrowser-tab:not([selected], [multiselected]) .tab-background {
       background: transparent !important;
-      box-shadow: inset 0 0 0 1px var(--oc-line) !important;
+      box-shadow: var(--oc-ident), inset 0 0 0 1px var(--oc-line) !important;
     }
 
     & .tabbrowser-tab:hover:not([selected], [multiselected]) .tab-background {
@@ -192,6 +209,7 @@
         linear-gradient(0deg, var(--oc-glow-wash), transparent 70%),
         var(--oc-selected) !important;
       box-shadow:
+        var(--oc-ident),
         inset 0 -2px 0 var(--oc-glow),
         inset 0 0 0 1px var(--oc-line-strong) !important;
     }
@@ -250,20 +268,83 @@
     }
   }
 
-  /* ---- groups ----------------------------------------------------- */
+  /* ---- groups ----------------------------------------------------- *
+   * A group reads as a tree: its label is a row-high block on the --oc-inset
+   * axis like any row, its tabs are indented one inset, and its line is
+   * the indent's rule, on the --oc-inset axis. Each tab's line covers its
+   * own pitch cell exactly (the half-unit margins above and below), so the
+   * cells join into one continuous line with no overlap. */
+  --tab-group-label-height: var(--oc-row) !important;
+  --tab-group-label-size: var(--oc-row) !important;
+  --tab-group-label-container-size: var(--oc-row) !important;
+  --tab-group-label-hover-inset: 0px !important;
 
   & .tab-group-label-container {
-    padding-inline: var(--oc-gap) !important;
+    margin: calc(var(--oc-u) / 2) 0 !important;
+    padding: 0 var(--oc-inset) !important;
+  }
+
+  /* Firefox centres the label and its hover box in their containers
+   * (xul.css [pack], which a user sheet cannot override); the rail's strip
+   * can be wider than its tiles, so both hold themselves to the start.
+   * The hover box (lit on a collapsed group's hover preview) takes the
+   * label's shape; Nova's rail margin would push it off the axis. */
+  & .tab-group-label-hover-highlight {
+    align-self: start !important;
+    margin-inline: 0 !important;
+    border-radius: var(--oc-radius-small) !important;
   }
 
   & .tab-group-label {
+    align-self: start !important;
+    margin: 0 !important;
     border-radius: var(--oc-radius-small) !important;
-    min-height: calc(var(--oc-row) - 8px) !important;
+    height: var(--oc-row) !important;
+    min-height: var(--oc-row) !important;
     font-weight: 600 !important;
   }
 
+  &[expanded] tab-group > .tabbrowser-tab {
+    margin-inline-start: var(--oc-inset) !important;
+  }
+
   & .tab-group-line {
-    border-radius: 2px !important;
+    inset-block: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  /* A collapsed group that holds the active tab counts the rest in a
+   * tile of its own: a rail tile's size, on the grouped rows' edge, on the
+   * row pitch. Its line joins the active tab's across the margin. */
+  & .tab-group-overflow-count-container {
+    margin: calc(var(--oc-u) / 2) 0 !important;
+    padding: 0 !important;
+
+    &::after {
+      inset-block-start: calc(var(--oc-u) / -2) !important;
+    }
+  }
+
+  &[expanded] .tab-group-overflow-count-container {
+    margin-inline-start: var(--oc-inset) !important;
+  }
+
+  & .tab-group-overflow-count {
+    margin: 0 0 0 var(--oc-inset) !important;
+    padding: 0 !important;
+    width: var(--oc-button) !important;
+    min-width: var(--oc-button) !important;
+    height: var(--oc-row) !important;
+    line-height: var(--oc-row) !important;
+    border-radius: var(--oc-radius-small) !important;
+  }
+
+  /* The line ends round at the group's last child; Firefox's
+   * :last-of-type also rounds a tab followed by a split pair. */
+  & tab-group:not([collapsed]) > .tabbrowser-tab:last-child .tab-group-line,
+  & tab-group[collapsed]:not([hasmultipletabs]) .tab-group-line {
+    border-end-start-radius: 1px !important;
+    border-end-end-radius: 1px !important;
   }
 
   /* ---- drag feedback --------------------------------------------- */
@@ -319,6 +400,7 @@
       linear-gradient(0deg, var(--oc-glow-wash), transparent 70%),
       var(--oc-selected) !important;
     box-shadow:
+      var(--oc-ident),
       inset 0 -2px 0 var(--oc-glow),
       inset 0 0 0 1px var(--oc-line-strong) !important;
   }
@@ -342,19 +424,32 @@
 }
 
 /* ---- split view ------------------------------------------------------ *
- * The pair of tabs is one row: the inset on both sides, the tab row's
- * height and pitch, one hairline around it. Each half keeps its icon on
- * the icon axis (the wrapper's edge plus one inset). */
+ * The pair of tabs is one tile: a row's axes, height and pitch, one hairline
+ * around it (stronger while it holds the active tab), the halves split by
+ * a hairline. Each half keeps its icon one --oc-icon-pad in from its own
+ * edge, like a row. In the rail the halves stack one unit apart, so the
+ * pair spans exactly two rail pitches. Firefox's own pair fill, drag and
+ * multiselect outlines stay: our rules only replace the resting surface. */
 #tabbrowser-tabs[orient="vertical"] tab-split-view-wrapper {
-  margin: 2px var(--oc-inset) !important;
+  margin: calc(var(--oc-u) / 2) var(--oc-inset) !important;
   padding: 0 !important;
   gap: 0 !important;
   border-radius: var(--oc-radius-small) !important;
-  background: transparent !important;
   box-shadow: inset 0 0 0 1px var(--oc-line) !important;
+
+  &:not([dragover-groupTarget]) {
+    background: transparent !important;
+  }
+
+  &[hasactivetab] {
+    box-shadow: inset 0 0 0 1px var(--oc-line-strong) !important;
+  }
 
   & .tabbrowser-tab {
     padding: 0 !important;
+    /* Nova shrinks split halves to 24px in compact density. */
+    --tab-min-height: var(--oc-row) !important;
+    --tab-collapsed-background-width: var(--oc-button) !important;
   }
 
   & .tabbrowser-tab:not([pinned]) .tab-background {
@@ -362,12 +457,86 @@
   }
 
   & .tabbrowser-tab:not([pinned]) .tab-content {
-    padding-inline: var(--oc-inset) !important;
+    padding-inline: var(--oc-icon-pad) var(--oc-inset) !important;
   }
 
+  /* Its group line runs on the --oc-inset axis with the rows', over the
+   * pair's whole pitch cell. */
+  & .tab-group-line {
+    inset-block: calc(var(--oc-u) / -2) !important;
+  }
+}
+
+#tabbrowser-tabs[orient="vertical"][expanded] tab-split-view-wrapper {
   & .tabbrowser-tab + .tabbrowser-tab .tab-background {
     border-inline-start: 1px solid var(--oc-line) !important;
     border-start-start-radius: 0 !important;
     border-end-start-radius: 0 !important;
+  }
+
+  & .tabbrowser-tab:first-child .tab-background {
+    border-start-end-radius: 0 !important;
+    border-end-end-radius: 0 !important;
+  }
+
+  /* Indented with the group's rows; the line stays on the inset axis. */
+  tab-group > & {
+    margin-inline-start: calc(2 * var(--oc-inset)) !important;
+  }
+
+  tab-group > & .tab-group-line {
+    inset-inline-start: calc(-1 * var(--oc-inset)) !important;
+  }
+}
+
+#tabbrowser-tabs[orient="vertical"]:not([expanded]) tab-split-view-wrapper {
+  width: var(--oc-button) !important;
+  grid-template-columns: 1fr !important;
+  row-gap: var(--oc-u) !important;
+
+  /* The divider sits in the unit between the halves. */
+  &:not([dragover-groupTarget]) {
+    background: linear-gradient(transparent calc(var(--oc-row) + var(--oc-u) / 2), var(--oc-line) 0,
+      var(--oc-line) calc(var(--oc-row) + var(--oc-u) / 2 + 1px), transparent 0) !important;
+  }
+
+  & .tabbrowser-tab {
+    width: var(--oc-button) !important;
+    min-width: 0 !important;
+    border: none !important;
+  }
+
+  & .tabbrowser-tab:not([pinned]) .tab-content {
+    margin: 0 !important;
+    padding-inline: var(--oc-icon-pad) 0 !important;
+  }
+
+  & .tabbrowser-tab .tab-group-line {
+    inset-inline-start: calc(var(--oc-inset) / 2 - 1px - var(--oc-inset)) !important;
+  }
+}
+
+/* ---- groups in the rail ---------------------------------------------- *
+ * The label is a rail tile with the group's initial; every group line
+ * (tabs, pair, label) sits centred in the gutter left of the tiles. */
+#tabbrowser-tabs[orient="vertical"]:not([expanded]) {
+  & .tab-group-label {
+    width: var(--oc-button) !important;
+    min-width: var(--oc-button) !important;
+    padding: 0 !important;
+    justify-content: center !important;
+  }
+
+  & .tabbrowser-tab .tab-group-line {
+    inset-inline-start: calc(var(--oc-inset) / 2 - 1px) !important;
+  }
+
+  & tab-group > :is(.tab-group-label-container, .tab-group-overflow-count-container)::after {
+    inset-inline-start: calc(var(--oc-inset) / 2 - 1px) !important;
+  }
+
+  /* The label's line reaches across its margin to the first tab's. */
+  & tab-group > .tab-group-label-container::after {
+    inset-block-end: calc(var(--oc-u) / -2) !important;
   }
 }
