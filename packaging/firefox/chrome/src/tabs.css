@@ -197,9 +197,8 @@
     }
   }
 
-  /* Pinned tiles, rule, tabs: the rule is the last pixel of the head band
-   * (tokens.css), one inset below the last tile and one above the first
-   * tab's surface, as wide as a tab row. Above: the grid's pitch leaves
+  /* Pinned tiles, rule, tabs: the rule sits one inset below the last
+   * tile and one above the first tab's surface, as wide as a tab row. Above: the grid's pitch leaves
    * one unit under the last tiles, then one more in here. Below: 1.5 in
    * here, then the first tab's half-unit margin. */
   & #vertical-pinned-tabs-splitter {

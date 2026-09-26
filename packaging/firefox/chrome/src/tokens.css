@@ -35,7 +35,11 @@
   --oc-toolbar: 40px;       /* top toolbar row */
   --oc-row: 32px;           /* vertical tab row */
   --oc-button: 32px;        /* toolbar button tile */
-  --oc-pinned: 40px;        /* pinned tab tile (square) */
+  /* One block size: pinned tiles, tab rows, buttons and the address
+   * field in the navigation row are all --oc-row tall, one unit apart. */
+  --oc-pinned: var(--oc-row); /* pinned tab tile height */
+  /* The column's default width: three pinned slabs one unit apart. */
+  --oc-column: 264px;
   --oc-icon: 16px;          /* every chrome glyph and favicon */
   /* Where icons sit: centred in a --oc-button square that starts on the
    * --oc-inset axis. Toolbar buttons, tabs, tiles and the new-tab row all
@@ -43,12 +47,12 @@
    * any density (compact shrinks the button, so the axis moves with it). */
   --oc-icon-pad: calc((var(--oc-button) - var(--oc-icon)) / 2);
   --oc-icon-axis: calc(var(--oc-inset) + var(--oc-icon-pad));
-  /* The window's head band, shared by the tab column and the page's
-   * navigation row (zen mode) so both read as one street: pinned tiles
-   * or the address field fill [--oc-inset, --oc-inset + --oc-pinned],
-   * one inset clears them, and the band's last pixel is the rule under
-   * it. The column's rule and the row's rule are the same line. */
-  --oc-head: calc(var(--oc-pinned) + 2 * var(--oc-inset) + 1px);
+  /* The window's head band: the first block of the tab column and its
+   * gap. The navigation row (zen mode) is this band: its buttons and
+   * field sit exactly on the column's first tile or tab
+   * [--oc-inset, --oc-inset + --oc-row], and its rule is the band's last
+   * pixel, inside the one-unit gap before the column's second block. */
+  --oc-head: calc(var(--oc-inset) + var(--oc-row) + var(--oc-u));
   /* Invisible strip at a window edge that reveals hidden chrome
    * (compact's column, zen's navigation row). */
   --oc-trigger: 6px;
@@ -63,7 +67,7 @@
     --oc-toolbar: 34px;
     --oc-row: 28px;
     --oc-button: 28px;
-    --oc-pinned: 36px;
+    --oc-column: 240px;
   }
 
   /* ---- type -------------------------------------------------------- */

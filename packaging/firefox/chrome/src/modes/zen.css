@@ -77,11 +77,12 @@
         height: var(--oc-trigger) !important;
       }
 
-      /* The row's height: a toolbar, or with vertical tabs the head band,
-       * so its rule continues the column's. The head band's last pixel is
-       * its rule (--oc-zen-rule), and the line centres above it. */
+      /* The row's height, and the padding its line of buttons and field
+       * centres between: a toolbar, or with vertical tabs the head band
+       * (tokens.css), whose line sits on the column's first block. */
       --oc-zen-row: var(--oc-toolbar);
-      --oc-zen-rule: 0px;
+      --oc-zen-pad-start: 0px;
+      --oc-zen-pad-end: 0px;
 
       /* Where the row's top edge is: parked one row plus a gap above the
        * window, or docked. Both the row and the field (a top-layer
@@ -94,8 +95,9 @@
         anchor-name: --oc-page !important;
       }
 
-      /* A title bar: one solid slab with a hairline under it, painted
-       * inside the box so buttons and field centre on the same line. */
+      /* A title bar: one slab with a hairline under it (its last pixel),
+       * painted inside the box so buttons and field centre on the same
+       * line. */
       & #nav-bar {
         top: var(--oc-zen-top) !important;
         bottom: auto !important;
@@ -103,7 +105,7 @@
         width: 100vw !important;
         height: var(--oc-zen-row) !important;
         min-height: var(--oc-zen-row) !important;
-        padding-block: 0 var(--oc-zen-rule) !important;
+        padding-block: var(--oc-zen-pad-start) var(--oc-zen-pad-end) !important;
         /* Buttons can be taller than the row (compact density): centre
          * the line, not its top, on the field's axis. */
         align-items: center !important;
@@ -127,7 +129,8 @@
       }
 
       & #urlbar[breakout] {
-        top: calc(var(--oc-zen-top) + (var(--oc-zen-row) - var(--oc-zen-rule) - var(--urlbar-height)) / 2) !important;
+        top: calc(var(--oc-zen-top) + var(--oc-zen-pad-start)
+                  + (var(--oc-zen-row) - var(--oc-zen-pad-start) - var(--oc-zen-pad-end) - var(--urlbar-height)) / 2) !important;
         /* Centred on the page, snapped to whole pixels: an odd page
          * width would otherwise leave both edges on a half pixel. */
         --oc-zen-field: round(down, min(var(--oc-field-width), calc(anchor-size(--oc-page width, 100vw) / 2)), 2px);
@@ -156,22 +159,38 @@
       }
 
       /* Vertical tabs: the row docks on the page, spanning it only; the
-       * tab column stays put beside it. */
+       * tab column stays put beside it. It is the head band: buttons and
+       * field one block tall on the column's first block, the rule in the
+       * gap under it.
+       *
+       * The row holds its own space: the page slides down by the row's
+       * height as it drops, so the row sits on the window surface itself,
+       * the same glass as the column (the chrome cannot blur the page, a
+       * separate process, so a row over the page could only ever be
+       * tinted, never frosted). The page moves by translate, not layout,
+       * so it never reflows, and the tabbox the field anchors to stays
+       * put (a moving anchor strands the top-layer field). */
       @media -moz-pref("sidebar.verticalTabs") {
         --oc-zen-top: calc(anchor(--oc-page top, 0px) * var(--oc-zen-open)
                            + (var(--oc-zen-open) - 1) * (var(--oc-zen-row) + var(--oc-gap)));
         --oc-zen-row: var(--oc-head);
-        --oc-zen-rule: 1px;
+        --oc-zen-pad-start: var(--oc-inset);
+        --oc-zen-pad-end: var(--oc-u);
 
-        /* The field is a pinned tile's height, on the same band. */
         & #urlbar[breakout] {
-          --urlbar-height: var(--oc-pinned) !important;
+          --urlbar-height: var(--oc-row) !important;
         }
 
         & #nav-bar {
           left: anchor(--oc-page left, 0px) !important;
           right: anchor(--oc-page right, 0px) !important;
           width: auto !important;
+          background-color: transparent !important;
+        }
+
+        & #tabbrowser-tabpanels {
+          translate: 0 calc(var(--oc-zen-open) * var(--oc-zen-row)) !important;
+          transition: translate var(--oc-zen-motion) !important;
         }
 
         /* The trigger spans the page, not the tab column. */
