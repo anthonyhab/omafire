@@ -1,5 +1,5 @@
 /* OMAFOX FIREFOX BRIDGE MANAGED FILE */
-/* Generated from Omarchy Chrome 4bc3e153ddd7 by omafox scripts/sync-firefox-payload.sh. */
+/* Generated from Omarchy Chrome 9e9b99819a51 by omafox scripts/sync-firefox-payload.sh. */
 /* Omarchy Chrome — Firefox 156+ with Nova (browser.nova.enabled).
  *
  * Load order: generated inputs, then tokens, then components. Components
@@ -35,6 +35,7 @@
 @import "src/modes/compact.css";
 @import "src/modes/gap.css";
 @import "src/modes/translucency.css";
+@import "src/modes/tab-numbers.css";
 
 /* Personal overrides; never shipped or maintained here. */
 @import "../customChrome.css";
