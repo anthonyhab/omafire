@@ -24,11 +24,10 @@ sidebar-main {
    * every other edge. */
   --space-small: var(--oc-inset) !important;
   /* The column's default width (until it is dragged) is Firefox's rem
-   * formula, which lands between pixels at normal density. Build it from
-   * the grid instead: three pinned slabs, each two tiles wide, one unit
-   * apart, inside the pinned grid's margins (tabs.css). A dragged width
-   * is Firefox's own, in whole pixels. */
-  --sidebar-expanded-launcher-width: calc(3 * (2 * var(--oc-pinned) + var(--oc-u)) + 2 * var(--oc-inset) - var(--oc-u)) !important;
+   * formula, which lands between pixels at normal density; use the
+   * grid's (tokens.css). A dragged width is Firefox's own, in whole
+   * pixels. */
+  --sidebar-expanded-launcher-width: var(--oc-column) !important;
 }
 
 /* Nova spaces the expanded tools with a hard-coded 12.5px gap, which puts
