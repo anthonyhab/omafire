@@ -1,0 +1,65 @@
+/* Omarchy Chrome — tab numbers (omarchy.tab-numbers).
+ *
+ * Each of the first eight tabs shows the digit that Alt+1…8 selects.
+ * Firefox counts gBrowser.visibleTabs: pinned tabs first, then the strip,
+ * skipping hidden tabs and the tabs a collapsed group tucks away. Those
+ * tabs are all display: none, and a display: none element never
+ * increments a counter, so a plain CSS counter gives the same numbers.
+ * Alt+9 (the last tab) has no marker: Firefox exposes none to CSS.
+ *
+ * Rows show the digit at the trailing end, before the close button, as
+ * dim text, clear of the container edge. Tiles (pinned, the collapsed
+ * rail) have no room in the row, so the digit sits in the gutter left of
+ * the favicon, on its baseline: the one tile edge no marker uses. */
+
+@counter-style oc-alt-key {
+  system: fixed;
+  symbols: "1" "2" "3" "4" "5" "6" "7" "8";
+  fallback: oc-alt-key-none;
+}
+
+/* Past eight, nothing: a lone space, since a symbol cannot be empty. */
+@counter-style oc-alt-key-none {
+  system: cyclic;
+  symbols: " ";
+}
+
+@media -moz-pref("omarchy.tab-numbers") {
+  #tabbrowser-tabs {
+    counter-reset: oc-tab;
+  }
+
+  #tabbrowser-tabs .tabbrowser-tab {
+    counter-increment: oc-tab;
+  }
+
+  /* Rows: before the close button, in its column's dim text. */
+  #tabbrowser-tabs:is([orient="horizontal"], [expanded]) .tabbrowser-tab:not([pinned]) {
+    & .tab-content::after {
+      content: counter(oc-tab, oc-alt-key);
+      order: 1;
+      flex: none;
+      margin-inline: var(--oc-inset) var(--oc-u);
+      font-size: var(--oc-font-size);
+      color: var(--oc-text-dim);
+      font-variant-numeric: tabular-nums;
+    }
+
+    & .tab-close-button {
+      order: 2;
+    }
+  }
+
+  /* Tiles: in the gutter left of the favicon, its bottom on the icon's. */
+  :is(#tabbrowser-tabs[orient="vertical"]:not([expanded]) .tabbrowser-tab,
+      #tabbrowser-tabs .tabbrowser-tab[pinned]) .tab-icon-stack::after {
+    content: counter(oc-tab, oc-alt-key);
+    position: absolute;
+    inset-inline-end: calc(100% + 1px);
+    inset-block-end: -1px;
+    font-size: 9px;
+    line-height: 1;
+    color: var(--oc-text-dim);
+    pointer-events: none;
+  }
+}

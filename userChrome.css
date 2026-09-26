@@ -36,6 +36,7 @@
 @import "src/modes/compact.css";
 @import "src/modes/gap.css";
 @import "src/modes/translucency.css";
+@import "src/modes/tab-numbers.css";
 
 /* Personal overrides; never shipped or maintained here. */
 @import "customChrome.css";
