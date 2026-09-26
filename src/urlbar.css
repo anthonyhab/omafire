@@ -57,13 +57,17 @@
 /* ---- results --------------------------------------------------------
  *
  * One line per result, on the tab grid: --oc-row rows at the same pitch
- * as vertical tabs, highlights flush with the field's inner edge, icons on
- * the field's leading-icon axis, the URL trailing the title. */
+ * as vertical tabs, the URL trailing the title. Rows share the field's
+ * columns: a highlight starts where the field's chips start (its inner
+ * padding) and its favicon sits exactly under the field's leading icon
+ * (one chip padding further in), on both ends. */
 
 .urlbarView {
   margin: 0 !important;
   width: 100% !important;
+  box-sizing: border-box !important;
   padding-block: var(--oc-gap) !important;
+  padding-inline: var(--urlbar-input-container-padding) !important;
   border-top: 1px solid var(--oc-line) !important;
 }
 
@@ -82,7 +86,7 @@
 
 .urlbarView-row-inner {
   min-height: var(--oc-row) !important;
-  padding: 0 var(--oc-inset) !important;
+  padding: 0 var(--urlbar-icon-padding) !important;
   align-items: center !important;
   border-radius: var(--oc-radius-small) !important;
 }

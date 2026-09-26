@@ -197,19 +197,20 @@
     }
   }
 
-  /* Pinned tiles, rule, tabs: the rule sits 3 units below the last tile
-   * and 3 above the first tab's surface, as wide as a tab row. Above: the
-   * grid's pitch leaves 1 unit under the last tiles, then 2 in here.
-   * Below: 2.5 in here, then the first tab's half-unit margin. */
+  /* Pinned tiles, rule, tabs: the rule is the last pixel of the head band
+   * (tokens.css), one inset below the last tile and one above the first
+   * tab's surface, as wide as a tab row. Above: the grid's pitch leaves
+   * one unit under the last tiles, then one more in here. Below: 1.5 in
+   * here, then the first tab's half-unit margin. */
   & #vertical-pinned-tabs-splitter {
     border: none !important;
     /* Hard stops over the full box, not a 1px background tile: a 1px tile
      * can snap to nothing at fractional display scales. */
-    background: linear-gradient(transparent calc(var(--oc-u) * 2), var(--oc-line) 0,
-      var(--oc-line) calc(var(--oc-u) * 2 + 1px), transparent 0)
+    background: linear-gradient(transparent calc(var(--oc-inset) - var(--oc-u)), var(--oc-line) 0,
+      var(--oc-line) calc(var(--oc-inset) - var(--oc-u) + 1px), transparent 0)
       center / calc(100% - 2 * var(--oc-inset)) 100% no-repeat !important;
-    min-height: calc(var(--oc-u) * 4.5 + 1px) !important;
-    height: calc(var(--oc-u) * 4.5 + 1px) !important;
+    min-height: calc(2 * var(--oc-inset) - var(--oc-u) * 1.5 + 1px) !important;
+    height: calc(2 * var(--oc-inset) - var(--oc-u) * 1.5 + 1px) !important;
     margin: 0 !important;
     pointer-events: none !important;
   }

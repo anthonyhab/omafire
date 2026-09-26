@@ -87,11 +87,13 @@
      * (--toolbar-shift-translate); the launcher is window-anchored. */
     translate: none !important;
 
-    /* A tall field whose leading chip starts at the same inner edge as
-     * the result highlights below it. */
+    /* A tall field whose leading chip starts at its inner edge. Through
+     * Firefox's variable, not the container's padding: the result rows
+     * read it too (urlbar.css), so they stay on the chips' columns. */
+    --urlbar-input-container-padding: 0px !important;
+
     & > .urlbar-input-container {
       height: calc(var(--oc-u) * 12) !important;
-      padding-inline: 0 !important;
       font-size: 1.15em !important;
     }
 
