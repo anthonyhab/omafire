@@ -1384,6 +1384,8 @@ static void configure_ff_profile(const char *profile) {
                         ", false);\n"
                         "user_pref(\"browser.tabs.allow_transparent_browser\""
                         ", true);\n"
+                        "user_pref(\"widget.wayland.opaque-region.enabled\""
+                        ", false);\n"
                         FF_PREFS_END "\n",
                         false, "Firefox profile file");
 
@@ -1774,6 +1776,12 @@ static void refresh_ff_profile_colors(const char *profile,
        * pages that paint no background fall back to the theme's canvas,
        * which matches browser.display.background_color below. */
       "user_pref(\"browser.tabs.allow_transparent_browser\", true);\n"
+      /* Hyprland skips its blur wherever the window claims to be opaque,
+       * and Firefox only refreshes that claim on some repaints: chrome
+       * that moves the page (the theme's zen row slides it down) leaves
+       * the glass above it unblurred until the next tab switch. Never
+       * claim opacity; the whole window is glass under omarchy anyway. */
+      "user_pref(\"widget.wayland.opaque-region.enabled\", false);\n"
       "user_pref(\"browser.nova.enabled\", true);\n"
       "user_pref(\"browser.newtabpage.activity-stream.nova.enabled\""
       ", true);\n"
