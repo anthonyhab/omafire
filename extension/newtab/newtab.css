@@ -343,15 +343,18 @@ header:has(> #time[hidden]):has(> #date[hidden]) {
 
 /* ---- customize ------------------------------------------------------ */
 
+/* Mirrors the sidebar's tool buttons across the window: a 28px square one
+ * unit (8px, the chrome's inset) off the bottom and side edges, so it
+ * shares their bottom edge and icon axis. */
 #settings-toggle {
   position: fixed;
-  right: calc(var(--u) * 2);
-  bottom: calc(var(--u) * 2);
+  right: var(--u);
+  bottom: var(--u);
   display: flex;
   align-items: center;
   gap: var(--u);
-  height: calc(var(--u) * 4);
-  padding: 0 calc(var(--u) * 1.5);
+  height: 28px;
+  padding: 0 5px;
   border: 1px solid transparent;
   background: transparent;
   color: var(--dim-text);
