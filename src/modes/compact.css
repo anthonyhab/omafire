@@ -18,9 +18,19 @@
      * open or focused, and while a tab is being dragged. The column's
      * popups (tab and group menus, the group editor, tab notes, the
      * new-tab container menu, the tools overflow) live outside it, so the
-     * pointer leaves the column to use them. */
+     * pointer leaves the column to use them.
+     *
+     * Keyboard focus holds it too: Tab from the address field walks the
+     * toolbar, the tabs and the sidebar tools, which were focused while
+     * parked off-screen. Only keyboard focus: :focus-visible for the light
+     * DOM, and :focus-within for the tools, which live in sidebar-main's
+     * shadow tree. A mouse click on a tab or a tool sends focus to the
+     * page or the panel, so nothing stale keeps the column out. */
     &:has(#navigator-toolbox:hover,
           #sidebar-container:hover,
+          #navigator-toolbox :focus-visible,
+          #sidebar-container :focus-visible,
+          sidebar-main:focus-within,
           #urlbar[focused],
           #nav-bar [open],
           #tabbrowser-tabs[movingtab],
