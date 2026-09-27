@@ -69,7 +69,7 @@
         : "Theme sync is active";
       themeName.textContent = storedTheme.themeName;
       paletteMode.textContent = `${storedTheme.palette.mode}, ${globalThis.OmafoxTheme.COLOR_KEYS.length} colors`;
-      lastSync.textContent = new Date(storedTheme.appliedAt).toLocaleString();
+      lastSync.textContent = new Date(storedTheme.appliedAt).toLocaleString([], { dateStyle: "short", timeStyle: "short" });
       details.hidden = false;
       reapply.disabled = false;
       clear.disabled = false;
