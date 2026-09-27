@@ -153,11 +153,17 @@
   }
 
   /* A tile nested in the row: one unit clear of its top, bottom and
-   * trailing edge (Nova's -3px margin hung it past the row), corners
+   * trailing edge at any density (Nova's -3px margin hung it past the
+   * row, and a fixed 24px crowded compact's 28px row), corners
    * concentric with the row's. At rest only its dim glyph shows; hovered it
    * becomes a red tile on the hairline logic, so closing reads as the one
    * destructive thing on the row. */
   & .tab-close-button {
+    /* One unit clear of the row at any density: 24px in a 32px row, 20px
+     * in compact's 28px. The 12px glyph stays centred. */
+    width: calc(var(--oc-row) - 2 * var(--oc-u)) !important;
+    height: calc(var(--oc-row) - 2 * var(--oc-u)) !important;
+    padding: calc((var(--oc-row) - 2 * var(--oc-u) - 12px) / 2) !important;
     margin-inline: var(--oc-u) var(--oc-u) !important;
     border-radius: max(0px, calc(var(--oc-radius-small) - var(--oc-u))) !important;
     fill: var(--oc-text-dim) !important;
