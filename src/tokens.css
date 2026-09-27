@@ -86,9 +86,15 @@
   --oc-field: var(--toolbar-field-background-color, var(--omarchy-darker_background));
   --oc-field-text: var(--toolbar-field-text-color, var(--oc-text));
   --oc-accent: var(--lwt-tab-line-color, var(--omarchy-accent, AccentColor));
-  /* Focus rings and selected edges use Hyprland's active window border
-   * (omarchy-radius.css), so the browser marks focus like the desktop. */
-  --oc-focus: var(--omarchy-border-active-color, var(--toolbar-field-border-color-focus, var(--oc-accent)));
+  /* Keyboard focus and focused edges (the open urlbar, split view's
+   * active pane, checkboxes) are the accent, as a 1px ring. Hyprland's
+   * active border was tried and dropped (2026-09-27): it is chosen for a
+   * window edge over wallpaper, not for the page, and varies by setup
+   * from grey to near-white. Near-white it outshone body text on every
+   * dark Omarchy theme and vanished (1.0-1.1:1) on every light one. The
+   * accent clears 3:1 on all of them, and stays below text on dark ones.
+   * Focus has no glow: that is the active/current signal. */
+  --oc-focus: var(--oc-accent);
   /* The active tab's glow: the palette accent, or the page's own colour
    * when Omafox's site-coloured tabs are on (it sets the lightweight
    * theme's tab_loading per window). Outside a lightweight theme Firefox's

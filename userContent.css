@@ -4,6 +4,8 @@
 @import "omarchy-radius.css";
 @import "omafox-content-palette.css";
 
+@import "src/tokens-content.css";
+
 @import "src/content.css";
 
 /* Personal overrides; never shipped or maintained here. */
