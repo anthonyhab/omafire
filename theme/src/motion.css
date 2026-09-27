@@ -1,0 +1,43 @@
+/* Omarchy Chrome — sidebar motion.
+ *
+ * Firefox animates expand/collapse by sliding boxes with `translate` while
+ * the final layout is already applied, so the column's contents and the
+ * page jump at either end of the slide. Instead the column's real width
+ * moves: the page reflows with it every frame and nothing detaches.
+ *
+ * !important declarations outrank Web Animations, which is what switches
+ * Firefox's slide off. The expanded width is Firefox's own (the inline
+ * width it writes while you drag the splitter); the collapsed width is the
+ * rail's. While the splitter is being dragged the transition is off, so
+ * resizing follows the pointer 1:1. */
+
+@media -moz-pref("sidebar.verticalTabs") {
+  #sidebar-container,
+  sidebar-main,
+  #sidebar-box,
+  #sidebar-splitter,
+  #tabbrowser-tabbox {
+    translate: none !important;
+  }
+
+  #sidebar-container {
+    transition: width var(--oc-slow) var(--oc-ease) !important;
+  }
+
+  /* The rail is its tiles plus an inset each side; the column's edge
+   * line (sidebar.css), where there is one, comes on top rather than out
+   * of the page-side inset. */
+  #sidebar-container:has(sidebar-main:not([expanded])) {
+    width: calc(var(--tab-collapsed-width) + var(--oc-column-edge, 0px)) !important;
+  }
+
+  :root:has(#sidebar-launcher-splitter[state="dragging"]) #sidebar-container {
+    transition: none !important;
+  }
+
+  /* The column clips its contents while it narrows, rather than letting
+   * rows overflow into the page. */
+  #sidebar-container {
+    overflow: clip !important;
+  }
+}

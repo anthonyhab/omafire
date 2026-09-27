@@ -1,0 +1,109 @@
+/* Omarchy Chrome — window frame, shared by every layout.
+ *
+ * One surface (--oc-surface) paints the whole window behind the chrome;
+ * toolbars and the sidebar are transparent on top of it, so translucency
+ * has exactly one layer to swap. The content area is flush by default;
+ * the --oc-frame-gap / --oc-card-* tokens turn it into a card
+ * (modes/gap.css). */
+
+:root:not([inDOMFullscreen]) {
+  & body {
+    background-color: var(--oc-surface) !important;
+    color: var(--oc-text) !important;
+  }
+
+  & #browser,
+  & #navigator-toolbox,
+  & #sidebar-container,
+  & #nav-bar,
+  & #PersonalToolbar {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  & #tabbrowser-tabbox {
+    margin: var(--oc-frame-gap) !important;
+    background: transparent !important;
+  }
+
+  & #tabbrowser-tabpanels {
+    background-color: transparent !important;
+  }
+
+  & .browserContainer {
+    border: none !important;
+    border-radius: var(--oc-card-radius) !important;
+    overflow: clip !important;
+    box-shadow: var(--oc-card-shadow) !important;
+    background-color: var(--oc-canvas) !important;
+    -moz-window-dragging: no-drag !important;
+  }
+
+  /* The Omafox new tab may leave its page clear to show the window
+   * surface (with glass: the blurred desktop). Only that page: everywhere
+   * else the canvas stays the backstop for pages that paint no background,
+   * and it matches browser.display.background_color, which omafox keeps on
+   * the palette. Needs browser.tabs.allow_transparent_browser (omafox sets
+   * it). The page is known by its favicon, the one trait it owns that the
+   * chrome can see: Firefox inlines it as base64, and this is the base64
+   * of its opening `<svg id="omafox-newtab" `. */
+  &:has(.tabbrowser-tab[selected][image*="PHN2ZyBpZD0ib21hZm94LW5ld3RhYiIg"])
+      #tabbrowser-tabpanels > .deck-selected .browserContainer {
+    background-color: transparent !important;
+  }
+
+  /* Split view: the active page is framed in the focus colour, 1px
+   * inside its edge. The frame is a positioned layer above the page, as
+   * the status panel is: the page (another process) paints over its
+   * container's own inset shadow and outline. */
+  & #tabbrowser-tabpanels[splitview] {
+    & .split-view-panel > .browserContainer {
+      border: none !important;
+      outline: none !important;
+    }
+    & .split-view-panel.deck-selected > .browserContainer {
+      position: relative !important;
+
+      &::after {
+        content: "" !important;
+        position: absolute !important;
+        inset: 0 !important;
+        z-index: 2 !important;
+        border: 1px solid var(--oc-focus) !important;
+        border-radius: inherit !important;
+        pointer-events: none !important;
+      }
+    }
+    /* The divider is a drag handle one gap wide, so the pointer has 8px
+     * to find (the card layouts' gap already is), with a short hairline
+     * marker while hovered. */
+    & .split-view-splitter {
+      width: max(var(--oc-frame-gap), var(--oc-gap)) !important;
+      margin: 0 !important;
+      background: transparent !important;
+
+      &:hover {
+        background: linear-gradient(var(--oc-line-strong), var(--oc-line-strong)) center / 2px 48px no-repeat !important;
+      }
+    }
+  }
+}
+
+/* Hyprland owns window controls; Firefox's close/minimize/maximize are
+ * dead weight in a tiling compositor. */
+.titlebar-buttonbox-container,
+.titlebar-spacer {
+  display: none !important;
+}
+
+/* XUL [collapsed] boxes (idle AI window, splitters) must never claim room. */
+#browser > [collapsed] {
+  display: none !important;
+}
+
+/* DOM fullscreen (video): no frame at all. */
+:root[inDOMFullscreen] {
+  & #tabbrowser-tabbox { margin: 0 !important; }
+  & .browserContainer { border-radius: 0 !important; box-shadow: none !important; }
+}

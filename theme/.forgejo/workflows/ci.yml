@@ -1,0 +1,31 @@
+# Forgejo is the CI authority for Omarchy Chrome. Omafox packages a committed
+# revision of this theme, so a revision it packages should be one this gate
+# passed on.
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: House rules (lint)
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base
+    steps:
+      - name: Install toolchain
+        # nodejs runs the checkout action and the lint; Node 26 is the
+        # pinned runtime.
+        run: |
+          pacman -Syu --noconfirm --needed git nodejs
+          node -e 'const m = +process.versions.node.split(".")[0]; if (m !== 26) { console.error(`Node ${process.version}; expected 26`); process.exit(1) }'
+      - name: Checkout
+        uses: https://code.forgejo.org/actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          token: ${{ forgejo.token }}
+          github-server-url: http://forgejo:3000
+          persist-credentials: false
+      - name: Lint
+        run: node scripts/lint.mjs

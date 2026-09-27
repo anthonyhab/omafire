@@ -1,0 +1,42 @@
+/* Omarchy Chrome — typography.
+ *
+ * Chrome text uses the shell's monospace (fontconfig), like the rest of
+ * Omarchy. Setting it on containers is not enough: Firefox's native skin
+ * puts `font: menu` / `font: caption` on menuitems, toolbar buttons and
+ * labels, which would split one popup into two typefaces. So the leaves
+ * are named. */
+
+#mainPopupSet > :is(menupopup, panel),
+#mainPopupSet :is(menupopup, panel, panelview)
+  :is(menu, menuitem, toolbarbutton, toolbaritem, label, description, input,
+      checkbox, radio, button, moz-button, richlistitem, menulist, select,
+      .toolbarbutton-text, .menu-iconic-text, .menu-accel),
+#navigator-toolbox :is(toolbarbutton, toolbaritem, label, .toolbarbutton-text, toolbarbadge),
+#sidebar-box :is(label, description, #sidebar-title),
+#tabbrowser-tabs .tab-group-label {
+  font-family: var(--oc-font) !important;
+  font-size: var(--oc-font-size) !important;
+}
+
+findbar :is(label, description, checkbox, input, .findbar-textbox),
+#sidebar-header {
+  font-family: var(--oc-font) !important;
+  font-size: var(--oc-font-size) !important;
+}
+
+/* Sidebar panels (bookmarks, history, synced tabs…) and the Library are
+ * their own chrome documents, some XUL, some HTML with custom elements. */
+@-moz-document url-prefix("chrome://browser/content/sidebar/"),
+               url-prefix("chrome://browser/content/places/") {
+  :root, :root * {
+    font-family: var(--oc-font) !important;
+  }
+}
+
+/* The new-tab row sits in the tab rows' rhythm, so it reads at their
+ * size, not a toolbar button's. */
+:is(#urlbar-input, .tab-label, .urlbarView-row,
+    #tabs-newtab-button, #tabs-newtab-button .toolbarbutton-text) {
+  font-family: var(--oc-font) !important;
+  font-size: var(--oc-label-size) !important;
+}

@@ -1,0 +1,119 @@
+/* Omarchy Chrome — compact mode (omarchy.compact, sidebar layout only).
+ *
+ * Zen's compact mode: the content card takes the whole window and the
+ * sidebar column (toolbox + tabs) floats over it as one card, parked off
+ * the left edge until the pointer reaches it. A --oc-reveal flag (0/1)
+ * drives every moving part so they can never disagree.
+ *
+ * The urlbar is a top-layer popover, so it does not inherit the toolbox's
+ * translate. Firefox exposes --toolbar-shift-translate for exactly this
+ * (it uses it for the fullscreen toolbar slide); we feed it the same
+ * distance, expressed in the urlbar's own width. */
+
+@media -moz-pref("omarchy.compact") and -moz-pref("omarchy.layout", "sidebar") and -moz-pref("sidebar.verticalTabs") {
+  :root:not([customizing], [popup-window], [taskbartab], [chromehidden~="toolbar"], [inDOMFullscreen]):has(sidebar-main[expanded]) {
+    --oc-reveal: 0;
+
+    /* Reveal while the pointer is on the column, while anything it owns is
+     * open or focused, and while a tab is being dragged. The column's
+     * popups (tab and group menus, the group editor, tab notes, the
+     * new-tab container menu, the tools overflow) live outside it, so the
+     * pointer leaves the column to use them.
+     *
+     * Keyboard focus holds it too: Tab from the address field walks the
+     * toolbar, the tabs and the sidebar tools, which were focused while
+     * parked off-screen. Only keyboard focus: :focus-visible for the light
+     * DOM, and :focus-within for the tools, which live in sidebar-main's
+     * shadow tree. A mouse click on a tab or a tool sends focus to the
+     * page or the panel, so nothing stale keeps the column out. */
+    &:has(#navigator-toolbox:hover,
+          #sidebar-container:hover,
+          #navigator-toolbox :focus-visible,
+          #sidebar-container :focus-visible,
+          sidebar-main:focus-within,
+          #urlbar[focused],
+          #nav-bar [open],
+          #tabbrowser-tabs[movingtab],
+          #sidebar-context-menu[open],
+          #tabContextMenu[open],
+          #open-tab-group-context-menu[open],
+          #saved-tab-group-context-menu[open],
+          #new-tab-button-popup[open],
+          #tab-group-editor panel[panelopen],
+          #tab-note-menu panel[panelopen],
+          #sidebar-tools-overflow[panelopen]) {
+      --oc-reveal: 1;
+    }
+
+    & #tabbrowser-tabbox {
+      grid-column: side / ai-split !important;
+      margin-inline-start: var(--oc-gap) !important;
+    }
+
+    & #sidebar-launcher-splitter {
+      display: none !important;
+    }
+
+    & :is(#navigator-toolbox, #sidebar-container) {
+      z-index: 3 !important;
+      margin-inline-start: var(--oc-gap) !important;
+      background-color: var(--oc-frame) !important;
+      box-shadow: var(--oc-shadow-float) !important;
+      opacity: var(--oc-reveal) !important;
+      translate: calc((1 - var(--oc-reveal)) * (-100% - var(--oc-gap) + var(--oc-trigger))) 0 !important;
+      transition:
+        translate var(--oc-slow) var(--oc-ease),
+        opacity var(--oc-slow) var(--oc-ease) !important;
+      transition-delay: calc((1 - var(--oc-reveal)) * 180ms) !important;
+    }
+
+    /* One card: the toolbox is its top, the tab column its bottom. The
+     * shadow is clipped where they meet so no seam shows. */
+    & #navigator-toolbox {
+      margin-top: var(--oc-gap) !important;
+      border-radius: var(--oc-radius) var(--oc-radius) 0 0 !important;
+      clip-path: inset(-40px -40px 0 -40px) !important;
+    }
+
+    & #sidebar-container {
+      margin-bottom: var(--oc-gap) !important;
+      border-radius: 0 0 var(--oc-radius) var(--oc-radius) !important;
+      clip-path: inset(0 -40px -40px -40px) !important;
+    }
+
+    /* The urlbar sits one gap (nav-bar padding) inside the toolbox on each
+     * side, so it travels its own width plus three gaps. */
+    & #urlbar:not([breakout-extend]) {
+      --toolbar-shift-translate: calc((1 - var(--oc-reveal)) * (-100% - 3 * var(--oc-gap) + var(--oc-trigger))) 0 !important;
+      opacity: var(--oc-reveal) !important;
+      transition:
+        translate var(--oc-slow) var(--oc-ease),
+        opacity var(--oc-slow) var(--oc-ease) !important;
+      transition-delay: calc((1 - var(--oc-reveal)) * 180ms) !important;
+    }
+
+    /* Sidebar on the right (sidebar.position_start = false): the same card
+     * mirrored. The grid's columns run the other way (layouts/sidebar.css),
+     * so the page spans from main to the window's end, and the column parks
+     * off the right edge. Without this the page stopped a column short of
+     * the edge and the column parked leftwards over it: transparent, but
+     * still taking the page's clicks. */
+    @media not -moz-pref("sidebar.position_start") {
+      /* Named as the layout names its own end-side margin rule, which
+       * this has to outrank. */
+      &:has(#sidebar-container:not([hidden])) #tabbrowser-tabbox {
+        grid-column: main / -1 !important;
+        margin-inline: var(--oc-frame-gap) var(--oc-gap) !important;
+      }
+
+      & :is(#navigator-toolbox, #sidebar-container) {
+        margin-inline: 0 var(--oc-gap) !important;
+        translate: calc((1 - var(--oc-reveal)) * (100% + var(--oc-gap) - var(--oc-trigger))) 0 !important;
+      }
+
+      & #urlbar:not([breakout-extend]) {
+        --toolbar-shift-translate: calc((1 - var(--oc-reveal)) * (100% + 3 * var(--oc-gap) - var(--oc-trigger))) 0 !important;
+      }
+    }
+  }
+}

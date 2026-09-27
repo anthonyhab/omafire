@@ -1,0 +1,267 @@
+/* Omarchy Chrome — zen mode (top layout).
+ *
+ * Two prefs, kept from the original theme so existing profiles carry over:
+ *   omarchy.zen-mode         feature switch
+ *   omarchy.zen-mode-active  live state: false shows the toolbar again
+ *
+ * The toolbar leaves the window: only the tab sidebar and the page remain.
+ * Focusing the urlbar (Ctrl+L) brings the navigation row back, so every
+ * address-bar-adjacent control is one keystroke away. By default the row
+ * slides down from the window's top edge (over the page only, with
+ * vertical tabs), moving like Omarchy's own quake console, with the field
+ * inline between navigation and actions, as VS Code's command centre;
+ * results drop beneath the field. omarchy.launcher = "center" floats the
+ * field as a card instead (launcher.css), the row above it.
+ *
+ * The row is parked above the top edge with position: fixed rather than
+ * hidden, so Ctrl+L can still focus the urlbar inside it. It is placed
+ * with insets, never transforms: a transformed ancestor would become the
+ * containing block for toolbar popups and pin them to the moving row. */
+
+/* The drop's results unroll out of the field's bottom edge. */
+@keyframes oc-unroll {
+  from { clip-path: inset(0 0 100% 0); }
+  to { clip-path: inset(0); }
+}
+
+@media -moz-pref("omarchy.zen-mode") and -moz-pref("omarchy.zen-mode-active") and (not -moz-pref("omarchy.layout", "sidebar")) {
+  :root:not([customizing], [popup-window], [taskbartab], [chromehidden~="toolbar"], [inDOMFullscreen]) {
+    --oc-zen-open: 0;
+    /* The row's own transition, chosen by direction: the console's exit
+     * curve, after a beat so a pointer that overshoots the row on its way
+     * to a button doesn't send it away; its enter curve at once. */
+    --oc-zen-motion: var(--oc-console-out) var(--oc-ease-exit) 180ms;
+
+    /* Open while editing the address, while anything in the row is open
+     * (extension popups, menus), or while the row has keyboard focus. */
+    &:has(#urlbar:is([breakout-extend], [focused]), #nav-bar [open], #nav-bar:focus-within) {
+      --oc-zen-open: 1;
+      --oc-zen-motion: var(--oc-console-in) var(--oc-ease-enter) 0s;
+    }
+
+    /* The row hangs out of the toolbox's now zero-height box. Firefox
+     * clips the toolbox (overflow: clip), and as a flex item its z-index: 0
+     * is a stacking context under the tabbox (z-index: 2), so lift it. */
+    & #navigator-toolbox {
+      overflow: visible !important;
+      z-index: 3 !important;
+    }
+
+    & #nav-bar {
+      position: fixed !important;
+      z-index: 10 !important;
+      flex-wrap: wrap !important;
+      row-gap: 2px !important;
+      margin: 0 !important;
+      padding-block: 2px !important;
+      background-color: var(--oc-panel) !important;
+    }
+
+    /* Springs split the row: navigation at its start, actions at its end.
+     * The drop's inline field collapses them below. */
+    & #nav-bar-customization-target {
+      display: contents !important;
+    }
+
+    & #nav-bar toolbarspring {
+      flex: 1 1 0 !important;
+      min-width: 0 !important;
+      max-width: none !important;
+    }
+
+    /* Drop (default): the row slides down from the window's top, the
+     * field inline in it. */
+    @media not -moz-pref("omarchy.launcher", "center") {
+      /* Pointing at the window's top edge peeks the row, for as long as
+       * the pointer stays on it. The trigger is a strip of the zero-height toolbox, so the edge
+       * and the row it reveals are one continuous :hover. */
+      &:has(#navigator-toolbox:hover) {
+        --oc-zen-open: 1;
+        --oc-zen-motion: var(--oc-console-in) var(--oc-ease-enter) 0s;
+      }
+
+      & #navigator-toolbox::before {
+        content: "" !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: var(--oc-trigger) !important;
+      }
+
+      /* The row's height, and the padding its line of buttons and field
+       * centres between: a toolbar, or with vertical tabs the head band
+       * (tokens.css), whose line sits on the column's first block. */
+      --oc-zen-row: var(--oc-toolbar);
+      --oc-zen-pad-start: 0px;
+      --oc-zen-pad-end: 0px;
+
+      /* Where the row's top edge is: parked one row plus a gap above the
+       * window, or docked. Both the row and the field (a top-layer
+       * popover that anchor positioning does not track while the row
+       * moves) take their top from it with the same transition, so they
+       * slide as one. */
+      --oc-zen-top: calc((var(--oc-zen-open) - 1) * (var(--oc-zen-row) + var(--oc-gap)));
+
+      & #tabbrowser-tabbox {
+        anchor-name: --oc-page !important;
+      }
+
+      /* A title bar: one slab with a hairline under it (its last pixel),
+       * painted inside the box so buttons and field centre on the same
+       * line. */
+      & #nav-bar {
+        top: var(--oc-zen-top) !important;
+        bottom: auto !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: var(--oc-zen-row) !important;
+        min-height: var(--oc-zen-row) !important;
+        padding-block: var(--oc-zen-pad-start) var(--oc-zen-pad-end) !important;
+        /* Buttons can be taller than the row (compact density): centre
+         * the line, not its top, on the field's axis. */
+        align-items: center !important;
+        align-content: center !important;
+        background-color: var(--oc-console) !important;
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: inset 0 -1px 0 var(--oc-line-strong) !important;
+        transition: top var(--oc-zen-motion) !important;
+      }
+
+      /* The field is centred on the page, as VS Code's command centre.
+       * Its slot in the row only keeps the buttons clear of it: auto
+       * margins push navigation to the row's start and actions to its
+       * end, springs or not. */
+      & #urlbar-container {
+        flex: 0 1 min(var(--oc-field-width), 50%) !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        margin: 0 auto !important;
+      }
+
+      & #urlbar[breakout] {
+        top: calc(var(--oc-zen-top) + var(--oc-zen-pad-start)
+                  + (var(--oc-zen-row) - var(--oc-zen-pad-start) - var(--oc-zen-pad-end) - var(--urlbar-height)) / 2) !important;
+        /* Centred on the page, snapped to whole pixels: an odd page
+         * width would otherwise leave both edges on a half pixel. */
+        --oc-zen-field: round(down, min(var(--oc-field-width), calc(anchor-size(--oc-page width, 100vw) / 2)), 2px);
+        left: round(down, calc(anchor(--oc-page center, 50vw) - var(--oc-zen-field) / 2), 1px) !important;
+        width: var(--oc-zen-field) !important;
+        margin: 0 !important;
+        translate: none !important;
+        transition: top var(--oc-zen-motion) !important;
+        /* Open, the results hang from the field as one card its width. */
+        --urlbar-background-inset-breakout: 0px !important;
+      }
+
+      & #urlbar > .urlbar-background {
+        border-radius: 0 !important;
+      }
+
+      /* The results unroll down out of the field. */
+      & #urlbar[breakout-extend] .urlbarView {
+        box-sizing: border-box !important;
+        animation: oc-unroll var(--oc-console-in) var(--oc-ease-enter) !important;
+      }
+
+      /* The field's auto margins do the splitting here. */
+      & #nav-bar toolbarspring {
+        flex: 0 0 0 !important;
+        min-width: 0 !important;
+      }
+
+      /* Vertical tabs: the row docks on the page, spanning it only; the
+       * tab column stays put beside it. It is the head band: buttons and
+       * field one block tall on the column's first block, the rule in the
+       * gap under it.
+       *
+       * The row holds its own space: the page slides down by the row's
+       * height as it drops, so the row sits on the window surface itself,
+       * the same glass as the column (the chrome cannot blur the page, a
+       * separate process, so a row over the page could only ever be
+       * tinted, never frosted). The page moves by translate, not layout,
+       * so it never reflows, and the tabbox the field anchors to stays
+       * put (a moving anchor strands the top-layer field). */
+      @media -moz-pref("sidebar.verticalTabs") {
+        --oc-zen-top: calc(anchor(--oc-page top, 0px) * var(--oc-zen-open)
+                           + (var(--oc-zen-open) - 1) * (var(--oc-zen-row) + var(--oc-gap)));
+        --oc-zen-row: var(--oc-head);
+        --oc-zen-pad-start: var(--oc-inset);
+        --oc-zen-pad-end: calc(var(--oc-inset) + 1px);
+
+        & #urlbar[breakout] {
+          --urlbar-height: var(--oc-row) !important;
+        }
+
+        & #nav-bar {
+          left: anchor(--oc-page left, 0px) !important;
+          right: anchor(--oc-page right, 0px) !important;
+          width: auto !important;
+          background-color: transparent !important;
+        }
+
+        & #tabbrowser-tabpanels {
+          translate: 0 calc(var(--oc-zen-open) * var(--oc-zen-row)) !important;
+          transition: translate var(--oc-zen-motion) !important;
+        }
+
+        /* The trigger spans the page, not the tab column. */
+        & #navigator-toolbox::before {
+          top: anchor(--oc-page top, 0px) !important;
+          left: anchor(--oc-page left, 0px) !important;
+          right: anchor(--oc-page right, 0px) !important;
+        }
+      }
+    }
+
+    /* Center: anchored by its bottom edge one gap above the floating card,
+     * so a row with many extension buttons wraps upward instead of
+     * overlapping it. Closed, it sits a full viewport higher. */
+    @media -moz-pref("omarchy.launcher", "center") {
+      & #nav-bar {
+        top: auto !important;
+        bottom: calc(100vh - var(--oc-launcher-top) + var(--oc-launcher-bleed) + var(--oc-gap)
+                     + (1 - var(--oc-zen-open)) * 100vh) !important;
+        left: calc(50vw - var(--oc-launcher-width) / 2 - var(--oc-launcher-bleed)) !important;
+        width: calc(var(--oc-launcher-width) + 2 * var(--oc-launcher-bleed)) !important;
+        border-radius: var(--oc-radius) !important;
+        box-shadow: var(--oc-shadow-float) !important;
+        transition: bottom var(--oc-slow) var(--oc-ease) !important;
+      }
+    }
+
+    /* Center: the urlbar floats as the launcher; its slot in the row
+     * collapses. At rest the field stays invisible (it must stay
+     * focusable for Ctrl+L, so it is never display: none). */
+    @media -moz-pref("omarchy.launcher", "center") {
+      & #urlbar-container {
+        flex: 0 0 0 !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      & #urlbar:not([breakout-extend], [focused]) {
+        opacity: 0 !important;
+      }
+    }
+
+    /* Center: dim the page and sidebar under the floating card. The
+     * launcher's own ::backdrop would also dim the row, which is not in
+     * the top layer. The drop leaves the page undimmed: its rules do the
+     * separating. */
+    & #urlbar[breakout-extend]::backdrop {
+      background: transparent !important;
+    }
+
+    @media -moz-pref("omarchy.launcher", "center") {
+      & #browser {
+        transition: filter var(--oc-slow) var(--oc-ease) !important;
+      }
+      &:has(#urlbar:is([breakout-extend], [focused])) #browser {
+        filter: brightness(0.72) !important;
+      }
+    }
+  }
+}
