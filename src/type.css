@@ -13,8 +13,7 @@
       .toolbarbutton-text, .menu-iconic-text, .menu-accel),
 #navigator-toolbox :is(toolbarbutton, toolbaritem, label, .toolbarbutton-text, toolbarbadge),
 #sidebar-box :is(label, description, #sidebar-title),
-#tabbrowser-tabs .tab-group-label,
-#tabs-newtab-button {
+#tabbrowser-tabs .tab-group-label {
   font-family: var(--oc-font) !important;
   font-size: var(--oc-font-size) !important;
 }
@@ -34,7 +33,10 @@ findbar :is(label, description, checkbox, input, .findbar-textbox),
   }
 }
 
-:is(#urlbar-input, .tab-label, .urlbarView-row) {
+/* The new-tab row sits in the tab rows' rhythm, so it reads at their
+ * size, not a toolbar button's. */
+:is(#urlbar-input, .tab-label, .urlbarView-row,
+    #tabs-newtab-button, #tabs-newtab-button .toolbarbutton-text) {
   font-family: var(--oc-font) !important;
   font-size: var(--oc-label-size) !important;
 }
