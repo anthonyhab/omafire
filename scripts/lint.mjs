@@ -26,10 +26,10 @@ const COLOR = /#[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?|oklch|lab|lch)\(/;
 const stripComments = (s) =>
   s.replace(/\/\*[\s\S]*?\*\//g, (c) => c.replace(/[^\n]/g, " "));
 
-// @property descriptors and @keyframes steps are not cascaded
-// declarations (!important is invalid there); blank them out too.
+// @property and @counter-style descriptors and @keyframes steps are not
+// cascaded declarations (!important is invalid there); blank them out too.
 const stripAtBlocks = (s) =>
-  s.replace(/@(property|keyframes)[^{]*\{(?:[^{}]|\{[^{}]*\})*\}/g, (b) =>
+  s.replace(/@(property|keyframes|counter-style)[^{]*\{(?:[^{}]|\{[^{}]*\})*\}/g, (b) =>
     b.replace(/[^\n]/g, " "));
 
 const findings = [];

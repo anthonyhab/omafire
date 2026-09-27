@@ -7,14 +7,18 @@
  * increments a counter, so a plain CSS counter gives the same numbers.
  * Alt+9 (the last tab) has no marker: Firefox exposes none to CSS.
  *
- * Rows show the digit at the trailing end, before the close button, as
- * dim text, clear of the container edge. Tiles (pinned, the collapsed
- * rail) have no room beside the favicon, so the digit is a legend cut into
- * the tile's leading edge, the way btop titles its panes: centred on the
- * edge, the edge and fill notched out behind it with a mask (not a
- * plate, which would double the alpha on glass chrome). The leading edge
- * is the one no marker uses on a tile, and the legend stays clear of the
- * group line in the gutter and never overflows its row. */
+ * Vertical tabs show the digit as a legend cut into the tab's leading
+ * edge, the way btop titles its panes: rows, pinned tiles and the
+ * collapsed rail alike, so the digits run down one column in either
+ * sidebar state and a row's label keeps its full width. The legend is
+ * centred on the edge, the edge and fill notched out behind it with a mask
+ * (not a plate, which would double the alpha on glass chrome); on a row
+ * the notch parts the active tab's glow bar. It takes the tab's text
+ * colour: dim at rest, full when hovered or selected. It stays clear of
+ * the group line in the gutter and never overflows its row.
+ *
+ * Horizontal tabs have no leading gutter: there the digit sits at the
+ * trailing end, before the close button, as dim text. */
 
 @counter-style oc-alt-key {
   system: fixed;
@@ -43,71 +47,73 @@
 
 @media -moz-pref("omarchy.tab-numbers") {
   #tabbrowser-tabs {
-    counter-reset: oc-tab;
+    counter-reset: oc-tab !important;
   }
 
   #tabbrowser-tabs .tabbrowser-tab {
-    counter-increment: oc-tab;
+    counter-increment: oc-tab !important;
   }
 
-  /* Rows: before the close button, in its column's dim text. */
-  #tabbrowser-tabs:is([orient="horizontal"], [expanded]) .tabbrowser-tab:not([pinned]) {
+  /* Horizontal rows: before the close button, in the strip's dim text. */
+  #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab:not([pinned]) {
     & .tab-content::after {
-      content: counter(oc-tab, oc-alt-key);
-      order: 1;
-      flex: none;
-      margin-inline: var(--oc-inset) var(--oc-u);
-      font-size: var(--oc-font-size);
-      color: var(--oc-text-dim);
-      font-variant-numeric: tabular-nums;
+      content: counter(oc-tab, oc-alt-key) !important;
+      order: 1 !important;
+      flex: none !important;
+      margin-inline: var(--oc-inset) var(--oc-u) !important;
+      font-size: var(--oc-font-size) !important;
+      color: var(--oc-text-dim) !important;
+      font-variant-numeric: tabular-nums !important;
     }
 
     & .tab-close-button {
-      order: 2;
+      order: 2 !important;
     }
   }
 
-  /* Tiles. --oc-num-x is the tile's leading edge inside .tab-content:
-   * in the rail a tab (pinned too) lays its content over the whole
-   * column, its tile one inset in; expanded pinned tiles and rail split
-   * halves are their content box. */
-  :is(#tabbrowser-tabs[orient="vertical"]:not([expanded]) .tabbrowser-tab,
-      #tabbrowser-tabs[orient="vertical"] .tabbrowser-tab[pinned]) {
+  /* Legends. --oc-num-x is the surface's leading edge inside
+   * .tab-content: a row, and in the rail any tab (pinned too), lays its
+   * content over the whole column, its surface one inset in; expanded
+   * pinned tiles and split halves are their content box. */
+  #tabbrowser-tabs[orient="vertical"] .tabbrowser-tab {
     --oc-num-x: 0px;
 
     & .tab-content::after {
-      content: counter(oc-tab, oc-alt-key-tile);
-      position: absolute;
-      inset-inline-start: var(--oc-num-x);
-      top: 50%;
+      content: counter(oc-tab, oc-alt-key-tile) !important;
+      position: absolute !important;
+      inset-inline-start: var(--oc-num-x) !important;
+      top: 50% !important;
       /* Centred on the edge, whatever the glyph's width. */
-      translate: -50% -50%;
-      font-family: var(--oc-font);
-      font-variant-numeric: tabular-nums;
-      font-size: 7px;
-      font-weight: 700;
-      line-height: 1;
-      color: var(--oc-text-dim);
-      pointer-events: none;
+      translate: -50% -50% !important;
+      font-family: var(--oc-font) !important;
+      font-variant-numeric: tabular-nums !important;
+      font-size: 7px !important;
+      font-weight: 700 !important;
+      line-height: 1 !important;
+      color: inherit !important;
+      pointer-events: none !important;
     }
 
     & .tab-background {
-      mask: linear-gradient(#000 0 0),
-        linear-gradient(#000 0 0) 0 50% / 3px 9px no-repeat;
-      mask-composite: exclude;
+      mask: linear-gradient(var(--oc-mask) 0 0),
+        linear-gradient(var(--oc-mask) 0 0) 0 50% / 3px 9px no-repeat !important;
+      mask-composite: exclude !important;
       /* The group line hangs outside the tile; leave it unmasked. */
-      mask-clip: no-clip;
+      mask-clip: no-clip !important;
     }
   }
 
-  #tabbrowser-tabs[orient="vertical"]:not([expanded]) :not(tab-split-view-wrapper) > .tabbrowser-tab {
+  #tabbrowser-tabs[orient="vertical"] :not(tab-split-view-wrapper) > .tabbrowser-tab:not([pinned]),
+  #tabbrowser-tabs[orient="vertical"]:not([expanded]) .tabbrowser-tab[pinned] {
     --oc-num-x: var(--oc-inset);
   }
 
-  /* A rail split pair is outlined by its wrapper, which also holds the
-   * digits, so the outline moves to a layer of its own and that layer is
-   * notched, once per half. */
-  #tabbrowser-tabs[orient="vertical"]:not([expanded]) tab-split-view-wrapper {
+  /* A split pair is outlined by its wrapper, which also holds the digits,
+   * so the outline moves to a layer of its own and that layer is notched:
+   * in the rail once per stacked half; expanded, where the halves sit side
+   * by side, once on the pair's leading edge (the second half's legend
+   * notches the divider, its own background edge). */
+  #tabbrowser-tabs[orient="vertical"] tab-split-view-wrapper {
     --oc-pair-line: var(--oc-line);
     box-shadow: none !important;
 
@@ -116,16 +122,21 @@
     }
 
     &::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      box-shadow: inset 0 0 0 1px var(--oc-pair-line);
-      pointer-events: none;
-      mask: linear-gradient(#000 0 0),
-        linear-gradient(#000 0 0) 0 calc(var(--oc-row) / 2 - 4.5px) / 3px 9px no-repeat,
-        linear-gradient(#000 0 0) 0 calc(var(--oc-row) * 1.5 + var(--oc-u) - 4.5px) / 3px 9px no-repeat;
-      mask-composite: exclude;
+      content: "" !important;
+      position: absolute !important;
+      inset: 0 !important;
+      border-radius: inherit !important;
+      box-shadow: inset 0 0 0 1px var(--oc-pair-line) !important;
+      pointer-events: none !important;
+      mask: linear-gradient(var(--oc-mask) 0 0),
+        linear-gradient(var(--oc-mask) 0 0) 0 50% / 3px 9px no-repeat !important;
+      mask-composite: exclude !important;
     }
+  }
+
+  #tabbrowser-tabs[orient="vertical"]:not([expanded]) tab-split-view-wrapper::before {
+    mask: linear-gradient(var(--oc-mask) 0 0),
+      linear-gradient(var(--oc-mask) 0 0) 0 calc(var(--oc-row) / 2 - 4.5px) / 3px 9px no-repeat,
+      linear-gradient(var(--oc-mask) 0 0) 0 calc(var(--oc-row) * 1.5 + var(--oc-u) - 4.5px) / 3px 9px no-repeat !important;
   }
 }
