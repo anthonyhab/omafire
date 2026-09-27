@@ -547,6 +547,12 @@
 }
 
 #tabbrowser-tabs[orient="vertical"][expanded] tab-split-view-wrapper {
+  /* Nova draws its own divider, a light border on the second half of an
+   * inactive pair; the halves' hairline below is the divider here. */
+  & .tabbrowser-tab {
+    border: none !important;
+  }
+
   & .tabbrowser-tab + .tabbrowser-tab .tab-background {
     border-inline-start: 1px solid var(--oc-line) !important;
     border-start-start-radius: 0 !important;
