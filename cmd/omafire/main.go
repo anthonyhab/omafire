@@ -82,6 +82,7 @@ func initPaths() {
 	ffRoot = envOr("OMAFIRE_FIREFOX_ROOT", home+"/.mozilla/firefox")
 	ffProfilesFile = envOr("OMAFIRE_FIREFOX_PROFILES_FILE", ffRoot+"/profiles.ini")
 	ffPayloadSource = envOr("OMAFIRE_FIREFOX_PAYLOAD_SOURCE", "/usr/share/omafire/firefox/chrome")
+	initConfigPath(home)
 }
 
 // ---------------------------------------------------------------- commands
@@ -193,6 +194,7 @@ func showStatus() {
 	fmt.Printf("Theme state: %s (%s)\n", stateFile, ready[isRegularFile(stateFile)])
 	fmt.Printf("Native host: %s (%s)\n", nativeHostPath, installed[unix.Access(nativeHostPath, unix.X_OK) == nil])
 	fmt.Printf("Native manifest: %s (%s)\n", nativeManifestPath, installed[isRegularFile(nativeManifestPath)])
+	fmt.Printf("Settings: %s (%s)\n", configFile, configStatus())
 	showProfileStatus("Zen", zenProfilesFile, zenRoot, zenProfileStatus)
 	showProfileStatus("Firefox", ffProfilesFile, ffRoot, ffProfileStatus)
 }
@@ -201,6 +203,7 @@ func usage() {
 	fmt.Print(`Usage: omafire <command>
 
 Keep Firefox and Zen Browser in sync with the current Omarchy Quattro palette.
+Settings live in ~/.config/omafire/config.json; Firefox follows them live.
 
 Commands:
   sync     Queue the current palette for connected browsers
@@ -208,6 +211,10 @@ Commands:
   status   Show the current theme and integration state
   setup    Enable the packaged Omafire integration for this user
   remove   Remove this user's Omafire hook and theme state
+  get      Print the settings, or one: get [--json | <setting>]
+  set      Change settings: set <setting> <value> [<setting> <value>]...
+  reset    Return settings to their defaults: reset <setting>...
+  watch    Print the settings as a JSON line now and after every change
   version  Print the Omafire version
   help     Show this help
 `)
@@ -240,6 +247,14 @@ func main() {
 		fmt.Print(formatPayload(readPalette(), jsonEscape(currentThemeName())))
 	case "status":
 		showStatus()
+	case "get":
+		cmdGet(os.Args[2:])
+	case "set":
+		cmdSet(os.Args[2:])
+	case "reset":
+		cmdReset(os.Args[2:])
+	case "watch":
+		cmdWatch(os.Args[2:])
 	case "setup":
 		cmdSetup()
 	case "remove":

@@ -18,6 +18,7 @@ bash -n \
   "$SCRIPT_DIR/managed-files.test.sh" \
   "$SCRIPT_DIR/profile-safety.test.sh" \
   "$SCRIPT_DIR/upgrade.test.sh" \
+  "$SCRIPT_DIR/settings.test.sh" \
   "$PROJECT_DIR/packaging/omafox-shim" \
   "$SCRIPT_DIR/fixtures/bin/omarchy"
 
@@ -34,6 +35,7 @@ shellcheck \
   "$SCRIPT_DIR/managed-files.test.sh" \
   "$SCRIPT_DIR/profile-safety.test.sh" \
   "$SCRIPT_DIR/upgrade.test.sh" \
+  "$SCRIPT_DIR/settings.test.sh" \
   "$PROJECT_DIR/packaging/omafox-shim" \
   "$SCRIPT_DIR/fixtures/bin/omarchy"
 
@@ -46,10 +48,11 @@ node --check "$PROJECT_DIR/extension/newtab/newtab.js"
 node --check "$SCRIPT_DIR/native-host.test.js"
 node --check "$PROJECT_DIR/chrome/omafire-prefs.js"
 node --check - < "$PROJECT_DIR/chrome/omafire.cfg"
+node --check "$PROJECT_DIR/chrome/config.sys.mjs"
 for script in "$PROJECT_DIR"/chrome/scripts/*.uc.js; do
   node --check "$script"
 done
-unformatted=$(cd "$PROJECT_DIR" && gofmt -l cmd)
+unformatted=$(cd "$PROJECT_DIR" && gofmt -l cmd config)
 [[ -z $unformatted ]] || { echo "gofmt needed: $unformatted" >&2; exit 1; }
 (cd "$PROJECT_DIR" && go vet ./...)
 
@@ -91,6 +94,7 @@ node "$SCRIPT_DIR/native-host.test.js"
 "$SCRIPT_DIR/managed-files.test.sh"
 "$SCRIPT_DIR/profile-safety.test.sh"
 "$SCRIPT_DIR/upgrade.test.sh"
+"$SCRIPT_DIR/settings.test.sh"
 "$SCRIPT_DIR/package.test.sh"
 
 echo "All Omafire tests passed."

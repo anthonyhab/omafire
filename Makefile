@@ -42,6 +42,8 @@ install: all
 	install -Dm644 chrome/omafire-prefs.js "$(DESTDIR)$(FIREFOX_DIR)/defaults/pref/omafire-prefs.js"
 	install -Dm644 chrome/omafire.cfg "$(DESTDIR)$(FIREFOX_DIR)/omafire.cfg"
 	install -Dm644 -t "$(DESTDIR)$(FIREFOX_DIR)/omafire" chrome/scripts/*.uc.js
+	install -Dm644 chrome/config.sys.mjs "$(DESTDIR)$(FIREFOX_DIR)/omafire/config.sys.mjs"
+	install -Dm644 config/schema.json "$(DESTDIR)$(FIREFOX_DIR)/omafire/config-schema.json"
 	install -Dm644 packaging/extension/omafire.xpi "$(DESTDIR)$(FIREFOX_DIR)/omafire/omafire.xpi"
 	install -Dm644 README.md "$(DESTDIR)$(PREFIX)/share/doc/omafire/README.md"
 	install -Dm644 LICENSE "$(DESTDIR)$(PREFIX)/share/licenses/omafire/LICENSE"

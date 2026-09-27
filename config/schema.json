@@ -1,0 +1,96 @@
+{
+  "comment": "The settings in ~/.config/omafire/config.json (DEC-29). The omafire CLI embeds this file and Firefox reads it from the package, so both agree on keys, types and defaults. Each setting drives the prefs listed with it: a pref takes the setting's value, the value from map, or a constant; format fixed2 writes a number as a string with two decimals.",
+  "settings": [
+    {
+      "key": "toolbar",
+      "about": "Where the toolbar sits: top, or in the sidebar.",
+      "type": "enum",
+      "values": ["top", "sidebar"],
+      "default": "top",
+      "prefs": [{ "name": "omafire.layout" }]
+    },
+    {
+      "key": "tabs",
+      "about": "Tab strip direction.",
+      "type": "enum",
+      "values": ["horizontal", "vertical"],
+      "default": "horizontal",
+      "prefs": [{ "name": "sidebar.verticalTabs", "map": { "horizontal": false, "vertical": true } }]
+    },
+    {
+      "key": "side",
+      "about": "Which side the vertical tabs are on.",
+      "type": "enum",
+      "values": ["left", "right"],
+      "default": "left",
+      "prefs": [{ "name": "sidebar.position_start", "map": { "left": true, "right": false } }]
+    },
+    {
+      "key": "launcher",
+      "about": "The address launcher in the sidebar layout and zen mode: dropped from the top, or centred.",
+      "type": "enum",
+      "values": ["drop", "center"],
+      "default": "drop",
+      "prefs": [{ "name": "omafire.launcher" }]
+    },
+    {
+      "key": "density",
+      "about": "Firefox's toolbar density.",
+      "type": "enum",
+      "values": ["normal", "compact"],
+      "default": "normal",
+      "prefs": [{ "name": "browser.uidensity", "map": { "normal": 0, "compact": 1 } }]
+    },
+    {
+      "key": "zen-mode",
+      "about": "Hide the toolbar until the pointer or a key asks for it (top toolbar layout).",
+      "type": "bool",
+      "default": false,
+      "prefs": [{ "name": "omafire.zen-mode", "const": true }, { "name": "omafire.zen-mode-active" }]
+    },
+    {
+      "key": "compact-sidebar",
+      "about": "Collapse the sidebar to icons (sidebar layout).",
+      "type": "bool",
+      "default": false,
+      "prefs": [{ "name": "omafire.compact" }]
+    },
+    {
+      "key": "floating-page",
+      "about": "Inset the page from the window edges (always on in the sidebar layout).",
+      "type": "bool",
+      "default": false,
+      "prefs": [{ "name": "omafire.chrome-gap" }]
+    },
+    {
+      "key": "glass",
+      "about": "Translucent chrome over the desktop.",
+      "type": "bool",
+      "default": false,
+      "prefs": [{ "name": "omafire.translucency" }]
+    },
+    {
+      "key": "opacity",
+      "about": "How opaque the glass is, 0.5 to 1.",
+      "type": "number",
+      "min": 0.5,
+      "max": 1,
+      "default": 0.85,
+      "prefs": [{ "name": "omafire.transparency", "format": "fixed2" }]
+    },
+    {
+      "key": "tab-numbers",
+      "about": "Number the first nine tabs.",
+      "type": "bool",
+      "default": false,
+      "prefs": [{ "name": "omafire.tab-numbers" }]
+    },
+    {
+      "key": "extension-glyphs",
+      "about": "Draw extension toolbar icons as monochrome glyphs.",
+      "type": "bool",
+      "default": true,
+      "prefs": [{ "name": "omafire.extension-glyphs" }]
+    }
+  ]
+}

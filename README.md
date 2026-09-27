@@ -32,19 +32,9 @@ omafox's, so upstream's `@omafox` extension works with it in Zen.
 - Firefox 156 or newer, or a current native Zen Browser installation
   (Zen 1.22+, Gecko 156).
 
-The packaged Firefox theme is built for Firefox's Nova
-design and a single vertical-tab sidebar. Omafire does not change your layout
-preferences; set these in `about:config` once:
-
-| Preference | Value | Why |
-|---|---|---|
-| `browser.nova.enabled` | `true` | Nova design (default from Firefox 157) |
-| `sidebar.revamp` | `true` | The sidebar the layout is built on |
-| `sidebar.verticalTabs` | `true` | Tabs, toolbar, and urlbar share one sidebar column |
-| `omafire.compact` | `true` (optional) | Hide the sidebar until the pointer reaches the window edge |
-
-Without vertical tabs the theme still colors Firefox but keeps the stock
-horizontal layout.
+The packaged Firefox theme is built for Firefox's Nova design
+(`browser.nova.enabled`, the default from Firefox 157) and the revamped
+sidebar (`sidebar.revamp`). Its layout is chosen in [Settings](#settings).
 
 Flatpak installations of Zen are not currently supported because their
 sandbox cannot use the host native-messaging manifest the package installs.
@@ -122,8 +112,47 @@ omafire sync      # Queue the current palette for connected browsers
 omafire payload   # Print the current normalized theme message
 omafire setup     # Reconfigure the integration for this user
 omafire remove    # Remove this user's hook and saved theme state
+omafire get/set   # Read and change settings (see Settings)
 omafire version   # Show the installed version
 ```
+
+## Settings
+
+Omafire's settings live in one file, `~/.config/omafire/config.json`, shared
+by every Firefox profile omafire manages. It holds only what you changed;
+everything else is its default. Change it with the CLI, by hand, or from
+Firefox (the Omafire panel in the app menu, the keybindings, or
+`about:config`): every running Firefox follows the file within a moment, and
+a change made in Firefox is written back to it.
+
+```bash
+omafire get                  # every setting, key=value
+omafire get opacity          # one value
+omafire set glass on opacity 0.8
+omafire reset opacity        # back to the default
+omafire watch                # a JSON line now and after every change
+```
+
+| Setting | Values | Default |
+|---|---|---|
+| `toolbar` | `top`, `sidebar` | `top` |
+| `tabs` | `horizontal`, `vertical` | `horizontal` |
+| `side` | `left`, `right` (vertical tabs) | `left` |
+| `launcher` | `drop`, `center` (sidebar layout and zen mode) | `drop` |
+| `density` | `normal`, `compact` | `normal` |
+| `zen-mode` | `true`, `false` (top toolbar) | `false` |
+| `compact-sidebar` | `true`, `false` (sidebar layout) | `false` |
+| `floating-page` | `true`, `false` | `false` |
+| `glass` | `true`, `false` | `false` |
+| `opacity` | `0.5` to `1` | `0.85` |
+| `tab-numbers` | `true`, `false` | `false` |
+| `extension-glyphs` | `true`, `false` | `true` |
+
+The first Firefox to start without a file creates it from that profile's
+settings. A value the file gets wrong is reported and its default used; a
+file that is not JSON is left alone, and Firefox keeps its current settings
+until it parses again. Keybindings (`omafire.keys.*`) and the extension's
+site-coloured tab are not in the file yet.
 
 ## How it works
 
@@ -207,7 +236,8 @@ own root-owned files: nothing is loaded from the profile.
   it in `about:addons` and it stays removed until a newer version ships.
 
 Turn them all off with `omafire.scripts` = false, or some with
-`omafire.scripts.disabled` (e.g. `keys, live-palette`).
+`omafire.scripts.disabled` (e.g. `keys, live-palette`). `config` in that list
+stops the profile following `config.json`.
 
 ## Profile safety
 

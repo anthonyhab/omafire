@@ -58,6 +58,10 @@ for name in "${scripts[@]}"; do
 done
 [[ $(find "$FIREFOX_DIR/omafire" -name '*.uc.js' | wc -l) -eq ${#scripts[@]} ]]
 cmp "$PROJECT_DIR/packaging/extension/omafire.xpi" "$FIREFOX_DIR/omafire/omafire.xpi"
+# The settings module the loader starts, with the CLI's schema beside it.
+grep -Fq 'resource://omafire/config.sys.mjs' "$FIREFOX_DIR/omafire.cfg"
+cmp "$PROJECT_DIR/chrome/config.sys.mjs" "$FIREFOX_DIR/omafire/config.sys.mjs"
+cmp "$PROJECT_DIR/config/schema.json" "$FIREFOX_DIR/omafire/config-schema.json"
 
 python3 - "$SYSTEM_MANIFEST" <<'PY'
 import json
