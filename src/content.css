@@ -184,8 +184,10 @@
   }
 
   /* One box per section: a card that holds box groups steps back, and the
-   * group is the box. Cards of plain controls (checkboxes) keep theirs. */
-  moz-card:has(moz-box-group, moz-box-item, moz-box-link, moz-box-button) {
+   * group is the box. Cards of plain controls (checkboxes) keep theirs.
+   * :has() can't see into shadow trees, so components that draw their
+   * box groups inside one (backup) are named. */
+  moz-card:has(moz-box-group, moz-box-item, moz-box-link, moz-box-button, backup-settings) {
     --card-border: 1px solid transparent !important;
     --card-background-color: transparent !important;
   }
