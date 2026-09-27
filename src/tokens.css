@@ -47,12 +47,13 @@
    * any density (compact shrinks the button, so the axis moves with it). */
   --oc-icon-pad: calc((var(--oc-button) - var(--oc-icon)) / 2);
   --oc-icon-axis: calc(var(--oc-inset) + var(--oc-icon-pad));
-  /* The window's head band: the first block of the tab column and its
-   * gap. The navigation row (zen mode) is this band: its buttons and
-   * field sit exactly on the column's first tile or tab
-   * [--oc-inset, --oc-inset + --oc-row], and its rule is the band's last
-   * pixel, inside the one-unit gap before the column's second block. */
-  --oc-head: calc(var(--oc-inset) + var(--oc-row) + var(--oc-u));
+  /* The window's head band: the first block of the tab column with an
+   * inset on either side, then one pixel of rule. The navigation row (zen
+   * mode) is this band: its buttons and field sit exactly on the column's
+   * first tile [--oc-inset, --oc-inset + --oc-row], and its rule, the
+   * band's last pixel, continues the rule under the pinned tiles
+   * (tabs.css) across the seam as one line. */
+  --oc-head: calc(2 * var(--oc-inset) + var(--oc-row) + 1px);
   /* Invisible strip at a window edge that reveals hidden chrome
    * (compact's column, zen's navigation row). */
   --oc-trigger: 6px;

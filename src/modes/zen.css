@@ -175,7 +175,7 @@
                            + (var(--oc-zen-open) - 1) * (var(--oc-zen-row) + var(--oc-gap)));
         --oc-zen-row: var(--oc-head);
         --oc-zen-pad-start: var(--oc-inset);
-        --oc-zen-pad-end: var(--oc-u);
+        --oc-zen-pad-end: calc(var(--oc-inset) + 1px);
 
         & #urlbar[breakout] {
           --urlbar-height: var(--oc-row) !important;
