@@ -127,6 +127,9 @@ if [[ -x /usr/bin/omafox ]]; then
 fi
 exit 0
 EOF
+# The same hook renamed by a user to run first, and an unrelated one.
+cp "$HOOKS/omafox" "$HOOKS/00-omafox"
+printf '#!/bin/sh\nexec true\n' > "$HOOKS/10-mine"
 printf '{"theme":"old"}\n' > "$OLD_STATE/theme.json"
 printf 'kept\n' > "$OLD_STATE/backups/20260927-setup-1/user.js"
 
@@ -167,6 +170,8 @@ out=$("$OMAFIRE_BIN" status 2>&1)
 # ---- one setup moves everything ------------------------------------------
 out=$("$OMAFIRE_BIN" setup 2>&1)
 [[ $out == *"Removed the omafox hook: $HOOKS/omafox"* ]]
+[[ $out == *"Removed the omafox hook: $HOOKS/00-omafox"* ]]
+[[ -f "$HOOKS/10-mine" ]]
 
 # No omafox marker survives anywhere; each file has exactly one new block.
 refute grep -rq 'OMAFOX' "$PLAIN/user.js" "$PLAIN/chrome/userChrome.css" \
@@ -206,7 +211,7 @@ done
 grep -Fq '@import url("omafire.css");' "$ZEN/chrome/userChrome.css"
 
 # Hook and state.
-[[ -x "$HOOKS/omafire" && ! -e "$HOOKS/omafox" ]]
+[[ -x "$HOOKS/omafire" && ! -e "$HOOKS/omafox" && ! -e "$HOOKS/00-omafox" ]]
 [[ ! -e $OLD_STATE ]]
 [[ $(cat "$NEW_STATE/backups/20260927-setup-1/user.js") == kept ]]
 [[ -f "$NEW_STATE/theme.json" ]]

@@ -2000,17 +2000,30 @@ static void remove_legacy_zen_bridge(const char *chrome_dir) {
   free(bridge);
 }
 
-/* omafox's theme hook, which ran /usr/bin/omafox. */
-static void remove_legacy_hook(void) {
-  char *hook = xasprintf("%s/.config/omarchy/hooks/theme-set.d/omafox",
-                         home_dir());
-  char *text = path_is_symlink(hook) ? NULL : read_file(hook, NULL);
-  if (text && strstr(text, LEGACY_HOOK_COMMAND)) {
-    unlink(hook);
-    printf("Removed the omafox hook: %s\n", hook);
+/* omafox's theme hook, which ran /usr/bin/omafox: under its own name, or
+ * any other a user gave it (00-omafox to run first). Recognised by the
+ * command it runs, never by name alone. */
+static void remove_legacy_hooks(void) {
+  char *dir = xasprintf("%s/.config/omarchy/hooks/theme-set.d", home_dir());
+  DIR *d = opendir(dir);
+  if (d) {
+    struct dirent *ent;
+    while ((ent = readdir(d))) {
+      if (ent->d_name[0] == '.')
+        continue;
+      char *hook = path_join(dir, ent->d_name);
+      char *text = is_regular_file(hook) && !path_is_symlink(hook)
+                       ? read_file(hook, NULL) : NULL;
+      if (text && strstr(text, LEGACY_HOOK_COMMAND)) {
+        unlink(hook);
+        printf("Removed the omafox hook: %s\n", hook);
+      }
+      free(text);
+      free(hook);
+    }
+    closedir(d);
   }
-  free(text);
-  free(hook);
+  free(dir);
 }
 
 /* omafox kept its state (theme.json, backups) in ~/.local/state/omafox. */
@@ -2361,7 +2374,7 @@ static void cmd_setup(void) {
   if (run_command(argv, NULL, 0) != 0)
     fail("omarchy hook install failed");
   printf("Enabled user hook: %s\n", g_hook_path);
-  remove_legacy_hook();
+  remove_legacy_hooks();
   printf("Using packaged native host: %s\n", g_native_host_path);
 
   g_backup_command = "setup";
@@ -2388,7 +2401,7 @@ static void cmd_remove(void) {
     unlink(g_hook_path);
     printf("Removed hook: %s\n", g_hook_path);
   }
-  remove_legacy_hook();
+  remove_legacy_hooks();
   if (path_exists(g_state_file) || path_is_symlink(g_state_file)) {
     unlink(g_state_file);
     printf("Removed theme state: %s\n", g_state_file);
