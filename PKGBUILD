@@ -10,6 +10,9 @@ arch=('x86_64' 'aarch64')
 url="https://github.com/cover/omafox"
 license=('MIT')
 depends=('glibc')
+makedepends=('git')
+# tests/run.sh: syntax checks, the node suites, the XPI provenance check.
+checkdepends=('nodejs' 'python' 'shellcheck' 'unzip')
 # The command and its files keep the omafox name.
 provides=('omafox')
 conflicts=('omafox')
