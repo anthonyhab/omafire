@@ -95,6 +95,21 @@
     --page-nav-button-text-color-selected: var(--oc-text) !important;
     --page-nav-button-background-color-selected: var(--oc-selected) !important;
 
+    /* Primary buttons keep the accent, as light rather than a solid slab
+     * (the primary rule below): the selection fill, full text. */
+    --button-background-color-primary: var(--oc-selected) !important;
+    --button-background-color-primary-hover: var(--oc-hover) !important;
+    --button-background-color-primary-active: var(--oc-active) !important;
+    --button-background-color-primary-selected: var(--oc-active) !important;
+    --button-background-color-primary-disabled: transparent !important;
+    --button-text-color-primary: var(--oc-text) !important;
+    --button-text-color-primary-hover: var(--oc-text) !important;
+    --button-text-color-primary-active: var(--oc-text) !important;
+    --button-text-color-primary-disabled: var(--oc-text-dim) !important;
+    --button-border-color-primary: transparent !important;
+    --button-border-color-primary-hover: transparent !important;
+    --button-border-color-primary-active: transparent !important;
+
     /* Fields: the quiet box. */
     --input-text-background-color: var(--oc-field-rest) !important;
     --input-text-border-color: var(--oc-line) !important;
@@ -124,6 +139,27 @@
   input:is([type="search"], [type="text"]):hover:not(:focus-visible) {
     background-color: var(--oc-field-hover) !important;
     border-color: var(--oc-line-strong) !important;
+  }
+
+  /* Primary buttons glow from their bottom edge like an active tile, the
+   * hairline lit from the same edge. moz-button paints inside its shadow
+   * tree, so its host carries the layers as variables; plain buttons take
+   * them directly. Icon buttons typed primary (a panel's close) stay out. */
+  moz-button[type~="primary"]:not([type~="icon"]),
+  button.primary:not([disabled]) {
+    --oc-primary-edge: linear-gradient(0deg, var(--oc-glow-edge));
+    --oc-primary-glow: linear-gradient(0deg, var(--oc-glow-falloff));
+  }
+
+  :is(.button-background, button.primary):not([disabled]) {
+    background-image: var(--oc-primary-edge, none), var(--oc-primary-glow, none) !important;
+    background-clip: border-area, padding-box !important;
+    background-origin: border-box !important;
+    background-repeat: no-repeat !important;
+  }
+
+  button.primary:not([disabled]) {
+    border-color: transparent !important;
   }
 
   /* Page navigation (settings, add-ons). Every row carries a transparent
