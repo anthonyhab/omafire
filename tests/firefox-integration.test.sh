@@ -115,6 +115,8 @@ cp "$RELATIVE_PROFILE/chrome/userContent.css" "$TEST_ROOT/original-userContent.c
 cp "$RELATIVE_PROFILE/user.js" "$TEST_ROOT/original-user.js"
 
 export HOME="$TEST_HOME"
+# Settings follow XDG_CONFIG_HOME; never the caller's.
+unset XDG_CONFIG_HOME OMAFIRE_CONFIG
 export PATH="$MOCK_BIN:$PATH"
 export OMAFIRE_THEME_DIR="$THEME_DIR"
 export OMAFIRE_THEME_NAME_FILE="$THEME_DIR/theme.name"

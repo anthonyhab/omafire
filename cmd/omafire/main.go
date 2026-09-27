@@ -160,45 +160,6 @@ func cmdRemove() {
 	fmt.Println("System files are managed by pacman; remove them with: sudo pacman -Rns omafire")
 }
 
-func showProfileStatus(label, profilesFile, root string, status func(string) string) {
-	if !isRegularFile(profilesFile) {
-		fmt.Printf("%s profiles: not detected (%s)\n", label, profilesFile)
-		return
-	}
-	profiles := listProfiles(profilesFile, root)
-	if len(profiles) == 0 {
-		fmt.Printf("%s profiles: none listed in %s\n", label, profilesFile)
-		return
-	}
-	for _, profile := range profiles {
-		if isDir(profile) {
-			fmt.Printf("%s profile: %s (%s)\n", label, profile, status(profile))
-		} else {
-			fmt.Printf("%s profile: %s (missing)\n", label, profile)
-		}
-	}
-}
-
-func showStatus() {
-	name := "unknown"
-	if contents, ok := readFile(themeNameFile); ok {
-		name = firstLine(contents)
-	}
-	ready := map[bool]string{true: "ready", false: "missing"}
-	installed := map[bool]string{true: "installed", false: "missing"}
-
-	fmt.Printf("Omafire version: %s\n", version)
-	fmt.Printf("Theme: %s\n", name)
-	fmt.Printf("Palette: %s/colors.toml\n", themeDir)
-	fmt.Printf("Hook: %s\n", hookPath)
-	fmt.Printf("Theme state: %s (%s)\n", stateFile, ready[isRegularFile(stateFile)])
-	fmt.Printf("Native host: %s (%s)\n", nativeHostPath, installed[unix.Access(nativeHostPath, unix.X_OK) == nil])
-	fmt.Printf("Native manifest: %s (%s)\n", nativeManifestPath, installed[isRegularFile(nativeManifestPath)])
-	fmt.Printf("Settings: %s (%s)\n", configFile, configStatus())
-	showProfileStatus("Zen", zenProfilesFile, zenRoot, zenProfileStatus)
-	showProfileStatus("Firefox", ffProfilesFile, ffRoot, ffProfileStatus)
-}
-
 func usage() {
 	fmt.Print(`Usage: omafire <command>
 
@@ -208,7 +169,7 @@ Settings live in ~/.config/omafire/config.json; Firefox follows them live.
 Commands:
   sync     Queue the current palette for connected browsers
   payload  Print the current JSON protocol message
-  status   Show the current theme and integration state
+  status   Show the current theme and integration state (--json for scripts)
   setup    Enable the packaged Omafire integration for this user
   remove   Remove this user's Omafire hook and theme state
   get      Print the settings, or one: get [--json | <setting>]
@@ -227,7 +188,7 @@ func main() {
 	if len(os.Args) > 1 {
 		command = os.Args[1]
 	}
-	known := []string{"sync", "payload", "status", "setup", "remove",
+	known := []string{"sync", "payload", "setup", "remove",
 		"version", "-V", "--version", "help", "-h", "--help"}
 	if slices.Contains(known, command) && len(os.Args) > 2 {
 		fail("command '%s' does not accept arguments", command)
@@ -246,7 +207,7 @@ func main() {
 		requireQuattro()
 		fmt.Print(formatPayload(readPalette(), jsonEscape(currentThemeName())))
 	case "status":
-		showStatus()
+		showStatus(os.Args[2:])
 	case "get":
 		cmdGet(os.Args[2:])
 	case "set":

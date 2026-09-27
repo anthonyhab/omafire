@@ -22,13 +22,15 @@ cp "$TEST_DIR/fixtures/colors.toml" "$THEME_DIR/colors.toml"
 printf '%s\n' 'osaka-jade' > "$THEME_DIR/theme.name"
 
 export HOME="$TEST_HOME"
+# Settings follow XDG_CONFIG_HOME; never the caller's.
+unset XDG_CONFIG_HOME OMAFIRE_CONFIG
 export PATH="$MOCK_BIN:$PATH"
 export OMAFIRE_THEME_DIR="$THEME_DIR"
 export OMAFIRE_THEME_NAME_FILE="$THEME_DIR/theme.name"
 
 [[ $("$OMAFIRE_BIN" version) == "$(cat "$TEST_DIR/../VERSION")" ]]
 help_output=$("$OMAFIRE_BIN" help)
-expected_commands=$'Commands:\n  sync     Queue the current palette for connected browsers\n  payload  Print the current JSON protocol message\n  status   Show the current theme and integration state\n  setup    Enable the packaged Omafire integration for this user\n  remove   Remove this user\'s Omafire hook and theme state\n  get      Print the settings, or one: get [--json | <setting>]\n  set      Change settings: set <setting> <value> [<setting> <value>]...\n  reset    Return settings to their defaults: reset <setting>...\n  watch    Print the settings as a JSON line now and after every change\n  version  Print the Omafire version\n  help     Show this help'
+expected_commands=$'Commands:\n  sync     Queue the current palette for connected browsers\n  payload  Print the current JSON protocol message\n  status   Show the current theme and integration state (--json for scripts)\n  setup    Enable the packaged Omafire integration for this user\n  remove   Remove this user\'s Omafire hook and theme state\n  get      Print the settings, or one: get [--json | <setting>]\n  set      Change settings: set <setting> <value> [<setting> <value>]...\n  reset    Return settings to their defaults: reset <setting>...\n  watch    Print the settings as a JSON line now and after every change\n  version  Print the Omafire version\n  help     Show this help'
 [[ $help_output == *"$expected_commands"* ]]
 
 if unknown_error=$("$OMAFIRE_BIN" unknown-command 2>&1); then
@@ -37,13 +39,31 @@ if unknown_error=$("$OMAFIRE_BIN" unknown-command 2>&1); then
 fi
 [[ $unknown_error == *"unknown command: unknown-command"* ]]
 
-for command in sync payload status; do
+for command in sync payload; do
   if argument_error=$("$OMAFIRE_BIN" "$command" unexpected 2>&1); then
     echo "$command unexpectedly accepted an argument" >&2
     exit 1
   fi
   [[ $argument_error == *"does not accept arguments"* ]]
 done
+if argument_error=$("$OMAFIRE_BIN" status unexpected 2>&1); then
+  echo "status unexpectedly accepted an argument" >&2
+  exit 1
+fi
+[[ $argument_error == *"usage: omafire status [--json]"* ]]
+
+# status --json: the same facts as the text, for the shell plugin.
+python3 - "$("$OMAFIRE_BIN" status --json)" "$HOME" <<'PY'
+import json, sys
+r = json.loads(sys.argv[1])
+home = sys.argv[2]
+assert set(r) == {"version", "theme", "palette", "hook", "themeState", "nativeHost",
+                  "nativeManifest", "settings", "zen", "firefox"}, r
+assert r["theme"] == "osaka-jade"
+assert r["hook"] == {"path": home + "/.config/omarchy/hooks/theme-set.d/omafire", "present": False}
+assert r["settings"] == {"path": home + "/.config/omafire/config.json", "status": "defaults, no file"}
+assert r["firefox"]["detected"] is False and r["firefox"]["profiles"] == []
+PY
 
 payload=$("$OMAFIRE_BIN" payload)
 python3 - "$payload" <<'PY'

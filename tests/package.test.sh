@@ -77,6 +77,8 @@ assert manifest["allowed_extensions"] == ["omarchy-ff-sync@bb.hab.rip", "@omafox
 PY
 
 export HOME="$TEST_HOME"
+# Settings follow XDG_CONFIG_HOME; never the caller's.
+unset XDG_CONFIG_HOME OMAFIRE_CONFIG
 export PATH="$MOCK_BIN:$PATH"
 export OMAFIRE_NATIVE_HOST_PATH="$SYSTEM_HOST"
 export OMAFIRE_NATIVE_MANIFEST_PATH="$SYSTEM_MANIFEST"

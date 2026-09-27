@@ -35,6 +35,8 @@ install -m 644 "$PROJECT_DIR/packaging/org.omarchy.omafox.json" "$TEST_ROOT/host
 install -m 755 "$PROJECT_DIR/packaging/omafire-hook" "$TEST_ROOT/host/hook"
 
 export HOME="$TEST_HOME"
+# Settings follow XDG_CONFIG_HOME; never the caller's.
+unset XDG_CONFIG_HOME OMAFIRE_CONFIG
 export PATH="$MOCK_BIN:$PATH"
 export OMAFIRE_THEME_DIR="$THEME_DIR"
 export OMAFIRE_THEME_NAME_FILE="$THEME_DIR/theme.name"
