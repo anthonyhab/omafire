@@ -41,7 +41,7 @@ Optional, all applied live without a restart:
 | `omarchy.chrome-gap` | `true` | Float the page as a card with a gap, Hyprland rounding and a hairline shadow. |
 | `omarchy.translucency` | `true` | Glass chrome (frosted with a Hyprland blur rule for Firefox). |
 | `omarchy.transparency` | `"0.50"`–`"1.00"` | Glass opacity in 0.01 steps (default 0.85). |
-| `omarchy.tab-numbers` | `true` | Show the Alt+1…8 digit on the first eight tabs: at the end of a row; on pinned tiles and in the collapsed rail, a legend notched into the tile's left edge, btop-style. Tabs hidden in collapsed groups are skipped, as Firefox skips them. |
+| `omarchy.tab-numbers` | `true` | Show the Alt+1…8 digit on the first eight tabs: on pinned tiles, rail tiles and split pairs, a legend notched into the tile's left edge, btop-style; beside an expanded row, in the gutter to its left. Tabs hidden in collapsed groups are skipped, as Firefox skips them. |
 | `omarchy.extension-glyphs` | `false` | Keep extensions' own icons. By default known extensions get monochrome glyphs that tint with the toolbar (needs `svg.context-properties.content.enabled`, which omafox sets). |
 
 Personal tweaks go in `customChrome.css` / `customContent.css` beside the
