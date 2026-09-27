@@ -64,6 +64,9 @@ version=$(cat "$PROJECT_DIR/VERSION")
 pkgver=$(sed -n 's/^pkgver=//p' "$PROJECT_DIR/PKGBUILD")
 [[ $pkgver == "$version" ]] \
   || { echo "PKGBUILD pkgver $pkgver != VERSION $version" >&2; exit 1; }
+plugin_version=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["version"])' "$PROJECT_DIR/shell/omafire/manifest.json")
+[[ $plugin_version == "$version" ]] \
+  || { echo "shell plugin version $plugin_version != VERSION $version" >&2; exit 1; }
 
 # The built payload: owned by marker, and never resolving chrome-root files
 # (palette, radius, custom*) inside itself.
