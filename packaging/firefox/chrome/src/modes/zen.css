@@ -2,7 +2,7 @@
  *
  * Two prefs, kept from the original theme so existing profiles carry over:
  *   omarchy.zen-mode         feature switch
- *   omarchy.zen-mode-active  live state (the future Omafox toggle flips it)
+ *   omarchy.zen-mode-active  live state: false shows the toolbar again
  *
  * The toolbar leaves the window: only the tab sidebar and the page remain.
  * Focusing the urlbar (Ctrl+L) brings the navigation row back, so every
@@ -55,6 +55,18 @@
       margin: 0 !important;
       padding-block: 2px !important;
       background-color: var(--oc-panel) !important;
+    }
+
+    /* Springs split the row: navigation at its start, actions at its end.
+     * The drop's inline field collapses them below. */
+    & #nav-bar-customization-target {
+      display: contents !important;
+    }
+
+    & #nav-bar toolbarspring {
+      flex: 1 1 0 !important;
+      min-width: 0 !important;
+      max-width: none !important;
     }
 
     /* Drop (default): the row slides down from the window's top, the
@@ -153,6 +165,7 @@
         animation: oc-unroll var(--oc-console-in) var(--oc-ease-enter) !important;
       }
 
+      /* The field's auto margins do the splitting here. */
       & #nav-bar toolbarspring {
         flex: 0 0 0 !important;
         min-width: 0 !important;
@@ -175,7 +188,7 @@
                            + (var(--oc-zen-open) - 1) * (var(--oc-zen-row) + var(--oc-gap)));
         --oc-zen-row: var(--oc-head);
         --oc-zen-pad-start: var(--oc-inset);
-        --oc-zen-pad-end: var(--oc-u);
+        --oc-zen-pad-end: calc(var(--oc-inset) + 1px);
 
         & #urlbar[breakout] {
           --urlbar-height: var(--oc-row) !important;
@@ -216,16 +229,6 @@
         box-shadow: var(--oc-shadow-float) !important;
         transition: bottom var(--oc-slow) var(--oc-ease) !important;
       }
-    }
-
-    & #nav-bar-customization-target {
-      display: contents !important;
-    }
-
-    & #nav-bar toolbarspring {
-      flex: 1 1 0 !important;
-      min-width: 0 !important;
-      max-width: none !important;
     }
 
     /* Center: the urlbar floats as the launcher; its slot in the row

@@ -44,6 +44,27 @@ sidebar-main:not([expanded]) {
   --space-xxsmall: calc(var(--oc-u) / 2) !important;
 }
 
+/* The open panel's tool (History while its panel shows) is current, so it
+ * glows like an active tile: light from its bottom edge, its hairline lit
+ * from the same edge, instead of Firefox's accent-tinted tile. The tools
+ * are moz-buttons whose pressed fill paints inside their own shadow tree:
+ * the tool hosts carry the glow as variables, and the shadow rule reads
+ * them, so no other moz-button changes. */
+moz-button.tools-overflow {
+  --button-background-color-selected: var(--oc-selected) !important;
+  /* Firefox's own selected edge; the glow's hairline replaces it. */
+  --button-border-color-selected: transparent !important;
+  --oc-pressed-edge: linear-gradient(0deg, var(--oc-glow-edge));
+  --oc-pressed-glow: linear-gradient(0deg, var(--oc-glow-falloff));
+}
+
+button[aria-pressed="true"]:not(:hover) > .button-background {
+  background-image: var(--oc-pressed-edge, none), var(--oc-pressed-glow, none) !important;
+  background-clip: border-area, padding-box !important;
+  background-origin: border-box !important;
+  background-repeat: no-repeat !important;
+}
+
 /* The splitter above the tools strip is a drag handle, not a divider:
  * invisible until hovered. */
 #sidebar-tools-and-extensions-splitter {
@@ -87,5 +108,97 @@ sidebar-main:not([expanded]) {
       border-inline-start: var(--oc-column-edge) solid var(--oc-line-strong) !important;
       border-inline-end: none !important;
     }
+  }
+}
+
+/* ---- panel documents -------------------------------------------------
+ * History, Synced tabs… (sidebar/) and Bookmarks (places/, which also
+ * serves the Library window) are chrome documents of their own,
+ * built from design-system components that redeclare Firefox's tokens on
+ * each :host, which a user sheet cannot match; so, as on the about:
+ * pages (content.css), the bridge is set on every element. */
+@-moz-document url-prefix("chrome://browser/content/sidebar/"),
+               url-prefix("chrome://browser/content/places/") {
+  * {
+    /* Focus: the 1px accent ring (tokens.css). */
+    --focus-outline-color: var(--oc-focus) !important;
+    --focus-outline-width: 1px !important;
+    --focus-outline-offset: 1px !important;
+    --focus-outline-inset: -1px !important;
+    --focus-outline: var(--focus-outline-width) solid var(--focus-outline-color) !important;
+
+    /* Fields: the quiet box. */
+    --input-text-background-color: var(--oc-field-rest) !important;
+    --input-text-border-color: var(--oc-line) !important;
+
+    /* A group's header ("Today") is a heading, not a selection: no fill
+     * at rest, the ordinary fills when handled. */
+    --card-header-background-color: transparent !important;
+    --card-header-background-color-hover: var(--oc-hover) !important;
+    --card-header-background-color-active: var(--oc-active) !important;
+    --card-header-text-color: var(--oc-text) !important;
+    --card-header-text-color-hover: var(--oc-text) !important;
+    --card-header-text-color-active: var(--oc-text) !important;
+  }
+
+  /* List rows (history, synced tabs) are rounded with the circle token
+   * into pills; they are rows, so the tab rows' corner. */
+  sidebar-tab-row {
+    border-radius: var(--oc-radius-small) !important;
+  }
+
+  /* Tree rows (bookmarks, the Library) painted GTK's Highlight with a
+   * dotted ring. A selection there is an interaction, so it is the
+   * selection fill (tree pseudos paint no gradients); the keyboard's row
+   * takes the focus ring. */
+  treechildren::-moz-tree-row(hover) {
+    background-color: var(--oc-hover) !important;
+  }
+
+  treechildren::-moz-tree-row(selected) {
+    background-color: var(--oc-selected) !important;
+  }
+
+  treechildren::-moz-tree-row(selected, focus) {
+    background-color: var(--oc-active) !important;
+  }
+
+  treechildren::-moz-tree-row(current, focus) {
+    outline: 1px solid var(--oc-focus) !important;
+    outline-offset: -1px !important;
+  }
+
+  treechildren::-moz-tree-cell-text(selected),
+  treechildren::-moz-tree-image(selected),
+  treechildren::-moz-tree-twisty(selected) {
+    color: var(--oc-text) !important;
+  }
+
+  input:focus-visible {
+    outline: var(--focus-outline) !important;
+    outline-offset: var(--focus-outline-inset) !important;
+  }
+
+  input:is([type="search"], [type="text"]):hover:not(:focus-visible) {
+    background-color: var(--oc-field-hover) !important;
+    border-color: var(--oc-line-strong) !important;
+  }
+
+  /* The panel's close button (type "icon primary", which Firefox paints
+   * as a filled tile edged in GTK's AccentColor, named outright in the
+   * platform's --button-border) closes a view and
+   * destroys nothing: the tab close button's dim glyph with the neutral
+   * hover tile. */
+  moz-button[view][type~="primary"] {
+    --button-border: 1px solid var(--button-border-color) !important;
+    --button-background-color: transparent !important;
+    --button-background-color-hover: var(--oc-hover) !important;
+    --button-background-color-active: var(--oc-active) !important;
+    --button-border-color: transparent !important;
+    --button-border-color-hover: transparent !important;
+    --button-border-color-active: transparent !important;
+    --button-text-color: var(--oc-text-dim) !important;
+    --button-text-color-hover: var(--oc-text) !important;
+    --button-text-color-active: var(--oc-text) !important;
   }
 }

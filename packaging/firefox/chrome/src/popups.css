@@ -93,3 +93,55 @@ findbar {
     box-shadow: 0 0 0 1px var(--oc-focus) !important;
   }
 }
+
+/* ---- tooltips and the link status panel ------------------------------
+ * The last text on the system face: GTK's native tooltip and the
+ * -moz-dialog label that shows a hovered link's URL. Both become small
+ * panels in the chrome's type, square to its radius. */
+
+tooltip {
+  appearance: none !important;
+  background-color: var(--oc-panel) !important;
+  color: var(--oc-text) !important;
+  border: 1px solid var(--oc-line) !important;
+  border-radius: var(--oc-radius-small) !important;
+  padding: var(--oc-u) var(--oc-inset) !important;
+  font-family: var(--oc-font) !important;
+  font-size: var(--oc-font-size) !important;
+  font-weight: normal !important;
+
+  & :is(label, description) {
+    font: inherit !important;
+    color: inherit !important;
+  }
+}
+
+/* The status label sits over the page, where no desktop blur reaches, so
+ * it takes the console's opaque slab: glass would let page text show
+ * through the URL. Split view's footer (the inactive page's host, in its
+ * bottom corner) is the same kind of label. */
+#statuspanel-label,
+split-view-footer {
+  background-color: var(--oc-console) !important;
+  color: var(--oc-text) !important;
+  border-color: var(--oc-line) !important;
+  font-family: var(--oc-font) !important;
+  font-size: var(--oc-font-size) !important;
+  padding-block: var(--oc-u) !important;
+  padding-inline: var(--oc-inset) !important;
+  /* Only the corner facing into the page rounds; the other sits on the
+   * content edge. The label moves to the right edge (mirror) when the
+   * pointer nears it. */
+  border-radius: 0 !important;
+  border-top-right-radius: var(--oc-radius-small) !important;
+
+  split-view-footer& {
+    border-radius: 0 !important;
+    border-top-left-radius: var(--oc-radius-small) !important;
+  }
+
+  #statuspanel[mirror] > & {
+    border-top-right-radius: 0 !important;
+    border-top-left-radius: var(--oc-radius-small) !important;
+  }
+}

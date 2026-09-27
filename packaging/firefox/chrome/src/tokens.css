@@ -47,12 +47,13 @@
    * any density (compact shrinks the button, so the axis moves with it). */
   --oc-icon-pad: calc((var(--oc-button) - var(--oc-icon)) / 2);
   --oc-icon-axis: calc(var(--oc-inset) + var(--oc-icon-pad));
-  /* The window's head band: the first block of the tab column and its
-   * gap. The navigation row (zen mode) is this band: its buttons and
-   * field sit exactly on the column's first tile or tab
-   * [--oc-inset, --oc-inset + --oc-row], and its rule is the band's last
-   * pixel, inside the one-unit gap before the column's second block. */
-  --oc-head: calc(var(--oc-inset) + var(--oc-row) + var(--oc-u));
+  /* The window's head band: the first block of the tab column with an
+   * inset on either side, then one pixel of rule. The navigation row (zen
+   * mode) is this band: its buttons and field sit exactly on the column's
+   * first tile [--oc-inset, --oc-inset + --oc-row], and its rule, the
+   * band's last pixel, continues the rule under the pinned tiles
+   * (tabs.css) across the seam as one line. */
+  --oc-head: calc(2 * var(--oc-inset) + var(--oc-row) + 1px);
   /* Invisible strip at a window edge that reveals hidden chrome
    * (compact's column, zen's navigation row). */
   --oc-trigger: 6px;
@@ -82,12 +83,17 @@
   --oc-frame: var(--toolbar-background-color, var(--omarchy-dark_background));
   --oc-text: var(--toolbar-text-color, var(--omarchy-foreground));
   --oc-canvas: var(--tabpanel-background-color, var(--omarchy-background, var(--oc-frame)));
-  --oc-field: var(--toolbar-field-background-color, var(--omarchy-darker_background));
-  --oc-field-text: var(--toolbar-field-text-color, var(--oc-text));
   --oc-accent: var(--lwt-tab-line-color, var(--omarchy-accent, AccentColor));
-  /* Focus rings and selected edges use Hyprland's active window border
-   * (omarchy-radius.css), so the browser marks focus like the desktop. */
-  --oc-focus: var(--omarchy-border-active-color, var(--toolbar-field-border-color-focus, var(--oc-accent)));
+  /* Keyboard focus and focused edges (the open urlbar, split view's
+   * active pane, checkboxes) are the accent, as a 1px ring. Hyprland's
+   * active border was tried and dropped (2026-09-27): it is chosen for a
+   * window edge over wallpaper, not for the page, and varies by setup
+   * from grey to near-white. Near-white it outshone body text on every
+   * dark Omarchy theme and vanished (1.0-1.1:1) on every light one. The
+   * accent clears 3:1 on all of them, and stays below text on dark ones.
+   * Focus has no glow: that is the active/current signal. On a light
+   * palette it is the accent mark, held to 3:1 (below). */
+  --oc-focus: var(--oc-accent-mark);
   /* The active tab's glow: the palette accent, or the page's own colour
    * when Omafox's site-coloured tabs are on (it sets the lightweight
    * theme's tab_loading per window). Outside a lightweight theme Firefox's
@@ -102,14 +108,61 @@
 
   /* Translucent overlays of the text color: legible on any palette, and
    * they stack (hover over selected stays visible). */
-  --oc-text-dim: color-mix(in srgb, var(--oc-text) 62%, transparent);
+  /* Contrast floors (2026-09-27, all 25 installed Omarchy themes). Text
+   * tokens are alpha over the surface, and on a light palette the same
+   * alpha reads lighter: 80% labels fell to 4.2:1 and 62% to 2.8:1 on
+   * rose-pine. Light palettes take stronger mixes (labels >= 4.5:1,
+   * dim >= 3:1); dark palettes keep theirs (>= 5.3:1 and >= 3.8:1).
+   * --oc-text-dim is for secondary glyphs and de-emphasized metadata:
+   * its target is 3:1, which is all 62% meets on dark themes too. */
+  --oc-text-dim: light-dark(
+    color-mix(in srgb, var(--oc-text) 70%, transparent),
+    color-mix(in srgb, var(--oc-text) 62%, transparent));
+  /* Resting tab labels: quieter than the active tab, never so dim that an
+   * ordinary tab reads as disabled (62% did, on glass). Secondary glyphs
+   * on a row (its digit, close button) stay --oc-text-dim. */
+  --oc-text-label: light-dark(
+    color-mix(in srgb, var(--oc-text) 90%, transparent),
+    color-mix(in srgb, var(--oc-text) 80%, transparent));
+  /* The accent as a state mark (focus rings; the glow on about: pages).
+   * Light palettes' accents run weak against their own page (rose-pine
+   * 3.1:1, 2.6:1 on a panel), so there it leans 30% toward the text:
+   * 3.25:1 at worst. Dark palettes' accents clear 3.8:1 as they are. */
+  --oc-accent-mark: light-dark(
+    color-mix(in srgb, var(--oc-accent), var(--oc-text) 30%),
+    var(--oc-accent));
   --oc-line: color-mix(in srgb, var(--oc-text) 11%, transparent);
   --oc-line-strong: color-mix(in srgb, var(--oc-text) 22%, transparent);
   --oc-hover: color-mix(in srgb, var(--oc-text) 8%, transparent);
   --oc-active: color-mix(in srgb, var(--oc-text) 18%, transparent);
-  --oc-selected: color-mix(in srgb, var(--oc-text) 12%, transparent);
+  --oc-selected: color-mix(in srgb, var(--oc-text) 9%, transparent);
+  /* The address field at rest and hovered: a quiet box on the hairline,
+   * findable without being the heaviest slab in the window. */
+  --oc-field-rest: color-mix(in srgb, var(--oc-text) 5%, transparent);
+  --oc-field-hover: color-mix(in srgb, var(--oc-text) 10%, transparent);
   --oc-accent-wash: color-mix(in srgb, var(--oc-accent) 22%, transparent);
-  --oc-glow-wash: color-mix(in srgb, var(--oc-glow) 16%, transparent);
+  /* The active tab's light: strong at its active edge, soft by the middle,
+   * clear past three quarters. A hovered tab gets a hint of the same. Use
+   * as linear-gradient(<direction>, var(--oc-glow-falloff)). */
+  --oc-glow-falloff:
+    color-mix(in srgb, var(--oc-glow) 22%, transparent),
+    color-mix(in srgb, var(--oc-glow) 6%, transparent) 45%,
+    transparent 75%;
+  --oc-glow-hint:
+    color-mix(in srgb, var(--oc-glow) 8%, transparent), transparent 60%;
+  /* The active tab's hairline carries the same light: the glow colour at
+   * the edge the light comes from, settling into the ordinary strong
+   * hairline across the tab. Same direction as --oc-glow-falloff. */
+  --oc-glow-edge:
+    color-mix(in srgb, var(--oc-glow) 85%, transparent),
+    color-mix(in srgb, var(--oc-glow) 40%, transparent) 40%,
+    var(--oc-line-strong) 85%;
+  /* Destructive actions (a tab's close button) warn in the palette's red.
+   * The lightweight theme carries no red, so like the tab-group swatches
+   * it follows the generated palette and catches up on restart. */
+  --oc-danger: var(--omarchy-red, var(--oc-accent));
+  --oc-danger-wash: color-mix(in srgb, var(--oc-danger) 18%, transparent);
+  --oc-danger-line: color-mix(in srgb, var(--oc-danger) 45%, transparent);
 
   /* Window surface behind all chrome. Opaque unless omarchy.translucency
    * (modes/translucency.css) turns it to glass. */
@@ -123,6 +176,8 @@
    * the page cannot show through the results. */
   --oc-console: color-mix(in srgb, var(--oc-frame), var(--oc-text) 5%);
   --oc-rule: 2px;
+  /* Fill for alpha masks (tab-number notches): only its opacity counts. */
+  --oc-mask: #000;
   /* Dims the window behind the urlbar launcher. */
   --oc-scrim: rgb(0 0 0 / 0.28);
 
@@ -195,7 +250,7 @@
   --input-search-border-radius: var(--oc-radius-small) !important;
   --input-text-border-radius: var(--oc-radius-small) !important;
   --input-text-border-color: var(--oc-line) !important;
-  --input-text-background-color: var(--oc-hover) !important;
+  --input-text-background-color: var(--oc-field-rest) !important;
 
   accent-color: var(--oc-focus) !important;
 }

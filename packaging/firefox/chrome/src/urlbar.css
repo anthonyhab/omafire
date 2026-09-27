@@ -5,7 +5,7 @@
  * launcher.css. */
 
 #urlbar {
-  --urlbar-background-color: var(--oc-hover) !important;
+  --urlbar-background-color: var(--oc-field-rest) !important;
   --urlbar-background-color-focus: var(--oc-panel) !important;
   --urlbar-border-radius: var(--oc-radius-small) !important;
   --urlbar-background-border-radius: var(--oc-radius-small) !important;  /* Nova: a 24px pill */
@@ -34,8 +34,15 @@
   outline: none !important;
 }
 
-#urlbar:not([focused]):hover .urlbar-background {
-  background-color: var(--oc-active) !important;
+/* At rest the field is a box like a pinned tile: its hairline edge over a
+ * faint fill. Hovered, the fill deepens and the edge firms up. */
+#urlbar:not([focused], [breakout-extend]) > .urlbar-background {
+  box-shadow: inset 0 0 0 1px var(--oc-line) !important;
+}
+
+#urlbar:not([focused]):hover > .urlbar-background {
+  background-color: var(--oc-field-hover) !important;
+  box-shadow: inset 0 0 0 1px var(--oc-line-strong) !important;
 }
 
 /* Page actions are noise at rest; reveal them on hover and while editing.
@@ -102,6 +109,10 @@
 .urlbarView-row-body-top-no-wrap {
   flex: 0 1 auto !important;
   min-width: 0 !important;
+  /* A long title truncates first: the destination (the URL, or the action
+   * inside this block's end) keeps at least the last 30% of the row.
+   * Uncapped, a long title took the whole row and the URL went to 0. */
+  max-width: 70% !important;
 }
 
 /* Exactly one two-unit space after the title, whichever follows it: the
@@ -149,6 +160,13 @@
 
 .urlbarView-row[selected] :is(.urlbarView-action, .urlbarView-url) {
   color: var(--oc-text) !important;
+}
+
+/* The keyboard's row: the pressed fill and the strong hairline, the box
+ * language's selected edge. Hover is the fill alone, so the two stay apart
+ * on any palette, not by fill strength only. */
+.urlbarView-row[selected] {
+  box-shadow: inset 0 0 0 1px var(--oc-line-strong) !important;
 }
 
 /* Search-mode chip and identity boxes read as quiet chips. */

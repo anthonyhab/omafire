@@ -1,0 +1,6 @@
+<!-- Omarchy Chrome tab glyph. The Omafox new tab's four squares, tintable:
+     Firefox rasterises page favicons, so the page's own context-fill copy
+     cannot follow the row colour. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="context-fill" fill-opacity="context-fill-opacity">
+  <path d="M2 2h5v5H2zM9 2h5v5H9zM2 9h5v5H2zM9 9h5v5H9z"/>
+</svg>
