@@ -760,8 +760,16 @@ static void validate_managed_block(const char *path, const char *begin,
   if (path_exists(path) && !is_regular_file(path))
     fail("%s path is not a regular file: %s", what, path);
   char *contents = read_file(path, NULL);
-  if (!contents)
+  if (!contents) {
+    /* An existing file that can't be read (over MAX_FILE_BYTES, or an I/O
+     * or permission error) must not be taken for an empty one: the managed
+     * block would be written over the user's content. */
+    if (path_exists(path))
+      fail("could not read %s (unreadable, or larger than %u MB); "
+           "refusing to rewrite it: %s",
+           what, MAX_FILE_BYTES / (1024U * 1024U), path);
     return;
+  }
 
   int begin_count = 0, end_count = 0;
   long begin_line = 0, end_line = 0, lineno = 0;
@@ -794,7 +802,9 @@ static char *emit_without_managed_block(const char *path, const char *begin,
   if (!contents)
     return NULL;
 
-  size_t capacity = strlen(contents) + 1;
+  /* Every kept line is written back with a newline, so a last line that
+   * had none grows by one byte, and sprintf adds the NUL after it. */
+  size_t capacity = strlen(contents) + 2;
   char *out = xmalloc(capacity), *o = out;
   bool managed = false;
   for (char *line = contents; line && *line;) {
