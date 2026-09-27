@@ -10,6 +10,8 @@ arch=('x86_64' 'aarch64')
 url="https://github.com/cover/omafox"
 license=('MIT')
 depends=('glibc')
+# No separate -debug package in releases.
+options=('!debug')
 optdepends=(
   'hyprland: window rounding for the Firefox theme geometry'
   'firefox: supported browser'
