@@ -58,10 +58,11 @@ jobs:
           git config --global --add safe.directory "$PWD"
           mkdir /tmp/build
           sed "s|^source=.*|source=(\"omafox::git+file://$PWD#commit=${{ forgejo.sha }}\")|" PKGBUILD > /tmp/build/PKGBUILD
+          cp omarchy-firefox.install /tmp/build/
           chown -R builder: /tmp/build
           su builder -c 'git config --global --add safe.directory "*" && cd /tmp/build && makepkg --noconfirm'
           mkdir dist
-          cp /tmp/build/*.pkg.tar.zst PKGBUILD dist/
+          cp /tmp/build/*.pkg.tar.zst PKGBUILD omarchy-firefox.install dist/
           cd dist && sha256sum -- * > SHA256SUMS && cat SHA256SUMS
       - name: Publish Forgejo release
         env:

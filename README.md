@@ -56,23 +56,37 @@ package.
 
 ## Installation
 
-Omafox has two parts: the Gecko extension applies the theme, and the AUR
-package connects the browser to Omarchy. The same signed extension works in
-Firefox and Zen Browser. Install both:
+This fork is packaged as `omarchy-firefox` (it provides and replaces
+`omafox`; the command is still `omafox`). Forgejo CI builds each release
+from its tag and attaches the package to the [release
+page](https://git.hab.rip/habibe/omafox/releases).
 
-1. Install the [Omafox extension for
-   Firefox or Zen Browser](https://addons.mozilla.org/en-US/firefox/addon/omafox/)
-2. Install the [Omafox AUR package](https://aur.archlinux.org/packages/omafox):
+1. Install the package from the latest release:
 
    ```bash
-   yay -S omafox
+   sudo pacman -U omarchy-firefox-<version>-1-x86_64.pkg.tar.zst
    ```
 
-3. Enable theme syncing for your user:
+   Upgrading from the `omafox` package, pacman offers to replace it. An
+   older, unpackaged Omarchy Firefox loader (`/usr/lib/firefox/mozilla.cfg`
+   and friends) is removed if it is byte for byte a known version, and
+   reported otherwise.
+
+2. Enable it for your user, then restart Firefox:
 
    ```bash
    omafox setup
    ```
+
+For Firefox that is all: the package carries the Mozilla-signed extension,
+and the first browser window of each set-up profile installs it. Do not also
+install upstream's `@omafox` from AMO in Firefox. Zen Browser still needs
+the [Omafox extension](https://addons.mozilla.org/en-US/firefox/addon/omafox/)
+from AMO.
+
+To build it yourself instead: `makepkg -si` with this repository's
+`PKGBUILD` (it builds the Forgejo tag), or `make && sudo make install` for
+the working tree.
 
 Setup registers the Omarchy theme-change hook and immediately sends your
 current palette to every connected browser. If Zen has been launched at least
@@ -171,6 +185,32 @@ When a supported browser starts, the extension restores its saved theme and
 the native host sends the latest Omarchy palette again. Everything stays
 local to the machine; there is no web service or always-running daemon.
 
+## Firefox chrome scripts
+
+The package installs a chrome script loader beside Firefox
+(`/usr/lib/firefox/omafox.cfg`, enabled by
+`defaults/pref/omafox-prefs.js`) and its scripts in
+`/usr/lib/firefox/omafox/`. It runs only in profiles `omafox setup` marked
+(`omarchy.omafox` in the managed `user.js` block), and only the package's
+own root-owned files: nothing is loaded from the profile.
+
+- **Settings panel.** *Omarchy Chrome* in the app menu (or Ctrl+Alt+O):
+  toolbar and tab layout, sidebar side, launcher, density, zen mode,
+  compact sidebar, floating page, glass and its opacity, tab numbers and
+  extension glyphs. Layout changes apply without a restart.
+- **Keybindings.** Ctrl+Alt+H hides the chrome (zen mode; compact in the
+  sidebar layout), Ctrl+Alt+S switches the toolbar, Ctrl+Alt+G toggles
+  glass. Rebind with `omarchy.keys.<zen|layout|glass|settings>` in
+  `about:config` (a chord like `Ctrl+Alt+J`; empty to unbind). A chord
+  Firefox already uses is left to Firefox.
+- **Live palette.** A theme change reaches the tab-group colours, window
+  rounding and Firefox's own pages (settings, add-ons) without a restart.
+- **Extension.** Installs or updates the bundled signed extension. Remove
+  it in `about:addons` and it stays removed until a newer version ships.
+
+Turn them all off with `omarchy.scripts` = false, or some with
+`omarchy.scripts.disabled` (e.g. `keys, live-palette`).
+
 ## Profile safety
 
 `setup`, `sync` and `remove` only write profiles that `profiles.ini` lists,
@@ -197,7 +237,8 @@ and only inside their own marked blocks and the `omarchy-firefox/` payload.
 
 If a browser does not update after a theme change:
 
-1. Confirm that both the Omafox extension and AUR package are installed.
+1. Confirm that the `omarchy-firefox` package is installed and, in Zen,
+   the Omafox extension.
 2. Run `omafox status` and check that the theme state, native host, and native
    manifest are present. For Zen, also check that each profile says
    `configured`. A `conflict` status means the profile already contains an
@@ -223,7 +264,7 @@ Remove the per-user integration before uninstalling the package:
 
 ```bash
 omafox remove
-sudo pacman -Rns omafox
+sudo pacman -Rns omarchy-firefox
 ```
 
 Then remove the Omafox extension from Firefox's `about:addons` page. Omafox
@@ -253,6 +294,13 @@ The Firefox payload (`packaging/firefox/chrome/`) is generated from a
 committed Omarchy Chrome revision with `make payload THEME_REV=<sha>`. CI
 checks that the stamped revision is on the theme's `main` and regenerates
 to exactly the committed files (`scripts/check-payload.sh`).
+
+The Firefox extension ships signed in the package
+(`packaging/extension/omafox.xpi`). To change it: bump `extension/manifest.json`,
+run `extension/sign.sh` (AMO, unlisted), commit the new
+`extension/.amo-upload-uuid` receipt, and copy the signed XPI from
+`extension/dist/` over the packaged one. `scripts/check-xpi.sh` fails the
+gate if the packaged XPI is unsigned or differs from `extension/`.
 
 ## Acknowledgements
 

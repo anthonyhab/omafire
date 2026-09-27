@@ -1,0 +1,77 @@
+# pacman install script for omarchy-firefox.
+
+# A pre-package Omarchy loader, installed by hand before this package
+# existed: autoconfig.js pointed Firefox at mozilla.cfg, which ran helpers
+# from /usr/lib/firefox/omarchy/. No package owns it, and it claims the
+# same autoconfig setting as omafox.cfg, so only one of the two would run.
+# It is removed only where every file is byte for byte a known release of
+# it; anything else is reported and left alone.
+_legacy_files=(
+  /usr/lib/firefox/defaults/pref/autoconfig.js
+  /usr/lib/firefox/mozilla.cfg
+  /usr/lib/firefox/omarchy/favicon-contrast.uc.js
+  /usr/lib/firefox/omarchy/omarchy-features.uc.js
+  /usr/lib/firefox/omarchy/omarchy-workspaces.uc.js
+)
+_legacy_sums=(
+  140d2731e601615750dc661209f15cbd99728834f7864d738fcbff78d3c643fa
+  b4e4e187884aef88494da72b63ec2ff06b0a844d3d128445b8955ce41df94509
+  2dce8e1389355af9ddf413cde40676328389d8ac890da7fb29b6e57cd56ffb59
+  221882b7cc71213d6906e968d642537c9ba9823c55c1d3ebc1558bc089ed688f
+  94a626f84a89d47705709be2fd63f0cf1c6215282f4aa4ce1dc05d73ce21651f
+)
+
+_remove_legacy_loader() {
+  local i file present=() changed=()
+  for i in "${!_legacy_files[@]}"; do
+    file=${_legacy_files[$i]}
+    [[ -e $file || -L $file ]] || continue
+    if pacman -Qqo "$file" >/dev/null 2>&1; then
+      continue                    # owned by some package: not ours to judge
+    fi
+    present+=("$file")
+    if [[ -L $file ]] || [[ $(sha256sum < "$file" | cut -d' ' -f1) != "${_legacy_sums[$i]}" ]]; then
+      changed+=("$file")
+    fi
+  done
+  (( ${#present[@]} )) || return 0
+  if (( ${#changed[@]} )); then
+    echo "==> omarchy-firefox: an older Omarchy Firefox loader is installed,"
+    echo "    changed from any known version, and was left in place:"
+    printf '      %s\n' "${present[@]}"
+    echo "    It sets the same autoconfig file as omafox.cfg. Remove it by hand"
+    echo "    once you have kept what you need from it."
+    return 0
+  fi
+  rm -f -- "${present[@]}"
+  rmdir --ignore-fail-on-non-empty /usr/lib/firefox/omarchy 2>/dev/null || true
+  echo "==> omarchy-firefox: removed the older, unpackaged Omarchy Firefox loader:"
+  printf '      %s\n' "${present[@]}"
+}
+
+post_install() {
+  _remove_legacy_loader
+  cat <<'MSG'
+==> omarchy-firefox: to theme your Firefox profiles, run as yourself:
+      omafox setup
+    It writes each profile through profile-sync-daemon's live copy when
+    psd is running, backs up files it changes to ~/.local/state/omafox/,
+    and follows Omarchy theme changes from then on. Restart Firefox after.
+MSG
+}
+
+post_upgrade() {
+  _remove_legacy_loader
+  cat <<'MSG'
+==> omarchy-firefox: restart Firefox to load the new chrome scripts. Run
+    `omafox setup` again to bring profiles up to the new theme payload.
+MSG
+}
+
+post_remove() {
+  cat <<'MSG'
+==> omarchy-firefox: profiles still hold omafox's managed blocks. To remove
+    them, reinstall and run `omafox remove`, or delete the blocks between
+    the OMAFOX FIREFOX BRIDGE markers in each profile's user.js and chrome/.
+MSG
+}
