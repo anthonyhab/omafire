@@ -29,13 +29,20 @@
     --oc-text: var(--omarchy-foreground, CanvasText);
     --oc-canvas: var(--omarchy-background, var(--oc-frame));
     --oc-accent: var(--omarchy-accent, AccentColor);
-    --oc-focus: var(--oc-accent);  /* see tokens.css */
-    --oc-glow: var(--oc-accent);
+    --oc-focus: var(--oc-accent-mark);  /* see tokens.css */
+    --oc-glow: var(--oc-accent-mark);
 
     /* ---- color: derived (mirrors tokens.css) ------------------------ */
 
-    --oc-text-dim: color-mix(in srgb, var(--oc-text) 62%, transparent);
-    --oc-text-label: color-mix(in srgb, var(--oc-text) 80%, transparent);
+    --oc-text-dim: light-dark(
+      color-mix(in srgb, var(--oc-text) 70%, transparent),
+      color-mix(in srgb, var(--oc-text) 62%, transparent));
+    --oc-text-label: light-dark(
+      color-mix(in srgb, var(--oc-text) 90%, transparent),
+      color-mix(in srgb, var(--oc-text) 80%, transparent));
+    --oc-accent-mark: light-dark(
+      color-mix(in srgb, var(--oc-accent), var(--oc-text) 30%),
+      var(--oc-accent));
     --oc-line: color-mix(in srgb, var(--oc-text) 11%, transparent);
     --oc-line-strong: color-mix(in srgb, var(--oc-text) 22%, transparent);
     --oc-hover: color-mix(in srgb, var(--oc-text) 8%, transparent);

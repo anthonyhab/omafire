@@ -38,8 +38,8 @@
     --text-color: var(--oc-text) !important;
     --text-color-deemphasized: var(--oc-text-dim) !important;
     --icon-color: var(--oc-text) !important;
-    --link-color: var(--oc-accent) !important;
-    --link-color-visited: var(--oc-accent) !important;
+    --link-color: var(--oc-accent-mark) !important;
+    --link-color-visited: var(--oc-accent-mark) !important;
     --link-color-hover: var(--oc-text) !important;
     --link-color-active: var(--oc-text) !important;
     --color-accent-primary: var(--oc-accent) !important;
@@ -56,6 +56,9 @@
     --border-color-interactive-active: var(--oc-line-strong) !important;
     --card-border-color: var(--oc-line) !important;
     --card-box-shadow: none !important;
+    /* Settings' AI-controls promo card is tinted Firefox violet; it is a
+     * card like any other. */
+    --ai-controls-description-background-color: var(--oc-frame) !important;
     --background-color-list-item-hover: var(--oc-hover) !important;
     --text-color-list-item-hover: var(--oc-text) !important;
 

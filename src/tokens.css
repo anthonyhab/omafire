@@ -93,8 +93,9 @@
    * from grey to near-white. Near-white it outshone body text on every
    * dark Omarchy theme and vanished (1.0-1.1:1) on every light one. The
    * accent clears 3:1 on all of them, and stays below text on dark ones.
-   * Focus has no glow: that is the active/current signal. */
-  --oc-focus: var(--oc-accent);
+   * Focus has no glow: that is the active/current signal. On a light
+   * palette it is the accent mark, held to 3:1 (below). */
+  --oc-focus: var(--oc-accent-mark);
   /* The active tab's glow: the palette accent, or the page's own colour
    * when Omafox's site-coloured tabs are on (it sets the lightweight
    * theme's tab_loading per window). Outside a lightweight theme Firefox's
@@ -109,11 +110,29 @@
 
   /* Translucent overlays of the text color: legible on any palette, and
    * they stack (hover over selected stays visible). */
-  --oc-text-dim: color-mix(in srgb, var(--oc-text) 62%, transparent);
+  /* Contrast floors (2026-09-27, all 25 installed Omarchy themes). Text
+   * tokens are alpha over the surface, and on a light palette the same
+   * alpha reads lighter: 80% labels fell to 4.2:1 and 62% to 2.8:1 on
+   * rose-pine. Light palettes take stronger mixes (labels >= 4.5:1,
+   * dim >= 3:1); dark palettes keep theirs (>= 5.3:1 and >= 3.8:1).
+   * --oc-text-dim is for secondary glyphs and de-emphasized metadata:
+   * its target is 3:1, which is all 62% meets on dark themes too. */
+  --oc-text-dim: light-dark(
+    color-mix(in srgb, var(--oc-text) 70%, transparent),
+    color-mix(in srgb, var(--oc-text) 62%, transparent));
   /* Resting tab labels: quieter than the active tab, never so dim that an
    * ordinary tab reads as disabled (62% did, on glass). Secondary glyphs
    * on a row (its digit, close button) stay --oc-text-dim. */
-  --oc-text-label: color-mix(in srgb, var(--oc-text) 80%, transparent);
+  --oc-text-label: light-dark(
+    color-mix(in srgb, var(--oc-text) 90%, transparent),
+    color-mix(in srgb, var(--oc-text) 80%, transparent));
+  /* The accent as a state mark (focus rings; the glow on about: pages).
+   * Light palettes' accents run weak against their own page (rose-pine
+   * 3.1:1, 2.6:1 on a panel), so there it leans 30% toward the text:
+   * 3.25:1 at worst. Dark palettes' accents clear 3.8:1 as they are. */
+  --oc-accent-mark: light-dark(
+    color-mix(in srgb, var(--oc-accent), var(--oc-text) 30%),
+    var(--oc-accent));
   --oc-line: color-mix(in srgb, var(--oc-text) 11%, transparent);
   --oc-line-strong: color-mix(in srgb, var(--oc-text) 22%, transparent);
   --oc-hover: color-mix(in srgb, var(--oc-text) 8%, transparent);
