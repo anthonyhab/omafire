@@ -109,6 +109,10 @@
 .urlbarView-row-body-top-no-wrap {
   flex: 0 1 auto !important;
   min-width: 0 !important;
+  /* A long title truncates first: the destination (the URL, or the action
+   * inside this block's end) keeps at least the last 30% of the row.
+   * Uncapped, a long title took the whole row and the URL went to 0. */
+  max-width: 70% !important;
 }
 
 /* Exactly one two-unit space after the title, whichever follows it: the
@@ -156,6 +160,13 @@
 
 .urlbarView-row[selected] :is(.urlbarView-action, .urlbarView-url) {
   color: var(--oc-text) !important;
+}
+
+/* The keyboard's row: the pressed fill and the strong hairline, the box
+ * language's selected edge. Hover is the fill alone, so the two stay apart
+ * on any palette, not by fill strength only. */
+.urlbarView-row[selected] {
+  box-shadow: inset 0 0 0 1px var(--oc-line-strong) !important;
 }
 
 /* Search-mode chip and identity boxes read as quiet chips. */
