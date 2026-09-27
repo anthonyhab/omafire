@@ -233,7 +233,7 @@
   --input-search-border-radius: var(--oc-radius-small) !important;
   --input-text-border-radius: var(--oc-radius-small) !important;
   --input-text-border-color: var(--oc-line) !important;
-  --input-text-background-color: var(--oc-hover) !important;
+  --input-text-background-color: var(--oc-field-rest) !important;
 
   accent-color: var(--oc-focus) !important;
 }

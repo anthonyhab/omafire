@@ -121,6 +121,11 @@
     outline-offset: var(--focus-outline-inset) !important;
   }
 
+  input:is([type="search"], [type="text"]):hover:not(:focus-visible) {
+    background-color: var(--oc-field-hover) !important;
+    border-color: var(--oc-line-strong) !important;
+  }
+
   /* Page navigation (settings, add-ons). Every row carries a transparent
    * 1px edge, so selecting one never shifts it. The selected row is the
    * active tab's language: light falling off from its leading edge and
