@@ -49,13 +49,11 @@ node --check - < "$PROJECT_DIR/chrome/omafire.cfg"
 for script in "$PROJECT_DIR"/chrome/scripts/*.uc.js; do
   node --check "$script"
 done
-cc -std=c17 -Wall -Wextra -Wpedantic -Werror -fsyntax-only \
-  "$PROJECT_DIR/omarchy/omafire-native-host.c"
-cc -std=c17 -Wall -Wextra -Wpedantic -Werror -fsyntax-only \
-  -DOMAFIRE_VERSION="\"$(cat "$PROJECT_DIR/VERSION")\"" \
-  "$PROJECT_DIR/omarchy/omafire.c"
+unformatted=$(cd "$PROJECT_DIR" && gofmt -l cmd)
+[[ -z $unformatted ]] || { echo "gofmt needed: $unformatted" >&2; exit 1; }
+(cd "$PROJECT_DIR" && go vet ./...)
 
-# One version: VERSION, which make compiles in; the PKGBUILD must agree.
+# One version: VERSION, which make links in; the PKGBUILD must agree.
 version=$(cat "$PROJECT_DIR/VERSION")
 [[ $version =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] \
   || { echo "VERSION is not x.y.z: $version" >&2; exit 1; }

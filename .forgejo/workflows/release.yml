@@ -18,7 +18,7 @@ jobs:
     steps:
       - name: Install toolchain
         run: |
-          pacman -Syu --noconfirm --needed git nodejs python shellcheck unzip openssh
+          pacman -Syu --noconfirm --needed git go nodejs python shellcheck unzip openssh
           node -e 'const m = +process.versions.node.split(".")[0]; if (m !== 26) { console.error(`Node ${process.version}; expected 26`); process.exit(1) }'
       - name: Checkout
         uses: https://code.forgejo.org/actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5

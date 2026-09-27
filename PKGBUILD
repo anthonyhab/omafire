@@ -3,14 +3,14 @@
 # https://github.com/cover/omafox (MIT), whose name it carried until 0.3.0.
 
 pkgname=omafire
-pkgver=0.3.0
+pkgver=0.4.0
 pkgrel=1
 pkgdesc="The Firefox theme and toolkit for Omarchy: a themed, live-synced Firefox with settings, keys and profile-safe setup"
 arch=('x86_64' 'aarch64')
 url="https://git.hab.rip/habibe/omafire"
 license=('MIT')
 depends=('glibc')
-makedepends=('git')
+makedepends=('git' 'go')
 # tests/run.sh: syntax checks, the node suites, the XPI provenance check.
 checkdepends=('nodejs' 'python' 'shellcheck' 'unzip')
 # Replaces its earlier names; /usr/bin/omafox stays as a forwarding shim
@@ -37,6 +37,11 @@ optdepends=(
 # `make` and `make install`, not this file.
 source=("omafire::git+ssh://git@git.hab.rip/habibe/omafire.git#tag=v${pkgver}")
 sha256sums=('SKIP')
+
+prepare() {
+  cd omafire
+  go mod download
+}
 
 build() {
   cd omafire

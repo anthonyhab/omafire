@@ -172,7 +172,7 @@ The flow is:
 ```text
 Omarchy theme change
         ↓
-Theme hook (C binary) → local state file → native messaging host → browser extension
+Theme hook (omafire sync) → local state file → native messaging host → browser extension
         ↓                                                          ↓
   generated palette CSS →                     Firefox theme properties
   Firefox profile first paint                          ↓
@@ -279,7 +279,7 @@ Zen's defaults.
 ## Releases
 
 Omafire is pre-1.0 and versions itself on 0.x (upstream omafox's 1.x tags
-are unrelated). `VERSION` is the one version source: make compiles it into the
+are unrelated). `VERSION` is the one version source: make links it into the
 CLI, and the PKGBUILD's `pkgver` must match it (`tests/run.sh` checks).
 
 A release is a `v$(cat VERSION)` tag pushed to Forgejo (`git push forgejo
@@ -288,8 +288,10 @@ commit, builds the package with makepkg, and publishes a Forgejo release
 with the package, PKGBUILD and checksums. Local `makepkg` builds are for
 development only.
 
-The theme lives in `theme/` (its own README covers its code and design
-language). The Firefox payload the package installs is built from it on
+The CLI and the native host are Go (`cmd/omafire`,
+`cmd/omafire-native-host`; standard library plus `golang.org/x/sys`), built
+by `make`. The theme lives in `theme/` (its own README covers its code and
+design language). The Firefox payload the package installs is built from it on
 every `make` (`scripts/build-payload.sh`, into `build/firefox/chrome/`), so
 the theme, CLI, chrome scripts and extension of a release all come from
 one commit. Its entrypoints carry a stamp naming the version and commit.

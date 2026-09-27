@@ -20,16 +20,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# An AddressSanitizer build when the toolchain has one, so an overrun in the
-# block splicing fails the test instead of passing silently.
-OMAFIRE="$TEST_ROOT/omafire"
-if cc -std=c17 -g -fsanitize=address,undefined -o "$OMAFIRE" \
-    "$PROJECT_DIR/omarchy/omafire.c" 2>/dev/null; then
-  export ASAN_OPTIONS=detect_leaks=0:abort_on_error=1
-  RUN=(env -u LD_PRELOAD "$OMAFIRE")
-else
-  RUN=("$OMAFIRE_BIN")
-fi
+RUN=("${OMAFIRE_BIN:-$PROJECT_DIR/build/omafire}")
 
 mkdir -p "$MOCK_BIN" "$THEME_DIR" "$PAYLOAD" "$UNTERMINATED" "$TEST_ROOT/host"
 install -m 755 "$TEST_DIR/fixtures/bin/omarchy" "$MOCK_BIN/omarchy"

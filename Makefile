@@ -1,7 +1,10 @@
 PREFIX ?= /usr
 DESTDIR ?=
 BUILD_DIR ?= build
-CC ?= cc
+GO ?= go
+# Arch's Go packaging flags; the environment may override them.
+GOFLAGS ?= -buildmode=pie -trimpath -mod=readonly -modcacherw
+export GOFLAGS
 # Firefox's install directory (GreD), where its autoconfig is read from.
 FIREFOX_DIR ?= $(PREFIX)/lib/firefox
 
@@ -9,21 +12,19 @@ CLI := $(BUILD_DIR)/omafire
 NATIVE_HOST := $(BUILD_DIR)/omafire-native-host
 PAYLOAD := $(BUILD_DIR)/firefox/chrome
 
-CFLAGS += -std=c17 -Wall -Wextra -Wpedantic
-
 # The one version source: VERSION (the release tag is v$(VERSION)).
 VERSION := $(shell cat "$(dir $(lastword $(MAKEFILE_LIST)))VERSION")
-CPPFLAGS += -DOMAFIRE_VERSION='"$(VERSION)"'
 
-.PHONY: all clean install payload
+# Go decides what to rebuild from its own cache, so these always run.
+.PHONY: all clean install payload $(CLI) $(NATIVE_HOST)
 
 all: $(CLI) $(NATIVE_HOST) payload
 
-$(CLI): omarchy/omafire.c VERSION | $(BUILD_DIR)
-	$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $< $(LDFLAGS)
+$(CLI): | $(BUILD_DIR)
+	$(GO) build -ldflags "-X main.version=$(VERSION)" -o $@ ./cmd/omafire
 
-$(NATIVE_HOST): omarchy/omafire-native-host.c | $(BUILD_DIR)
-	$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $< $(LDFLAGS)
+$(NATIVE_HOST): | $(BUILD_DIR)
+	$(GO) build -o $@ ./cmd/omafire-native-host
 
 $(BUILD_DIR):
 	mkdir -p $@

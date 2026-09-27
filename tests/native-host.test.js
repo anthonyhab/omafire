@@ -5,12 +5,13 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const crypto = require("node:crypto");
-const { execFileSync, spawn } = require("node:child_process");
+const { spawn } = require("node:child_process");
 
 const projectDir = path.resolve(__dirname, "..");
 const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "omafire-native-host-"));
-const sourcePath = path.join(projectDir, "omarchy", "omafire-native-host.c");
-const hostPath = path.join(testDir, "omafire-native-host");
+// The host as built (tests/run.sh runs make first).
+const hostPath = process.env.OMAFIRE_NATIVE_HOST_BIN
+  || path.join(projectDir, "build", "omafire-native-host");
 const stateFile = path.join(testDir, "theme.json");
 const firstMessage = {
   protocol: "omafox",
@@ -48,23 +49,6 @@ function waitFor(predicate, message) {
 }
 
 (async () => {
-  execFileSync("cc", [
-    "-std=c17",
-    "-Os",
-    "-fstack-protector-strong",
-    "-fPIE",
-    "-Wall",
-    "-Wextra",
-    "-Wpedantic",
-    "-Werror",
-    "-o",
-    hostPath,
-    sourcePath,
-    "-pie",
-    "-Wl,-z,relro,-z,now",
-    "-Wl,--as-needed",
-    "-s"
-  ]);
   fs.writeFileSync(stateFile, `${firstPayload}\n`, { mode: 0o600 });
   fs.mkdirSync(wallpaperDir, { recursive: true });
   fs.mkdirSync(imageDir);
