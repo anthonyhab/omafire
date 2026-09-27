@@ -9,7 +9,9 @@ layout. Colors follow the current Omarchy theme live through
 [Omafox](https://github.com/cover/omafox).
 
 Requires **Firefox 156 or newer with Nova** (`browser.nova.enabled`, the
-default from Firefox 157). Older layouts are not supported.
+default from Firefox 157). Tested on Firefox 156; later versions install but
+are untested until the test matrix passes on them. Older layouts are not
+supported.
 
 ## Install
 
@@ -37,7 +39,7 @@ Optional, all applied live without a restart:
 | `omarchy.layout` | `"sidebar"` | Zen's single sidebar: toolbar and urlbar at the top of the tab column, floating page, centred launcher. Unset (or `"top"`) is the default top toolbar. |
 | `omarchy.zen-mode` + `omarchy.zen-mode-active` | `true` + `true` | Top layout: hide the toolbar. Ctrl+L opens a centred launcher with the navigation row docked above it. |
 | `omarchy.launcher` | `"center"` | Launcher shape (sidebar layout and zen mode). Unset (or `"drop"`) is a quake console: with horizontal tabs it slides full width down from the window's top edge, with vertical tabs it slides out of the tab column over the page, leaving the tabs in view. `"center"` floats it as a card. |
-| `omarchy.compact` | `true` | Sidebar layout: hide the column until the pointer reaches the edge. |
+| `omarchy.compact` | `true` | Sidebar layout with the sidebar expanded: hide the column until the pointer reaches the edge. The collapsed icon rail stays visible. |
 | `omarchy.chrome-gap` | `true` | Float the page as a card with a gap, Hyprland rounding and a hairline shadow. |
 | `omarchy.translucency` | `true` | Glass chrome (frosted with a Hyprland blur rule for Firefox). |
 | `omarchy.transparency` | `"0.50"`–`"1.00"` | Glass opacity in 0.01 steps (default 0.85). |
