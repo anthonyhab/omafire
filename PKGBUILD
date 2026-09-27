@@ -3,7 +3,7 @@
 # Firefox userChrome bridge (palette-accurate first paint).
 
 pkgname=omafox
-pkgver=1.3.0
+pkgver=0.1.0
 pkgrel=1
 pkgdesc="Keeps Firefox and Zen Browser in sync with the current Omarchy theme"
 arch=('x86_64' 'aarch64')
@@ -17,9 +17,11 @@ optdepends=(
 )
 # The signed @omafox WebExtension is installed from AMO inside the browser;
 # pacman cannot deploy extensions. `omafox setup` wires everything else.
-source=("omafox::git+file://${PWD}")
-# When published, point source at the canonical git remote instead:
-# source=("git+https://git.hab.rip/habibe/omafox.git#tag=v${pkgver}")
+# Releases build the Forgejo tag v$pkgver, which Forgejo CI gated and
+# published (.forgejo/workflows/release.yml). pkgver must equal VERSION
+# (tests/run.sh checks). For a development build of the working tree, use
+# `make` and `make install`, not this file.
+source=("omafox::git+ssh://git@git.hab.rip/habibe/omafox.git#tag=v${pkgver}")
 sha256sums=('SKIP')
 
 build() {

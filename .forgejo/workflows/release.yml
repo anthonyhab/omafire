@@ -1,0 +1,77 @@
+# Tag pipeline. A v* tag is released only when the full gate, payload
+# provenance included, passes on that exact commit and the tag matches
+# VERSION. The package is built by makepkg from the tagged commit; the
+# Forgejo release is the record of what was built, from what.
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Gate, build package, publish Forgejo release
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: archlinux:base-devel
+    steps:
+      - name: Install toolchain
+        run: |
+          pacman -Syu --noconfirm --needed git nodejs python shellcheck
+          node -e 'const m = +process.versions.node.split(".")[0]; if (m !== 26) { console.error(`Node ${process.version}; expected 26`); process.exit(1) }'
+      - name: Checkout
+        uses: https://code.forgejo.org/actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          token: ${{ forgejo.token }}
+          github-server-url: http://forgejo:3000
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Tag matches VERSION
+        run: |
+          test "${{ forgejo.ref_name }}" = "v$(cat VERSION)" \
+            || { echo "tag ${{ forgejo.ref_name }} != v$(cat VERSION)" >&2; exit 1; }
+      - name: Theme checkout (for the payload check)
+        env:
+          TOKEN: ${{ secrets.THEME_READ_TOKEN || forgejo.token }}
+        run: |
+          git clone --quiet "http://oauth2:${TOKEN}@forgejo:3000/habibe/omarchy-chrome.git" /tmp/theme
+      - name: Full gate on the tagged commit
+        env:
+          OMAFOX_THEME_CHECKOUT: /tmp/theme
+          OMAFOX_REQUIRE_PAYLOAD_CHECK: '1'
+        run: ./tests/run.sh
+      - name: Build package
+        # makepkg refuses root. The PKGBUILD's source is the Forgejo tag over
+        # SSH; here the same commit comes from this checkout.
+        run: |
+          useradd -m builder
+          git config --global --add safe.directory "$PWD"
+          mkdir /tmp/build
+          sed "s|^source=.*|source=(\"omafox::git+file://$PWD#commit=${{ forgejo.sha }}\")|" PKGBUILD > /tmp/build/PKGBUILD
+          chown -R builder: /tmp/build
+          su builder -c 'git config --global --add safe.directory "*" && cd /tmp/build && makepkg --noconfirm'
+          mkdir dist
+          cp /tmp/build/*.pkg.tar.zst PKGBUILD dist/
+          cd dist && sha256sum -- * > SHA256SUMS && cat SHA256SUMS
+      - name: Publish Forgejo release
+        env:
+          TOKEN: ${{ forgejo.token }}
+          API: http://forgejo:3000/api/v1/repos/${{ forgejo.repository }}
+          TAG: ${{ forgejo.ref_name }}
+          SHA: ${{ forgejo.sha }}
+        run: |
+          set -euo pipefail
+          theme=$(sed -nE '2s#^/\* Generated from Omarchy Chrome ([0-9a-f]+) by .*#\1#p' packaging/firefox/chrome/userChrome.css)
+          notes="Omafox $TAG, built by Forgejo CI from $SHA.
+          Firefox payload: Omarchy Chrome $theme.
+          Pre-1.0: interfaces and packaging may still change."
+          body="$(python3 -c 'import json,sys; print(json.dumps({"tag_name": sys.argv[1], "name": "Omafox " + sys.argv[1], "body": sys.argv[2], "prerelease": True}))' "$TAG" "$notes")"
+          id="$(curl -fsS -X POST -H "Authorization: token $TOKEN" -H 'Content-Type: application/json' \
+            -d "$body" "$API/releases" | python3 -c 'import json,sys; print(json.load(sys.stdin)["id"])')"
+          for f in dist/*; do
+            curl -fsS -H "Authorization: token $TOKEN" -F "attachment=@$f" \
+              "$API/releases/$id/assets?name=$(basename "$f")" >/dev/null
+          done
+          echo "published release $id for $TAG at $SHA"

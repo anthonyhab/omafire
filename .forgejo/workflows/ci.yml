@@ -1,0 +1,42 @@
+# Forgejo is the CI and release authority for this fork (a .forgejo workflow
+# directory also retires the upstream .github one here). The gate is the
+# same tests/run.sh contributors run, plus the payload provenance check
+# against the theme repository.
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Tests, payload provenance
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      # Arch is the package's target; its nodejs is the pinned Node 26.
+      image: archlinux:base-devel
+    steps:
+      - name: Install toolchain
+        run: |
+          pacman -Syu --noconfirm --needed git nodejs python shellcheck
+          node -e 'const m = +process.versions.node.split(".")[0]; if (m !== 26) { console.error(`Node ${process.version}; expected 26`); process.exit(1) }'
+      - name: Checkout
+        uses: https://code.forgejo.org/actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          token: ${{ forgejo.token }}
+          github-server-url: http://forgejo:3000
+          persist-credentials: false
+      - name: Theme checkout (for the payload check)
+        # The payload is generated from a committed Omarchy Chrome revision;
+        # the check needs that repository's history.
+        env:
+          TOKEN: ${{ secrets.THEME_READ_TOKEN || forgejo.token }}
+        run: |
+          git clone --quiet "http://oauth2:${TOKEN}@forgejo:3000/habibe/omarchy-chrome.git" /tmp/theme
+      - name: Tests
+        env:
+          OMAFOX_THEME_CHECKOUT: /tmp/theme
+          OMAFOX_REQUIRE_PAYLOAD_CHECK: '1'
+        run: ./tests/run.sh

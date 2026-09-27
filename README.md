@@ -215,6 +215,23 @@ Zen copies `user.js` values into `prefs.js` when it starts, so the preferences
 Use Reset for those entries in `about:config` if you want to return them to
 Zen's defaults.
 
+## Releases (this fork)
+
+This fork is pre-1.0 and versions itself on 0.x, separately from upstream's
+1.x tags. `VERSION` is the one version source: make compiles it into the
+CLI, and the PKGBUILD's `pkgver` must match it (`tests/run.sh` checks).
+
+A release is a `v$(cat VERSION)` tag pushed to Forgejo (`git push forgejo
+v0.1.0`, never `--tags`). Forgejo CI re-runs the full gate on the tagged
+commit, builds the package with makepkg, and publishes a Forgejo release
+with the package, PKGBUILD and checksums. Local `makepkg` builds are for
+development only.
+
+The Firefox payload (`packaging/firefox/chrome/`) is generated from a
+committed Omarchy Chrome revision with `make payload THEME_REV=<sha>`. CI
+checks that the stamped revision is on the theme's `main` and regenerates
+to exactly the committed files (`scripts/check-payload.sh`).
+
 ## Acknowledgements
 
 Omafox was inspired by [omazed](https://github.com/APS6/omazed), which provides

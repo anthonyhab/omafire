@@ -41,7 +41,7 @@ make -C "$PROJECT_DIR" \
 [[ -f "$PACKAGE_ROOT/usr/share/omafox/firefox/chrome/userChrome.css" ]]
 [[ -f "$PACKAGE_ROOT/usr/share/doc/omafox/README.md" ]]
 [[ -f "$PACKAGE_ROOT/usr/share/licenses/omafox/LICENSE" ]]
-[[ $($SYSTEM_COMMAND version) == 1.2.0 ]]
+[[ $($SYSTEM_COMMAND version) == "$(cat "$PROJECT_DIR/VERSION")" ]]
 
 python3 - "$SYSTEM_MANIFEST" <<'PY'
 import json

@@ -10,11 +10,15 @@ NATIVE_HOST := $(BUILD_DIR)/omafox-native-host
 
 CFLAGS += -std=c17 -Wall -Wextra -Wpedantic
 
+# The one version source: VERSION (the release tag is v$(VERSION)).
+VERSION := $(shell cat "$(dir $(lastword $(MAKEFILE_LIST)))VERSION")
+CPPFLAGS += -DOMAFOX_VERSION='"$(VERSION)"'
+
 .PHONY: all clean install payload
 
 all: $(CLI) $(NATIVE_HOST)
 
-$(CLI): omarchy/omafox.c | $(BUILD_DIR)
+$(CLI): omarchy/omafox.c VERSION | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $< $(LDFLAGS)
 
 $(NATIVE_HOST): omarchy/omafox-native-host.c | $(BUILD_DIR)

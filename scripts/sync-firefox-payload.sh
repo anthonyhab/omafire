@@ -17,7 +17,8 @@ set -euo pipefail
 PROJECT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 THEME_DIR=${1:-$PROJECT_DIR/../theme}
 REV=${2:-HEAD}
-DEST="$PROJECT_DIR/packaging/firefox/chrome"
+# PAYLOAD_DEST overrides where it is written (scripts/check-payload.sh).
+DEST=${PAYLOAD_DEST:-$PROJECT_DIR/packaging/firefox/chrome}
 
 MARKER='/* OMAFOX FIREFOX BRIDGE MANAGED FILE */'
 # Files that live in the profile's chrome/, never inside the payload.
@@ -62,4 +63,4 @@ rm -rf "$DEST"
 mkdir -p "$(dirname "$DEST")"
 cp -a "$stage" "$DEST"
 chmod 755 "$DEST"
-echo "Packaged Omarchy Chrome $sha into ${DEST#"$PROJECT_DIR"/}"
+echo "Packaged Omarchy Chrome $sha into ${DEST#"$PROJECT_DIR"/}" >&2

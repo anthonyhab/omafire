@@ -38,7 +38,11 @@
 #endif
 
 #define PROGRAM_NAME "omafox"
-#define VERSION "1.2.0"
+/* The release version lives in VERSION; make passes it in. */
+#ifndef OMAFOX_VERSION
+#error "build with make, which defines OMAFOX_VERSION from VERSION"
+#endif
+#define VERSION OMAFOX_VERSION
 #define PROTOCOL "omafox"
 #define PROTOCOL_VERSION 1
 #define ACTION "theme-set"
