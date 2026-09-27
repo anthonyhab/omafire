@@ -127,10 +127,13 @@
     transparent 75%;
   --oc-glow-hint:
     color-mix(in srgb, var(--oc-glow) 8%, transparent), transparent 60%;
-  /* The active tab's 2px edge is focus, so it is Hyprland's active border
-   * like every other focus mark; the page's own colour stays in the light
-   * behind it. */
-  --oc-edge-active: var(--oc-focus);
+  /* The active tab's hairline carries the same light: the glow colour at
+   * the edge the light comes from, settling into the ordinary strong
+   * hairline across the tab. Same direction as --oc-glow-falloff. */
+  --oc-glow-edge:
+    color-mix(in srgb, var(--oc-glow) 85%, transparent),
+    color-mix(in srgb, var(--oc-glow) 40%, transparent) 40%,
+    var(--oc-line-strong) 85%;
   /* Destructive actions (a tab's close button) warn in the palette's red.
    * The lightweight theme carries no red, so like the tab-group swatches
    * it follows the generated palette and catches up on restart. */
