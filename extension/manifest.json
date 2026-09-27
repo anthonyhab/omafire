@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Omarchy FF Sync",
-  "version": "1.8.2",
-  "description": "Keeps Firefox and Zen Browser in sync with the current Omarchy theme.",
+  "name": "Omafire",
+  "version": "1.9.0",
+  "description": "Themes Firefox and Zen Browser from the current Omarchy theme, live. Part of Omafire, the Firefox theme and toolkit for Omarchy.",
   "browser_specific_settings": {
     "gecko": {
       "id": "omarchy-ff-sync@bb.hab.rip",
@@ -29,7 +29,7 @@
     ]
   },
   "action": {
-    "default_title": "Omarchy FF Sync",
+    "default_title": "Omafire",
     "default_popup": "popup/popup.html",
     "default_icon": {
       "16": "icons/omafox.svg",
