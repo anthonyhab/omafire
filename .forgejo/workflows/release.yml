@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: Install toolchain
         run: |
-          pacman -Syu --noconfirm --needed git nodejs python shellcheck
+          pacman -Syu --noconfirm --needed git nodejs python shellcheck openssh
           node -e 'const m = +process.versions.node.split(".")[0]; if (m !== 26) { console.error(`Node ${process.version}; expected 26`); process.exit(1) }'
       - name: Checkout
         uses: https://code.forgejo.org/actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
@@ -33,10 +33,18 @@ jobs:
           test "${{ forgejo.ref_name }}" = "v$(cat VERSION)" \
             || { echo "tag ${{ forgejo.ref_name }} != v$(cat VERSION)" >&2; exit 1; }
       - name: Theme checkout (for the payload check)
+        # The payload is generated from a committed Omarchy Chrome revision;
+        # the check needs that private repository's history. The job token
+        # cannot read another repository, so a read-only deploy key on
+        # omarchy-chrome does.
         env:
-          TOKEN: ${{ secrets.THEME_READ_TOKEN || forgejo.token }}
+          THEME_DEPLOY_KEY: ${{ secrets.THEME_DEPLOY_KEY }}
         run: |
-          git clone --quiet "http://oauth2:${TOKEN}@forgejo:3000/habibe/omarchy-chrome.git" /tmp/theme
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$THEME_DEPLOY_KEY" > ~/.ssh/theme_deploy && chmod 600 ~/.ssh/theme_deploy
+          GIT_SSH_COMMAND='ssh -i ~/.ssh/theme_deploy -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new' \
+            git clone --quiet ssh://git@git.hab.rip/habibe/omarchy-chrome.git /tmp/theme
+          rm -f ~/.ssh/theme_deploy
       - name: Full gate on the tagged commit
         env:
           OMAFOX_THEME_CHECKOUT: /tmp/theme
