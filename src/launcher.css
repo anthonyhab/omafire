@@ -133,6 +133,12 @@
       }
       #main-window:not([customizing]):has(sidebar-main[expanded]) #urlbar[breakout]:is([breakout-extend], [focused]) {
         left: calc(anchor(--oc-column right, 0px) + var(--oc-gap) + var(--oc-inset)) !important;
+
+        /* Column on the right: end before it instead. */
+        @media not -moz-pref("sidebar.position_start") {
+          left: calc(anchor(--oc-page left, 0px) + var(--oc-inset)) !important;
+          right: calc(anchor(--oc-column left, 0px) + var(--oc-gap) + var(--oc-inset)) !important;
+        }
       }
     }
   }

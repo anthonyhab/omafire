@@ -91,5 +91,29 @@
         opacity var(--oc-slow) var(--oc-ease) !important;
       transition-delay: calc((1 - var(--oc-reveal)) * 180ms) !important;
     }
+
+    /* Sidebar on the right (sidebar.position_start = false): the same card
+     * mirrored. The grid's columns run the other way (layouts/sidebar.css),
+     * so the page spans from main to the window's end, and the column parks
+     * off the right edge. Without this the page stopped a column short of
+     * the edge and the column parked leftwards over it: transparent, but
+     * still taking the page's clicks. */
+    @media not -moz-pref("sidebar.position_start") {
+      /* Named as the layout names its own end-side margin rule, which
+       * this has to outrank. */
+      &:has(#sidebar-container:not([hidden])) #tabbrowser-tabbox {
+        grid-column: main / -1 !important;
+        margin-inline: var(--oc-frame-gap) var(--oc-gap) !important;
+      }
+
+      & :is(#navigator-toolbox, #sidebar-container) {
+        margin-inline: 0 var(--oc-gap) !important;
+        translate: calc((1 - var(--oc-reveal)) * (100% + var(--oc-gap) - var(--oc-trigger))) 0 !important;
+      }
+
+      & #urlbar:not([breakout-extend]) {
+        --toolbar-shift-translate: calc((1 - var(--oc-reveal)) * (100% + 3 * var(--oc-gap) - var(--oc-trigger))) 0 !important;
+      }
+    }
   }
 }
