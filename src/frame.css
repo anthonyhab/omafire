@@ -56,9 +56,7 @@
   /* Split view: the active page is framed in the focus colour, 1px
    * inside its edge. The frame is a positioned layer above the page, as
    * the status panel is: the page (another process) paints over its
-   * container's own inset shadow and outline. The inset shadow this
-   * replaces was never seen: listed with the card shadow, `none, inset`
-   * was invalid in the flush layout too. */
+   * container's own inset shadow and outline. */
   & #tabbrowser-tabpanels[splitview] {
     & .split-view-panel > .browserContainer {
       border: none !important;

@@ -1,7 +1,7 @@
 /* Omarchy Chrome — vertical tabs.
  *
- * Zen-style rows: flat until hovered, the selected tab lifted onto a
- * raised surface, close buttons only where the pointer is. Pinned tabs
+ * Zen-style rows: flat until hovered, the selected tab a flat wash lit
+ * from its leading edge, close buttons only where the pointer is. Pinned tabs
  * become a grid of icon tiles. Colors are overlays of the text color
  * (tokens.css), so the rows read on any palette. */
 
@@ -11,7 +11,7 @@
   --tab-border-color-selected-leading: transparent !important;
   --tab-border-color-selected-trailing: transparent !important;
   --tab-background-color-selected: var(--oc-selected) !important;
-  --tab-box-shadow-selected: var(--oc-shadow) !important;
+  --tab-box-shadow-selected: none !important;
   --tab-selected-textcolor: var(--oc-text) !important;
   --tab-attention-dot-color: var(--oc-accent) !important;
 
@@ -286,9 +286,10 @@
   }
 
   /* Pinned tiles, rule, tabs: the rule sits one inset below the last
-   * tile and one above the first tab's surface, as wide as a tab row. Above: the grid's pitch leaves
-   * one unit under the last tiles, then one more in here. Below: 1.5 in
-   * here, then the first tab's half-unit margin. */
+   * tile and one above the first tab's surface, as wide as a tab row.
+   * Above: the grid's pitch leaves one unit under the last tiles, then one
+   * more in here. Below: 1.5 in here, then the first tab's half-unit
+   * margin. */
   & #vertical-pinned-tabs-splitter {
     border: none !important;
     /* Hard stops over the full box, not a 1px background tile: a 1px tile
@@ -316,6 +317,8 @@
     min-height: var(--oc-row) !important;
     gap: var(--oc-inset) !important;
     border-radius: var(--oc-radius-small) !important;
+    color: var(--oc-text-dim) !important;
+    fill: var(--oc-text-dim) !important;
 
     & .toolbarbutton-icon {
       margin: 0 !important;
@@ -328,8 +331,6 @@
       margin: 0 !important;
       padding: 0 !important;
     }
-    color: var(--oc-text-dim) !important;
-    fill: var(--oc-text-dim) !important;
 
     &:hover {
       background-color: var(--oc-hover) !important;
@@ -443,7 +444,6 @@
 #tabbrowser-arrowscrollbox[orient="vertical"]::part(scrollbutton-down) {
   display: none !important;
 }
-
 
 /* ---- collapsed rail -------------------------------------------------- *
  * One 32px button column with the inset on both sides, so every rail item

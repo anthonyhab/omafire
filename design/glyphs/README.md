@@ -19,9 +19,8 @@ Files:
   glyphs between the real Nova icons (dark and light, @1x/1.6x/2x).
 - `native.py`: extracts the Nova icons from the installed Firefox into
   `native/` (not committed). Run it first.
-- `candidates.py`: the three directions compared for v2 (A Nova soft,
-  B Omarchy line, C Brutalist line). B was chosen.
-- `glyphs.py`: the chosen glyphs; prints metrics and writes preview sheets
+- `glyphs.py`: the glyphs (the "Omarchy line" direction, picked over a
+  softer Nova one and a brutalist one); prints metrics and writes preview sheets
   to `out/`.
 - `export.py`: outlines and unions each glyph into one `context-fill` path
   with Inkscape, writes the SVGs and diffs them against the stroke source.

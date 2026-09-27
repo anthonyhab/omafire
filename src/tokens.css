@@ -83,8 +83,6 @@
   --oc-frame: var(--toolbar-background-color, var(--omarchy-dark_background));
   --oc-text: var(--toolbar-text-color, var(--omarchy-foreground));
   --oc-canvas: var(--tabpanel-background-color, var(--omarchy-background, var(--oc-frame)));
-  --oc-field: var(--toolbar-field-background-color, var(--omarchy-darker_background));
-  --oc-field-text: var(--toolbar-field-text-color, var(--oc-text));
   --oc-accent: var(--lwt-tab-line-color, var(--omarchy-accent, AccentColor));
   /* Keyboard focus and focused edges (the open urlbar, split view's
    * active pane, checkboxes) are the accent, as a 1px ring. Hyprland's

@@ -141,11 +141,15 @@
  * mode keeps the stock single row so drag-and-drop targets stay intact. */
 @media -moz-pref("omarchy.layout", "sidebar") and -moz-pref("sidebar.verticalTabs") {
   :root:not([customizing], [popup-window], [taskbartab], [chromehidden~="toolbar"]):has(sidebar-main[expanded]) {
+    /* Buttons, field and tab rows are blocks one unit apart, like the
+     * rest of the column; the field sits one inset clear of the first tab,
+     * as the rule under pinned tiles does (the tab's half-unit margin
+     * makes up the rest). */
     & #nav-bar {
       flex-wrap: wrap !important;
       align-items: center !important;
-      row-gap: 6px !important;
-      padding: var(--oc-gap) var(--oc-gap) 6px !important;
+      row-gap: var(--oc-u) !important;
+      padding: var(--oc-inset) var(--oc-inset) calc(var(--oc-inset) - var(--oc-u) / 2) !important;
     }
 
     & #nav-bar-customization-target {
@@ -155,6 +159,9 @@
     & #urlbar-container {
       order: 100 !important;
       flex: 1 1 100% !important;
+      /* Firefox sizes the slot to the toolbar row (inline
+       * --urlbar-container-height); here it is one block. */
+      min-height: var(--oc-row) !important;
       min-width: 0 !important;
       max-width: none !important;
       margin: 0 !important;

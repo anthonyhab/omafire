@@ -2,7 +2,8 @@
 
 A Firefox userChrome theme for [Omarchy](https://omarchy.org/): flat, square
 chrome in the shell's monospace, one quiet visual language shared by the
-chrome and Firefox's own pages, and the page flush against a single top toolbar with vertical tabs below.
+chrome and Firefox's own pages, and the page flush against a single top
+toolbar and a column of vertical tabs.
 Optional modes add Zen-style touches: a hidden toolbar with a centred
 launcher, glass chrome, a floating content card, or a single-sidebar
 layout. Colors follow the current Omarchy theme live through

@@ -16,11 +16,9 @@
   :root {
     /* ---- geometry and type ------------------------------------------ */
 
-    --oc-u: 4px;
     --oc-radius: var(--omarchy-radius-container, 10px);
     --oc-radius-small: clamp(0px, calc(var(--oc-radius) - 3px), 8px);
     --oc-font: monospace;
-    --oc-font-size: 12px;
     --oc-label-size: 13px;
 
     /* ---- color: the content palette --------------------------------- */
@@ -37,9 +35,6 @@
     --oc-text-dim: light-dark(
       color-mix(in srgb, var(--oc-text) 70%, transparent),
       color-mix(in srgb, var(--oc-text) 62%, transparent));
-    --oc-text-label: light-dark(
-      color-mix(in srgb, var(--oc-text) 90%, transparent),
-      color-mix(in srgb, var(--oc-text) 80%, transparent));
     --oc-accent-mark: light-dark(
       color-mix(in srgb, var(--oc-accent), var(--oc-text) 30%),
       var(--oc-accent));
@@ -50,33 +45,14 @@
     --oc-selected: color-mix(in srgb, var(--oc-text) 9%, transparent);
     --oc-field-rest: color-mix(in srgb, var(--oc-text) 5%, transparent);
     --oc-field-hover: color-mix(in srgb, var(--oc-text) 10%, transparent);
-    --oc-accent-wash: color-mix(in srgb, var(--oc-accent) 22%, transparent);
     --oc-glow-falloff:
       color-mix(in srgb, var(--oc-glow) 22%, transparent),
       color-mix(in srgb, var(--oc-glow) 6%, transparent) 45%,
       transparent 75%;
-    --oc-glow-hint:
-      color-mix(in srgb, var(--oc-glow) 8%, transparent), transparent 60%;
     --oc-glow-edge:
       color-mix(in srgb, var(--oc-glow) 85%, transparent),
       color-mix(in srgb, var(--oc-glow) 40%, transparent) 40%,
       var(--oc-line-strong) 85%;
-    --oc-danger: var(--omarchy-red, var(--oc-accent));
-    --oc-danger-wash: color-mix(in srgb, var(--oc-danger) 18%, transparent);
-    --oc-danger-line: color-mix(in srgb, var(--oc-danger) 45%, transparent);
 
-    --oc-panel: color-mix(in srgb, var(--oc-frame), var(--oc-text) 5%);
-
-    /* ---- motion ----------------------------------------------------- */
-
-    --oc-ease: cubic-bezier(0.2, 0.9, 0.25, 1);
-    --oc-fast: 120ms;
-    --oc-slow: 220ms;
-    --oc-ease-enter: cubic-bezier(0.23, 1, 0.32, 1);
-
-    @media (prefers-reduced-motion: reduce) {
-      --oc-fast: 0s;
-      --oc-slow: 0s;
-    }
   }
 }

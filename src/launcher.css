@@ -39,8 +39,8 @@
  *
  * Brutalist, on the theme's one edge rule: the card is a solid slab with
  * a hairline edge (no shadow, no scrim); hover and selection are fills;
- * the single accent is the focus bar under the field, like the active
- * tab's. Shared by the drop launcher and zen mode's inline field. */
+ * the single accent is the focus rule under the field. Shared by the drop
+ * launcher and zen mode's inline field. */
 
 @media -moz-pref("omarchy.layout", "sidebar") and (not -moz-pref("omarchy.launcher", "center")),
        -moz-pref("omarchy.zen-mode") and -moz-pref("omarchy.zen-mode-active") and (not -moz-pref("omarchy.launcher", "center")) {
