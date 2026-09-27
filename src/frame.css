@@ -53,22 +53,40 @@
     background-color: transparent !important;
   }
 
-  /* Split view: the focused page is outlined with the focus edge. */
+  /* Split view: the active page is framed in the focus colour, 1px
+   * inside its edge. The frame is a positioned layer above the page, as
+   * the status panel is: the page (another process) paints over its
+   * container's own inset shadow and outline. The inset shadow this
+   * replaces was never seen: listed with the card shadow, `none, inset`
+   * was invalid in the flush layout too. */
   & #tabbrowser-tabpanels[splitview] {
     & .split-view-panel > .browserContainer {
       border: none !important;
       outline: none !important;
     }
     & .split-view-panel.deck-selected > .browserContainer {
-      box-shadow: var(--oc-card-shadow), inset 0 0 0 1px var(--oc-focus) !important;
+      position: relative !important;
+
+      &::after {
+        content: "" !important;
+        position: absolute !important;
+        inset: 0 !important;
+        z-index: 2 !important;
+        border: 1px solid var(--oc-focus) !important;
+        border-radius: inherit !important;
+        pointer-events: none !important;
+      }
     }
+    /* The divider is a drag handle one gap wide, so the pointer has 8px
+     * to find (the card layouts' gap already is), with a short hairline
+     * marker while hovered. */
     & .split-view-splitter {
-      width: max(var(--oc-frame-gap), 4px) !important;
+      width: max(var(--oc-frame-gap), var(--oc-gap)) !important;
       margin: 0 !important;
       background: transparent !important;
 
       &:hover {
-        background: linear-gradient(var(--oc-line), var(--oc-line)) center / 2px 48px no-repeat !important;
+        background: linear-gradient(var(--oc-line-strong), var(--oc-line-strong)) center / 2px 48px no-repeat !important;
       }
     }
   }
