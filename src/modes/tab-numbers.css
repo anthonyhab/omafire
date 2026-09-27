@@ -7,15 +7,16 @@
  * increments a counter, so a plain CSS counter gives the same numbers.
  * Alt+9 (the last tab) has no marker: Firefox exposes none to CSS.
  *
- * Vertical tabs show the digit as a legend cut into the tab's leading
- * edge, the way btop titles its panes: rows, pinned tiles and the
- * collapsed rail alike, so the digits run down one column in either
- * sidebar state and a row's label keeps its full width. The legend is
- * centred on the edge, the edge and fill notched out behind it with a mask
- * (not a plate, which would double the alpha on glass chrome); on a row
- * the notch parts the active tab's glow bar. It takes the tab's text
- * colour: dim at rest, full when hovered or selected. It stays clear of
- * the group line in the gutter and never overflows its row.
+ * Vertical tabs label boxes and rows differently, as btop does: a box
+ * (pinned tile, collapsed-rail tile, split pair) gets a legend cut into
+ * its leading edge, centred on the edge with the edge and fill notched
+ * out behind it by a mask (not a plate, which would double the alpha on
+ * glass chrome). A row has no edge to cut, and a notch there would part
+ * the active tab's glow bar, so its digit stands in the gutter left of
+ * the row instead, centred between the column edge (or its group's line)
+ * and the row. Either way the digits run down one column and a label
+ * keeps its full width. The digit takes the tab's text colour: dim at
+ * rest, full when hovered or selected.
  *
  * Horizontal tabs have no leading gutter: there the digit sits at the
  * trailing end, before the close button, as dim text. */
@@ -71,10 +72,10 @@
     }
   }
 
-  /* Legends. --oc-num-x is the surface's leading edge inside
-   * .tab-content: a row, and in the rail any tab (pinned too), lays its
-   * content over the whole column, its surface one inset in; expanded
-   * pinned tiles and split halves are their content box. */
+  /* Legends. --oc-num-x is where the digit is centred inside
+   * .tab-content: for a box, its leading edge. In the rail any tab (pinned
+   * too) lays its content over the whole column, its tile one inset in;
+   * expanded pinned tiles and split halves are their content box. */
   #tabbrowser-tabs[orient="vertical"] .tabbrowser-tab {
     --oc-num-x: 0px;
 
@@ -83,11 +84,11 @@
       position: absolute !important;
       inset-inline-start: var(--oc-num-x) !important;
       top: 50% !important;
-      /* Centred on the edge, whatever the glyph's width. */
+      /* Centred on its x, whatever the glyph's width. */
       translate: -50% -50% !important;
       font-family: var(--oc-font) !important;
       font-variant-numeric: tabular-nums !important;
-      font-size: 7px !important;
+      font-size: 8px !important;
       font-weight: 700 !important;
       line-height: 1 !important;
       color: inherit !important;
@@ -103,9 +104,29 @@
     }
   }
 
-  #tabbrowser-tabs[orient="vertical"] :not(tab-split-view-wrapper) > .tabbrowser-tab:not([pinned]),
-  #tabbrowser-tabs[orient="vertical"]:not([expanded]) .tabbrowser-tab[pinned] {
+  #tabbrowser-tabs[orient="vertical"]:not([expanded]) :not(tab-split-view-wrapper) > .tabbrowser-tab {
     --oc-num-x: var(--oc-inset);
+  }
+
+  /* Expanded rows: the digit stands in the gutter, unnotched. Past eight
+   * there is no key and nothing to hold an edge together, so nothing. */
+  #tabbrowser-tabs[orient="vertical"][expanded] :not(tab-split-view-wrapper) > .tabbrowser-tab:not([pinned]) {
+    /* Centred in the gutter: the column edge to the row. */
+    --oc-num-x: calc(var(--oc-inset) / 2);
+
+    & .tab-content::after {
+      content: counter(oc-tab, oc-alt-key) !important;
+    }
+
+    & .tab-background {
+      mask: none !important;
+    }
+  }
+
+  /* A grouped row is indented by an inset, its group's 2px line on the
+   * gutter's leading edge: centre on what the line leaves clear. */
+  #tabbrowser-tabs[orient="vertical"][expanded] tab-group > .tabbrowser-tab:not([pinned]) {
+    --oc-num-x: calc(var(--oc-inset) / 2 + 1px);
   }
 
   /* A split pair is outlined by its wrapper, which also holds the digits,
