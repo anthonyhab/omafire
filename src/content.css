@@ -90,6 +90,11 @@
     --focus-outline: var(--focus-outline-width) solid var(--focus-outline-color) !important;
     --card-focus-outline: var(--focus-outline) !important;
 
+    /* The selected settings section is current, like the active tab:
+     * full text on the selection fill, lit below (the nav rule). */
+    --page-nav-button-text-color-selected: var(--oc-text) !important;
+    --page-nav-button-background-color-selected: var(--oc-selected) !important;
+
     /* Fields: the quiet box. */
     --input-text-background-color: var(--oc-field-rest) !important;
     --input-text-border-color: var(--oc-line) !important;
@@ -114,6 +119,34 @@
   input:focus-visible {
     outline: var(--focus-outline) !important;
     outline-offset: var(--focus-outline-inset) !important;
+  }
+
+  /* Page navigation (settings, add-ons). Every row carries a transparent
+   * 1px edge, so selecting one never shifts it. The selected row is the
+   * active tab's language: light falling off from its leading edge and
+   * its hairline lit from the same edge, not Firefox's solid accent
+   * block. The button lives in the element's shadow tree, which a user
+   * sheet reaches by its own selectors. */
+  button[role="tab"]:has(> slot) {
+    border: 1px solid transparent !important;
+    padding: calc(var(--page-nav-button-padding) - 1px) !important;
+  }
+
+  button[role="tab"]:has(> slot)[selected] {
+    font-weight: normal !important;
+    background-image:
+      linear-gradient(90deg, var(--oc-glow-edge)),
+      linear-gradient(90deg, var(--oc-glow-falloff)) !important;
+    background-clip: border-area, padding-box !important;
+    background-origin: border-box !important;
+    background-repeat: no-repeat !important;
+  }
+
+  /* One box per section: a card that holds box groups steps back, and the
+   * group is the box. Cards of plain controls (checkboxes) keep theirs. */
+  moz-card:has(moz-box-group, moz-box-item, moz-box-link, moz-box-button) {
+    --card-border: 1px solid transparent !important;
+    --card-background-color: transparent !important;
   }
 
   /* Monospace runs wider; the chrome's label size keeps labels on one
