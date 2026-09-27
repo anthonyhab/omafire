@@ -113,6 +113,10 @@
   --oc-hover: color-mix(in srgb, var(--oc-text) 8%, transparent);
   --oc-active: color-mix(in srgb, var(--oc-text) 18%, transparent);
   --oc-selected: color-mix(in srgb, var(--oc-text) 12%, transparent);
+  /* The address field at rest and hovered: a quiet box on the hairline,
+   * findable without being the heaviest slab in the window. */
+  --oc-field-rest: color-mix(in srgb, var(--oc-text) 5%, transparent);
+  --oc-field-hover: color-mix(in srgb, var(--oc-text) 10%, transparent);
   --oc-accent-wash: color-mix(in srgb, var(--oc-accent) 22%, transparent);
   --oc-glow-wash: color-mix(in srgb, var(--oc-glow) 16%, transparent);
   /* Destructive actions (a tab's close button) warn in the palette's red.
