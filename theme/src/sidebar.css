@@ -1,4 +1,4 @@
-/* Omarchy Chrome — sidebar rail and panel.
+/* Omafire — sidebar rail and panel.
  *
  * sidebar-main is a custom element: its tools strip lives in a shadow root
  * and is styled through the design-system variables it inherits. The
@@ -96,8 +96,8 @@ button[aria-pressed="true"]:not(:hover) > .button-background {
  * hairline on the column's page-facing edge separates the two surfaces,
  * as in Zed or VS Code; the quake console then slides down against a
  * ruled edge instead of blending into the column. The card layouts
- * (single sidebar, omarchy.chrome-gap) already separate by their gap. */
-@media -moz-pref("sidebar.verticalTabs") and (not -moz-pref("omarchy.layout", "sidebar")) and (not -moz-pref("omarchy.chrome-gap")) {
+ * (single sidebar, omafire.chrome-gap) already separate by their gap. */
+@media -moz-pref("sidebar.verticalTabs") and (not -moz-pref("omafire.layout", "sidebar")) and (not -moz-pref("omafire.chrome-gap")) {
   :root:not([inDOMFullscreen]) #sidebar-container {
     --oc-column-edge: 1px;
     border-inline-end: var(--oc-column-edge) solid var(--oc-line-strong) !important;

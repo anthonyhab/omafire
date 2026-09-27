@@ -1,8 +1,8 @@
-/* Omarchy Chrome — Firefox-owned pages (userContent).
+/* Omafire — Firefox-owned pages (userContent).
  *
  * Only about: pages are touched; ordinary websites are never styled.
  *
- * New tab / home: the Omafox lightweight theme colors these live
+ * New tab / home: the Omafire lightweight theme colors these live
  * (Firefox marks the root [lwt-newtab] and sets --newtab-* inline). The
  * rules below are the cold-start fallback from the generated palette and
  * step aside as soon as the live theme arrives. */
@@ -16,8 +16,8 @@
   }
 
   :root {
-    --border-radius-medium: var(--omarchy-radius-container, 10px) !important;
-    --border-radius-large: var(--omarchy-radius-container, 10px) !important;
+    --border-radius-medium: var(--omafire-radius-container, 10px) !important;
+    --border-radius-large: var(--omafire-radius-container, 10px) !important;
   }
 }
 
@@ -208,11 +208,11 @@
   }
 }
 
-/* Omafox new tab: tell the page whether the chrome is glass, so its
+/* Omafire new tab: tell the page whether the chrome is glass, so its
  * Desktop background can be the default where it shows the desktop and
  * explain itself where it can't. A page can't read prefs; it reads this. */
 @-moz-document regexp("moz-extension://[^/]+/newtab/newtab\\.html.*") {
-  @media -moz-pref("omarchy.translucency") {
+  @media -moz-pref("omafire.translucency") {
     :root {
       --omarchy-glass: 1 !important;
     }

@@ -6,22 +6,24 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 PROJECT_DIR=$(dirname "$SCRIPT_DIR")
 
 make -C "$PROJECT_DIR" all >/dev/null
-export OMAFOX_BIN="$PROJECT_DIR/build/omafox"
+export OMAFIRE_BIN="$PROJECT_DIR/build/omafire"
 
 bash -n \
   "$PROJECT_DIR/extension/build.sh" \
-  "$PROJECT_DIR/packaging/omafox-hook" \
+  "$PROJECT_DIR/packaging/omafire-hook" \
   "$SCRIPT_DIR/command.test.sh" \
   "$SCRIPT_DIR/package.test.sh" \
   "$SCRIPT_DIR/zen-integration.test.sh" \
   "$SCRIPT_DIR/firefox-integration.test.sh" \
   "$SCRIPT_DIR/managed-files.test.sh" \
   "$SCRIPT_DIR/profile-safety.test.sh" \
+  "$SCRIPT_DIR/upgrade.test.sh" \
+  "$PROJECT_DIR/packaging/omafox-shim" \
   "$SCRIPT_DIR/fixtures/bin/omarchy"
 
 shellcheck \
   "$PROJECT_DIR/extension/build.sh" \
-  "$PROJECT_DIR/packaging/omafox-hook" \
+  "$PROJECT_DIR/packaging/omafire-hook" \
   "$PROJECT_DIR/scripts/build-payload.sh" \
   "$PROJECT_DIR/scripts/check-xpi.sh" \
   "$SCRIPT_DIR/run.sh" \
@@ -31,6 +33,8 @@ shellcheck \
   "$SCRIPT_DIR/firefox-integration.test.sh" \
   "$SCRIPT_DIR/managed-files.test.sh" \
   "$SCRIPT_DIR/profile-safety.test.sh" \
+  "$SCRIPT_DIR/upgrade.test.sh" \
+  "$PROJECT_DIR/packaging/omafox-shim" \
   "$SCRIPT_DIR/fixtures/bin/omarchy"
 
 node --check "$PROJECT_DIR/extension/theme.js"
@@ -40,16 +44,16 @@ node --check "$PROJECT_DIR/extension/wallpaper.js"
 node --check "$PROJECT_DIR/extension/popup/popup.js"
 node --check "$PROJECT_DIR/extension/newtab/newtab.js"
 node --check "$SCRIPT_DIR/native-host.test.js"
-node --check "$PROJECT_DIR/chrome/omafox-prefs.js"
-node --check - < "$PROJECT_DIR/chrome/omafox.cfg"
+node --check "$PROJECT_DIR/chrome/omafire-prefs.js"
+node --check - < "$PROJECT_DIR/chrome/omafire.cfg"
 for script in "$PROJECT_DIR"/chrome/scripts/*.uc.js; do
   node --check "$script"
 done
 cc -std=c17 -Wall -Wextra -Wpedantic -Werror -fsyntax-only \
-  "$PROJECT_DIR/omarchy/omafox-native-host.c"
+  "$PROJECT_DIR/omarchy/omafire-native-host.c"
 cc -std=c17 -Wall -Wextra -Wpedantic -Werror -fsyntax-only \
-  -DOMAFOX_VERSION="\"$(cat "$PROJECT_DIR/VERSION")\"" \
-  "$PROJECT_DIR/omarchy/omafox.c"
+  -DOMAFIRE_VERSION="\"$(cat "$PROJECT_DIR/VERSION")\"" \
+  "$PROJECT_DIR/omarchy/omafire.c"
 
 # One version: VERSION, which make compiles in; the PKGBUILD must agree.
 version=$(cat "$PROJECT_DIR/VERSION")
@@ -63,8 +67,8 @@ pkgver=$(sed -n 's/^pkgver=//p' "$PROJECT_DIR/PKGBUILD")
 # (palette, radius, custom*) inside itself.
 for entry in userChrome.css userContent.css; do
   payload_entry="$PROJECT_DIR/build/firefox/chrome/$entry"
-  [[ $(head -n1 "$payload_entry") == '/* OMAFOX FIREFOX BRIDGE MANAGED FILE */' ]]
-  if grep -Eq '^@import (url\()?"(omarchy-radius|omafox-palette|omafox-content-palette|customChrome|customContent)\.css"|OMAFOX FIREFOX BRIDGE \*/$' \
+  [[ $(head -n1 "$payload_entry") == '/* OMAFIRE FIREFOX BRIDGE MANAGED FILE */' ]]
+  if grep -Eq '^@import (url\()?"(omafire-radius|omafire-palette|omafire-content-palette|customChrome|customContent)\.css"|OMAFIRE FIREFOX BRIDGE \*/$' \
       "$payload_entry"; then
     echo "$entry is not a generated payload entrypoint" >&2
     exit 1
@@ -88,6 +92,7 @@ node "$SCRIPT_DIR/native-host.test.js"
 "$SCRIPT_DIR/firefox-integration.test.sh"
 "$SCRIPT_DIR/managed-files.test.sh"
 "$SCRIPT_DIR/profile-safety.test.sh"
+"$SCRIPT_DIR/upgrade.test.sh"
 "$SCRIPT_DIR/package.test.sh"
 
-echo "All Omafox tests passed."
+echo "All Omafire tests passed."

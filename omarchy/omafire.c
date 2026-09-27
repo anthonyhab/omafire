@@ -1,16 +1,16 @@
-/* omafox — Omarchy → Firefox/Zen theme sync command.
+/* omafire — Omarchy → Firefox/Zen theme sync command.
  *
  * C port of the original bash CLI. Speaks the omafox v1 protocol so both the
  * upstream-signed @omafox WebExtension and this fork's Omarchy FF Sync
  * extension work unmodified: `sync` normalizes the current Quattro palette
- * into ~/.local/state/omafox/theme.json and the native host pushes it to
+ * into ~/.local/state/omafire/theme.json and the native host pushes it to
  * connected browsers over inotify.
  *
  * Firefox support adds the same managed-block pattern used for Zen:
- *   chrome/userChrome.css  -> BEGIN/END OMAFOX FIREFOX BRIDGE import block
+ *   chrome/userChrome.css  -> BEGIN/END OMAFIRE FIREFOX BRIDGE import block
  *   user.js                -> managed prefs (stylesheet loading, dark canvas)
- *   chrome/omarchy-firefox/ -> packaged theme payload
- *   chrome/omafox-palette.css -> regenerated on every sync so the first
+ *   chrome/omafire/ -> packaged theme payload
+ *   chrome/omafire-palette.css -> regenerated on every sync so the first
  *                                painted frame already uses the palette.
  */
 
@@ -39,12 +39,12 @@
 #define PATH_MAX 4096
 #endif
 
-#define PROGRAM_NAME "omafox"
+#define PROGRAM_NAME "omafire"
 /* The release version lives in VERSION; make passes it in. */
-#ifndef OMAFOX_VERSION
-#error "build with make, which defines OMAFOX_VERSION from VERSION"
+#ifndef OMAFIRE_VERSION
+#error "build with make, which defines OMAFIRE_VERSION from VERSION"
 #endif
-#define VERSION OMAFOX_VERSION
+#define VERSION OMAFIRE_VERSION
 #define PROTOCOL "omafox"
 #define PROTOCOL_VERSION 1
 #define ACTION "theme-set"
@@ -53,24 +53,64 @@
 #define COLOR_LEN 8   /* normalized "#RRGGBB\0" */
 #define RAW_LEN 64    /* raw colors.toml values (0x112233, junk, ...) */
 
-#define ZEN_BRIDGE_MARKER "/* OMAFOX ZEN BRIDGE MANAGED FILE */"
-#define ZEN_CSS_BEGIN "/* BEGIN OMAFOX ZEN BRIDGE */"
-#define ZEN_CSS_END "/* END OMAFOX ZEN BRIDGE */"
-#define ZEN_PREFS_BEGIN "// BEGIN OMAFOX ZEN BRIDGE"
-#define ZEN_PREFS_END "// END OMAFOX ZEN BRIDGE"
+#define ZEN_BRIDGE_MARKER "/* OMAFIRE ZEN BRIDGE MANAGED FILE */"
+#define ZEN_CSS_BEGIN "/* BEGIN OMAFIRE ZEN BRIDGE */"
+#define ZEN_CSS_END "/* END OMAFIRE ZEN BRIDGE */"
+#define ZEN_PREFS_BEGIN "// BEGIN OMAFIRE ZEN BRIDGE"
+#define ZEN_PREFS_END "// END OMAFIRE ZEN BRIDGE"
 
-#define FF_BRIDGE_MARKER "/* OMAFOX FIREFOX BRIDGE MANAGED FILE */"
-#define FF_CSS_BEGIN "/* BEGIN OMAFOX FIREFOX BRIDGE */"
-#define FF_CSS_END "/* END OMAFOX FIREFOX BRIDGE */"
-#define FF_PREFS_BEGIN "// BEGIN OMAFOX FIREFOX BRIDGE"
-#define FF_PREFS_END "// END OMAFOX FIREFOX BRIDGE"
-#define FF_PALETTE_NAME "omafox-palette.css"
-#define FF_CONTENT_PALETTE_NAME "omafox-content-palette.css"
-#define FF_RADIUS_NAME "omarchy-radius.css"
+#define FF_BRIDGE_MARKER "/* OMAFIRE FIREFOX BRIDGE MANAGED FILE */"
+#define FF_CSS_BEGIN "/* BEGIN OMAFIRE FIREFOX BRIDGE */"
+#define FF_CSS_END "/* END OMAFIRE FIREFOX BRIDGE */"
+#define FF_PREFS_BEGIN "// BEGIN OMAFIRE FIREFOX BRIDGE"
+#define FF_PREFS_END "// END OMAFIRE FIREFOX BRIDGE"
+#define FF_PALETTE_NAME "omafire-palette.css"
+#define FF_CONTENT_PALETTE_NAME "omafire-content-palette.css"
+#define FF_RADIUS_NAME "omafire-radius.css"
 #define FF_RADIUS_MARKER \
-  "/* OMAFOX GENERATED GEOMETRY — written by omafox sync; do not edit. */"
-#define FF_PAYLOAD_DIRNAME "omarchy-firefox"
+  "/* OMAFIRE GENERATED GEOMETRY — written by omafire sync; do not edit. */"
+#define FF_PAYLOAD_DIRNAME "omafire"
 #define FF_PAYLOAD_ENTRY "userChrome.css"
+
+/* Names this program had as omafox (<= 0.2.0), recognised so an upgrade
+ * replaces them in place and remove still finds them. Never written. */
+#define LEGACY_FF_PAYLOAD_DIRNAME "omarchy-firefox"
+#define LEGACY_ZEN_BRIDGE_NAME "omafox.css"
+#define LEGACY_GENERATED_PREFIX "/* OMAFOX GENERATED "
+#define LEGACY_HOOK_COMMAND "exec /usr/bin/omafox sync"
+static const char *const LEGACY_GENERATED_NAMES[] = {
+    "omafox-palette.css", "omafox-content-palette.css", "omarchy-radius.css"};
+static const char *const LEGACY_MARKERS[][2] = {
+    {ZEN_BRIDGE_MARKER, "/* OMAFOX ZEN BRIDGE MANAGED FILE */"},
+    {ZEN_CSS_BEGIN, "/* BEGIN OMAFOX ZEN BRIDGE */"},
+    {ZEN_CSS_END, "/* END OMAFOX ZEN BRIDGE */"},
+    {ZEN_PREFS_BEGIN, "// BEGIN OMAFOX ZEN BRIDGE"},
+    {ZEN_PREFS_END, "// END OMAFOX ZEN BRIDGE"},
+    {FF_BRIDGE_MARKER, "/* OMAFOX FIREFOX BRIDGE MANAGED FILE */"},
+    {FF_CSS_BEGIN, "/* BEGIN OMAFOX FIREFOX BRIDGE */"},
+    {FF_CSS_END, "/* END OMAFOX FIREFOX BRIDGE */"},
+    {FF_PREFS_BEGIN, "// BEGIN OMAFOX FIREFOX BRIDGE"},
+    {FF_PREFS_END, "// END OMAFOX FIREFOX BRIDGE"},
+    {FF_RADIUS_MARKER,
+     "/* OMAFOX GENERATED GEOMETRY — written by omafox sync; do not edit. */"},
+};
+
+/* Cleanups of what omafox left behind, defined with the palette refresh. */
+static void remove_legacy_ff_payload(const char *chrome_dir);
+static void clean_legacy_generated(const char *chrome_dir,
+                                   const char *palette_dir, bool all);
+static void remove_legacy_zen_bridge(const char *chrome_dir);
+
+/* A line is a marker when it is the marker or the marker's omafox name. */
+static bool marker_is(const char *line, const char *marker) {
+  if (strcmp(line, marker) == 0)
+    return true;
+  for (size_t i = 0; i < sizeof(LEGACY_MARKERS) / sizeof(LEGACY_MARKERS[0]); i++)
+    if (strcmp(marker, LEGACY_MARKERS[i][0]) == 0
+        && strcmp(line, LEGACY_MARKERS[i][1]) == 0)
+      return true;
+  return false;
+}
 typedef struct {
   char **items;
   size_t count;
@@ -195,37 +235,37 @@ static char *g_ff_payload_source;
 static void init_paths(void) {
   const char *home = home_dir();
   g_theme_dir = xstrdup(env_or(
-      "OMAFOX_THEME_DIR",
+      "OMAFIRE_THEME_DIR",
       xasprintf("%s/.local/state/omarchy/current/theme", home)));
   g_theme_name_file = xstrdup(env_or(
-      "OMAFOX_THEME_NAME_FILE",
+      "OMAFIRE_THEME_NAME_FILE",
       xasprintf("%s/.local/state/omarchy/current/theme.name", home)));
   g_hook_path =
-      xasprintf("%s/.config/omarchy/hooks/theme-set.d/omafox", home);
-  g_state_dir = xasprintf("%s/.local/state/omafox", home);
+      xasprintf("%s/.config/omarchy/hooks/theme-set.d/omafire", home);
+  g_state_dir = xasprintf("%s/.local/state/omafire", home);
   g_state_file = xasprintf("%s/theme.json", g_state_dir);
   g_native_host_path = xstrdup(env_or(
-      "OMAFOX_NATIVE_HOST_PATH", "/usr/lib/omafox/omafox-native-host"));
+      "OMAFIRE_NATIVE_HOST_PATH", "/usr/lib/omafire/omafire-native-host"));
   g_native_manifest_path = xstrdup(env_or(
-      "OMAFOX_NATIVE_MANIFEST_PATH",
+      "OMAFIRE_NATIVE_MANIFEST_PATH",
       "/usr/lib/mozilla/native-messaging-hosts/org.omarchy.omafox.json"));
   g_hook_source = xstrdup(
-      env_or("OMAFOX_HOOK_SOURCE", "/usr/share/omafox/hooks/omafox"));
+      env_or("OMAFIRE_HOOK_SOURCE", "/usr/share/omafire/hooks/omafire"));
   g_zen_root = xstrdup(
-      env_or("OMAFOX_ZEN_ROOT", xasprintf("%s/.config/zen", home)));
+      env_or("OMAFIRE_ZEN_ROOT", xasprintf("%s/.config/zen", home)));
   g_zen_profiles_file = xstrdup(env_or(
-      "OMAFOX_ZEN_PROFILES_FILE",
+      "OMAFIRE_ZEN_PROFILES_FILE",
       xasprintf("%s/profiles.ini", g_zen_root)));
   g_zen_bridge_source = xstrdup(env_or(
-      "OMAFOX_ZEN_BRIDGE_SOURCE", "/usr/share/omafox/zen/omafox.css"));
+      "OMAFIRE_ZEN_BRIDGE_SOURCE", "/usr/share/omafire/zen/omafire.css"));
   g_ff_root = xstrdup(env_or(
-      "OMAFOX_FIREFOX_ROOT", xasprintf("%s/.mozilla/firefox", home)));
+      "OMAFIRE_FIREFOX_ROOT", xasprintf("%s/.mozilla/firefox", home)));
   g_ff_profiles_file = xstrdup(env_or(
-      "OMAFOX_FIREFOX_PROFILES_FILE",
+      "OMAFIRE_FIREFOX_PROFILES_FILE",
       xasprintf("%s/profiles.ini", g_ff_root)));
   g_ff_payload_source = xstrdup(env_or(
-      "OMAFOX_FIREFOX_PAYLOAD_SOURCE",
-      "/usr/share/omafox/firefox/chrome"));
+      "OMAFIRE_FIREFOX_PAYLOAD_SOURCE",
+      "/usr/share/omafire/firefox/chrome"));
 }
 
 /* ------------------------------------------------------------ file I/O */
@@ -306,7 +346,7 @@ static void atomic_write(const char *path, const char *data, size_t len,
     slash[1] = '\0';
   else
     strcpy(tmp, "./");
-  strcat(tmp, ".omafox.XXXXXX");
+  strcat(tmp, ".omafire.XXXXXX");
 
   int fd = mkstemp(tmp);
   if (fd < 0) {
@@ -416,7 +456,7 @@ static void remove_tree(const char *dir) {
 
 /* ---------------------------------------------------------- run safety */
 
-/* One omafox at a time per user: the theme hook's sync can fire while a
+/* One omafire at a time per user: the theme hook's sync can fire while a
  * setup or remove is rewriting the same profile files. Held until exit. */
 static void acquire_lock(void) {
   mkdir_p700(g_state_dir);
@@ -601,7 +641,7 @@ static void note_written_profile(const char *profile, const char *browser) {
 static int run_command(char *const argv[], char *output, size_t output_size);
 
 static void psd_resync(void) {
-  if (g_psd_profiles == 0 || strcmp(env_or("OMAFOX_PSD_RESYNC", "1"), "0") == 0)
+  if (g_psd_profiles == 0 || strcmp(env_or("OMAFIRE_PSD_RESYNC", "1"), "0") == 0)
     return;
   char *const argv[] = {"systemctl", "--user", "start", "psd-resync.service",
                         NULL};
@@ -929,7 +969,7 @@ static void read_palette(palette_t *p) {
 static void require_quattro(void) {
   /* The theme-set hook proves Omarchy is installed by existing; skipping the
    * `omarchy version` subprocess there takes fork+exec off the sync path. */
-  if (!getenv("OMAFOX_SKIP_VERSION_CHECK")) {
+  if (!getenv("OMAFIRE_SKIP_VERSION_CHECK")) {
     char version[64] = {0};
     char *const argv[] = {"omarchy", "version", NULL};
     if (run_command(argv, version, sizeof(version)) != 0)
@@ -1044,11 +1084,11 @@ static void validate_managed_block(const char *path, const char *begin,
     char *newline = strchr(line, '\n');
     if (newline)
       *newline = '\0';
-    if (strcmp(line, begin) == 0) {
+    if (marker_is(line, begin)) {
       begin_count++;
       begin_line = lineno;
     }
-    if (strcmp(line, end) == 0) {
+    if (marker_is(line, end)) {
       end_count++;
       end_line = lineno;
     }
@@ -1056,9 +1096,9 @@ static void validate_managed_block(const char *path, const char *begin,
   }
   free(contents);
   if (begin_count != end_count || begin_count > 1)
-    fail("malformed Omafox markers in %s: %s", what, path);
+    fail("malformed Omafire markers in %s: %s", what, path);
   if (begin_count == 1 && begin_line >= end_line)
-    fail("malformed Omafox markers in %s: %s", what, path);
+    fail("malformed Omafire markers in %s: %s", what, path);
 }
 
 /* Return file contents minus the managed block (begin..end inclusive). */
@@ -1077,9 +1117,9 @@ static char *emit_without_managed_block(const char *path, const char *begin,
     char *newline = strchr(line, '\n');
     if (newline)
       *newline = '\0';
-    if (strcmp(line, begin) == 0) {
+    if (marker_is(line, begin)) {
       managed = true;
-    } else if (strcmp(line, end) == 0) {
+    } else if (marker_is(line, end)) {
       managed = false;
     } else if (!managed) {
       o += sprintf(o, "%s\n", line);
@@ -1103,9 +1143,9 @@ static bool managed_block_present(const char *path, const char *begin,
     char *newline = strchr(line, '\n');
     if (newline)
       *newline = '\0';
-    if (strcmp(line, begin) == 0)
+    if (marker_is(line, begin))
       found_begin = true;
-    if (strcmp(line, end) == 0)
+    if (marker_is(line, end))
       found_end = true;
     line = newline ? newline + 1 : NULL;
   }
@@ -1123,7 +1163,7 @@ static bool managed_marker_present(const char *path, const char *begin,
     char *newline = strchr(line, '\n');
     if (newline)
       *newline = '\0';
-    if (strcmp(line, begin) == 0 || strcmp(line, end) == 0)
+    if (marker_is(line, begin) || marker_is(line, end))
       found = true;
     line = newline ? newline + 1 : NULL;
   }
@@ -1138,7 +1178,7 @@ static bool first_line_is(const char *path, const char *expected) {
   char *newline = strchr(contents, '\n');
   if (newline)
     *newline = '\0';
-  bool match = strcmp(contents, expected) == 0;
+  bool match = marker_is(contents, expected);
   free(contents);
   return match;
 }
@@ -1179,10 +1219,10 @@ static void replace_managed_block_in_place(const char *path, const char *begin,
     char *newline = strchr(line, '\n');
     if (newline)
       *newline = '\0';
-    if (strcmp(line, begin) == 0) {
+    if (marker_is(line, begin)) {
       managed = true;
       o += sprintf(o, "%s", new_block);
-    } else if (strcmp(line, end) == 0) {
+    } else if (marker_is(line, end)) {
       managed = false;
     } else if (!managed) {
       o += sprintf(o, "%s\n", line);
@@ -1310,7 +1350,7 @@ static void validate_zen_bridge(const char *target) {
 
 static void validate_zen_profile(const char *profile) {
   char *chrome_dir = path_join(profile, "chrome");
-  char *bridge = path_join(chrome_dir, "omafox.css");
+  char *bridge = path_join(chrome_dir, "omafire.css");
   char *user_chrome = path_join(chrome_dir, "userChrome.css");
   char *user_prefs = path_join(profile, "user.js");
 
@@ -1335,7 +1375,7 @@ static int g_ff_configured = 0;
 
 static void configure_zen_profile(const char *profile) {
   char *chrome_dir = path_join(profile, "chrome");
-  char *bridge = path_join(chrome_dir, "omafox.css");
+  char *bridge = path_join(chrome_dir, "omafire.css");
   char *user_chrome = path_join(chrome_dir, "userChrome.css");
   char *user_prefs = path_join(profile, "user.js");
 
@@ -1356,7 +1396,7 @@ static void configure_zen_profile(const char *profile) {
   free(bridge_data);
 
   install_managed_block(user_chrome, ZEN_CSS_BEGIN, ZEN_CSS_END,
-                        ZEN_CSS_BEGIN "\n@import url(\"omafox.css\");\n\n"
+                        ZEN_CSS_BEGIN "\n@import url(\"omafire.css\");\n\n"
                         ZEN_CSS_END "\n",
                         true, "Zen profile file");
   install_managed_block(user_prefs, ZEN_PREFS_BEGIN, ZEN_PREFS_END,
@@ -1367,6 +1407,7 @@ static void configure_zen_profile(const char *profile) {
                         ZEN_PREFS_END "\n",
                         false, "Zen profile file");
 
+  remove_legacy_zen_bridge(chrome_dir);
   printf("Configured Zen profile: %s\n", profile);
   note_written_profile(profile, "Zen Browser");
   free(chrome_dir);
@@ -1399,7 +1440,7 @@ static void setup_zen_profiles(void) {
 
 static const char *zen_profile_status(const char *profile) {
   char *chrome_dir = path_join(profile, "chrome");
-  char *bridge = path_join(chrome_dir, "omafox.css");
+  char *bridge = path_join(chrome_dir, "omafire.css");
   char *user_chrome = path_join(chrome_dir, "userChrome.css");
   char *user_prefs = path_join(profile, "user.js");
   const char *status;
@@ -1441,7 +1482,7 @@ static const char *zen_profile_status(const char *profile) {
 
 static void remove_zen_profile(const char *profile) {
   char *chrome_dir = path_join(profile, "chrome");
-  char *bridge = path_join(chrome_dir, "omafox.css");
+  char *bridge = path_join(chrome_dir, "omafire.css");
   char *user_chrome = path_join(chrome_dir, "userChrome.css");
   char *user_prefs = path_join(profile, "user.js");
 
@@ -1456,6 +1497,7 @@ static void remove_zen_profile(const char *profile) {
                        "Zen profile file");
   if (is_regular_file(bridge))
     unlink(bridge);
+  remove_legacy_zen_bridge(chrome_dir);
   if (configured) {
     printf("Removed Zen profile bridge: %s\n", profile);
     note_written_profile(profile, "Zen Browser");
@@ -1481,7 +1523,7 @@ static void remove_zen_profiles(void) {
 
 /* ------------------------------------------------------- firefox bridge */
 
-/* The packaged payload directory owns profile/chrome/omarchy-firefox/. */
+/* The packaged payload directory owns profile/chrome/omafire/. */
 static bool ff_payload_owned(const char *dir) {
   char *entry = xasprintf("%s/%s", dir, FF_PAYLOAD_ENTRY);
   bool owned = is_regular_file(entry) && !path_is_symlink(entry)
@@ -1490,7 +1532,7 @@ static bool ff_payload_owned(const char *dir) {
   return owned;
 }
 
-/* A profile whose chrome/ is itself an Omarchy Chrome checkout (the
+/* A profile whose chrome/ is itself an Omafire checkout (the
  * development symlink) must not also get the packaged payload: both copies
  * would load and the older one would shadow the checkout. Such a profile
  * gets the prefs block and the generated files only, written beside the
@@ -1708,6 +1750,8 @@ static void configure_ff_profile(const char *profile) {
                           content_block, true, "Firefox profile file");
     free(content_block);
   }
+  /* The profile imports the new names now; omafox's payload can go. */
+  remove_legacy_ff_payload(chrome_dir);
 
   /* The bootstrap prefs, only where there is no block yet: the sync that
    * setup runs next writes the full block (palette prefs included), so
@@ -1725,7 +1769,7 @@ static void configure_ff_profile(const char *profile) {
                           ", true);\n"
                           "user_pref(\"widget.wayland.opaque-region.enabled\""
                           ", false);\n"
-                          "user_pref(\"omarchy.omafox\", true);\n"
+                          "user_pref(\"omafire.managed\", true);\n"
                           FF_PREFS_END "\n",
                           false, "Firefox profile file");
   }
@@ -1770,8 +1814,13 @@ static const char *ff_profile_status(const char *profile) {
   char *user_prefs = path_join(profile, "user.js");
   const char *status;
 
+  char *legacy_payload = path_join(chrome_dir, LEGACY_FF_PAYLOAD_DIRNAME);
+  bool legacy = ff_payload_owned(legacy_payload);
+  free(legacy_payload);
   if (path_exists(payload_dir) && !ff_payload_owned(payload_dir)) {
     status = "conflict";
+  } else if (legacy && !ff_chrome_is_checkout(chrome_dir)) {
+    status = "outdated (set up by omafox; run omafire setup)";
   } else if (ff_chrome_is_checkout(chrome_dir)) {
     /* A leftover payload or import block would shadow the checkout. */
     char *uc = read_file(user_chrome, NULL);
@@ -1843,7 +1892,8 @@ static void remove_ff_profile(const char *profile) {
   char *user_prefs = path_join(profile, "user.js");
 
   validate_ff_payload(payload_dir);
-  bool configured = path_exists(payload_dir)
+  char *legacy_payload = path_join(chrome_dir, LEGACY_FF_PAYLOAD_DIRNAME);
+  bool configured = path_exists(payload_dir) || ff_payload_owned(legacy_payload)
       || managed_marker_present(user_chrome, FF_CSS_BEGIN, FF_CSS_END)
       || managed_marker_present(user_content, FF_CSS_BEGIN, FF_CSS_END)
       || managed_marker_present(user_prefs, FF_PREFS_BEGIN, FF_PREFS_END);
@@ -1856,6 +1906,10 @@ static void remove_ff_profile(const char *profile) {
                        "Firefox profile file");
   if (ff_payload_owned(payload_dir))
     remove_ff_payload_dir(payload_dir);
+  remove_legacy_ff_payload(chrome_dir);
+  char *legacy_dir = ff_palette_dir(chrome_dir);
+  clean_legacy_generated(chrome_dir, legacy_dir, true);
+  free(legacy_dir);
   if (is_regular_file(palette_file))
     unlink(palette_file);
   if (is_regular_file(content_palette_file))
@@ -1863,6 +1917,7 @@ static void remove_ff_profile(const char *profile) {
   /* The radius file is shared with the old per-user hook; only ours goes. */
   if (first_line_is(radius_file, FF_RADIUS_MARKER))
     unlink(radius_file);
+  free(legacy_payload);
   if (configured) {
     printf("Removed Firefox profile bridge: %s\n", profile);
     note_written_profile(profile, "Firefox");
@@ -1888,6 +1943,84 @@ static void remove_ff_profiles(void) {
   for (size_t i = 0; i < profiles.count; i++)
     if (profile_writable(profiles.items[i], "Firefox", true))
       remove_ff_profile(profiles.items[i]);
+}
+
+/* ----------------------------------------------- what omafox left behind */
+
+/* The omafox payload directory, once the profile imports the new one. */
+static void remove_legacy_ff_payload(const char *chrome_dir) {
+  char *dir = path_join(chrome_dir, LEGACY_FF_PAYLOAD_DIRNAME);
+  if (!path_is_symlink(dir) && ff_payload_owned(dir)) {
+    remove_tree(dir);
+    fsync_parent(dir);
+  }
+  free(dir);
+}
+
+/* omafox's generated files, when their marker says they are ours. Unless
+ * everything goes (remove), one the profile's entrypoints still import
+ * stays: a checkout of an older theme, or a profile setup has not reached
+ * yet, would lose its palette. */
+static void clean_legacy_generated(const char *chrome_dir,
+                                   const char *palette_dir, bool all) {
+  char *uc_path = path_join(chrome_dir, "userChrome.css");
+  char *ucontent_path = path_join(chrome_dir, "userContent.css");
+  char *uc = all ? NULL : read_file(uc_path, NULL);
+  char *ucontent = all ? NULL : read_file(ucontent_path, NULL);
+  for (size_t i = 0;
+       i < sizeof(LEGACY_GENERATED_NAMES) / sizeof(LEGACY_GENERATED_NAMES[0]);
+       i++) {
+    const char *name = LEGACY_GENERATED_NAMES[i];
+    char *path = path_join(palette_dir, name);
+    char *head = is_regular_file(path) && !path_is_symlink(path)
+                     ? read_file(path, NULL) : NULL;
+    bool ours = head && strncmp(head, LEGACY_GENERATED_PREFIX,
+                                strlen(LEGACY_GENERATED_PREFIX)) == 0;
+    bool used = (uc && strstr(uc, name)) || (ucontent && strstr(ucontent, name));
+    if (ours && !used) {
+      unlink(path);
+      fsync_parent(path);
+    }
+    free(head);
+    free(path);
+  }
+  free(uc);
+  free(ucontent);
+  free(uc_path);
+  free(ucontent_path);
+}
+
+/* The omafox Zen bridge file, once userChrome.css imports the new one. */
+static void remove_legacy_zen_bridge(const char *chrome_dir) {
+  char *bridge = path_join(chrome_dir, LEGACY_ZEN_BRIDGE_NAME);
+  if (zen_bridge_owned(bridge)) {
+    unlink(bridge);
+    fsync_parent(bridge);
+  }
+  free(bridge);
+}
+
+/* omafox's theme hook, which ran /usr/bin/omafox. */
+static void remove_legacy_hook(void) {
+  char *hook = xasprintf("%s/.config/omarchy/hooks/theme-set.d/omafox",
+                         home_dir());
+  char *text = path_is_symlink(hook) ? NULL : read_file(hook, NULL);
+  if (text && strstr(text, LEGACY_HOOK_COMMAND)) {
+    unlink(hook);
+    printf("Removed the omafox hook: %s\n", hook);
+  }
+  free(text);
+  free(hook);
+}
+
+/* omafox kept its state (theme.json, backups) in ~/.local/state/omafox. */
+static void migrate_legacy_state(void) {
+  char *old = xasprintf("%s/.local/state/omafox", home_dir());
+  struct stat st;
+  if (lstat(old, &st) == 0 && S_ISDIR(st.st_mode) && !path_exists(g_state_dir)
+      && rename(old, g_state_dir) == 0)
+    fsync_parent(g_state_dir);
+  free(old);
 }
 
 /* ------------------------------------------------------- palette refresh */
@@ -1920,7 +2053,7 @@ static char *raw_palette_vars(const palette_t *p, char *buf, size_t cap) {
 static void write_palette_css(const palette_t *p, const char *path) {
   char raw[4096];
   char *css = xasprintf(
-      "/* OMAFOX GENERATED PALETTE — written by omafox sync; do not edit. */\n"
+      "/* OMAFIRE GENERATED PALETTE — written by omafire sync; do not edit. */\n"
       "%s\n"
       ":root:not([lwtheme]) {\n"
       "  color-scheme: %s !important;\n"
@@ -1946,7 +2079,7 @@ static void write_palette_css(const palette_t *p, const char *path) {
 static void write_content_palette_css(const palette_t *p, const char *path) {
   char raw[4096];
   char *css = xasprintf(
-      "/* OMAFOX GENERATED CONTENT PALETTE — written by omafox sync; do not"
+      "/* OMAFIRE GENERATED CONTENT PALETTE — written by omafire sync; do not"
       " edit. */\n"
       ":root {\n  --omarchy-color-scheme: %s;\n}\n\n%s",
       p->mode, raw_palette_vars(p, raw, sizeof(raw)));
@@ -2044,7 +2177,7 @@ static void write_radius_css(const char *path) {
                         border_size, active, inactive);
   }
   char *css = xasprintf(
-      "%s\n:root {\n  --omarchy-radius-container: %ldpx;\n%s}\n",
+      "%s\n:root {\n  --omafire-radius-container: %ldpx;\n%s}\n",
       FF_RADIUS_MARKER, rounding, borders);
   atomic_write(path, css, strlen(css), 0600, false);
   free(borders);
@@ -2099,10 +2232,10 @@ static void refresh_ff_profile_colors(const char *profile,
        * the glass above it unblurred until the next tab switch. Never
        * claim opacity; the whole window is glass under omarchy anyway. */
       "user_pref(\"widget.wayland.opaque-region.enabled\", false);\n"
-      /* Marks the profile as omafox's: the package's chrome script loader
-       * (omafox.cfg) runs only where this is set, and the user's own
-       * omarchy.scripts switch, never written here, stays theirs. */
-      "user_pref(\"omarchy.omafox\", true);\n"
+      /* Marks the profile as omafire's: the package's chrome script loader
+       * (omafire.cfg) runs only where this is set, and the user's own
+       * omafire.scripts switch, never written here, stays theirs. */
+      "user_pref(\"omafire.managed\", true);\n"
       "user_pref(\"browser.nova.enabled\", true);\n"
       "user_pref(\"browser.newtabpage.activity-stream.nova.enabled\""
       ", true);\n"
@@ -2123,6 +2256,9 @@ static void refresh_ff_profile_colors(const char *profile,
   write_palette_css(p, palette_file);
   write_content_palette_css(p, content_palette_file);
   write_radius_css(radius_file);
+  char *legacy_dir = ff_palette_dir(chrome_dir);
+  clean_legacy_generated(chrome_dir, legacy_dir, false);
+  free(legacy_dir);
   free(radius_file);
   free(chrome_dir);
   free(user_chrome);
@@ -2174,7 +2310,7 @@ static void show_status(void) {
     name = contents;
   }
 
-  printf("Omafox version: %s\n", VERSION);
+  printf("Omafire version: %s\n", VERSION);
   printf("Theme: %s\n", name ? name : "unknown");
   printf("Palette: %s/colors.toml\n", g_theme_dir);
   printf("Hook: %s\n", g_hook_path);
@@ -2225,6 +2361,7 @@ static void cmd_setup(void) {
   if (run_command(argv, NULL, 0) != 0)
     fail("omarchy hook install failed");
   printf("Enabled user hook: %s\n", g_hook_path);
+  remove_legacy_hook();
   printf("Using packaged native host: %s\n", g_native_host_path);
 
   g_backup_command = "setup";
@@ -2234,9 +2371,9 @@ static void cmd_setup(void) {
   cmd_sync();
   printf("Queued the current Omarchy palette for connected browsers.\n");
   if (g_zen_configured > 0)
-    printf("Restart Zen Browser once to load the Omafox bridge.\n");
+    printf("Restart Zen Browser once to load the Omafire bridge.\n");
   if (g_ff_configured > 0)
-    printf("Restart Firefox once to load the Omafox bridge.\n");
+    printf("Restart Firefox once to load the Omafire bridge.\n");
   if (g_backup_dir)
     printf("Backed up the files it changed to %s\n", g_backup_dir);
   psd_resync();
@@ -2251,6 +2388,7 @@ static void cmd_remove(void) {
     unlink(g_hook_path);
     printf("Removed hook: %s\n", g_hook_path);
   }
+  remove_legacy_hook();
   if (path_exists(g_state_file) || path_is_symlink(g_state_file)) {
     unlink(g_state_file);
     printf("Removed theme state: %s\n", g_state_file);
@@ -2265,14 +2403,14 @@ static void cmd_remove(void) {
     printf("Backed up the files it changed to %s\n", g_backup_dir);
   psd_resync();
   printf("System files are managed by pacman; remove them with:"
-         " sudo pacman -Rns omafox\n");
+         " sudo pacman -Rns omafire\n");
 }
 
 /* ----------------------------------------------------------------- main */
 
 static void usage(void) {
   printf(
-      "Usage: omafox <command>\n"
+      "Usage: omafire <command>\n"
       "\n"
       "Keep Firefox and Zen Browser in sync with the current Omarchy Quattro"
       " palette.\n"
@@ -2281,9 +2419,9 @@ static void usage(void) {
       "  sync     Queue the current palette for connected browsers\n"
       "  payload  Print the current JSON protocol message\n"
       "  status   Show the current theme and integration state\n"
-      "  setup    Enable the packaged Omafox integration for this user\n"
-      "  remove   Remove this user's Omafox hook and theme state\n"
-      "  version  Print the Omafox version\n"
+      "  setup    Enable the packaged Omafire integration for this user\n"
+      "  remove   Remove this user's Omafire hook and theme state\n"
+      "  version  Print the Omafire version\n"
       "  help     Show this help\n");
 }
 
@@ -2305,8 +2443,10 @@ int main(int argc, char **argv) {
     fail("command '%s' does not accept arguments", command);
 
   if (strcmp(command, "sync") == 0 || strcmp(command, "setup") == 0
-      || strcmp(command, "remove") == 0)
+      || strcmp(command, "remove") == 0) {
+    migrate_legacy_state();
     acquire_lock();
+  }
 
   if (strcmp(command, "sync") == 0)
     cmd_sync();

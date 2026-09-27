@@ -5,7 +5,7 @@ set -euo pipefail
 TEST_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 PROJECT_DIR=$(dirname "$TEST_DIR")
 TEST_ROOT=$(mktemp -d)
-OMAFOX_BIN=${OMAFOX_BIN:-$(dirname "$TEST_DIR")/build/omafox}
+OMAFIRE_BIN=${OMAFIRE_BIN:-$(dirname "$TEST_DIR")/build/omafire}
 TEST_HOME="$TEST_ROOT/home"
 MOCK_BIN="$TEST_ROOT/bin"
 THEME_DIR="$TEST_ROOT/theme"
@@ -13,15 +13,15 @@ ZEN_ROOT="$TEST_HOME/.config/zen"
 RELATIVE_PROFILE="$ZEN_ROOT/Profiles/default-release"
 ABSOLUTE_PROFILE="$TEST_ROOT/external Zen profile"
 MISSING_PROFILE="$ZEN_ROOT/Profiles/missing"
-NATIVE_HOST="$TEST_ROOT/package/omafox-native-host"
+NATIVE_HOST="$TEST_ROOT/package/omafire-native-host"
 NATIVE_MANIFEST="$TEST_ROOT/package/org.omarchy.omafox.json"
-HOOK_SOURCE="$TEST_ROOT/package/omafox-hook"
-ZEN_BRIDGE_SOURCE="$TEST_ROOT/package/omafox.css"
-ZEN_BRIDGE_MARKER='/* OMAFOX ZEN BRIDGE MANAGED FILE */'
-CSS_BEGIN='/* BEGIN OMAFOX ZEN BRIDGE */'
-CSS_END='/* END OMAFOX ZEN BRIDGE */'
-PREFS_BEGIN='// BEGIN OMAFOX ZEN BRIDGE'
-PREFS_END='// END OMAFOX ZEN BRIDGE'
+HOOK_SOURCE="$TEST_ROOT/package/omafire-hook"
+ZEN_BRIDGE_SOURCE="$TEST_ROOT/package/omafire.css"
+ZEN_BRIDGE_MARKER='/* OMAFIRE ZEN BRIDGE MANAGED FILE */'
+CSS_BEGIN='/* BEGIN OMAFIRE ZEN BRIDGE */'
+CSS_END='/* END OMAFIRE ZEN BRIDGE */'
+PREFS_BEGIN='// BEGIN OMAFIRE ZEN BRIDGE'
+PREFS_END='// END OMAFIRE ZEN BRIDGE'
 
 cleanup() {
   rm -rf "$TEST_ROOT"
@@ -40,10 +40,10 @@ mkdir -p \
   "$TEST_HOME" "$MOCK_BIN" "$THEME_DIR" "$ZEN_ROOT" \
   "$RELATIVE_PROFILE/chrome" "$ABSOLUTE_PROFILE" "$(dirname "$NATIVE_HOST")"
 install -m 755 "$TEST_DIR/fixtures/bin/omarchy" "$MOCK_BIN/omarchy"
-install -m 755 "$PROJECT_DIR/packaging/omafox-hook" "$HOOK_SOURCE"
+install -m 755 "$PROJECT_DIR/packaging/omafire-hook" "$HOOK_SOURCE"
 install -m 755 /dev/null "$NATIVE_HOST"
 install -m 644 "$PROJECT_DIR/packaging/org.omarchy.omafox.json" "$NATIVE_MANIFEST"
-install -m 644 "$PROJECT_DIR/packaging/zen/omafox.css" "$ZEN_BRIDGE_SOURCE"
+install -m 644 "$PROJECT_DIR/packaging/zen/omafire.css" "$ZEN_BRIDGE_SOURCE"
 cp "$TEST_DIR/fixtures/colors.toml" "$THEME_DIR/colors.toml"
 printf '%s\n' 'osaka-jade' > "$THEME_DIR/theme.name"
 
@@ -79,13 +79,13 @@ cp "$RELATIVE_PROFILE/user.js" "$TEST_ROOT/original-user.js"
 
 export HOME="$TEST_HOME"
 export PATH="$MOCK_BIN:$PATH"
-export OMAFOX_THEME_DIR="$THEME_DIR"
-export OMAFOX_THEME_NAME_FILE="$THEME_DIR/theme.name"
-export OMAFOX_NATIVE_HOST_PATH="$NATIVE_HOST"
-export OMAFOX_NATIVE_MANIFEST_PATH="$NATIVE_MANIFEST"
-export OMAFOX_HOOK_SOURCE="$HOOK_SOURCE"
-export OMAFOX_ZEN_ROOT="$ZEN_ROOT"
-export OMAFOX_ZEN_BRIDGE_SOURCE="$ZEN_BRIDGE_SOURCE"
+export OMAFIRE_THEME_DIR="$THEME_DIR"
+export OMAFIRE_THEME_NAME_FILE="$THEME_DIR/theme.name"
+export OMAFIRE_NATIVE_HOST_PATH="$NATIVE_HOST"
+export OMAFIRE_NATIVE_MANIFEST_PATH="$NATIVE_MANIFEST"
+export OMAFIRE_HOOK_SOURCE="$HOOK_SOURCE"
+export OMAFIRE_ZEN_ROOT="$ZEN_ROOT"
+export OMAFIRE_ZEN_BRIDGE_SOURCE="$ZEN_BRIDGE_SOURCE"
 
 [[ $(sed -n '1p' "$ZEN_BRIDGE_SOURCE") == "$ZEN_BRIDGE_MARKER" ]]
 grep -Fq ':root[lwtheme] {' "$ZEN_BRIDGE_SOURCE"
@@ -98,29 +98,29 @@ grep -Fq -- '--zen-navigator-toolbox-background:' "$ZEN_BRIDGE_SOURCE"
 grep -Fq -- '--zen-toolbar-element-bg-hover:' "$ZEN_BRIDGE_SOURCE"
 grep -Fq -- '--zen-primary-color:' "$ZEN_BRIDGE_SOURCE"
 
-# Unrelated profile customizations alone are not an incomplete Omafox setup.
-initial_status=$("$OMAFOX_BIN" status)
+# Unrelated profile customizations alone are not an incomplete Omafire setup.
+initial_status=$("$OMAFIRE_BIN" status)
 [[ $initial_status == *"Zen profile: $RELATIVE_PROFILE (not configured)"* ]]
 [[ $initial_status == *"Zen profile: $ABSOLUTE_PROFILE (not configured)"* ]]
 [[ $initial_status == *"Zen profile: $MISSING_PROFILE (missing)"* ]]
 
-setup_output=$("$OMAFOX_BIN" setup 2>&1)
+setup_output=$("$OMAFIRE_BIN" setup 2>&1)
 [[ $(grep -Fc "Configured Zen profile: $RELATIVE_PROFILE" <<< "$setup_output") == 1 ]]
 [[ $(grep -Fc "Configured Zen profile: $ABSOLUTE_PROFILE" <<< "$setup_output") == 1 ]]
 [[ $setup_output == *"Skipped missing Zen profile: $MISSING_PROFILE"* ]]
 [[ $setup_output == *"Restart Zen Browser once"* ]]
 
 for profile in "$RELATIVE_PROFILE" "$ABSOLUTE_PROFILE"; do
-  cmp "$ZEN_BRIDGE_SOURCE" "$profile/chrome/omafox.css"
+  cmp "$ZEN_BRIDGE_SOURCE" "$profile/chrome/omafire.css"
   [[ $(grep -Fxc "$CSS_BEGIN" "$profile/chrome/userChrome.css") == 1 ]]
   [[ $(grep -Fxc "$CSS_END" "$profile/chrome/userChrome.css") == 1 ]]
-  [[ $(grep -Fxc '@import url("omafox.css");' "$profile/chrome/userChrome.css") == 1 ]]
+  [[ $(grep -Fxc '@import url("omafire.css");' "$profile/chrome/userChrome.css") == 1 ]]
   [[ $(grep -Fxc "$PREFS_BEGIN" "$profile/user.js") == 1 ]]
   [[ $(grep -Fxc "$PREFS_END" "$profile/user.js") == 1 ]]
   [[ $(grep -Fxc 'user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);' "$profile/user.js") == 1 ]]
   [[ $(grep -Fxc 'user_pref("zen.theme.disable-lightweight", false);' "$profile/user.js") == 1 ]]
   [[ $(sed -n '1p' "$profile/chrome/userChrome.css") == "$CSS_BEGIN" ]]
-  [[ $(stat -c '%a' "$profile/chrome/omafox.css") == 600 ]]
+  [[ $(stat -c '%a' "$profile/chrome/omafire.css") == 600 ]]
 done
 
 [[ $(stat -c '%a' "$RELATIVE_PROFILE/chrome/userChrome.css") == 640 ]]
@@ -132,37 +132,37 @@ grep -Fqx '@namespace url("http://www.mozilla.org/keymaster/gatekeeper/there.is.
   "$RELATIVE_PROFILE/chrome/userChrome.css"
 grep -Fqx 'user_pref("example.existing", true);' "$RELATIVE_PROFILE/user.js"
 
-configured_status=$("$OMAFOX_BIN" status)
+configured_status=$("$OMAFIRE_BIN" status)
 [[ $configured_status == *"Zen profile: $RELATIVE_PROFILE (configured)"* ]]
 [[ $configured_status == *"Zen profile: $ABSOLUTE_PROFILE (configured)"* ]]
 
 # Setup is idempotent and refreshes a stale packaged bridge.
-"$OMAFOX_BIN" setup >/dev/null 2>&1
+"$OMAFIRE_BIN" setup >/dev/null 2>&1
 [[ $(grep -Fxc "$CSS_BEGIN" "$RELATIVE_PROFILE/chrome/userChrome.css") == 1 ]]
 [[ $(grep -Fxc "$PREFS_BEGIN" "$RELATIVE_PROFILE/user.js") == 1 ]]
 printf '%s\n' '/* package update */' >> "$ZEN_BRIDGE_SOURCE"
-outdated_status=$("$OMAFOX_BIN" status)
+outdated_status=$("$OMAFIRE_BIN" status)
 [[ $outdated_status == *"Zen profile: $RELATIVE_PROFILE (outdated)"* ]]
-"$OMAFOX_BIN" setup >/dev/null 2>&1
-cmp "$ZEN_BRIDGE_SOURCE" "$RELATIVE_PROFILE/chrome/omafox.css"
+"$OMAFIRE_BIN" setup >/dev/null 2>&1
+cmp "$ZEN_BRIDGE_SOURCE" "$RELATIVE_PROFILE/chrome/omafire.css"
 
 # Removal preflights every profile and refuses to delete an unowned collision.
-printf '%s\n' '/* existing user file */' > "$ABSOLUTE_PROFILE/chrome/omafox.css"
-conflict_status=$("$OMAFOX_BIN" status)
+printf '%s\n' '/* existing user file */' > "$ABSOLUTE_PROFILE/chrome/omafire.css"
+conflict_status=$("$OMAFIRE_BIN" status)
 [[ $conflict_status == *"Zen profile: $ABSOLUTE_PROFILE (conflict)"* ]]
-if remove_error=$("$OMAFOX_BIN" remove 2>&1); then
+if remove_error=$("$OMAFIRE_BIN" remove 2>&1); then
   echo "remove with an unmanaged Zen bridge unexpectedly succeeded" >&2
   exit 1
 fi
 [[ $remove_error == *"refusing to modify unmanaged Zen bridge"* ]]
 grep -Fqx "$CSS_BEGIN" "$RELATIVE_PROFILE/chrome/userChrome.css"
 grep -Fqx "$PREFS_BEGIN" "$RELATIVE_PROFILE/user.js"
-grep -Fqx '/* existing user file */' "$ABSOLUTE_PROFILE/chrome/omafox.css"
-install -m 600 "$ZEN_BRIDGE_SOURCE" "$ABSOLUTE_PROFILE/chrome/omafox.css"
+grep -Fqx '/* existing user file */' "$ABSOLUTE_PROFILE/chrome/omafire.css"
+install -m 600 "$ZEN_BRIDGE_SOURCE" "$ABSOLUTE_PROFILE/chrome/omafire.css"
 
-"$OMAFOX_BIN" remove >/dev/null
+"$OMAFIRE_BIN" remove >/dev/null
 for profile in "$RELATIVE_PROFILE" "$ABSOLUTE_PROFILE"; do
-  [[ ! -e $profile/chrome/omafox.css ]]
+  [[ ! -e $profile/chrome/omafire.css ]]
   if [[ -f $profile/chrome/userChrome.css ]]; then
     assert_not_contains "$CSS_BEGIN" "$profile/chrome/userChrome.css"
   fi
@@ -176,25 +176,25 @@ cmp "$TEST_ROOT/original-user.js" "$RELATIVE_PROFILE/user.js"
 [[ ! -e $ABSOLUTE_PROFILE/user.js ]]
 
 # Setup also refuses an unowned collision before changing any other profile.
-printf '%s\n' '/* existing user file */' > "$ABSOLUTE_PROFILE/chrome/omafox.css"
-if collision_error=$("$OMAFOX_BIN" setup 2>&1); then
+printf '%s\n' '/* existing user file */' > "$ABSOLUTE_PROFILE/chrome/omafire.css"
+if collision_error=$("$OMAFIRE_BIN" setup 2>&1); then
   echo "setup with an unmanaged Zen bridge unexpectedly succeeded" >&2
   exit 1
 fi
 [[ $collision_error == *"refusing to modify unmanaged Zen bridge"* ]]
-grep -Fqx '/* existing user file */' "$ABSOLUTE_PROFILE/chrome/omafox.css"
-[[ ! -e $RELATIVE_PROFILE/chrome/omafox.css ]]
+grep -Fqx '/* existing user file */' "$ABSOLUTE_PROFILE/chrome/omafire.css"
+[[ ! -e $RELATIVE_PROFILE/chrome/omafire.css ]]
 assert_not_contains "$CSS_BEGIN" "$RELATIVE_PROFILE/chrome/userChrome.css"
-rm -f "$ABSOLUTE_PROFILE/chrome/omafox.css"
+rm -f "$ABSOLUTE_PROFILE/chrome/omafire.css"
 
 # A malformed managed block aborts before any detected profile is changed.
 printf '%s\n' "$PREFS_BEGIN" > "$ABSOLUTE_PROFILE/user.js"
-if malformed_error=$("$OMAFOX_BIN" setup 2>&1); then
+if malformed_error=$("$OMAFIRE_BIN" setup 2>&1); then
   echo "setup with malformed Zen markers unexpectedly succeeded" >&2
   exit 1
 fi
-[[ $malformed_error == *"malformed Omafox markers"* ]]
-[[ ! -e $RELATIVE_PROFILE/chrome/omafox.css ]]
+[[ $malformed_error == *"malformed Omafire markers"* ]]
+[[ ! -e $RELATIVE_PROFILE/chrome/omafire.css ]]
 assert_not_contains "$CSS_BEGIN" "$RELATIVE_PROFILE/chrome/userChrome.css"
 
 echo "zen-integration.test.sh: ok"

@@ -4,11 +4,11 @@ set -euo pipefail
 
 TEST_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 TEST_ROOT=$(mktemp -d)
-OMAFOX_BIN=${OMAFOX_BIN:-$(dirname "$TEST_DIR")/build/omafox}
+OMAFIRE_BIN=${OMAFIRE_BIN:-$(dirname "$TEST_DIR")/build/omafire}
 TEST_HOME="$TEST_ROOT/home"
 MOCK_BIN="$TEST_ROOT/bin"
 THEME_DIR="$TEST_ROOT/theme"
-STATE_FILE="$TEST_HOME/.local/state/omafox/theme.json"
+STATE_FILE="$TEST_HOME/.local/state/omafire/theme.json"
 
 cleanup() {
   rm -rf "$TEST_ROOT"
@@ -23,29 +23,29 @@ printf '%s\n' 'osaka-jade' > "$THEME_DIR/theme.name"
 
 export HOME="$TEST_HOME"
 export PATH="$MOCK_BIN:$PATH"
-export OMAFOX_THEME_DIR="$THEME_DIR"
-export OMAFOX_THEME_NAME_FILE="$THEME_DIR/theme.name"
+export OMAFIRE_THEME_DIR="$THEME_DIR"
+export OMAFIRE_THEME_NAME_FILE="$THEME_DIR/theme.name"
 
-[[ $("$OMAFOX_BIN" version) == "$(cat "$TEST_DIR/../VERSION")" ]]
-help_output=$("$OMAFOX_BIN" help)
-expected_commands=$'Commands:\n  sync     Queue the current palette for connected browsers\n  payload  Print the current JSON protocol message\n  status   Show the current theme and integration state\n  setup    Enable the packaged Omafox integration for this user\n  remove   Remove this user\'s Omafox hook and theme state\n  version  Print the Omafox version\n  help     Show this help'
+[[ $("$OMAFIRE_BIN" version) == "$(cat "$TEST_DIR/../VERSION")" ]]
+help_output=$("$OMAFIRE_BIN" help)
+expected_commands=$'Commands:\n  sync     Queue the current palette for connected browsers\n  payload  Print the current JSON protocol message\n  status   Show the current theme and integration state\n  setup    Enable the packaged Omafire integration for this user\n  remove   Remove this user\'s Omafire hook and theme state\n  version  Print the Omafire version\n  help     Show this help'
 [[ $help_output == *"$expected_commands"* ]]
 
-if unknown_error=$("$OMAFOX_BIN" unknown-command 2>&1); then
+if unknown_error=$("$OMAFIRE_BIN" unknown-command 2>&1); then
   echo "unknown command unexpectedly succeeded" >&2
   exit 1
 fi
 [[ $unknown_error == *"unknown command: unknown-command"* ]]
 
 for command in sync payload status; do
-  if argument_error=$("$OMAFOX_BIN" "$command" unexpected 2>&1); then
+  if argument_error=$("$OMAFIRE_BIN" "$command" unexpected 2>&1); then
     echo "$command unexpectedly accepted an argument" >&2
     exit 1
   fi
   [[ $argument_error == *"does not accept arguments"* ]]
 done
 
-payload=$("$OMAFOX_BIN" payload)
+payload=$("$OMAFIRE_BIN" payload)
 python3 - "$payload" <<'PY'
 import json
 import sys
@@ -61,7 +61,7 @@ PY
 
 special_theme=$'quoted "theme"\\path'
 printf '%s\n' "$special_theme" > "$THEME_DIR/theme.name"
-escaped_payload=$("$OMAFOX_BIN" payload)
+escaped_payload=$("$OMAFIRE_BIN" payload)
 python3 - "$escaped_payload" "$special_theme" <<'PY'
 import json
 import sys
@@ -72,7 +72,7 @@ PY
 printf -v long_theme '%101s' ''
 long_theme=${long_theme// /x}
 printf '%s\n' "$long_theme" > "$THEME_DIR/theme.name"
-if long_theme_error=$("$OMAFOX_BIN" payload 2>&1); then
+if long_theme_error=$("$OMAFIRE_BIN" payload 2>&1); then
   echo "overlong theme name unexpectedly succeeded" >&2
   exit 1
 fi
@@ -86,14 +86,14 @@ for omitted_key in mode accent selection muted background dark_background darker
   bright_cyan bright_blue bright_magenta; do
   sed -E "/^${omitted_key}[[:space:]]*=/d" \
     "$TEST_DIR/fixtures/colors.toml" > "$THEME_DIR/colors.toml"
-  "$OMAFOX_BIN" payload >/dev/null
+  "$OMAFIRE_BIN" payload >/dev/null
 done
 
 # Some stock Quattro themes omit orange and brown. Verify the command derives
 # both values while still producing the extension's complete JSON schema.
 sed -E '/^(orange|brown)[[:space:]]*=/d' \
   "$TEST_DIR/fixtures/colors.toml" > "$THEME_DIR/colors.toml"
-fallback_payload=$("$OMAFOX_BIN" payload)
+fallback_payload=$("$OMAFIRE_BIN" payload)
 python3 - "$fallback_payload" <<'PY'
 import json
 import sys
@@ -105,7 +105,7 @@ PY
 
 sed -E 's/^accent[[:space:]]*=.*/accent = "not-a-color"/' \
   "$TEST_DIR/fixtures/colors.toml" > "$THEME_DIR/colors.toml"
-malformed_payload=$("$OMAFOX_BIN" payload)
+malformed_payload=$("$OMAFIRE_BIN" payload)
 python3 - "$malformed_payload" <<'PY'
 import json
 import sys
@@ -116,7 +116,7 @@ PY
 # A minimal custom palette should infer light mode, normalize shorthand/0x
 # colors, and generate valid values for every omitted Firefox input.
 cp "$TEST_DIR/fixtures/minimal-colors.toml" "$THEME_DIR/colors.toml"
-minimal_payload=$("$OMAFOX_BIN" payload)
+minimal_payload=$("$OMAFIRE_BIN" payload)
 python3 - "$minimal_payload" <<'PY'
 import json
 import re
@@ -135,7 +135,7 @@ for key, value in palette.items():
         assert re.fullmatch(r"#[0-9a-fA-F]{6}", value), (key, value)
 PY
 
-"$OMAFOX_BIN" sync
+"$OMAFIRE_BIN" sync
 [[ -f $STATE_FILE ]]
 [[ $(stat -c '%a' "$(dirname "$STATE_FILE")") == 700 ]]
 [[ $(stat -c '%a' "$STATE_FILE") == 600 ]]
@@ -153,17 +153,17 @@ assert message["theme"] == "osaka-jade"
 assert message["palette"]["mode"] == "light"
 PY
 
-export OMAFOX_NATIVE_HOST_PATH="$TEST_ROOT/missing/omafox-native-host"
-export OMAFOX_NATIVE_MANIFEST_PATH="$TEST_ROOT/missing/org.omarchy.omafox.json"
-export OMAFOX_HOOK_SOURCE="$TEST_ROOT/missing/omafox-hook"
-if setup_error=$("$OMAFOX_BIN" setup 2>&1); then
+export OMAFIRE_NATIVE_HOST_PATH="$TEST_ROOT/missing/omafire-native-host"
+export OMAFIRE_NATIVE_MANIFEST_PATH="$TEST_ROOT/missing/org.omarchy.omafox.json"
+export OMAFIRE_HOOK_SOURCE="$TEST_ROOT/missing/omafire-hook"
+if setup_error=$("$OMAFIRE_BIN" setup 2>&1); then
   echo "setup without packaged files unexpectedly succeeded" >&2
   exit 1
 fi
 [[ $setup_error == *"packaged native host not found"* ]]
 
-"$OMAFOX_BIN" remove >/dev/null
+"$OMAFIRE_BIN" remove >/dev/null
 [[ ! -e $STATE_FILE ]]
-[[ ! -d "$TEST_HOME/.local/state/omafox" ]]
+[[ ! -d "$TEST_HOME/.local/state/omafire" ]]
 
 echo "command.test.sh: ok"

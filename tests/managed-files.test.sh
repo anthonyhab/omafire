@@ -22,13 +22,13 @@ trap cleanup EXIT
 
 # An AddressSanitizer build when the toolchain has one, so an overrun in the
 # block splicing fails the test instead of passing silently.
-OMAFOX="$TEST_ROOT/omafox"
-if cc -std=c17 -g -fsanitize=address,undefined -o "$OMAFOX" \
-    "$PROJECT_DIR/omarchy/omafox.c" 2>/dev/null; then
+OMAFIRE="$TEST_ROOT/omafire"
+if cc -std=c17 -g -fsanitize=address,undefined -o "$OMAFIRE" \
+    "$PROJECT_DIR/omarchy/omafire.c" 2>/dev/null; then
   export ASAN_OPTIONS=detect_leaks=0:abort_on_error=1
-  RUN=(env -u LD_PRELOAD "$OMAFOX")
+  RUN=(env -u LD_PRELOAD "$OMAFIRE")
 else
-  RUN=("$OMAFOX_BIN")
+  RUN=("$OMAFIRE_BIN")
 fi
 
 mkdir -p "$MOCK_BIN" "$THEME_DIR" "$PAYLOAD" "$UNTERMINATED" "$TEST_ROOT/host"
@@ -37,22 +37,22 @@ printf '#!/bin/sh\nexit 1\n' > "$MOCK_BIN/hyprctl"
 chmod 755 "$MOCK_BIN/hyprctl"
 cp "$TEST_DIR/fixtures/colors.toml" "$THEME_DIR/colors.toml"
 printf '%s\n' 'osaka-jade' > "$THEME_DIR/theme.name"
-printf '%s\n' '/* OMAFOX FIREFOX BRIDGE MANAGED FILE */' > "$PAYLOAD/userChrome.css"
+printf '%s\n' '/* OMAFIRE FIREFOX BRIDGE MANAGED FILE */' > "$PAYLOAD/userChrome.css"
 printf '%s\n' '/* payload content */' > "$PAYLOAD/userContent.css"
-install -m 755 /dev/null "$TEST_ROOT/host/omafox-native-host"
+install -m 755 /dev/null "$TEST_ROOT/host/omafire-native-host"
 install -m 644 "$PROJECT_DIR/packaging/org.omarchy.omafox.json" "$TEST_ROOT/host/manifest.json"
-install -m 755 "$PROJECT_DIR/packaging/omafox-hook" "$TEST_ROOT/host/hook"
+install -m 755 "$PROJECT_DIR/packaging/omafire-hook" "$TEST_ROOT/host/hook"
 
 export HOME="$TEST_HOME"
 export PATH="$MOCK_BIN:$PATH"
-export OMAFOX_THEME_DIR="$THEME_DIR"
-export OMAFOX_THEME_NAME_FILE="$THEME_DIR/theme.name"
-export OMAFOX_NATIVE_HOST_PATH="$TEST_ROOT/host/omafox-native-host"
-export OMAFOX_NATIVE_MANIFEST_PATH="$TEST_ROOT/host/manifest.json"
-export OMAFOX_HOOK_SOURCE="$TEST_ROOT/host/hook"
-export OMAFOX_FIREFOX_ROOT="$FF_ROOT"
-export OMAFOX_FIREFOX_PAYLOAD_SOURCE="$PAYLOAD"
-export OMAFOX_ZEN_PROFILES_FILE="$TEST_ROOT/missing-zen-profiles.ini"
+export OMAFIRE_THEME_DIR="$THEME_DIR"
+export OMAFIRE_THEME_NAME_FILE="$THEME_DIR/theme.name"
+export OMAFIRE_NATIVE_HOST_PATH="$TEST_ROOT/host/omafire-native-host"
+export OMAFIRE_NATIVE_MANIFEST_PATH="$TEST_ROOT/host/manifest.json"
+export OMAFIRE_HOOK_SOURCE="$TEST_ROOT/host/hook"
+export OMAFIRE_FIREFOX_ROOT="$FF_ROOT"
+export OMAFIRE_FIREFOX_PAYLOAD_SOURCE="$PAYLOAD"
+export OMAFIRE_ZEN_PROFILES_FILE="$TEST_ROOT/missing-zen-profiles.ini"
 
 profiles() {
   local index=0

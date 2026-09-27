@@ -1,24 +1,24 @@
-// Omafox live palette: a theme switch reaches everything without a restart.
+// Omafire live palette: a theme switch reaches everything without a restart.
 //
-// The chrome follows the Omafox extension's lightweight theme live, but
-// the files omafox sync writes beside the theme are read once, at startup:
+// The chrome follows the Omafire extension's lightweight theme live, but
+// the files omafire sync writes beside the theme are read once, at startup:
 // the palette (tab-group swatches, the danger red), Hyprland's rounding,
 // and the content palette that Firefox's own pages (settings, add-ons) are
 // painted from. When the extension repaints the window, sync has already
 // rewritten those files (it writes them before theme.json); this rereads
 // them and lays their --omarchy-* values over the startup copies as one
 // user sheet, which reaches chrome and content documents alike.
-// Loaded into each browser window by omafox.cfg.
+// Loaded into each browser window by omafire.cfg.
 (function () {
   "use strict";
-  if (window.OmafoxLivePalette) {
+  if (window.OmafireLivePalette) {
     return;
   }
 
   const TOPIC = "lightweight-theme-styling-update";
   // Remembers the registered sheet across windows. A default-branch pref
   // is never written to prefs.js, so it lasts exactly one session.
-  const CURRENT = "omarchy.internal.live-palette-sheet";
+  const CURRENT = "omafire.internal.live-palette-sheet";
   const sss = Cc["@mozilla.org/content/style-sheet-service;1"]
     .getService(Ci.nsIStyleSheetService);
   const defaults = Services.prefs.getDefaultBranch("");
@@ -41,9 +41,9 @@
 
   async function build() {
     const [chrome, content, geometry] = await Promise.all([
-      vars("omafox-palette.css"),
-      vars("omafox-content-palette.css"),
-      vars("omarchy-radius.css"),
+      vars("omafire-palette.css"),
+      vars("omafire-content-palette.css"),
+      vars("omafire-radius.css"),
     ]);
     if (!chrome.length && !content.length && !geometry.length) {
       return null;
@@ -81,7 +81,7 @@
     observe() {
       // The extension repaints a window at a time; settle once.
       clearTimeout(timer);
-      timer = setTimeout(() => refresh().catch(e => console.error("[omafox:live-palette]", e)), 300);
+      timer = setTimeout(() => refresh().catch(e => console.error("[omafire:live-palette]", e)), 300);
     },
   };
   Services.obs.addObserver(observer, TOPIC);
@@ -90,5 +90,5 @@
     Services.obs.removeObserver(observer, TOPIC);
   }, {once: true});
 
-  window.OmafoxLivePalette = {refresh};
+  window.OmafireLivePalette = {refresh};
 })();

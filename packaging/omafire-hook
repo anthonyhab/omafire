@@ -2,10 +2,10 @@
 
 # Omarchy copies hooks into the user's configuration. Keep this wrapper stable
 # so package upgrades use the current pacman-managed command automatically.
-if [[ -x /usr/bin/omafox ]]; then
+if [[ -x /usr/bin/omafire ]]; then
   # The hook only exists where omarchy-hook installed it, so the sync-time
   # `omarchy version` probe is dead weight — skip it (inert on old binaries).
-  OMAFOX_SKIP_VERSION_CHECK=1 exec /usr/bin/omafox sync
+  OMAFIRE_SKIP_VERSION_CHECK=1 exec /usr/bin/omafire sync
 fi
 
 exit 0

@@ -40,12 +40,12 @@ jobs:
           useradd -m builder
           git config --global --add safe.directory "$PWD"
           mkdir /tmp/build
-          sed "s|^source=.*|source=(\"omafox::git+file://$PWD#commit=${{ forgejo.sha }}\")|" PKGBUILD > /tmp/build/PKGBUILD
-          cp omarchy-firefox.install /tmp/build/
+          sed "s|^source=.*|source=(\"omafire::git+file://$PWD#commit=${{ forgejo.sha }}\")|" PKGBUILD > /tmp/build/PKGBUILD
+          cp omafire.install /tmp/build/
           chown -R builder: /tmp/build
           su builder -c 'git config --global --add safe.directory "*" && cd /tmp/build && makepkg --noconfirm'
           mkdir dist
-          cp /tmp/build/*.pkg.tar.zst PKGBUILD omarchy-firefox.install dist/
+          cp /tmp/build/*.pkg.tar.zst PKGBUILD omafire.install dist/
           cd dist && sha256sum -- * > SHA256SUMS && cat SHA256SUMS
       - name: Publish Forgejo release
         env:
@@ -55,10 +55,10 @@ jobs:
           SHA: ${{ forgejo.sha }}
         run: |
           set -euo pipefail
-          notes="Omafox $TAG, built by Forgejo CI from $SHA.
+          notes="Omafire $TAG, built by Forgejo CI from $SHA.
           Firefox theme, CLI, chrome scripts and extension all from this commit.
           Pre-1.0: interfaces and packaging may still change."
-          body="$(python3 -c 'import json,sys; print(json.dumps({"tag_name": sys.argv[1], "name": "Omafox " + sys.argv[1], "body": sys.argv[2], "prerelease": True}))' "$TAG" "$notes")"
+          body="$(python3 -c 'import json,sys; print(json.dumps({"tag_name": sys.argv[1], "name": "Omafire " + sys.argv[1], "body": sys.argv[2], "prerelease": True}))' "$TAG" "$notes")"
           id="$(curl -fsS -X POST -H "Authorization: token $TOKEN" -H 'Content-Type: application/json' \
             -d "$body" "$API/releases" | python3 -c 'import json,sys; print(json.load(sys.stdin)["id"])')"
           for f in dist/*; do

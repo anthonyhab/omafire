@@ -1,12 +1,12 @@
-// Omafox keybindings: the theme's modes, one chord each.
+// Omafire keybindings: the theme's modes, one chord each.
 //
-// Each binding is a pref, omarchy.keys.<action>, like "Ctrl+Alt+Z"; an
+// Each binding is a pref, omafire.keys.<action>, like "Ctrl+Alt+Z"; an
 // empty string turns it off. A chord Firefox already uses is skipped, not
 // taken over. Changing a binding applies to windows opened afterwards.
-// Loaded into each browser window by omafox.cfg.
+// Loaded into each browser window by omafire.cfg.
 (function () {
   "use strict";
-  if (window.OmafoxKeys) {
+  if (window.OmafireKeys) {
     return;
   }
 
@@ -18,35 +18,35 @@
       name: "zen", chord: "Ctrl+Alt+H", label: "Hide the chrome",
       run() {
         // Top layout only; the sidebar layout's counterpart is compact.
-        if (prefs.getStringPref("omarchy.layout", "top") === "sidebar") {
-          prefs.setBoolPref("omarchy.compact", !bool("omarchy.compact", false));
+        if (prefs.getStringPref("omafire.layout", "top") === "sidebar") {
+          prefs.setBoolPref("omafire.compact", !bool("omafire.compact", false));
           return;
         }
-        const on = bool("omarchy.zen-mode", false) && bool("omarchy.zen-mode-active", false);
-        prefs.setBoolPref("omarchy.zen-mode", true);
-        prefs.setBoolPref("omarchy.zen-mode-active", !on);
+        const on = bool("omafire.zen-mode", false) && bool("omafire.zen-mode-active", false);
+        prefs.setBoolPref("omafire.zen-mode", true);
+        prefs.setBoolPref("omafire.zen-mode-active", !on);
       },
     },
     {
       name: "layout", chord: "Ctrl+Alt+S", label: "Switch toolbar",
       run() {
-        const sidebar = prefs.getStringPref("omarchy.layout", "top") === "sidebar";
+        const sidebar = prefs.getStringPref("omafire.layout", "top") === "sidebar";
         if (!sidebar) {
           prefs.setBoolPref("sidebar.verticalTabs", true);
         }
-        prefs.setStringPref("omarchy.layout", sidebar ? "top" : "sidebar");
+        prefs.setStringPref("omafire.layout", sidebar ? "top" : "sidebar");
       },
     },
     {
       name: "glass", chord: "Ctrl+Alt+G", label: "Glass",
       run() {
-        prefs.setBoolPref("omarchy.translucency", !bool("omarchy.translucency", false));
+        prefs.setBoolPref("omafire.translucency", !bool("omafire.translucency", false));
       },
     },
     {
       name: "settings", chord: "Ctrl+Alt+O", label: "This panel",
       run() {
-        window.OmafoxSettings?.open();
+        window.OmafireSettings?.open();
       },
     },
   ];
@@ -85,7 +85,7 @@
   // Firefox's own <key> for this chord, if any.
   function taken(spec) {
     for (const el of document.querySelectorAll("key[key]")) {
-      if (el.closest("#omafox-keyset")) {
+      if (el.closest("#omafire-keyset")) {
         continue;
       }
       if (el.getAttribute("key").toUpperCase() === spec.key
@@ -98,24 +98,24 @@
 
   const active = [];
   const keyset = document.createXULElement("keyset");
-  keyset.id = "omafox-keyset";
+  keyset.id = "omafire-keyset";
   for (const action of ACTIONS) {
-    const chord = prefs.getStringPref(`omarchy.keys.${action.name}`, action.chord);
+    const chord = prefs.getStringPref(`omafire.keys.${action.name}`, action.chord);
     if (!chord) {
       continue;
     }
     const spec = parse(chord);
     if (!spec) {
-      console.warn(`[omafox:keys] omarchy.keys.${action.name}: cannot read "${chord}"`);
+      console.warn(`[omafire:keys] omafire.keys.${action.name}: cannot read "${chord}"`);
       continue;
     }
     const owner = taken(spec);
     if (owner) {
-      console.warn(`[omafox:keys] ${chord} is taken by ${owner}; ${action.label} left unbound`);
+      console.warn(`[omafire:keys] ${chord} is taken by ${owner}; ${action.label} left unbound`);
       continue;
     }
     const key = document.createXULElement("key");
-    key.id = `omafox-key-${action.name}`;
+    key.id = `omafire-key-${action.name}`;
     key.setAttribute("modifiers", spec.modifiers);
     key.setAttribute("key", spec.key);
     key.setAttribute("reserved", "true");
@@ -123,7 +123,7 @@
       try {
         action.run();
       } catch (error) {
-        console.error(`[omafox:keys] ${action.name}`, error);
+        console.error(`[omafire:keys] ${action.name}`, error);
       }
     });
     keyset.append(key);
@@ -131,7 +131,7 @@
   }
   document.documentElement.append(keyset);
 
-  window.OmafoxKeys = {
+  window.OmafireKeys = {
     describe: () => active.slice(),
     ACTIONS,
   };

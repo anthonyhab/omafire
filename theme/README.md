@@ -1,4 +1,4 @@
-# Omarchy Chrome
+# Omafire theme
 
 A Firefox userChrome theme for [Omarchy](https://omarchy.org/): flat, square
 chrome in the shell's monospace, one quiet visual language shared by the
@@ -7,7 +7,7 @@ toolbar and a column of vertical tabs.
 Optional modes add Zen-style touches: a hidden toolbar with a centred
 launcher, glass chrome, a floating content card, or a single-sidebar
 layout. Colors follow the current Omarchy theme live through
-[Omafox](https://github.com/cover/omafox).
+[Omafire](https://github.com/cover/omafox).
 
 Requires **Firefox 156 or newer with Nova** (`browser.nova.enabled`, the
 default from Firefox 157). Tested on Firefox 156; later versions install but
@@ -16,20 +16,20 @@ supported.
 
 ## Install
 
-The usual path is Omafox: `omafox setup` installs this theme into every
+The usual path is Omafire: `omafire setup` installs this theme into every
 Firefox profile and keeps its palette and window rounding in sync with
-Omarchy. See the Omafox README.
+Omarchy. See the Omafire README.
 
 To run from a checkout instead (for development), point the profile's
-`chrome/` directory at this `theme/` directory of an omafox checkout
-(a symlink) and run `omafox setup` once; it recognises the checkout and
+`chrome/` directory at this `theme/` directory of an omafire checkout
+(a symlink) and run `omafire setup` once; it recognises the checkout and
 writes only the generated files beside it.
 
 Then set these in `about:config`:
 
 | Preference | Value | |
 |---|---|---|
-| `toolkit.legacyUserProfileCustomizations.stylesheets` | `true` | load userChrome (omafox sets it) |
+| `toolkit.legacyUserProfileCustomizations.stylesheets` | `true` | load userChrome (omafire sets it) |
 | `browser.nova.enabled` | `true` | Nova design (Firefox 156 only) |
 | `sidebar.revamp` | `true` | the sidebar the layout is built on |
 | `sidebar.verticalTabs` | `true` | vertical tabs |
@@ -38,15 +38,15 @@ Optional, all applied live without a restart:
 
 | Preference | Value | Effect |
 |---|---|---|
-| `omarchy.layout` | `"sidebar"` | Zen's single sidebar: toolbar and urlbar at the top of the tab column, floating page, centred launcher. Unset (or `"top"`) is the default top toolbar. |
-| `omarchy.zen-mode` + `omarchy.zen-mode-active` | `true` + `true` | Top layout: hide the toolbar. Ctrl+L opens a centred launcher with the navigation row docked above it. |
-| `omarchy.launcher` | `"center"` | Launcher shape (sidebar layout and zen mode). Unset (or `"drop"`) is a quake console: with horizontal tabs it slides full width down from the window's top edge, with vertical tabs it slides out of the tab column over the page, leaving the tabs in view. `"center"` floats it as a card. |
-| `omarchy.compact` | `true` | Sidebar layout with the sidebar expanded: hide the column until the pointer reaches the edge. The collapsed icon rail stays visible. |
-| `omarchy.chrome-gap` | `true` | Float the page as a card with a gap, Hyprland rounding and a hairline shadow. |
-| `omarchy.translucency` | `true` | Glass chrome (frosted with a Hyprland blur rule for Firefox). |
-| `omarchy.transparency` | `"0.50"`–`"1.00"` | Glass opacity in 0.01 steps (default 0.85). |
-| `omarchy.tab-numbers` | `true` | Show the Alt+1…8 digit on the first eight tabs: on pinned tiles, rail tiles and split pairs, a legend notched into the tile's left edge, btop-style; beside an expanded row, in the gutter to its left. Tabs hidden in collapsed groups are skipped, as Firefox skips them. |
-| `omarchy.extension-glyphs` | `false` | Keep extensions' own icons. By default known extensions get monochrome glyphs that tint with the toolbar (needs `svg.context-properties.content.enabled`, which omafox sets). |
+| `omafire.layout` | `"sidebar"` | Zen's single sidebar: toolbar and urlbar at the top of the tab column, floating page, centred launcher. Unset (or `"top"`) is the default top toolbar. |
+| `omafire.zen-mode` + `omafire.zen-mode-active` | `true` + `true` | Top layout: hide the toolbar. Ctrl+L opens a centred launcher with the navigation row docked above it. |
+| `omafire.launcher` | `"center"` | Launcher shape (sidebar layout and zen mode). Unset (or `"drop"`) is a quake console: with horizontal tabs it slides full width down from the window's top edge, with vertical tabs it slides out of the tab column over the page, leaving the tabs in view. `"center"` floats it as a card. |
+| `omafire.compact` | `true` | Sidebar layout with the sidebar expanded: hide the column until the pointer reaches the edge. The collapsed icon rail stays visible. |
+| `omafire.chrome-gap` | `true` | Float the page as a card with a gap, Hyprland rounding and a hairline shadow. |
+| `omafire.translucency` | `true` | Glass chrome (frosted with a Hyprland blur rule for Firefox). |
+| `omafire.transparency` | `"0.50"`–`"1.00"` | Glass opacity in 0.01 steps (default 0.85). |
+| `omafire.tab-numbers` | `true` | Show the Alt+1…8 digit on the first eight tabs: on pinned tiles, rail tiles and split pairs, a legend notched into the tile's left edge, btop-style; beside an expanded row, in the gutter to its left. Tabs hidden in collapsed groups are skipped, as Firefox skips them. |
+| `omafire.extension-glyphs` | `false` | Keep extensions' own icons. By default known extensions get monochrome glyphs that tint with the toolbar (needs `svg.context-properties.content.enabled`, which omafire sets). |
 
 Personal tweaks go in `customChrome.css` / `customContent.css` beside the
 entrypoints. They load last and are never shipped.
@@ -67,12 +67,12 @@ src/popups.css          menus, panels, notification bars, findbar
 src/icons.css           extension id → glyph (src/icons/extensions/*.svg)
 src/launcher.css        urlbar launcher: quake drop or centred card (sidebar layout, zen mode)
 src/motion.css          sidebar expand/collapse and resize motion
-src/layouts/sidebar.css omarchy.layout = "sidebar"
-src/modes/zen.css       omarchy.zen-mode
-src/modes/compact.css   omarchy.compact
-src/modes/gap.css       omarchy.chrome-gap
-src/modes/translucency.css  omarchy.translucency
-src/modes/tab-numbers.css   omarchy.tab-numbers
+src/layouts/sidebar.css omafire.layout = "sidebar"
+src/modes/zen.css       omafire.zen-mode
+src/modes/compact.css   omafire.compact
+src/modes/gap.css       omafire.chrome-gap
+src/modes/translucency.css  omafire.translucency
+src/modes/tab-numbers.css   omafire.tab-numbers
 src/tokens-content.css  the same tokens for about: pages, from the content palette
 src/content.css         new tab and about: pages
 ```
@@ -83,9 +83,9 @@ layout or mode is one file gated on its pref, so adding one never changes
 the others. Modes change tokens where they can (`gap.css` is three token
 overrides) rather than restyling elements.
 
-Generated by Omafox and gitignored: `omafox-palette.css` (the `--omarchy-*`
+Generated by Omafire and gitignored: `omafire-palette.css` (the `--omarchy-*`
 palette plus a cold-start stand-in for the lightweight theme),
-`omafox-content-palette.css`, and `omarchy-radius.css` (Hyprland's
+`omafire-content-palette.css`, and `omafire-radius.css` (Hyprland's
 rounding, border width, and active/inactive border colors).
 
 ## Rules
@@ -98,7 +98,7 @@ These keep a small theme small. `node scripts/lint.mjs` checks the first two.
 2. **Only the token files pick colors** (`src/tokens.css`, and
    `src/tokens-content.css` for about: pages). Components read `--oc-*` tokens.
    Tokens read Firefox's lightweight-theme variables first (set live by the
-   Omafox extension) and fall back to the generated `--omarchy-*` palette,
+   Omafire extension) and fall back to the generated `--omarchy-*` palette,
    which only reloads on restart. That is why a theme switch repaints without
    a restart.
 3. **Steer Firefox through its own variables where it has them**
@@ -107,7 +107,7 @@ These keep a small theme small. `node scripts/lint.mjs` checks the first two.
    working across releases; selectors against internals break.
 4. **Gate layouts and modes on prefs.** Each lives under its own
    `@media -moz-pref(...)` (string prefs compare by value:
-   `-moz-pref("omarchy.layout", "sidebar")`). Popups, kiosk windows and
+   `-moz-pref("omafire.layout", "sidebar")`). Popups, kiosk windows and
    customize mode keep the stock layout.
 
 Notes on the non-obvious parts:

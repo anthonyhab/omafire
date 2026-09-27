@@ -1,4 +1,4 @@
-/* Omarchy Chrome — tab numbers (omarchy.tab-numbers).
+/* Omafire — tab numbers (omafire.tab-numbers).
  *
  * Each of the first eight tabs shows the digit that Alt+1…8 selects.
  * Firefox counts gBrowser.visibleTabs: pinned tabs first, then the strip,
@@ -46,7 +46,7 @@
   symbols: "\00B7";
 }
 
-@media -moz-pref("omarchy.tab-numbers") {
+@media -moz-pref("omafire.tab-numbers") {
   #tabbrowser-tabs {
     counter-reset: oc-tab !important;
   }

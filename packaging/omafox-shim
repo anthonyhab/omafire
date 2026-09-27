@@ -1,0 +1,4 @@
+#!/bin/sh
+# omafox is now omafire. This keeps omafox's theme hook and old habits
+# working until `omafire setup` replaces the hook; it goes in a later release.
+exec /usr/bin/omafire "$@"

@@ -1,23 +1,25 @@
 # Maintainer: habibe
-# Fork of https://github.com/cover/omafox with the C CLI port and the
-# Firefox userChrome bridge (palette-accurate first paint).
+# Omafire: the Firefox theme and toolkit for Omarchy. Grew out of
+# https://github.com/cover/omafox (MIT), whose name it carried until 0.3.0.
 
-pkgname=omarchy-firefox
-pkgver=0.2.0
+pkgname=omafire
+pkgver=0.3.0
 pkgrel=1
-pkgdesc="Keeps Firefox and Zen Browser in sync with the current Omarchy theme"
+pkgdesc="The Firefox theme and toolkit for Omarchy: a themed, live-synced Firefox with settings, keys and profile-safe setup"
 arch=('x86_64' 'aarch64')
-url="https://github.com/cover/omafox"
+url="https://git.hab.rip/habibe/omafire"
 license=('MIT')
 depends=('glibc')
 makedepends=('git')
 # tests/run.sh: syntax checks, the node suites, the XPI provenance check.
 checkdepends=('nodejs' 'python' 'shellcheck' 'unzip')
-# The command and its files keep the omafox name.
-provides=('omafox')
-conflicts=('omafox')
+# Replaces its earlier names; /usr/bin/omafox stays as a forwarding shim
+# so omafox's theme hook keeps working until `omafire setup` replaces it.
+provides=('omafox' 'omarchy-firefox')
+conflicts=('omafox' 'omarchy-firefox')
+replaces=('omafox' 'omarchy-firefox')
 # Guarded removal of an older unpackaged loader; setup instructions.
-install=omarchy-firefox.install
+install=omafire.install
 # No separate -debug package in releases.
 options=('!debug')
 optdepends=(
@@ -25,28 +27,28 @@ optdepends=(
   'firefox: supported browser'
   'zen-browser: supported browser'
 )
-# Firefox gets a chrome script loader (autoconfig: omafox.cfg) with the
+# Firefox gets a chrome script loader (autoconfig: omafire.cfg) with the
 # settings panel, keybindings and live palette, and the Mozilla-signed
-# Omafox WebExtension beside it, which the loader installs into each
-# profile `omafox setup` marks. setup wires everything else.
+# Omafire WebExtension beside it, which the loader installs into each
+# profile `omafire setup` marks. setup wires everything else.
 # Releases build the Forgejo tag v$pkgver, which Forgejo CI gated and
 # published (.forgejo/workflows/release.yml). pkgver must equal VERSION
 # (tests/run.sh checks). For a development build of the working tree, use
 # `make` and `make install`, not this file.
-source=("omafox::git+ssh://git@git.hab.rip/habibe/omafox.git#tag=v${pkgver}")
+source=("omafire::git+ssh://git@git.hab.rip/habibe/omafire.git#tag=v${pkgver}")
 sha256sums=('SKIP')
 
 build() {
-  cd omafox
+  cd omafire
   make
 }
 
 check() {
-  cd omafox
+  cd omafire
   ./tests/run.sh
 }
 
 package() {
-  cd omafox
+  cd omafire
   make DESTDIR="$pkgdir" PREFIX=/usr install
 }

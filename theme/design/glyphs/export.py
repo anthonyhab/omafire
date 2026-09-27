@@ -50,7 +50,7 @@ def check(name, final):
 if __name__ == "__main__":
     for name in G:
         d = outline(name)
-        out = (f"<!-- Omarchy Chrome extension glyph. {TITLE[name]}. -->\n"
+        out = (f"<!-- Omafire extension glyph. {TITLE[name]}. -->\n"
                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" '
                'fill="context-fill" fill-opacity="context-fill-opacity">\n'
                f'  <path d="{d}"/>\n</svg>\n')

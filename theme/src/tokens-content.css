@@ -1,4 +1,4 @@
-/* Omarchy Chrome — design tokens for Firefox-owned pages (userContent).
+/* Omafire — design tokens for Firefox-owned pages (userContent).
  *
  * The same --oc-* vocabulary as tokens.css, for content documents
  * (about:preferences, about:addons, …). tokens.css can't be imported
@@ -16,7 +16,7 @@
   :root {
     /* ---- geometry and type ------------------------------------------ */
 
-    --oc-radius: var(--omarchy-radius-container, 10px);
+    --oc-radius: var(--omafire-radius-container, 10px);
     --oc-radius-small: clamp(0px, calc(var(--oc-radius) - 3px), 8px);
     --oc-font: monospace;
     --oc-label-size: 13px;

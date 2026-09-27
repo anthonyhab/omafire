@@ -1,4 +1,4 @@
-/* Omarchy Chrome — vertical tabs.
+/* Omafire — vertical tabs.
  *
  * Zen-style rows: flat until hovered, the selected tab a flat wash lit
  * from its leading edge, close buttons only where the pointer is. Pinned tabs
@@ -16,7 +16,7 @@
   --tab-attention-dot-color: var(--oc-accent) !important;
 
   /* The loading throbber and the active tab's glow (tokens.css) follow
-   * the accent. Under a lightweight theme Omafox owns tab_loading: it is
+   * the accent. Under a lightweight theme Omafire owns tab_loading: it is
    * the accent, or per window the page's colour with site-coloured tabs,
    * so leave it be there. */
   &:not([lwtheme]) {
@@ -174,11 +174,11 @@
     font-weight: normal !important;
   }
 
-  /* The Omafox new tab's favicon is black squares: Firefox hands tabs a
+  /* The Omafire new tab's favicon is black squares: Firefox hands tabs a
    * rasterised copy, so its context-fill never meets the row's colour and
    * it vanishes on dark chrome. Swap in the same glyph from the theme,
    * which tints with the row (needs svg.context-properties.content.enabled,
-   * which omafox sets). Known by the base64 fingerprint frame.css uses; no
+   * which omafire sets). Known by the base64 fingerprint frame.css uses; no
    * site favicon is touched. */
   & .tabbrowser-tab[image*="PHN2ZyBpZD0ib21hZm94LW5ld3RhYiIg"] .tab-icon-image {
     content: url("icons/tabs/omafox-newtab.svg") !important;

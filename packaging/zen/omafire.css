@@ -1,9 +1,9 @@
-/* OMAFOX ZEN BRIDGE MANAGED FILE */
+/* OMAFIRE ZEN BRIDGE MANAGED FILE */
 /*
- * Omafox bridge for Zen Browser.
+ * Omafire bridge for Zen Browser.
  *
  * Zen deliberately replaces Firefox lightweight themes with its own workspace
- * theme. Omafox still publishes a standard Firefox theme, so this stylesheet
+ * theme. Omafire still publishes a standard Firefox theme, so this stylesheet
  * maps the live lightweight-theme variables to Zen's browser chrome. Scoping
  * everything to [lwtheme] makes browser.theme.reset() restore Zen's own theme.
  */

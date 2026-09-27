@@ -10,11 +10,11 @@ TEST_HOME="$TEST_ROOT/home"
 MOCK_BIN="$TEST_ROOT/bin"
 THEME_DIR="$TEST_ROOT/theme"
 BUILD_DIR="$TEST_ROOT/build"
-SYSTEM_COMMAND="$PACKAGE_ROOT/usr/bin/omafox"
-SYSTEM_HOST="$PACKAGE_ROOT/usr/lib/omafox/omafox-native-host"
+SYSTEM_COMMAND="$PACKAGE_ROOT/usr/bin/omafire"
+SYSTEM_HOST="$PACKAGE_ROOT/usr/lib/omafire/omafire-native-host"
 SYSTEM_MANIFEST="$PACKAGE_ROOT/usr/lib/mozilla/native-messaging-hosts/org.omarchy.omafox.json"
-SYSTEM_HOOK_SOURCE="$PACKAGE_ROOT/usr/share/omafox/hooks/omafox"
-SYSTEM_ZEN_BRIDGE="$PACKAGE_ROOT/usr/share/omafox/zen/omafox.css"
+SYSTEM_HOOK_SOURCE="$PACKAGE_ROOT/usr/share/omafire/hooks/omafire"
+SYSTEM_ZEN_BRIDGE="$PACKAGE_ROOT/usr/share/omafire/zen/omafire.css"
 
 cleanup() {
   rm -rf "$TEST_ROOT"
@@ -38,24 +38,26 @@ make -C "$PROJECT_DIR" \
 [[ -f $SYSTEM_MANIFEST ]]
 [[ -x $SYSTEM_HOOK_SOURCE ]]
 [[ -f $SYSTEM_ZEN_BRIDGE ]]
-[[ -f "$PACKAGE_ROOT/usr/share/omafox/firefox/chrome/userChrome.css" ]]
-[[ -f "$PACKAGE_ROOT/usr/share/doc/omafox/README.md" ]]
-[[ -f "$PACKAGE_ROOT/usr/share/licenses/omafox/LICENSE" ]]
+[[ -f "$PACKAGE_ROOT/usr/share/omafire/firefox/chrome/userChrome.css" ]]
+[[ -f "$PACKAGE_ROOT/usr/share/doc/omafire/README.md" ]]
+[[ -f "$PACKAGE_ROOT/usr/share/licenses/omafire/LICENSE" ]]
 [[ $($SYSTEM_COMMAND version) == "$(cat "$PROJECT_DIR/VERSION")" ]]
+# omafox's name forwards to omafire (the old theme hook calls it).
+grep -Fqx 'exec /usr/bin/omafire "$@"' "$PACKAGE_ROOT/usr/bin/omafox"
 
-# The chrome script loader: autoconfig names omafox.cfg, whose first line
+# The chrome script loader: autoconfig names omafire.cfg, whose first line
 # Firefox skips, and every script it lists ships beside the signed XPI.
 FIREFOX_DIR="$PACKAGE_ROOT/usr/lib/firefox"
-grep -Fqx 'pref("general.config.filename", "omafox.cfg");' \
-  "$FIREFOX_DIR/defaults/pref/omafox-prefs.js"
-[[ $(head -c2 "$FIREFOX_DIR/omafox.cfg") == '//' ]]
-read -ra scripts < <(sed -nE 's/^ *const SCRIPTS = \[(.*)\];/\1/p' "$FIREFOX_DIR/omafox.cfg" | tr -d '",')
+grep -Fqx 'pref("general.config.filename", "omafire.cfg");' \
+  "$FIREFOX_DIR/defaults/pref/omafire-prefs.js"
+[[ $(head -c2 "$FIREFOX_DIR/omafire.cfg") == '//' ]]
+read -ra scripts < <(sed -nE 's/^ *const SCRIPTS = \[(.*)\];/\1/p' "$FIREFOX_DIR/omafire.cfg" | tr -d '",')
 [[ ${#scripts[@]} -gt 0 ]]
 for name in "${scripts[@]}"; do
-  [[ -f "$FIREFOX_DIR/omafox/$name.uc.js" ]]
+  [[ -f "$FIREFOX_DIR/omafire/$name.uc.js" ]]
 done
-[[ $(find "$FIREFOX_DIR/omafox" -name '*.uc.js' | wc -l) -eq ${#scripts[@]} ]]
-cmp "$PROJECT_DIR/packaging/extension/omafox.xpi" "$FIREFOX_DIR/omafox/omafox.xpi"
+[[ $(find "$FIREFOX_DIR/omafire" -name '*.uc.js' | wc -l) -eq ${#scripts[@]} ]]
+cmp "$PROJECT_DIR/packaging/extension/omafire.xpi" "$FIREFOX_DIR/omafire/omafire.xpi"
 
 python3 - "$SYSTEM_MANIFEST" <<'PY'
 import json
@@ -65,19 +67,19 @@ with open(sys.argv[1], encoding="utf-8") as source:
     manifest = json.load(source)
 
 assert manifest["name"] == "org.omarchy.omafox"
-assert manifest["path"] == "/usr/lib/omafox/omafox-native-host"
+assert manifest["path"] == "/usr/lib/omafire/omafire-native-host"
 assert manifest["type"] == "stdio"
 assert manifest["allowed_extensions"] == ["omarchy-ff-sync@bb.hab.rip", "@omafox"]
 PY
 
 export HOME="$TEST_HOME"
 export PATH="$MOCK_BIN:$PATH"
-export OMAFOX_NATIVE_HOST_PATH="$SYSTEM_HOST"
-export OMAFOX_NATIVE_MANIFEST_PATH="$SYSTEM_MANIFEST"
-export OMAFOX_HOOK_SOURCE="$SYSTEM_HOOK_SOURCE"
-export OMAFOX_ZEN_BRIDGE_SOURCE="$SYSTEM_ZEN_BRIDGE"
-export OMAFOX_THEME_DIR="$THEME_DIR"
-export OMAFOX_THEME_NAME_FILE="$THEME_DIR/theme.name"
+export OMAFIRE_NATIVE_HOST_PATH="$SYSTEM_HOST"
+export OMAFIRE_NATIVE_MANIFEST_PATH="$SYSTEM_MANIFEST"
+export OMAFIRE_HOOK_SOURCE="$SYSTEM_HOOK_SOURCE"
+export OMAFIRE_ZEN_BRIDGE_SOURCE="$SYSTEM_ZEN_BRIDGE"
+export OMAFIRE_THEME_DIR="$THEME_DIR"
+export OMAFIRE_THEME_NAME_FILE="$THEME_DIR/theme.name"
 
 ZEN_PROFILE="$TEST_HOME/.config/zen/Profiles/default-release"
 mkdir -p "$ZEN_PROFILE"
@@ -88,13 +90,13 @@ printf '%s\n' \
   'Path=Profiles/default-release' > "$TEST_HOME/.config/zen/profiles.ini"
 
 "$SYSTEM_COMMAND" setup >/dev/null
-USER_HOOK="$TEST_HOME/.config/omarchy/hooks/theme-set.d/omafox"
-STATE_FILE="$TEST_HOME/.local/state/omafox/theme.json"
+USER_HOOK="$TEST_HOME/.config/omarchy/hooks/theme-set.d/omafire"
+STATE_FILE="$TEST_HOME/.local/state/omafire/theme.json"
 [[ -x $USER_HOOK ]]
 cmp "$SYSTEM_HOOK_SOURCE" "$USER_HOOK"
 [[ -f $STATE_FILE ]]
-cmp "$SYSTEM_ZEN_BRIDGE" "$ZEN_PROFILE/chrome/omafox.css"
-grep -Fqx '@import url("omafox.css");' "$ZEN_PROFILE/chrome/userChrome.css"
+cmp "$SYSTEM_ZEN_BRIDGE" "$ZEN_PROFILE/chrome/omafire.css"
+grep -Fqx '@import url("omafire.css");' "$ZEN_PROFILE/chrome/userChrome.css"
 grep -Fqx 'user_pref("zen.theme.disable-lightweight", false);' "$ZEN_PROFILE/user.js"
 python3 - "$STATE_FILE" <<'PY'
 import json
@@ -116,10 +118,10 @@ status_output=$("$SYSTEM_COMMAND" status)
 "$SYSTEM_COMMAND" remove >/dev/null
 [[ ! -e $USER_HOOK ]]
 [[ ! -e $STATE_FILE ]]
-[[ ! -e $ZEN_PROFILE/chrome/omafox.css ]]
+[[ ! -e $ZEN_PROFILE/chrome/omafire.css ]]
 [[ ! -e $ZEN_PROFILE/chrome/userChrome.css ]]
 [[ ! -e $ZEN_PROFILE/user.js ]]
-[[ ! -d "$TEST_HOME/.local/state/omafox" ]]
+[[ ! -d "$TEST_HOME/.local/state/omafire" ]]
 [[ -x $SYSTEM_COMMAND ]]
 [[ -x $SYSTEM_HOST ]]
 [[ -f $SYSTEM_MANIFEST ]]

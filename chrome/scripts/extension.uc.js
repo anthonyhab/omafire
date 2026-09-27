@@ -1,21 +1,21 @@
-// Omafox extension: install the Omafox WebExtension the package ships.
+// Omafire extension: install the Omafire WebExtension the package ships.
 //
 // The package carries the Mozilla-signed XPI beside this script. It is
 // installed when missing and updated when the package brings a newer
 // version. A user who removes it keeps it removed: each bundled version is
-// offered once (omarchy.extension.offered), and a disabled one is left
-// disabled. Loaded into each browser window by omafox.cfg; the first
+// offered once (omafire.extension.offered), and a disabled one is left
+// disabled. Loaded into each browser window by omafire.cfg; the first
 // window of a session does the work.
 (function () {
   "use strict";
-  if (window.OmafoxExtension) {
+  if (window.OmafireExtension) {
     return;
   }
-  window.OmafoxExtension = {};
+  window.OmafireExtension = {};
 
   const ID = "omarchy-ff-sync@bb.hab.rip";
-  const OFFERED = "omarchy.extension.offered";
-  const SESSION = "omarchy.internal.extension-checked";
+  const OFFERED = "omafire.extension.offered";
+  const SESSION = "omafire.internal.extension-checked";
   const defaults = Services.prefs.getDefaultBranch("");
   if (defaults.getBoolPref(SESSION, false)) {
     return;
@@ -25,13 +25,13 @@
   const {AddonManager} = ChromeUtils.importESModule(
     "resource://gre/modules/AddonManager.sys.mjs");
 
-  // The XPI sits in the loader's directory, wherever resource://omafox/
+  // The XPI sits in the loader's directory, wherever resource://omafire/
   // points (the package's, or a working tree under fxlab --scripts).
   function bundledXpi() {
     try {
       const res = Services.io.getProtocolHandler("resource")
         .QueryInterface(Ci.nsIResProtocolHandler);
-      const url = res.resolveURI(Services.io.newURI("resource://omafox/omafox.xpi"));
+      const url = res.resolveURI(Services.io.newURI("resource://omafire/omafire.xpi"));
       const f = Services.io.newURI(url).QueryInterface(Ci.nsIFileURL).file;
       return f.exists() ? f : null;
     } catch {
@@ -76,8 +76,8 @@
     }
     const addon = await install.install();
     Services.prefs.setStringPref(OFFERED, bundled);
-    console.info(`[omafox:extension] ${installed ? "updated to" : "installed"} ${addon.id} ${addon.version}`);
+    console.info(`[omafire:extension] ${installed ? "updated to" : "installed"} ${addon.id} ${addon.version}`);
   }
 
-  ensure().catch(e => console.error("[omafox:extension]", e));
+  ensure().catch(e => console.error("[omafire:extension]", e));
 })();

@@ -1,4 +1,4 @@
-/* Omarchy Chrome — extension glyphs.
+/* Omafire — extension glyphs.
  *
  * Replaces extension icons with monochrome glyphs from icons/extensions/
  * that tint like Firefox's own (context-fill; needs
@@ -10,9 +10,9 @@
  * Browser actions are matched on the action button, which paints the icon
  * in the toolbar, the extensions panel and the overflow menu alike.
  * Extensions without an action appear in the panel as a plain image.
- * On unless omarchy.extension-glyphs is false. */
+ * On unless omafire.extension-glyphs is false. */
 
-@media not -moz-pref("omarchy.extension-glyphs", false) {
+@media not -moz-pref("omafire.extension-glyphs", false) {
   /* ---- browser actions ------------------------------------------------ */
 
   .webextension-browser-action {

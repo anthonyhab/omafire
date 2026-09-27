@@ -8,9 +8,9 @@ const crypto = require("node:crypto");
 const { execFileSync, spawn } = require("node:child_process");
 
 const projectDir = path.resolve(__dirname, "..");
-const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "omafox-native-host-"));
-const sourcePath = path.join(projectDir, "omarchy", "omafox-native-host.c");
-const hostPath = path.join(testDir, "omafox-native-host");
+const testDir = fs.mkdtempSync(path.join(os.tmpdir(), "omafire-native-host-"));
+const sourcePath = path.join(projectDir, "omarchy", "omafire-native-host.c");
+const hostPath = path.join(testDir, "omafire-native-host");
 const stateFile = path.join(testDir, "theme.json");
 const firstMessage = {
   protocol: "omafox",
@@ -75,8 +75,8 @@ function waitFor(predicate, message) {
   const child = spawn(hostPath, [], {
     env: {
       ...process.env,
-      OMAFOX_STATE_FILE: stateFile,
-      OMAFOX_WALLPAPER_FILE: wallpaperLink
+      OMAFIRE_STATE_FILE: stateFile,
+      OMAFIRE_WALLPAPER_FILE: wallpaperLink
     },
     stdio: ["pipe", "pipe", "pipe"]
   });

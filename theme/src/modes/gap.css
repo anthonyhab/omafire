@@ -1,10 +1,10 @@
-/* Omarchy Chrome — floating content card (omarchy.chrome-gap).
+/* Omafire — floating content card (omafire.chrome-gap).
  *
  * Off: the page sits flush against the chrome. On: it floats with a gap,
  * Hyprland's rounding, and a hairline shadow. The single-sidebar layout
  * always floats. */
 
-@media -moz-pref("omarchy.chrome-gap") {
+@media -moz-pref("omafire.chrome-gap") {
   :root {
     --oc-frame-gap: var(--oc-gap);
     --oc-card-radius: var(--oc-radius);

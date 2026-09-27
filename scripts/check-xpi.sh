@@ -7,7 +7,7 @@
 set -euo pipefail
 
 PROJECT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-XPI=${1:-$PROJECT_DIR/packaging/extension/omafox.xpi}
+XPI=${1:-$PROJECT_DIR/packaging/extension/omafire.xpi}
 SOURCE="$PROJECT_DIR/extension"
 WORK=$(mktemp -d)
 trap 'rm -rf "$WORK"' EXIT
@@ -45,6 +45,6 @@ while read -r file; do
   status=1
 done < <(listing "$SOURCE")
 if (( status )); then
-  echo "Sign the current source (extension/sign.sh) and copy it to packaging/extension/omafox.xpi." >&2
+  echo "Sign the current source (extension/sign.sh) and copy it to packaging/extension/omafire.xpi." >&2
 fi
 exit "$status"

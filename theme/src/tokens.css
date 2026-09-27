@@ -1,12 +1,12 @@
-/* Omarchy Chrome — design tokens.
+/* Omafire — design tokens.
  *
  * The only file that chooses colors and geometry. Everything else reads the
  * --oc-* tokens below.
  *
- * Colors come from Firefox's own theme variables, which the Omafox
+ * Colors come from Firefox's own theme variables, which the Omafire
  * extension's lightweight theme sets live on every Omarchy theme change.
  * Reading them (instead of the generated --omarchy-* palette) is what keeps a
- * live theme switch repaint-only: omafox-palette.css is loaded once at
+ * live theme switch repaint-only: omafire-palette.css is loaded once at
  * startup and only matters until the extension's theme lands.
  *
  * Tokens are declared once on :root and inherit as computed values, so the
@@ -25,12 +25,12 @@
   --oc-inset: calc(var(--oc-u) * 2);
   --oc-gap: calc(var(--oc-u) * 2);
   /* Space around the content area. 0 = page flush against the chrome;
-   * omarchy.chrome-gap turns it into a floating card (modes/gap.css). */
+   * omafire.chrome-gap turns it into a floating card (modes/gap.css). */
   --oc-frame-gap: 0px;
   --oc-card-radius: 0px;
   --oc-card-shadow: none;
-  /* Corners follow Hyprland's decoration:rounding (omarchy-radius.css). */
-  --oc-radius: var(--omarchy-radius-container, 10px);
+  /* Corners follow Hyprland's decoration:rounding (omafire-radius.css). */
+  --oc-radius: var(--omafire-radius-container, 10px);
   --oc-radius-small: clamp(0px, calc(var(--oc-radius) - 3px), 8px);
   --oc-toolbar: 40px;       /* top toolbar row */
   --oc-row: 32px;           /* vertical tab row */
@@ -95,7 +95,7 @@
    * palette it is the accent mark, held to 3:1 (below). */
   --oc-focus: var(--oc-accent-mark);
   /* The active tab's glow: the palette accent, or the page's own colour
-   * when Omafox's site-coloured tabs are on (it sets the lightweight
+   * when Omafire's site-coloured tabs are on (it sets the lightweight
    * theme's tab_loading per window). Outside a lightweight theme Firefox's
    * own --tab-loading-fill is its default blue, so it only counts there. */
   --oc-glow: var(--oc-accent);
@@ -164,7 +164,7 @@
   --oc-danger-wash: color-mix(in srgb, var(--oc-danger) 18%, transparent);
   --oc-danger-line: color-mix(in srgb, var(--oc-danger) 45%, transparent);
 
-  /* Window surface behind all chrome. Opaque unless omarchy.translucency
+  /* Window surface behind all chrome. Opaque unless omafire.translucency
    * (modes/translucency.css) turns it to glass. */
   --oc-surface: var(--oc-frame);
   /* Raised surface for panels and the floating launcher. */

@@ -1,9 +1,9 @@
-/* Omarchy Chrome — urlbar launcher (Zen's command bar) and the console
+/* Omafire — urlbar launcher (Zen's command bar) and the console
  * look it shares with zen mode's inline field.
  *
  * The launcher is used where the resting urlbar is narrow: the single
  * sidebar, and zen mode's "center" shape. Two shapes, picked by
- * omarchy.launcher:
+ * omafire.launcher:
  *   (unset) / "drop"  a quake console over the page, sliding down out of
  *                     the page's top edge; the tab column stays in view.
  *   "center"          a floating card in the middle of the window
@@ -42,8 +42,8 @@
  * the single accent is the focus rule under the field. Shared by the drop
  * launcher and zen mode's inline field. */
 
-@media -moz-pref("omarchy.layout", "sidebar") and (not -moz-pref("omarchy.launcher", "center")),
-       -moz-pref("omarchy.zen-mode") and -moz-pref("omarchy.zen-mode-active") and (not -moz-pref("omarchy.launcher", "center")) {
+@media -moz-pref("omafire.layout", "sidebar") and (not -moz-pref("omafire.launcher", "center")),
+       -moz-pref("omafire.zen-mode") and -moz-pref("omafire.zen-mode-active") and (not -moz-pref("omafire.launcher", "center")) {
   #main-window:not([customizing]) #urlbar[breakout]:is([breakout-extend], [focused]) {
     & > .urlbar-background {
       background-color: var(--oc-console) !important;
@@ -79,8 +79,8 @@
 
 /* ---- launcher -------------------------------------------------------- */
 
-@media -moz-pref("omarchy.layout", "sidebar"),
-       -moz-pref("omarchy.zen-mode") and -moz-pref("omarchy.zen-mode-active") and -moz-pref("omarchy.launcher", "center") {
+@media -moz-pref("omafire.layout", "sidebar"),
+       -moz-pref("omafire.zen-mode") and -moz-pref("omafire.zen-mode-active") and -moz-pref("omafire.launcher", "center") {
   #main-window:not([customizing]) #urlbar[breakout]:is([breakout-extend], [focused]) {
     margin: 0 !important;
     /* Firefox shifts the popover along with a sliding toolbar
@@ -108,7 +108,7 @@
    * side, the collapsed rail and the floating card without knowing any of
    * them. The field and rows sit on the chrome's inset axis; the card
    * bleeds to the page's edges. */
-  @media not -moz-pref("omarchy.launcher", "center") {
+  @media not -moz-pref("omafire.launcher", "center") {
     #main-window:not([customizing]) {
       & #tabbrowser-tabbox {
         anchor-name: --oc-page !important;
@@ -127,7 +127,7 @@
 
     /* Compact mode floats the column over the page, and reveals it while
      * the urlbar is focused: start past the column instead. */
-    @media -moz-pref("omarchy.compact") and -moz-pref("omarchy.layout", "sidebar") {
+    @media -moz-pref("omafire.compact") and -moz-pref("omafire.layout", "sidebar") {
       #main-window:not([customizing]) #sidebar-container {
         anchor-name: --oc-column !important;
       }
@@ -143,7 +143,7 @@
     }
   }
 
-  @media -moz-pref("omarchy.launcher", "center") {
+  @media -moz-pref("omafire.launcher", "center") {
     #main-window:not([customizing]) #urlbar[breakout]:is([breakout-extend], [focused]) {
       top: var(--oc-launcher-top) !important;
       left: calc(50vw - var(--oc-launcher-width) / 2) !important;

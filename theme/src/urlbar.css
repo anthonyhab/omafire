@@ -1,4 +1,4 @@
-/* Omarchy Chrome — urlbar field and results.
+/* Omafire — urlbar field and results.
  *
  * A quiet flat field at rest; on focus it opens in place on the panel
  * surface. Layouts that want Zen's centred launcher get it from
@@ -181,7 +181,7 @@
   color: var(--oc-text) !important;
 }
 
-/* Extension pages (the Omafox new tab) keep their icon; the add-on's name
+/* Extension pages (the Omafire new tab) keep their icon; the add-on's name
  * beside it only crowds the field. */
 #identity-box.extensionPage #identity-icon-label {
   display: none !important;

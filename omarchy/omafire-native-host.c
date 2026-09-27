@@ -173,7 +173,7 @@ static int split_state_path(const char *state_path, char *directory,
 }
 
 static int resolve_state_path(char *state_path, size_t state_path_size) {
-  const char *override = getenv("OMAFOX_STATE_FILE");
+  const char *override = getenv("OMAFIRE_STATE_FILE");
   if (override != NULL && override[0] != '\0') {
     int length = snprintf(state_path, state_path_size, "%s", override);
     return length >= 0 && (size_t)length < state_path_size ? 0 : -1;
@@ -184,7 +184,7 @@ static int resolve_state_path(char *state_path, size_t state_path_size) {
     return -1;
   }
   int length = snprintf(state_path, state_path_size,
-                        "%s/.local/state/omafox/theme.json", home);
+                        "%s/.local/state/omafire/theme.json", home);
   return length >= 0 && (size_t)length < state_path_size ? 0 : -1;
 }
 
@@ -204,7 +204,7 @@ static int set_target_path(struct watch_target *target, const char *path) {
 /* Candidate "background" links, most preferred first. An override replaces
  * the Omarchy locations entirely (used by tests). */
 static size_t resolve_wallpaper_targets(struct watch_target *targets) {
-  const char *override = getenv("OMAFOX_WALLPAPER_FILE");
+  const char *override = getenv("OMAFIRE_WALLPAPER_FILE");
   if (override != NULL && override[0] != '\0') {
     return set_target_path(&targets[0], override) == 0 ? 1U : 0U;
   }
@@ -507,7 +507,7 @@ int main(void) {
 
   if (resolve_state_path(state_path, sizeof(state_path)) < 0
       || set_target_path(&targets[0], state_path) < 0) {
-    fprintf(stderr, "omafox native host: invalid state path\n");
+    fprintf(stderr, "omafire native host: invalid state path\n");
     return 1;
   }
   size_t target_count = 1U + resolve_wallpaper_targets(&targets[1]);
@@ -517,7 +517,7 @@ int main(void) {
   signal(SIGPIPE, SIG_IGN);
   int inotify_descriptor = inotify_init1(IN_CLOEXEC | IN_NONBLOCK);
   if (inotify_descriptor < 0) {
-    fprintf(stderr, "omafox native host: inotify initialization failed\n");
+    fprintf(stderr, "omafire native host: inotify initialization failed\n");
     return 1;
   }
 

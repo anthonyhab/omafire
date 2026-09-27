@@ -1,8 +1,8 @@
-/* Omarchy Chrome — zen mode (top layout).
+/* Omafire — zen mode (top layout).
  *
  * Two prefs, kept from the original theme so existing profiles carry over:
- *   omarchy.zen-mode         feature switch
- *   omarchy.zen-mode-active  live state: false shows the toolbar again
+ *   omafire.zen-mode         feature switch
+ *   omafire.zen-mode-active  live state: false shows the toolbar again
  *
  * The toolbar leaves the window: only the tab sidebar and the page remain.
  * Focusing the urlbar (Ctrl+L) brings the navigation row back, so every
@@ -10,7 +10,7 @@
  * slides down from the window's top edge (over the page only, with
  * vertical tabs), moving like Omarchy's own quake console, with the field
  * inline between navigation and actions, as VS Code's command centre;
- * results drop beneath the field. omarchy.launcher = "center" floats the
+ * results drop beneath the field. omafire.launcher = "center" floats the
  * field as a card instead (launcher.css), the row above it.
  *
  * The row is parked above the top edge with position: fixed rather than
@@ -24,7 +24,7 @@
   to { clip-path: inset(0); }
 }
 
-@media -moz-pref("omarchy.zen-mode") and -moz-pref("omarchy.zen-mode-active") and (not -moz-pref("omarchy.layout", "sidebar")) {
+@media -moz-pref("omafire.zen-mode") and -moz-pref("omafire.zen-mode-active") and (not -moz-pref("omafire.layout", "sidebar")) {
   :root:not([customizing], [popup-window], [taskbartab], [chromehidden~="toolbar"], [inDOMFullscreen]) {
     --oc-zen-open: 0;
     /* The row's own transition, chosen by direction: the console's exit
@@ -71,7 +71,7 @@
 
     /* Drop (default): the row slides down from the window's top, the
      * field inline in it. */
-    @media not -moz-pref("omarchy.launcher", "center") {
+    @media not -moz-pref("omafire.launcher", "center") {
       /* Pointing at the window's top edge peeks the row, for as long as
        * the pointer stays on it. The trigger is a strip of the zero-height toolbox, so the edge
        * and the row it reveals are one continuous :hover. */
@@ -218,7 +218,7 @@
     /* Center: anchored by its bottom edge one gap above the floating card,
      * so a row with many extension buttons wraps upward instead of
      * overlapping it. Closed, it sits a full viewport higher. */
-    @media -moz-pref("omarchy.launcher", "center") {
+    @media -moz-pref("omafire.launcher", "center") {
       & #nav-bar {
         top: auto !important;
         bottom: calc(100vh - var(--oc-launcher-top) + var(--oc-launcher-bleed) + var(--oc-gap)
@@ -234,7 +234,7 @@
     /* Center: the urlbar floats as the launcher; its slot in the row
      * collapses. At rest the field stays invisible (it must stay
      * focusable for Ctrl+L, so it is never display: none). */
-    @media -moz-pref("omarchy.launcher", "center") {
+    @media -moz-pref("omafire.launcher", "center") {
       & #urlbar-container {
         flex: 0 0 0 !important;
         min-width: 0 !important;
@@ -255,7 +255,7 @@
       background: transparent !important;
     }
 
-    @media -moz-pref("omarchy.launcher", "center") {
+    @media -moz-pref("omafire.launcher", "center") {
       & #browser {
         transition: filter var(--oc-slow) var(--oc-ease) !important;
       }
