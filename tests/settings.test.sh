@@ -18,6 +18,8 @@ trap cleanup EXIT
 
 export HOME="$TEST_ROOT/home"
 unset XDG_CONFIG_HOME OMAFIRE_CONFIG
+# Nor the host's installed shell plugin.
+export OMAFIRE_SHELL_PLUGIN_SOURCE="$HOME/no-shell-plugin"
 CONFIG="$HOME/.config/omafire/config.json"
 mkdir -p "$HOME"
 

@@ -58,6 +58,9 @@ for name in "${scripts[@]}"; do
 done
 [[ $(find "$FIREFOX_DIR/omafire" -name '*.uc.js' | wc -l) -eq ${#scripts[@]} ]]
 cmp "$PROJECT_DIR/packaging/extension/omafire.xpi" "$FIREFOX_DIR/omafire/omafire.xpi"
+# The Omarchy shell plugin, byte for byte (DEC-30).
+diff -r "$PROJECT_DIR/shell/omafire" "$PACKAGE_ROOT/usr/share/omafire/shell/omafire"
+
 # The settings module the loader starts, with the CLI's schema beside it.
 grep -Fq 'resource://omafire/config.sys.mjs' "$FIREFOX_DIR/omafire.cfg"
 cmp "$PROJECT_DIR/chrome/config.sys.mjs" "$FIREFOX_DIR/omafire/config.sys.mjs"
@@ -79,6 +82,8 @@ PY
 export HOME="$TEST_HOME"
 # Settings follow XDG_CONFIG_HOME; never the caller's.
 unset XDG_CONFIG_HOME OMAFIRE_CONFIG
+# Nor the host's installed shell plugin.
+export OMAFIRE_SHELL_PLUGIN_SOURCE="$HOME/no-shell-plugin"
 export PATH="$MOCK_BIN:$PATH"
 export OMAFIRE_NATIVE_HOST_PATH="$SYSTEM_HOST"
 export OMAFIRE_NATIVE_MANIFEST_PATH="$SYSTEM_MANIFEST"

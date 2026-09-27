@@ -154,6 +154,19 @@ file that is not JSON is left alone, and Firefox keeps its current settings
 until it parses again. Keybindings (`omafire.keys.*`) and the extension's
 site-coloured tab are not in the file yet.
 
+### In the Omarchy bar
+
+`omafire setup` adds an Omafire icon to the right of the Omarchy bar (a
+plugin the package installs to `/usr/share/omafire/shell/omafire`, linked
+into `~/.config/omarchy/plugins/omafire`). Its panel holds every setting
+above and the state of each Firefox and Zen profile, with a Repair button
+(`omafire setup`) when one needs it; the icon turns red until then.
+Right-click toggles glass. Keyboard: j/k move, h/l change, Enter toggles,
+r repairs.
+
+Setup enables it once. Disable it with `omarchy plugin disable omafire` and
+later setups leave it off; `omafire remove` takes it out.
+
 ## How it works
 
 Omafire is made up of a few small parts:

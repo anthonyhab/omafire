@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "omafire",
+  "name": "Omafire",
+  "version": "0.6.0",
+  "author": "habibe",
+  "license": "MIT",
+  "description": "Firefox's Omafire settings and the state of each browser profile, from ~/.config/omafire/config.json. Installed and enabled by `omafire setup`.",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "Panel.qml"
+  },
+  "barWidget": {
+    "displayName": "Omafire",
+    "description": "Firefox layout, glass and profile health. Right-click toggles glass.",
+    "category": "Apps",
+    "aliases": [
+      "firefox",
+      "browser",
+      "omafire"
+    ],
+    "allowMultiple": false,
+    "defaultSection": "right",
+    "defaults": {
+      "command": "omafire"
+    },
+    "schema": [
+      {
+        "key": "command",
+        "type": "string",
+        "label": "The omafire command (a path, for a build that is not on PATH)",
+        "defaultValue": "omafire"
+      }
+    ]
+  }
+}

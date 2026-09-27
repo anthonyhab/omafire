@@ -13,6 +13,10 @@ case ${1:-} in
     cp "$4" "$hook_dir/$(basename "$4")"
     chmod 755 "$hook_dir/$(basename "$4")"
     ;;
+  plugin)
+    # Calls are logged for the shell plugin assertions.
+    echo "$*" >> "$HOME/omarchy-plugin.log"
+    ;;
   *)
     exit 1
     ;;

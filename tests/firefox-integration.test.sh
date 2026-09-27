@@ -117,6 +117,8 @@ cp "$RELATIVE_PROFILE/user.js" "$TEST_ROOT/original-user.js"
 export HOME="$TEST_HOME"
 # Settings follow XDG_CONFIG_HOME; never the caller's.
 unset XDG_CONFIG_HOME OMAFIRE_CONFIG
+# Nor the host's installed shell plugin.
+export OMAFIRE_SHELL_PLUGIN_SOURCE="$HOME/no-shell-plugin"
 export PATH="$MOCK_BIN:$PATH"
 export OMAFIRE_THEME_DIR="$THEME_DIR"
 export OMAFIRE_THEME_NAME_FILE="$THEME_DIR/theme.name"
@@ -127,7 +129,14 @@ export OMAFIRE_FIREFOX_ROOT="$FF_ROOT"
 export OMAFIRE_FIREFOX_PAYLOAD_SOURCE="$FF_PAYLOAD_SOURCE"
 export OMAFIRE_ZEN_PROFILES_FILE="$TEST_ROOT/missing-zen-profiles.ini"
 
+# The shell plugin (DEC-30): linked and enabled once by setup.
+export OMAFIRE_SHELL_PLUGIN_SOURCE="$TEST_ROOT/share/shell/omafire"
+mkdir -p "$OMAFIRE_SHELL_PLUGIN_SOURCE"
+PLUGIN_LINK="$TEST_HOME/.config/omarchy/plugins/omafire"
+PLUGIN_LOG="$TEST_HOME/omarchy-plugin.log"
+
 initial_status=$("$OMAFIRE_BIN" status)
+[[ $initial_status == *"Shell plugin: $PLUGIN_LINK (not linked)"* ]]
 [[ $initial_status == *"Firefox profile: $RELATIVE_PROFILE (not configured)"* ]]
 [[ $initial_status == *"Firefox profile: $ABSOLUTE_PROFILE (not configured)"* ]]
 [[ $initial_status == *"Firefox profile: $MISSING_PROFILE (missing)"* ]]
@@ -137,6 +146,13 @@ setup_output=$("$OMAFIRE_BIN" setup 2>&1)
 [[ $(grep -Fc "Configured Firefox profile: $ABSOLUTE_PROFILE" <<< "$setup_output") == 1 ]]
 [[ $setup_output == *"Skipped missing Firefox profile: $MISSING_PROFILE"* ]]
 [[ $setup_output == *"Restart Firefox once"* ]]
+[[ $(readlink "$PLUGIN_LINK") == "$OMAFIRE_SHELL_PLUGIN_SOURCE" ]]
+[[ $setup_output == *"Enabled it in the bar"* ]]
+[[ $(cat "$PLUGIN_LOG") == "plugin enable omafire" ]]
+[[ $("$OMAFIRE_BIN" status) == *"Shell plugin: $PLUGIN_LINK (linked)"* ]]
+# A second setup leaves it alone: a user who disabled it keeps that.
+"$OMAFIRE_BIN" setup >/dev/null 2>&1
+[[ $(wc -l < "$PLUGIN_LOG") == 1 ]]
 
 for profile in "$RELATIVE_PROFILE" "$ABSOLUTE_PROFILE"; do
   cmp "$FF_PAYLOAD_SOURCE/userChrome.css" "$profile/chrome/omafire/userChrome.css"
@@ -235,6 +251,16 @@ grep -Fqx '/* user-owned dir */' "$ABSOLUTE_PROFILE/chrome/omafire/userChrome.cs
 rm -rf "$ABSOLUTE_PROFILE/chrome/omafire"
 
 "$OMAFIRE_BIN" remove >/dev/null
+[[ ! -e $PLUGIN_LINK && ! -L $PLUGIN_LINK ]]
+[[ $(tail -n1 "$PLUGIN_LOG") == "plugin disable omafire" ]]
+# A plugin of the user's own at that path is never touched.
+mkdir -p "$PLUGIN_LINK"
+own_output=$("$OMAFIRE_BIN" setup 2>&1)
+[[ $own_output == *"Left your own $PLUGIN_LINK alone"* ]]
+[[ -d $PLUGIN_LINK && ! -L $PLUGIN_LINK ]]
+"$OMAFIRE_BIN" remove >/dev/null
+[[ -d $PLUGIN_LINK ]]
+rmdir "$PLUGIN_LINK"
 for profile in "$RELATIVE_PROFILE" "$ABSOLUTE_PROFILE"; do
   [[ ! -e $profile/chrome/omafire ]]
   [[ ! -e $profile/chrome/omafire-palette.css ]]

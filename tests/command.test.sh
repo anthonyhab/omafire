@@ -24,6 +24,8 @@ printf '%s\n' 'osaka-jade' > "$THEME_DIR/theme.name"
 export HOME="$TEST_HOME"
 # Settings follow XDG_CONFIG_HOME; never the caller's.
 unset XDG_CONFIG_HOME OMAFIRE_CONFIG
+# Nor the host's installed shell plugin.
+export OMAFIRE_SHELL_PLUGIN_SOURCE="$HOME/no-shell-plugin"
 export PATH="$MOCK_BIN:$PATH"
 export OMAFIRE_THEME_DIR="$THEME_DIR"
 export OMAFIRE_THEME_NAME_FILE="$THEME_DIR/theme.name"
@@ -58,7 +60,7 @@ import json, sys
 r = json.loads(sys.argv[1])
 home = sys.argv[2]
 assert set(r) == {"version", "theme", "palette", "hook", "themeState", "nativeHost",
-                  "nativeManifest", "settings", "zen", "firefox"}, r
+                  "nativeManifest", "settings", "shellPlugin", "zen", "firefox"}, r
 assert r["theme"] == "osaka-jade"
 assert r["hook"] == {"path": home + "/.config/omarchy/hooks/theme-set.d/omafire", "present": False}
 assert r["settings"] == {"path": home + "/.config/omafire/config.json", "status": "defaults, no file"}

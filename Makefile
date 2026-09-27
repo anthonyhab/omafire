@@ -45,6 +45,7 @@ install: all
 	install -Dm644 chrome/config.sys.mjs "$(DESTDIR)$(FIREFOX_DIR)/omafire/config.sys.mjs"
 	install -Dm644 config/schema.json "$(DESTDIR)$(FIREFOX_DIR)/omafire/config-schema.json"
 	install -Dm644 packaging/extension/omafire.xpi "$(DESTDIR)$(FIREFOX_DIR)/omafire/omafire.xpi"
+	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/omafire/shell/omafire" shell/omafire/manifest.json shell/omafire/*.qml shell/omafire/*.js
 	install -Dm644 README.md "$(DESTDIR)$(PREFIX)/share/doc/omafire/README.md"
 	install -Dm644 LICENSE "$(DESTDIR)$(PREFIX)/share/licenses/omafire/LICENSE"
 

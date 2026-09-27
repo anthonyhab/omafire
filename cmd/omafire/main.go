@@ -83,6 +83,7 @@ func initPaths() {
 	ffProfilesFile = envOr("OMAFIRE_FIREFOX_PROFILES_FILE", ffRoot+"/profiles.ini")
 	ffPayloadSource = envOr("OMAFIRE_FIREFOX_PAYLOAD_SOURCE", "/usr/share/omafire/firefox/chrome")
 	initConfigPath(home)
+	initShellPluginPaths(home)
 }
 
 // ---------------------------------------------------------------- commands
@@ -120,6 +121,7 @@ func cmdSetup() {
 	backupCommand = "setup"
 	zenConfigured := setupZenProfiles()
 	ffConfigured := setupFFProfiles()
+	setupShellPlugin()
 	backupCommand = "" // the palette refresh below changes no user file
 	cmdSync()
 	fmt.Println("Queued the current Omarchy palette for connected browsers.")
@@ -139,6 +141,7 @@ func cmdRemove() {
 	backupCommand = "remove"
 	removeZenProfiles()
 	removeFFProfiles()
+	removeShellPlugin()
 
 	if pathExists(hookPath) {
 		unix.Unlink(hookPath)

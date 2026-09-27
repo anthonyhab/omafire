@@ -36,6 +36,7 @@ type statusReport struct {
 	NativeHost     fileState    `json:"nativeHost"`
 	NativeManifest fileState    `json:"nativeManifest"`
 	Settings       settingsInfo `json:"settings"`
+	ShellPlugin    fileState    `json:"shellPlugin"`
 	Zen            browserState `json:"zen"`
 	Firefox        browserState `json:"firefox"`
 }
@@ -78,6 +79,7 @@ func collectStatus() statusReport {
 		NativeHost:     fileState{nativeHostPath, unix.Access(nativeHostPath, unix.X_OK) == nil},
 		NativeManifest: fileState{nativeManifestPath, isRegularFile(nativeManifestPath)},
 		Settings:       settingsInfo{configFile, configStatus()},
+		ShellPlugin:    fileState{shellPluginLink, shellPluginLinked()},
 		Zen:            browserStatus(zenProfilesFile, zenRoot, zenProfileStatus),
 		Firefox:        browserStatus(ffProfilesFile, ffRoot, ffProfileStatus),
 	}
@@ -116,6 +118,7 @@ func showStatus(args []string) {
 	fmt.Printf("Native host: %s (%s)\n", r.NativeHost.Path, installed[r.NativeHost.Present])
 	fmt.Printf("Native manifest: %s (%s)\n", r.NativeManifest.Path, installed[r.NativeManifest.Present])
 	fmt.Printf("Settings: %s (%s)\n", r.Settings.Path, r.Settings.Status)
+	fmt.Printf("Shell plugin: %s (%s)\n", r.ShellPlugin.Path, map[bool]string{true: "linked", false: "not linked"}[r.ShellPlugin.Present])
 	printBrowserStatus("Zen", r.Zen)
 	printBrowserStatus("Firefox", r.Firefox)
 }
