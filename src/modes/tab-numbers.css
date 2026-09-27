@@ -15,8 +15,8 @@
  * the active tab's glow bar, so its digit stands in the gutter left of
  * the row instead, centred between the column edge (or its group's line)
  * and the row. Either way the digits run down one column and a label
- * keeps its full width. The digit takes the tab's text colour: dim at
- * rest, full when hovered or selected.
+ * keeps its full width. The digit is dim at rest and takes the tab's
+ * full text colour when hovered or selected.
  *
  * Horizontal tabs have no leading gutter: there the digit sits at the
  * trailing end, before the close button, as dim text. */
@@ -91,7 +91,7 @@
       font-size: 8px !important;
       font-weight: 700 !important;
       line-height: 1 !important;
-      color: inherit !important;
+      color: var(--oc-text-dim) !important;
       pointer-events: none !important;
     }
 
@@ -102,6 +102,12 @@
       /* The group line hangs outside the tile; leave it unmasked. */
       mask-clip: no-clip !important;
     }
+  }
+
+  /* A secondary glyph: dim at rest, the row's full text when it is
+   * hovered or selected. */
+  #tabbrowser-tabs[orient="vertical"] .tabbrowser-tab:is([selected], [multiselected], :hover) .tab-content::after {
+    color: inherit !important;
   }
 
   #tabbrowser-tabs[orient="vertical"]:not([expanded]) :not(tab-split-view-wrapper) > .tabbrowser-tab {

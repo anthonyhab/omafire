@@ -56,7 +56,7 @@
   /* Row background on the --oc-inset axis, icon one inset further in. */
   & .tabbrowser-tab {
     padding-inline: 0 !important;
-    color: var(--oc-text-dim) !important;
+    color: var(--oc-text-label) !important;
   }
 
   & .tabbrowser-tab:not([pinned]) {
@@ -142,9 +142,15 @@
     font-weight: normal !important;
   }
 
-  /* Discarded tabs recede until they are loaded again. */
-  & .tabbrowser-tab[pending]:not([selected]) :is(.tab-icon-image, .tab-label) {
-    opacity: 0.55 !important;
+  /* Discarded tabs recede until they are loaded again: the label drops to
+   * the dim tone and the favicon fades. Fading the label as well stacked
+   * to a third of the text colour, barely there on glass. */
+  & .tabbrowser-tab[pending]:not([selected], [multiselected], :hover) {
+    color: var(--oc-text-dim) !important;
+  }
+
+  & .tabbrowser-tab[pending]:not([selected]) .tab-icon-image {
+    opacity: 0.5 !important;
   }
 
   /* Close button: only on the hovered or selected row. */

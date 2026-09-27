@@ -104,6 +104,10 @@
   /* Translucent overlays of the text color: legible on any palette, and
    * they stack (hover over selected stays visible). */
   --oc-text-dim: color-mix(in srgb, var(--oc-text) 62%, transparent);
+  /* Resting tab labels: quieter than the active tab, never so dim that an
+   * ordinary tab reads as disabled (62% did, on glass). Secondary glyphs
+   * on a row (its digit, close button) stay --oc-text-dim. */
+  --oc-text-label: color-mix(in srgb, var(--oc-text) 80%, transparent);
   --oc-line: color-mix(in srgb, var(--oc-text) 11%, transparent);
   --oc-line-strong: color-mix(in srgb, var(--oc-text) 22%, transparent);
   --oc-hover: color-mix(in srgb, var(--oc-text) 8%, transparent);
