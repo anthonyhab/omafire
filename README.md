@@ -290,10 +290,11 @@ commit, builds the package with makepkg, and publishes a Forgejo release
 with the package, PKGBUILD and checksums. Local `makepkg` builds are for
 development only.
 
-The Firefox payload (`packaging/firefox/chrome/`) is generated from a
-committed Omarchy Chrome revision with `make payload THEME_REV=<sha>`. CI
-checks that the stamped revision is on the theme's `main` and regenerates
-to exactly the committed files (`scripts/check-payload.sh`).
+The theme lives in `theme/` (its own README covers its code and design
+language). The Firefox payload the package installs is built from it on
+every `make` (`scripts/build-payload.sh`, into `build/firefox/chrome/`), so
+the theme, CLI, chrome scripts and extension of a release all come from
+one commit. Its entrypoints carry a stamp naming the version and commit.
 
 The Firefox extension ships signed in the package
 (`packaging/extension/omafox.xpi`). To change it: bump `extension/manifest.json`,

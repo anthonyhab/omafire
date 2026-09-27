@@ -1,7 +1,7 @@
 # Forgejo is the CI and release authority for this fork (a .forgejo workflow
 # directory also retires the upstream .github one here). The gate is the
-# same tests/run.sh contributors run, plus the payload provenance check
-# against the theme repository.
+# same tests/run.sh contributors run: the theme lint, the payload built from
+# theme/ in this commit, the XPI provenance check, and the test suites.
 name: CI
 
 on:
@@ -11,7 +11,7 @@ on:
 
 jobs:
   test:
-    name: Tests, payload provenance
+    name: Tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
     container:
@@ -28,21 +28,5 @@ jobs:
           token: ${{ forgejo.token }}
           github-server-url: http://forgejo:3000
           persist-credentials: false
-      - name: Theme checkout (for the payload check)
-        # The payload is generated from a committed Omarchy Chrome revision;
-        # the check needs that private repository's history. The job token
-        # cannot read another repository, so a read-only deploy key on
-        # omarchy-chrome does.
-        env:
-          THEME_DEPLOY_KEY: ${{ secrets.THEME_DEPLOY_KEY }}
-        run: |
-          install -d -m 700 ~/.ssh
-          printf '%s\n' "$THEME_DEPLOY_KEY" > ~/.ssh/theme_deploy && chmod 600 ~/.ssh/theme_deploy
-          GIT_SSH_COMMAND='ssh -i ~/.ssh/theme_deploy -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new' \
-            git clone --quiet ssh://git@git.hab.rip/habibe/omarchy-chrome.git /tmp/theme
-          rm -f ~/.ssh/theme_deploy
       - name: Tests
-        env:
-          OMAFOX_THEME_CHECKOUT: /tmp/theme
-          OMAFOX_REQUIRE_PAYLOAD_CHECK: '1'
         run: ./tests/run.sh

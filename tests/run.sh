@@ -22,8 +22,7 @@ bash -n \
 shellcheck \
   "$PROJECT_DIR/extension/build.sh" \
   "$PROJECT_DIR/packaging/omafox-hook" \
-  "$PROJECT_DIR/scripts/sync-firefox-payload.sh" \
-  "$PROJECT_DIR/scripts/check-payload.sh" \
+  "$PROJECT_DIR/scripts/build-payload.sh" \
   "$PROJECT_DIR/scripts/check-xpi.sh" \
   "$SCRIPT_DIR/run.sh" \
   "$SCRIPT_DIR/command.test.sh" \
@@ -60,29 +59,20 @@ pkgver=$(sed -n 's/^pkgver=//p' "$PROJECT_DIR/PKGBUILD")
 [[ $pkgver == "$version" ]] \
   || { echo "PKGBUILD pkgver $pkgver != VERSION $version" >&2; exit 1; }
 
-# The packaged payload must stay generated: owned by marker, and never
-# resolving chrome-root files (palette, radius, custom*) inside itself.
+# The built payload: owned by marker, and never resolving chrome-root files
+# (palette, radius, custom*) inside itself.
 for entry in userChrome.css userContent.css; do
-  payload_entry="$PROJECT_DIR/packaging/firefox/chrome/$entry"
+  payload_entry="$PROJECT_DIR/build/firefox/chrome/$entry"
   [[ $(head -n1 "$payload_entry") == '/* OMAFOX FIREFOX BRIDGE MANAGED FILE */' ]]
   if grep -Eq '^@import (url\()?"(omarchy-radius|omafox-palette|omafox-content-palette|customChrome|customContent)\.css"|OMAFOX FIREFOX BRIDGE \*/$' \
       "$payload_entry"; then
-    echo "$entry is not a generated payload entrypoint; run make payload" >&2
+    echo "$entry is not a generated payload entrypoint" >&2
     exit 1
   fi
 done
 
-# Payload provenance, where a theme checkout is at hand (CI clones one;
-# OMAFOX_THEME_CHECKOUT, else ../theme beside this repo).
-theme_checkout=${OMAFOX_THEME_CHECKOUT:-$PROJECT_DIR/../theme}
-if [[ -d $theme_checkout/.git || -f $theme_checkout/.git ]]; then
-  "$PROJECT_DIR/scripts/check-payload.sh" "$theme_checkout"
-elif [[ -n ${OMAFOX_REQUIRE_PAYLOAD_CHECK:-} ]]; then
-  echo "no theme checkout at $theme_checkout for the payload check" >&2
-  exit 1
-else
-  echo "payload check skipped: no theme checkout at $theme_checkout"
-fi
+# The theme's own rules: !important everywhere, colours only in token files.
+node "$PROJECT_DIR/theme/scripts/lint.mjs"
 
 # The packaged XPI is the signed build of extension/ as committed.
 "$PROJECT_DIR/scripts/check-xpi.sh"

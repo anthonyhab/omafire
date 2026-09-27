@@ -20,9 +20,10 @@ The usual path is Omafox: `omafox setup` installs this theme into every
 Firefox profile and keeps its palette and window rounding in sync with
 Omarchy. See the Omafox README.
 
-To run from a checkout instead, clone this repository as the profile's
-`chrome/` directory and run `omafox setup` once; it recognises the checkout
-and writes only the generated files beside it.
+To run from a checkout instead (for development), point the profile's
+`chrome/` directory at this `theme/` directory of an omafox checkout
+(a symlink) and run `omafox setup` once; it recognises the checkout and
+writes only the generated files beside it.
 
 Then set these in `about:config`:
 
@@ -155,6 +156,7 @@ against a theme tree (`FXLAB_THEME=<dir> tools/fxlab up`). Check anything
 touching colors at cold start, from the first painted frames, not only in a
 settled window.
 
-Released under the [Unlicense](LICENSE). Layout ideas owe a lot to
+Released under the [MIT License](../LICENSE) with the rest of this repository
+(until 2026-09-27 the theme was public domain under the Unlicense). Layout ideas owe a lot to
 [Zen Browser](https://zen-browser.app/) and
 [parfait](https://github.com/reizumii/parfait).

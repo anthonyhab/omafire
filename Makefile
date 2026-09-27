@@ -2,13 +2,12 @@ PREFIX ?= /usr
 DESTDIR ?=
 BUILD_DIR ?= build
 CC ?= cc
-THEME_DIR ?= ../theme
-THEME_REV ?= HEAD
 # Firefox's install directory (GreD), where its autoconfig is read from.
 FIREFOX_DIR ?= $(PREFIX)/lib/firefox
 
 CLI := $(BUILD_DIR)/omafox
 NATIVE_HOST := $(BUILD_DIR)/omafox-native-host
+PAYLOAD := $(BUILD_DIR)/firefox/chrome
 
 CFLAGS += -std=c17 -Wall -Wextra -Wpedantic
 
@@ -18,7 +17,7 @@ CPPFLAGS += -DOMAFOX_VERSION='"$(VERSION)"'
 
 .PHONY: all clean install payload
 
-all: $(CLI) $(NATIVE_HOST)
+all: $(CLI) $(NATIVE_HOST) payload
 
 $(CLI): omarchy/omafox.c VERSION | $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -o $@ $< $(LDFLAGS)
@@ -35,12 +34,9 @@ install: all
 	install -Dm644 packaging/org.omarchy.omafox.json "$(DESTDIR)$(PREFIX)/lib/mozilla/native-messaging-hosts/org.omarchy.omafox.json"
 	install -Dm755 packaging/omafox-hook "$(DESTDIR)$(PREFIX)/share/omafox/hooks/omafox"
 	install -Dm644 packaging/zen/omafox.css "$(DESTDIR)$(PREFIX)/share/omafox/zen/omafox.css"
-	if [ -d packaging/firefox/chrome ]; then \
-		mkdir -p "$(DESTDIR)$(PREFIX)/share/omafox/firefox"; \
-		cp -a packaging/firefox/chrome "$(DESTDIR)$(PREFIX)/share/omafox/firefox/chrome"; \
-		find "$(DESTDIR)$(PREFIX)/share/omafox/firefox" -type d -exec chmod 755 {} +; \
-		find "$(DESTDIR)$(PREFIX)/share/omafox/firefox" -type f -exec chmod 644 {} +; \
-	fi
+	mkdir -p "$(DESTDIR)$(PREFIX)/share/omafox/firefox"
+	rm -rf "$(DESTDIR)$(PREFIX)/share/omafox/firefox/chrome"
+	cp -a $(PAYLOAD) "$(DESTDIR)$(PREFIX)/share/omafox/firefox/chrome"
 	install -Dm644 chrome/omafox-prefs.js "$(DESTDIR)$(FIREFOX_DIR)/defaults/pref/omafox-prefs.js"
 	install -Dm644 chrome/omafox.cfg "$(DESTDIR)$(FIREFOX_DIR)/omafox.cfg"
 	install -Dm644 -t "$(DESTDIR)$(FIREFOX_DIR)/omafox" chrome/scripts/*.uc.js
@@ -48,10 +44,9 @@ install: all
 	install -Dm644 README.md "$(DESTDIR)$(PREFIX)/share/doc/omafox/README.md"
 	install -Dm644 LICENSE "$(DESTDIR)$(PREFIX)/share/licenses/omafox/LICENSE"
 
-# Regenerate the packaged Firefox chrome payload from a committed theme
-# revision: make payload [THEME_DIR=../theme] [THEME_REV=HEAD]
-payload:
-	scripts/sync-firefox-payload.sh "$(THEME_DIR)" "$(THEME_REV)"
+# The Firefox payload, built from theme/ on every build: cheap, and never stale.
+payload: | $(BUILD_DIR)
+	scripts/build-payload.sh $(PAYLOAD)
 
 clean:
 	rm -rf "$(BUILD_DIR)"
