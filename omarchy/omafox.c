@@ -14,7 +14,7 @@
  *                                painted frame already uses the palette.
  */
 
-#define _POSIX_C_SOURCE 200809L
+#define _GNU_SOURCE /* flock, renameat2 */
 
 #include <ctype.h>
 #include <dirent.h>
@@ -28,9 +28,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/file.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <time.h>
 #include <unistd.h>
 
 #ifndef PATH_MAX
@@ -69,6 +71,13 @@
   "/* OMAFOX GENERATED GEOMETRY — written by omafox sync; do not edit. */"
 #define FF_PAYLOAD_DIRNAME "omarchy-firefox"
 #define FF_PAYLOAD_ENTRY "userChrome.css"
+typedef struct {
+  char **items;
+  size_t count;
+} str_list_t;
+
+/* Backup sets kept under the state directory (setup and remove only). */
+#define MAX_BACKUP_SETS 10
 
 /* Palette key order is part of the JSON wire format. */
 static const char *const PALETTE_KEYS[] = {
@@ -270,6 +279,9 @@ static char *read_file(const char *path, size_t *out_len) {
 /* Write buffer to path via a same-directory temp file + rename.
  * preserve_mode keeps an existing file's permissions (managed user files);
  * otherwise the given mode is applied exactly (owned payload/state files). */
+static void backup_user_file(const char *path);
+static void fsync_parent(const char *path);
+
 static void atomic_write(const char *path, const char *data, size_t len,
                          mode_t mode, bool preserve_mode) {
   /* Skip the write entirely when the target already holds this content —
@@ -282,6 +294,10 @@ static void atomic_write(const char *path, const char *data, size_t len,
     return;
   }
   free(existing);
+  /* A user's own file (preserve_mode) is copied aside before its first
+   * change in a setup or remove run. */
+  if (preserve_mode)
+    backup_user_file(path);
 
   char *tmp = xmalloc(strlen(path) + 32);
   strcpy(tmp, path);
@@ -321,6 +337,15 @@ static void atomic_write(const char *path, const char *data, size_t len,
     }
     written += (size_t)n;
   }
+  /* On disk (a profile outside profile-sync-daemon), a crash between the
+   * rename and writeback could leave an empty file where the old one was:
+   * flush the data before the rename, and the rename after it. */
+  if (fsync(fd) < 0 && errno != EINVAL) {
+    close(fd);
+    unlink(tmp);
+    free(tmp);
+    fail("could not flush temp file for %s", path);
+  }
   close(fd);
   if (rename(tmp, path) < 0) {
     unlink(tmp);
@@ -328,6 +353,22 @@ static void atomic_write(const char *path, const char *data, size_t len,
     fail("could not replace %s", path);
   }
   free(tmp);
+  fsync_parent(path);
+}
+
+static void fsync_parent(const char *path) {
+  char *dir = xstrdup(path);
+  char *slash = strrchr(dir, '/');
+  if (slash && slash != dir)
+    *slash = '\0';
+  else
+    strcpy(dir, slash ? "/" : ".");
+  int fd = open(dir, O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+  if (fd >= 0) {
+    fsync(fd); /* best effort: some filesystems refuse directory fsync */
+    close(fd);
+  }
+  free(dir);
 }
 
 /* mkdir -p with 0700 leaf mode, like `install -d -m 700`. */
@@ -348,6 +389,227 @@ static void mkdir_p700(const char *path) {
     fail("could not create directory: %s", path);
   }
   free(copy);
+}
+
+/* rm -r that never follows a symlink: links inside are unlinked. */
+static void remove_tree(const char *dir) {
+  DIR *d = opendir(dir);
+  if (!d)
+    return;
+  struct dirent *ent;
+  while ((ent = readdir(d))) {
+    if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0)
+      continue;
+    char *child = path_join(dir, ent->d_name);
+    struct stat st;
+    if (lstat(child, &st) == 0) {
+      if (S_ISDIR(st.st_mode))
+        remove_tree(child);
+      else
+        unlink(child);
+    }
+    free(child);
+  }
+  closedir(d);
+  rmdir(dir);
+}
+
+/* ---------------------------------------------------------- run safety */
+
+/* One omafox at a time per user: the theme hook's sync can fire while a
+ * setup or remove is rewriting the same profile files. Held until exit. */
+static void acquire_lock(void) {
+  mkdir_p700(g_state_dir);
+  char *lock = path_join(g_state_dir, "lock");
+  int fd = open(lock, O_RDWR | O_CREAT | O_CLOEXEC | O_NOFOLLOW, 0600);
+  if (fd < 0)
+    fail("could not open lock file: %s", lock);
+  while (flock(fd, LOCK_EX) < 0) {
+    if (errno != EINTR)
+      fail("could not lock %s", lock);
+  }
+  free(lock);
+}
+
+/* Backups: setup and remove copy each user-owned file (user.js,
+ * userChrome.css, userContent.css) to
+ * <state>/backups/<time>-<command>/<absolute path> before its first change,
+ * so a bad run can be undone by copying the file back. The state directory
+ * is outside the profile, so profile-sync-daemon's tmpfs never holds the
+ * only copy. The newest MAX_BACKUP_SETS sets are kept. */
+static const char *g_backup_command = NULL;
+static char *g_backup_dir = NULL;
+static str_list_t g_backed_up = {0};
+
+static void list_push(str_list_t *list, char *item);
+static bool list_contains(const str_list_t *list, const char *item);
+
+static int compare_names(const void *a, const void *b) {
+  return strcmp(*(char *const *)a, *(char *const *)b);
+}
+
+static void prune_backups(const char *root) {
+  DIR *d = opendir(root);
+  if (!d)
+    return;
+  str_list_t sets = {0};
+  struct dirent *ent;
+  while ((ent = readdir(d)))
+    if (ent->d_name[0] != '.')
+      list_push(&sets, xstrdup(ent->d_name));
+  closedir(d);
+  qsort(sets.items, sets.count, sizeof(char *), compare_names);
+  for (size_t i = 0; i < sets.count; i++) {
+    if (i + MAX_BACKUP_SETS < sets.count) {
+      char *old = path_join(root, sets.items[i]);
+      remove_tree(old);
+      free(old);
+    }
+    free(sets.items[i]);
+  }
+  free(sets.items);
+}
+
+static void backup_user_file(const char *path) {
+  if (!g_backup_command || path[0] != '/' || !is_regular_file(path)
+      || list_contains(&g_backed_up, path))
+    return;
+  size_t len;
+  char *data = read_file(path, &len);
+  if (!data)
+    fail("could not read %s to back it up; nothing was changed", path);
+  if (!g_backup_dir) {
+    char *root = path_join(g_state_dir, "backups");
+    char stamp[32];
+    time_t now = time(NULL);
+    struct tm tm;
+    localtime_r(&now, &tm);
+    strftime(stamp, sizeof(stamp), "%Y%m%d-%H%M%S", &tm);
+    g_backup_dir = xasprintf("%s/%s-%s-%ld", root, stamp, g_backup_command,
+                             (long)getpid());
+    mkdir_p700(g_backup_dir);
+    prune_backups(root);
+    free(root);
+  }
+  char *dest = xasprintf("%s%s", g_backup_dir, path);
+  char *parent = xstrdup(dest);
+  *strrchr(parent, '/') = '\0';
+  mkdir_p700(parent);
+  atomic_write(dest, data, len, 0600, false);
+  list_push(&g_backed_up, xstrdup(path));
+  free(parent);
+  free(dest);
+  free(data);
+}
+
+/* profile-sync-daemon keeps a synced profile in tmpfs: the profile path
+ * becomes a symlink into /run/user/<uid>/psd/, and its on-disk copy is
+ * renamed <profile>-backup (with -back-ovfs and -backup-crashrecovery-*
+ * siblings). Only the symlinked path is the live profile; the copies are
+ * psd's, and writing them would be overwritten or, worse, restored over
+ * the live profile after a crash. */
+static bool psd_copy_name(const char *profile) {
+  const char *base = strrchr(profile, '/');
+  base = base ? base + 1 : profile;
+  static const char *const SUFFIXES[] = {"-backup", "-back-ovfs"};
+  size_t n = strlen(base);
+  for (size_t i = 0; i < sizeof(SUFFIXES) / sizeof(SUFFIXES[0]); i++) {
+    size_t m = strlen(SUFFIXES[i]);
+    if (n > m && strcmp(base + n - m, SUFFIXES[i]) == 0)
+      return true;
+  }
+  return strstr(base, "-backup-crashrecovery-") != NULL;
+}
+
+static bool profile_in_psd(const char *profile) {
+  if (!path_is_symlink(profile))
+    return false;
+  char target[PATH_MAX];
+  ssize_t n = readlink(profile, target, sizeof(target) - 1);
+  if (n <= 0)
+    return false;
+  target[n] = '\0';
+  return strstr(target, "/psd/") != NULL;
+}
+
+static int g_psd_profiles = 0;
+
+typedef enum { PROFILE_OK, PROFILE_MISSING, PROFILE_OFFLINE, PROFILE_PSD_COPY }
+    profile_state_t;
+
+/* Whether a profiles.ini entry may be written. A symlink whose target is
+ * gone is a profile-sync-daemon profile while psd is stopped or
+ * mid-restore: never create anything through it. */
+static profile_state_t profile_state(const char *profile) {
+  if (psd_copy_name(profile))
+    return PROFILE_PSD_COPY;
+  struct stat st;
+  if (stat(profile, &st) == 0 && S_ISDIR(st.st_mode))
+    return PROFILE_OK;
+  return path_is_symlink(profile) ? PROFILE_OFFLINE : PROFILE_MISSING;
+}
+
+static bool profile_writable(const char *profile, const char *browser,
+                             bool report) {
+  switch (profile_state(profile)) {
+  case PROFILE_OK:
+    return true;
+  case PROFILE_PSD_COPY:
+    if (report)
+      fprintf(stderr, "Skipped %s profile-sync-daemon copy (listed in "
+                      "profiles.ini?): %s\n", browser, profile);
+    return false;
+  case PROFILE_OFFLINE:
+    if (report)
+      fprintf(stderr, "Skipped offline %s profile (a symlink to nothing; is "
+                      "profile-sync-daemon stopped?): %s\n", browser, profile);
+    return false;
+  default:
+    if (report)
+      fprintf(stderr, "Skipped missing %s profile: %s\n", browser, profile);
+    return false;
+  }
+}
+
+/* Firefox keeps <profile>/lock, a symlink to "<host>:+<pid>", while it runs
+ * the profile. */
+static bool profile_running(const char *profile) {
+  char *lock = path_join(profile, "lock");
+  char target[256];
+  ssize_t n = readlink(lock, target, sizeof(target) - 1);
+  free(lock);
+  if (n <= 0)
+    return false;
+  target[n] = '\0';
+  char *plus = strrchr(target, '+');
+  if (!plus)
+    return false;
+  long pid = strtol(plus + 1, NULL, 10);
+  return pid > 0 && (kill((pid_t)pid, 0) == 0 || errno == EPERM);
+}
+
+static void note_written_profile(const char *profile, const char *browser) {
+  if (profile_in_psd(profile))
+    g_psd_profiles++;
+  if (profile_running(profile))
+    printf("  %s is running with this profile; restart it to load the "
+           "changes.\n", browser);
+}
+
+/* Ask psd to write tmpfs back to disk now rather than at its next hourly
+ * resync, so a crash in between cannot lose a setup or remove. */
+static int run_command(char *const argv[], char *output, size_t output_size);
+
+static void psd_resync(void) {
+  if (g_psd_profiles == 0 || strcmp(env_or("OMAFOX_PSD_RESYNC", "1"), "0") == 0)
+    return;
+  char *const argv[] = {"systemctl", "--user", "start", "psd-resync.service",
+                        NULL};
+  if (run_command(argv, NULL, 0) == 0)
+    printf("Asked profile-sync-daemon to write the changes to disk.\n");
+  else
+    printf("profile-sync-daemon manages a changed profile; it writes it to "
+           "disk at its next resync.\n");
 }
 
 static int run_command(char *const argv[], char *output, size_t output_size) {
@@ -945,17 +1207,14 @@ static void remove_managed_block(const char *path, const char *begin,
   if (rest && rest_len > 0) {
     atomic_write(path, rest, rest_len, 0600, true);
   } else {
+    /* Nothing but our block: the file is ours, nothing to back up. */
     unlink(path);
+    fsync_parent(path);
   }
   free(rest);
 }
 
 /* ----------------------------------------------------------- profiles.ini */
-
-typedef struct {
-  char **items;
-  size_t count;
-} str_list_t;
 
 static void list_push(str_list_t *list, char *item) {
   list->items = realloc(list->items, (list->count + 1) * sizeof(char *));
@@ -1109,6 +1368,7 @@ static void configure_zen_profile(const char *profile) {
                         false, "Zen profile file");
 
   printf("Configured Zen profile: %s\n", profile);
+  note_written_profile(profile, "Zen Browser");
   free(chrome_dir);
   free(bridge);
   free(user_chrome);
@@ -1121,14 +1381,9 @@ static void setup_zen_profiles(void) {
     return;
   str_list_t profiles = list_profiles(g_zen_profiles_file, g_zen_root);
   str_list_t existing = {0};
-  for (size_t i = 0; i < profiles.count; i++) {
-    struct stat st;
-    if (stat(profiles.items[i], &st) == 0 && S_ISDIR(st.st_mode))
+  for (size_t i = 0; i < profiles.count; i++)
+    if (profile_writable(profiles.items[i], "Zen", true))
       list_push(&existing, xstrdup(profiles.items[i]));
-    else
-      fprintf(stderr, "Skipped missing Zen profile: %s\n",
-              profiles.items[i]);
-  }
   if (existing.count == 0)
     return;
   if (!zen_bridge_owned(g_zen_bridge_source))
@@ -1201,8 +1456,10 @@ static void remove_zen_profile(const char *profile) {
                        "Zen profile file");
   if (is_regular_file(bridge))
     unlink(bridge);
-  if (configured)
+  if (configured) {
     printf("Removed Zen profile bridge: %s\n", profile);
+    note_written_profile(profile, "Zen Browser");
+  }
 
   free(chrome_dir);
   free(bridge);
@@ -1214,16 +1471,12 @@ static void remove_zen_profiles(void) {
   if (!is_regular_file(g_zen_profiles_file))
     return;
   str_list_t profiles = list_profiles(g_zen_profiles_file, g_zen_root);
-  for (size_t i = 0; i < profiles.count; i++) {
-    struct stat st;
-    if (stat(profiles.items[i], &st) == 0 && S_ISDIR(st.st_mode))
+  for (size_t i = 0; i < profiles.count; i++)
+    if (profile_writable(profiles.items[i], "Zen", false))
       validate_zen_profile(profiles.items[i]);
-  }
-  for (size_t i = 0; i < profiles.count; i++) {
-    struct stat st;
-    if (stat(profiles.items[i], &st) == 0 && S_ISDIR(st.st_mode))
+  for (size_t i = 0; i < profiles.count; i++)
+    if (profile_writable(profiles.items[i], "Zen", true))
       remove_zen_profile(profiles.items[i]);
-  }
 }
 
 /* ------------------------------------------------------- firefox bridge */
@@ -1316,6 +1569,8 @@ static void copy_tree(const char *src, const char *dst) {
   if (!dir)
     fail("could not read Firefox payload: %s", src);
   mkdir_p700(dst);
+  /* Staged into a fresh directory, so a file that cannot be read fails the
+   * install rather than leaving a partial payload. */
   struct dirent *ent;
   while ((ent = readdir(dir))) {
     if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0)
@@ -1333,15 +1588,81 @@ static void copy_tree(const char *src, const char *dst) {
     } else if (S_ISREG(st.st_mode)) {
       size_t len;
       char *data = read_file(src_path, &len);
-      if (data) {
-        atomic_write(dst_path, data, len, 0600, false);
-        free(data);
-      }
+      if (!data)
+        fail("could not read Firefox payload file: %s", src_path);
+      atomic_write(dst_path, data, len, 0600, false);
+      free(data);
     }
     free(src_path);
     free(dst_path);
   }
   closedir(dir);
+}
+
+/* Staging names beside the payload: .<payload>.new.XXXXXX, .<payload>.old.XXXXXX */
+static bool ff_payload_leftover(const char *name) {
+  size_t n = strlen(FF_PAYLOAD_DIRNAME);
+  return name[0] == '.' && strncmp(name + 1, FF_PAYLOAD_DIRNAME, n) == 0
+         && (strncmp(name + 1 + n, ".new.", 5) == 0
+             || strncmp(name + 1 + n, ".old.", 5) == 0);
+}
+
+/* Remove what an interrupted install left beside the payload, if ours. */
+static void clean_ff_payload_leftovers(const char *chrome_dir) {
+  DIR *d = opendir(chrome_dir);
+  if (!d)
+    return;
+  struct dirent *ent;
+  while ((ent = readdir(d))) {
+    if (!ff_payload_leftover(ent->d_name))
+      continue;
+    char *path = path_join(chrome_dir, ent->d_name);
+    if (!path_is_symlink(path) && ff_payload_owned(path))
+      remove_tree(path);
+    free(path);
+  }
+  closedir(d);
+}
+
+/* Replace the payload as one step: build the new tree beside it, then
+ * swap. Firefox never sees a half-copied theme, and files dropped from
+ * the new payload go with the old tree. */
+static void install_ff_payload(const char *chrome_dir, const char *payload_dir) {
+  clean_ff_payload_leftovers(chrome_dir);
+  char *stage = xasprintf("%s/.%s.new.XXXXXX", chrome_dir, FF_PAYLOAD_DIRNAME);
+  if (!mkdtemp(stage))
+    fail("could not stage the Firefox payload in %s", chrome_dir);
+  copy_tree(g_ff_payload_source, stage);
+  if (!ff_payload_owned(stage)) {
+    remove_tree(stage);
+    fail("staged Firefox payload has no ownership marker: %s", stage);
+  }
+  if (!path_exists(payload_dir)) {
+    if (rename(stage, payload_dir) < 0) {
+      remove_tree(stage);
+      fail("could not install the Firefox payload: %s", payload_dir);
+    }
+  } else if (renameat2(AT_FDCWD, stage, AT_FDCWD, payload_dir,
+                       RENAME_EXCHANGE) == 0) {
+    remove_tree(stage); /* now the previous payload */
+  } else {
+    /* No atomic exchange here: two renames, the window between them a
+     * missing (not a mixed) payload that the next run repairs. */
+    char *old = xasprintf("%s/.%s.old.XXXXXX", chrome_dir, FF_PAYLOAD_DIRNAME);
+    if (!mkdtemp(old) || rmdir(old) < 0 || rename(payload_dir, old) < 0) {
+      remove_tree(stage);
+      fail("could not replace the Firefox payload: %s", payload_dir);
+    }
+    if (rename(stage, payload_dir) < 0) {
+      rename(old, payload_dir);
+      remove_tree(stage);
+      fail("could not replace the Firefox payload: %s", payload_dir);
+    }
+    remove_tree(old);
+    free(old);
+  }
+  fsync_parent(payload_dir);
+  free(stage);
 }
 
 static void configure_ff_profile(const char *profile) {
@@ -1370,7 +1691,7 @@ static void configure_ff_profile(const char *profile) {
       remove_ff_payload_dir(payload_dir);
     free(checkout_dir);
   } else {
-    copy_tree(g_ff_payload_source, payload_dir);
+    install_ff_payload(chrome_dir, payload_dir);
 
     char *block = xasprintf(
         "%s\n@import url(\"%s/%s\");\n@import url(\"%s\");\n\n%s\n",
@@ -1388,24 +1709,30 @@ static void configure_ff_profile(const char *profile) {
     free(content_block);
   }
 
-  install_managed_block(user_prefs, FF_PREFS_BEGIN, FF_PREFS_END,
-                        FF_PREFS_BEGIN "\n"
-                        "user_pref(\"toolkit.legacyUserProfileCustomizations."
-                        "stylesheets\", true);\n"
-                        "user_pref(\"svg.context-properties.content.enabled\""
-                        ", true);\n"
-                        "user_pref(\"browser.theme.dark-private-windows\""
-                        ", false);\n"
-                        "user_pref(\"browser.tabs.allow_transparent_browser\""
-                        ", true);\n"
-                        "user_pref(\"widget.wayland.opaque-region.enabled\""
-                        ", false);\n"
-                        FF_PREFS_END "\n",
-                        false, "Firefox profile file");
+  /* The bootstrap prefs, only where there is no block yet: the sync that
+   * setup runs next writes the full block (palette prefs included), so
+   * rewriting it here would only churn the user's user.js on every run. */
+  if (!managed_block_present(user_prefs, FF_PREFS_BEGIN, FF_PREFS_END)) {
+    install_managed_block(user_prefs, FF_PREFS_BEGIN, FF_PREFS_END,
+                          FF_PREFS_BEGIN "\n"
+                          "user_pref(\"toolkit.legacyUserProfileCustomizations."
+                          "stylesheets\", true);\n"
+                          "user_pref(\"svg.context-properties.content.enabled\""
+                          ", true);\n"
+                          "user_pref(\"browser.theme.dark-private-windows\""
+                          ", false);\n"
+                          "user_pref(\"browser.tabs.allow_transparent_browser\""
+                          ", true);\n"
+                          "user_pref(\"widget.wayland.opaque-region.enabled\""
+                          ", false);\n"
+                          FF_PREFS_END "\n",
+                          false, "Firefox profile file");
+  }
 
   printf(checkout ? "Configured Firefox profile (theme checkout): %s\n"
                   : "Configured Firefox profile: %s\n",
          profile);
+  note_written_profile(profile, "Firefox");
   free(chrome_dir);
   free(payload_dir);
   free(user_chrome);
@@ -1421,14 +1748,9 @@ static void setup_ff_profiles(void) {
     return; /* Firefox payload not packaged; palette sync still works. */
   str_list_t profiles = list_profiles(g_ff_profiles_file, g_ff_root);
   str_list_t existing = {0};
-  for (size_t i = 0; i < profiles.count; i++) {
-    struct stat st;
-    if (stat(profiles.items[i], &st) == 0 && S_ISDIR(st.st_mode))
+  for (size_t i = 0; i < profiles.count; i++)
+    if (profile_writable(profiles.items[i], "Firefox", true))
       list_push(&existing, xstrdup(profiles.items[i]));
-    else
-      fprintf(stderr, "Skipped missing Firefox profile: %s\n",
-              profiles.items[i]);
-  }
   if (existing.count == 0)
     return;
   for (size_t i = 0; i < existing.count; i++)
@@ -1504,25 +1826,7 @@ static const char *ff_profile_status(const char *profile) {
 }
 
 static void remove_ff_payload_dir(const char *dir) {
-  DIR *d = opendir(dir);
-  if (!d)
-    return;
-  struct dirent *ent;
-  while ((ent = readdir(d))) {
-    if (strcmp(ent->d_name, ".") == 0 || strcmp(ent->d_name, "..") == 0)
-      continue;
-    char *child = path_join(dir, ent->d_name);
-    struct stat st;
-    if (lstat(child, &st) == 0) {
-      if (S_ISDIR(st.st_mode))
-        remove_ff_payload_dir(child);
-      else
-        unlink(child);
-    }
-    free(child);
-  }
-  closedir(d);
-  rmdir(dir);
+  remove_tree(dir);
 }
 
 static void remove_ff_profile(const char *profile) {
@@ -1558,8 +1862,10 @@ static void remove_ff_profile(const char *profile) {
   /* The radius file is shared with the old per-user hook; only ours goes. */
   if (first_line_is(radius_file, FF_RADIUS_MARKER))
     unlink(radius_file);
-  if (configured)
+  if (configured) {
     printf("Removed Firefox profile bridge: %s\n", profile);
+    note_written_profile(profile, "Firefox");
+  }
 
   free(chrome_dir);
   free(payload_dir);
@@ -1575,16 +1881,12 @@ static void remove_ff_profiles(void) {
   if (!is_regular_file(g_ff_profiles_file))
     return;
   str_list_t profiles = list_profiles(g_ff_profiles_file, g_ff_root);
-  for (size_t i = 0; i < profiles.count; i++) {
-    struct stat st;
-    if (stat(profiles.items[i], &st) == 0 && S_ISDIR(st.st_mode))
+  for (size_t i = 0; i < profiles.count; i++)
+    if (profile_writable(profiles.items[i], "Firefox", false))
       validate_ff_profile(profiles.items[i]);
-  }
-  for (size_t i = 0; i < profiles.count; i++) {
-    struct stat st;
-    if (stat(profiles.items[i], &st) == 0 && S_ISDIR(st.st_mode))
+  for (size_t i = 0; i < profiles.count; i++)
+    if (profile_writable(profiles.items[i], "Firefox", true))
       remove_ff_profile(profiles.items[i]);
-  }
 }
 
 /* ------------------------------------------------------- palette refresh */
@@ -1828,11 +2130,9 @@ static void refresh_ff_profiles_colors(const palette_t *p) {
   if (!is_regular_file(g_ff_profiles_file))
     return;
   str_list_t profiles = list_profiles(g_ff_profiles_file, g_ff_root);
-  for (size_t i = 0; i < profiles.count; i++) {
-    struct stat st;
-    if (stat(profiles.items[i], &st) == 0 && S_ISDIR(st.st_mode))
+  for (size_t i = 0; i < profiles.count; i++)
+    if (profile_writable(profiles.items[i], "Firefox", false))
       refresh_ff_profile_colors(profiles.items[i], p);
-  }
 }
 
 /* --------------------------------------------------------------- status */
@@ -1921,17 +2221,23 @@ static void cmd_setup(void) {
   printf("Enabled user hook: %s\n", g_hook_path);
   printf("Using packaged native host: %s\n", g_native_host_path);
 
+  g_backup_command = "setup";
   setup_zen_profiles();
   setup_ff_profiles();
+  g_backup_command = NULL; /* the palette refresh below changes no user file */
   cmd_sync();
   printf("Queued the current Omarchy palette for connected browsers.\n");
   if (g_zen_configured > 0)
     printf("Restart Zen Browser once to load the Omafox bridge.\n");
   if (g_ff_configured > 0)
     printf("Restart Firefox once to load the Omafox bridge.\n");
+  if (g_backup_dir)
+    printf("Backed up the files it changed to %s\n", g_backup_dir);
+  psd_resync();
 }
 
 static void cmd_remove(void) {
+  g_backup_command = "remove";
   remove_zen_profiles();
   remove_ff_profiles();
 
@@ -1943,7 +2249,15 @@ static void cmd_remove(void) {
     unlink(g_state_file);
     printf("Removed theme state: %s\n", g_state_file);
   }
+  /* Backups stay (they are how a remove is undone); the lock goes with the
+   * state directory when nothing else is left in it. */
+  char *lock = path_join(g_state_dir, "lock");
+  unlink(lock);
+  free(lock);
   rmdir(g_state_dir);
+  if (g_backup_dir)
+    printf("Backed up the files it changed to %s\n", g_backup_dir);
+  psd_resync();
   printf("System files are managed by pacman; remove them with:"
          " sudo pacman -Rns omafox\n");
 }
@@ -1983,6 +2297,10 @@ int main(int argc, char **argv) {
     }
   if (known && argc > 2)
     fail("command '%s' does not accept arguments", command);
+
+  if (strcmp(command, "sync") == 0 || strcmp(command, "setup") == 0
+      || strcmp(command, "remove") == 0)
+    acquire_lock();
 
   if (strcmp(command, "sync") == 0)
     cmd_sync();

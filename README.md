@@ -171,6 +171,28 @@ When a supported browser starts, the extension restores its saved theme and
 the native host sends the latest Omarchy palette again. Everything stays
 local to the machine; there is no web service or always-running daemon.
 
+## Profile safety
+
+`setup`, `sync` and `remove` only write profiles that `profiles.ini` lists,
+and only inside their own marked blocks and the `omarchy-firefox/` payload.
+
+- **profile-sync-daemon.** A psd profile is written through its symlink
+  into tmpfs, never into psd's `-backup`, `-back-ovfs` or
+  `-backup-crashrecovery-*` copies. A symlink with nothing behind it (psd
+  stopped or mid-restore) is skipped, never written through. After a setup
+  or remove, omafox asks psd to resync, so the change reaches disk at once.
+- **Backups.** Before setup or remove changes a file that holds your own
+  content (`user.js`, `userChrome.css`, `userContent.css`), it copies it to
+  `~/.local/state/omafox/backups/<time>-<command>-<pid>/<path>`; the newest
+  ten sets are kept. To undo, copy the file back.
+- **Atomic writes.** Every file is written to a temporary file, flushed,
+  and renamed into place. The theme payload is staged beside the old one
+  and swapped in one step.
+- **One run at a time.** A lock in `~/.local/state/omafox/` serializes the
+  theme hook's syncs with setup and remove.
+- **Running browsers** are fine: omafox never touches `prefs.js`, and it
+  names any profile that needs a restart.
+
 ## Troubleshooting
 
 If a browser does not update after a theme change:
