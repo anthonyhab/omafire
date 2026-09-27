@@ -95,6 +95,10 @@
      * accent over the page's colour. */
     if (!tab) return;
     const color = (await faviconColor(tab.favIconUrl)) || baseTheme.colors.tab_loading;
+    /* Reading a favicon can take a while: if the window has moved on to
+     * another tab meanwhile, that tab's own paint owns the glow. */
+    const [current] = await browser.tabs.query({ active: true, windowId });
+    if (!current || current.id !== tab.id) return;
     if (applied.get(windowId) === color) return;
     applied.set(windowId, color);
     await browser.theme.update(windowId, withGlow(color));

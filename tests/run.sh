@@ -57,6 +57,7 @@ done
 node "$SCRIPT_DIR/theme.test.js"
 node "$SCRIPT_DIR/background.test.js"
 node "$SCRIPT_DIR/tabglow.test.js"
+node "$SCRIPT_DIR/tabglow-race.test.js"
 node "$SCRIPT_DIR/wallpaper.test.js"
 node "$SCRIPT_DIR/native-host.test.js"
 "$SCRIPT_DIR/command.test.sh"
