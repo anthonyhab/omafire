@@ -112,13 +112,25 @@
   --oc-line-strong: color-mix(in srgb, var(--oc-text) 22%, transparent);
   --oc-hover: color-mix(in srgb, var(--oc-text) 8%, transparent);
   --oc-active: color-mix(in srgb, var(--oc-text) 18%, transparent);
-  --oc-selected: color-mix(in srgb, var(--oc-text) 12%, transparent);
+  --oc-selected: color-mix(in srgb, var(--oc-text) 9%, transparent);
   /* The address field at rest and hovered: a quiet box on the hairline,
    * findable without being the heaviest slab in the window. */
   --oc-field-rest: color-mix(in srgb, var(--oc-text) 5%, transparent);
   --oc-field-hover: color-mix(in srgb, var(--oc-text) 10%, transparent);
   --oc-accent-wash: color-mix(in srgb, var(--oc-accent) 22%, transparent);
-  --oc-glow-wash: color-mix(in srgb, var(--oc-glow) 16%, transparent);
+  /* The active tab's light: strong at its active edge, soft by the middle,
+   * clear past three quarters. A hovered tab gets a hint of the same. Use
+   * as linear-gradient(<direction>, var(--oc-glow-falloff)). */
+  --oc-glow-falloff:
+    color-mix(in srgb, var(--oc-glow) 22%, transparent),
+    color-mix(in srgb, var(--oc-glow) 6%, transparent) 45%,
+    transparent 75%;
+  --oc-glow-hint:
+    color-mix(in srgb, var(--oc-glow) 8%, transparent), transparent 60%;
+  /* The active tab's 2px edge is focus, so it is Hyprland's active border
+   * like every other focus mark; the page's own colour stays in the light
+   * behind it. */
+  --oc-edge-active: var(--oc-focus);
   /* Destructive actions (a tab's close button) warn in the palette's red.
    * The lightweight theme carries no red, so like the tab-group swatches
    * it follows the generated palette and catches up on restart. */

@@ -72,20 +72,6 @@
     color: var(--oc-text) !important;
   }
 
-  /* Container tabs carry their identity colour as one more edge: a 2px
-   * bar on the trailing edge of every surface (row, tile, rail), which no
-   * active bar uses, so identity and state never share an edge. Every
-   * tab surface lists --oc-ident first in its box-shadow; it is a no-op
-   * shadow on ordinary tabs. The colours stay Firefox's own: an Omarchy
-   * palette can be monochrome, and identity has to stay tellable apart. */
-  & .tabbrowser-tab {
-    --oc-ident: 0 0 transparent;
-  }
-
-  & .tabbrowser-tab[usercontextid] {
-    --oc-ident: inset -2px 0 0 var(--identity-tab-color);
-  }
-
   & .tab-background {
     border: none !important;
     border-radius: var(--oc-radius-small) !important;
@@ -93,13 +79,41 @@
     transition: background-color var(--oc-fast), box-shadow var(--oc-fast) !important;
   }
 
-  & .tabbrowser-tab:not([selected], [multiselected]) .tab-background {
-    background: transparent !important;
-    box-shadow: var(--oc-ident) !important;
+  /* Container tabs carry their identity colour as a tag: a short 2px tick
+   * centred on the trailing edge of every surface (row, tile, rail), which
+   * no active bar uses, so identity and state never share an edge. Short,
+   * so it reads as a tag and not as a second active bar. The colours stay
+   * Firefox's own: an Omarchy palette can be monochrome, and identity has
+   * to stay tellable apart. The tick is placed in the tab (which Firefox
+   * positions; the background stays unpositioned, or the group line inside
+   * it would lose the tab as its box), so --oc-tick-end is how far the
+   * surface's trailing edge sits in from the tab's. */
+  & .tabbrowser-tab {
+    --oc-tick-end: var(--oc-inset);
   }
 
+  & .tabbrowser-tab[usercontextid] .tab-background::after {
+    content: "" !important;
+    position: absolute !important;
+    inset-inline-end: var(--oc-tick-end) !important;
+    top: 50% !important;
+    translate: 0 -50% !important;
+    width: 2px !important;
+    height: calc(var(--oc-row) / 2 - var(--oc-u)) !important;
+    border-radius: 1px !important;
+    background: var(--identity-tab-color) !important;
+    pointer-events: none !important;
+  }
+
+  & .tabbrowser-tab:not([selected], [multiselected]) .tab-background {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  /* Hover fills the row and hints at the light it gets when selected. */
   & .tabbrowser-tab:hover:not([selected]) .tab-background {
     background-color: var(--oc-hover) !important;
+    background-image: linear-gradient(90deg, var(--oc-glow-hint)) !important;
   }
 
   /* One edge logic for every tab surface (rows, tiles, rail, new tab):
@@ -107,33 +121,42 @@
    *   hairline = a tile's own edge (--oc-line), stronger when selected
    *   2px bar  = the active tab, on the edge facing its content: the
    *              leading edge for a row, the bottom edge for a tile
-   *   ident   = a container tab's colour, on the trailing edge
+   *   tick    = a container tab's colour, centred on the trailing edge
    * Nothing else paints an edge or a shadow.
    *
-   * Selected: a flat wash with a hairline edge, no raised shadow. */
+   * Selected: a flat wash with a hairline edge, no raised shadow.
+   * Selected surfaces set background longhands, never the shorthand: it
+   * would make background-size !important, and the glow's entrance
+   * animates it. So the longhands the shorthand used to reset are named:
+   * Nova clips the selected tab's background to its border-area (for its
+   * gradient border), which with no border paints nothing. */
   & .tabbrowser-tab:is([selected], [multiselected]) .tab-background {
-    background: var(--oc-selected) !important;
-    box-shadow: var(--oc-ident), inset 0 0 0 1px var(--oc-line-strong) !important;
+    background-color: var(--oc-selected) !important;
+    background-image: none !important;
+    background-clip: border-box !important;
+    background-origin: border-box !important;
+    box-shadow: inset 0 0 0 1px var(--oc-line-strong) !important;
   }
 
-  /* The active tab glows: a hard 2px edge in the glow colour and a wash
-   * that fades out across the row, over the selected surface. */
+  /* The active tab glows: a hard 2px focus edge, and light falling off
+   * across the row from it. When a tab becomes active the light pours in
+   * from that edge (none under reduced motion). */
   & .tabbrowser-tab[selected] .tab-background {
-    background:
-      linear-gradient(90deg, var(--oc-glow-wash), transparent 70%),
-      var(--oc-selected) !important;
+    background-image: linear-gradient(90deg, var(--oc-glow-falloff)) !important;
+    background-repeat: no-repeat !important;
+    background-position: left center !important;
     box-shadow:
-      var(--oc-ident),
-      inset 2px 0 0 var(--oc-glow),
+      inset 2px 0 0 var(--oc-edge-active),
       inset 0 0 0 1px var(--oc-line-strong) !important;
+    animation: oc-glow-in-row var(--oc-slow) var(--oc-ease-enter) !important;
   }
 
   & .tabbrowser-tab[multiselected]:not([selected]) .tab-background {
-    background: var(--oc-accent-wash) !important;
-    box-shadow: var(--oc-ident) !important;
+    background-color: var(--oc-accent-wash) !important;
+    box-shadow: none !important;
   }
 
-  /* Nova's context line is replaced by the --oc-ident edge above. */
+  /* Nova's context line is replaced by the container tick above. */
   & .tab-context-line {
     display: none !important;
   }
@@ -224,31 +247,33 @@
     & .tabbrowser-tab {
       padding: 0 calc(var(--oc-u) / 2) !important;
       height: var(--oc-pinned) !important;
+      --oc-tick-end: calc(var(--oc-u) / 2);
     }
 
     & .tab-background {
       margin: 0 !important;
     }
 
-    /* A tile at rest is its edge only; hover fills it like a row. */
+    /* A tile at rest is its edge only; hover fills it like a row, the
+     * hint rising from its bottom edge. */
     & .tabbrowser-tab:not([selected], [multiselected]) .tab-background {
       background: transparent !important;
-      box-shadow: var(--oc-ident), inset 0 0 0 1px var(--oc-line) !important;
+      box-shadow: inset 0 0 0 1px var(--oc-line) !important;
     }
 
     & .tabbrowser-tab:hover:not([selected], [multiselected]) .tab-background {
       background-color: var(--oc-hover) !important;
+      background-image: linear-gradient(0deg, var(--oc-glow-hint)) !important;
     }
 
     /* Slabs glow from their bottom edge. */
     & .tabbrowser-tab[selected] .tab-background {
-      background:
-        linear-gradient(0deg, var(--oc-glow-wash), transparent 70%),
-        var(--oc-selected) !important;
+      background-image: linear-gradient(0deg, var(--oc-glow-falloff)) !important;
+      background-position: left bottom !important;
       box-shadow:
-        var(--oc-ident),
-        inset 0 -2px 0 var(--oc-glow),
+        inset 0 -2px 0 var(--oc-edge-active),
         inset 0 0 0 1px var(--oc-line-strong) !important;
+      animation-name: oc-glow-in-tile !important;
     }
   }
 
@@ -393,6 +418,18 @@
   }
 }
 
+/* The active tab's light pours in from its active edge. Only the size
+ * moves: a row's light grows along the row, a tile's up from its bottom. */
+@keyframes oc-glow-in-row {
+  from { background-size: 0% 100%; }
+  to { background-size: 100% 100%; }
+}
+
+@keyframes oc-glow-in-tile {
+  from { background-size: 100% 0%; }
+  to { background-size: 100% 100%; }
+}
+
 /* The vertical strip scrolls with the wheel; no arrow buttons. */
 #tabbrowser-arrowscrollbox[orient="vertical"]::part(scrollbutton-up),
 #tabbrowser-arrowscrollbox[orient="vertical"]::part(scrollbutton-down) {
@@ -433,13 +470,16 @@
    * edge like a pinned tile; a leading bar would pull the lone icon off
    * the column's centre line. */
   & .tabbrowser-tab[selected] .tab-background {
-    background:
-      linear-gradient(0deg, var(--oc-glow-wash), transparent 70%),
-      var(--oc-selected) !important;
+    background-image: linear-gradient(0deg, var(--oc-glow-falloff)) !important;
+    background-position: left bottom !important;
     box-shadow:
-      var(--oc-ident),
-      inset 0 -2px 0 var(--oc-glow),
+      inset 0 -2px 0 var(--oc-edge-active),
       inset 0 0 0 1px var(--oc-line-strong) !important;
+    animation-name: oc-glow-in-tile !important;
+  }
+
+  & .tabbrowser-tab:hover:not([selected], [multiselected]) .tab-background {
+    background-image: linear-gradient(0deg, var(--oc-glow-hint)) !important;
   }
 
   /* Rail tiles are tab-sized, at the tab pitch, one per row at any column
@@ -453,6 +493,7 @@
     padding: 0 !important;
     width: var(--tab-collapsed-width) !important;
     height: var(--oc-row) !important;
+    --oc-tick-end: var(--oc-inset);
 
     & .tab-background {
       margin-inline: var(--oc-inset) !important;
@@ -484,6 +525,7 @@
 
   & .tabbrowser-tab {
     padding: 0 !important;
+    --oc-tick-end: 0px;
     /* Nova shrinks split halves to 24px in compact density. */
     --tab-min-height: var(--oc-row) !important;
     --tab-collapsed-background-width: var(--oc-button) !important;
