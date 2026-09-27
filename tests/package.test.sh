@@ -43,6 +43,20 @@ make -C "$PROJECT_DIR" \
 [[ -f "$PACKAGE_ROOT/usr/share/licenses/omafox/LICENSE" ]]
 [[ $($SYSTEM_COMMAND version) == "$(cat "$PROJECT_DIR/VERSION")" ]]
 
+# The chrome script loader: autoconfig names omafox.cfg, whose first line
+# Firefox skips, and every script it lists ships beside the signed XPI.
+FIREFOX_DIR="$PACKAGE_ROOT/usr/lib/firefox"
+grep -Fqx 'pref("general.config.filename", "omafox.cfg");' \
+  "$FIREFOX_DIR/defaults/pref/omafox-prefs.js"
+[[ $(head -c2 "$FIREFOX_DIR/omafox.cfg") == '//' ]]
+read -ra scripts < <(sed -nE 's/^ *const SCRIPTS = \[(.*)\];/\1/p' "$FIREFOX_DIR/omafox.cfg" | tr -d '",')
+[[ ${#scripts[@]} -gt 0 ]]
+for name in "${scripts[@]}"; do
+  [[ -f "$FIREFOX_DIR/omafox/$name.uc.js" ]]
+done
+[[ $(find "$FIREFOX_DIR/omafox" -name '*.uc.js' | wc -l) -eq ${#scripts[@]} ]]
+cmp "$PROJECT_DIR/packaging/extension/omafox.xpi" "$FIREFOX_DIR/omafox/omafox.xpi"
+
 python3 - "$SYSTEM_MANIFEST" <<'PY'
 import json
 import sys

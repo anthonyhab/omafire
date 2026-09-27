@@ -1725,6 +1725,7 @@ static void configure_ff_profile(const char *profile) {
                           ", true);\n"
                           "user_pref(\"widget.wayland.opaque-region.enabled\""
                           ", false);\n"
+                          "user_pref(\"omarchy.omafox\", true);\n"
                           FF_PREFS_END "\n",
                           false, "Firefox profile file");
   }
@@ -2098,6 +2099,10 @@ static void refresh_ff_profile_colors(const char *profile,
        * the glass above it unblurred until the next tab switch. Never
        * claim opacity; the whole window is glass under omarchy anyway. */
       "user_pref(\"widget.wayland.opaque-region.enabled\", false);\n"
+      /* Marks the profile as omafox's: the package's chrome script loader
+       * (omafox.cfg) runs only where this is set, and the user's own
+       * omarchy.scripts switch, never written here, stays theirs. */
+      "user_pref(\"omarchy.omafox\", true);\n"
       "user_pref(\"browser.nova.enabled\", true);\n"
       "user_pref(\"browser.newtabpage.activity-stream.nova.enabled\""
       ", true);\n"
@@ -2197,11 +2202,12 @@ static void cmd_sync(void) {
   free(theme_name);
   char *payload = format_payload(&palette, escaped);
   free(escaped);
-  store_theme_payload(payload);
 
-  /* Push the same palette into configured Firefox profiles so the first
-   * painted frame already matches — no waiting on extension startup. */
+  /* Profile files first: the same palette for the first painted frame, and
+   * ready before theme.json below wakes the extension, whose repaint is
+   * what tells the live-palette chrome script to reread them. */
   refresh_ff_profiles_colors(&palette);
+  store_theme_payload(payload);
   free(payload);
 }
 

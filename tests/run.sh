@@ -24,6 +24,7 @@ shellcheck \
   "$PROJECT_DIR/packaging/omafox-hook" \
   "$PROJECT_DIR/scripts/sync-firefox-payload.sh" \
   "$PROJECT_DIR/scripts/check-payload.sh" \
+  "$PROJECT_DIR/scripts/check-xpi.sh" \
   "$SCRIPT_DIR/run.sh" \
   "$SCRIPT_DIR/command.test.sh" \
   "$SCRIPT_DIR/package.test.sh" \
@@ -40,6 +41,11 @@ node --check "$PROJECT_DIR/extension/wallpaper.js"
 node --check "$PROJECT_DIR/extension/popup/popup.js"
 node --check "$PROJECT_DIR/extension/newtab/newtab.js"
 node --check "$SCRIPT_DIR/native-host.test.js"
+node --check "$PROJECT_DIR/chrome/omafox-prefs.js"
+node --check - < "$PROJECT_DIR/chrome/omafox.cfg"
+for script in "$PROJECT_DIR"/chrome/scripts/*.uc.js; do
+  node --check "$script"
+done
 cc -std=c17 -Wall -Wextra -Wpedantic -Werror -fsyntax-only \
   "$PROJECT_DIR/omarchy/omafox-native-host.c"
 cc -std=c17 -Wall -Wextra -Wpedantic -Werror -fsyntax-only \
@@ -77,6 +83,9 @@ elif [[ -n ${OMAFOX_REQUIRE_PAYLOAD_CHECK:-} ]]; then
 else
   echo "payload check skipped: no theme checkout at $theme_checkout"
 fi
+
+# The packaged XPI is the signed build of extension/ as committed.
+"$PROJECT_DIR/scripts/check-xpi.sh"
 
 node "$SCRIPT_DIR/theme.test.js"
 node "$SCRIPT_DIR/background.test.js"

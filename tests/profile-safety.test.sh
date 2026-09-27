@@ -110,6 +110,7 @@ grep -qx -- '--user start psd-resync.service' "$TEST_ROOT/systemctl.log"
 [[ -f "$LIVE_TMPFS/chrome/omarchy-firefox/userChrome.css" ]]
 grep -Fq "$PREFS_BEGIN" "$LIVE_TMPFS/user.js"
 grep -Fq 'user_pref("my.own", 1);' "$LIVE_TMPFS/user.js"
+grep -Fqx 'user_pref("omarchy.omafox", true);' "$LIVE_TMPFS/user.js"
 # Nothing created behind the dangling link, no psd copy changed.
 [[ -L $OFFLINE && ! -e $OFFLINE ]]
 [[ ! -e "$PSD_RUN/user-firefox-offline.default" ]]

@@ -4,6 +4,8 @@ BUILD_DIR ?= build
 CC ?= cc
 THEME_DIR ?= ../theme
 THEME_REV ?= HEAD
+# Firefox's install directory (GreD), where its autoconfig is read from.
+FIREFOX_DIR ?= $(PREFIX)/lib/firefox
 
 CLI := $(BUILD_DIR)/omafox
 NATIVE_HOST := $(BUILD_DIR)/omafox-native-host
@@ -39,6 +41,10 @@ install: all
 		find "$(DESTDIR)$(PREFIX)/share/omafox/firefox" -type d -exec chmod 755 {} +; \
 		find "$(DESTDIR)$(PREFIX)/share/omafox/firefox" -type f -exec chmod 644 {} +; \
 	fi
+	install -Dm644 chrome/omafox-prefs.js "$(DESTDIR)$(FIREFOX_DIR)/defaults/pref/omafox-prefs.js"
+	install -Dm644 chrome/omafox.cfg "$(DESTDIR)$(FIREFOX_DIR)/omafox.cfg"
+	install -Dm644 -t "$(DESTDIR)$(FIREFOX_DIR)/omafox" chrome/scripts/*.uc.js
+	install -Dm644 packaging/extension/omafox.xpi "$(DESTDIR)$(FIREFOX_DIR)/omafox/omafox.xpi"
 	install -Dm644 README.md "$(DESTDIR)$(PREFIX)/share/doc/omafox/README.md"
 	install -Dm644 LICENSE "$(DESTDIR)$(PREFIX)/share/licenses/omafox/LICENSE"
 
