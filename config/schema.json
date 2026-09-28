@@ -79,6 +79,13 @@
       "prefs": [{ "name": "omafire.transparency", "format": "fixed2" }]
     },
     {
+      "key": "glass-pages",
+      "about": "Pages on the glass too: their background shows the blurred desktop (needs glass and Cinder).",
+      "type": "bool",
+      "default": false,
+      "prefs": [{ "name": "omafire.glass-pages" }]
+    },
+    {
       "key": "tab-numbers",
       "about": "Number the first nine tabs.",
       "type": "bool",

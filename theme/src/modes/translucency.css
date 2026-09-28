@@ -2,7 +2,8 @@
  *
  * The window surface and panels turn translucent; with a Hyprland blur
  * rule for Firefox the chrome reads as frosted glass, elsewhere simply
- * translucent. Pages stay opaque: the page owns its legibility.
+ * translucent. Pages stay opaque (the page owns its legibility) unless
+ * glass pages are on (omafire.glass-pages: frame.css, content.css, Cinder).
  *
  * frame.css paints the surface exactly once (body), so alpha never stacks.
  * Menus and panels keep a floor of 0.8 so dense text stays readable.

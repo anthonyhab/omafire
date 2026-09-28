@@ -44,7 +44,8 @@ Optional, all applied live without a restart:
 | `omafire.compact` | `true` | Sidebar layout with the sidebar expanded: hide the column until the pointer reaches the edge. The collapsed icon rail stays visible. |
 | `omafire.chrome-gap` | `true` | Float the page as a card with a gap, Hyprland rounding and a hairline shadow. |
 | `omafire.translucency` | `true` | Glass chrome (frosted with a Hyprland blur rule for Firefox). |
-| `omafire.transparency` | `"0.50"`–`"1.00"` | Glass opacity in 0.01 steps (default 0.85). |
+| `omafire.transparency` | `"0.50"`–`"1.00"` | Glass opacity in 0.01 steps (default 0.85); glass pages share it. |
+| `omafire.glass-pages` | `true` | With glass chrome: pages on the glass too. Cinder paints each page's base translucent and its grey structure in steps over it; the page card drops its canvas. Needs Cinder. |
 | `omafire.tab-numbers` | `true` | Show the Alt+1…8 digit on the first eight tabs: on pinned tiles, rail tiles and split pairs, a legend notched into the tile's left edge, btop-style; beside an expanded row, in the gutter to its left. Tabs hidden in collapsed groups are skipped, as Firefox skips them. |
 | `omafire.extension-glyphs` | `false` | Keep extensions' own icons. By default known extensions get monochrome glyphs that tint with the toolbar (needs `svg.context-properties.content.enabled`, which omafire sets). |
 
@@ -74,7 +75,7 @@ src/modes/gap.css       omafire.chrome-gap
 src/modes/translucency.css  omafire.translucency
 src/modes/tab-numbers.css   omafire.tab-numbers
 src/tokens-content.css  the same tokens for about: pages, from the content palette
-src/content.css         new tab and about: pages
+src/content.css         new tab and about: pages; variables for Cinder on web pages
 ```
 
 The default layout is the top toolbar, which is Firefox's own flow with

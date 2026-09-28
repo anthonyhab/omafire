@@ -218,3 +218,24 @@
     }
   }
 }
+
+/* Web pages: what Cinder (the dark mode add-on built on forced colours)
+ * can't read for itself. Pages can't read prefs; they read these.
+ * - omafire turns off forced colours' text backplate (a Canvas plate
+ *   behind each text run), so Cinder may draw surfaces in other steps.
+ * - Glass pages: Cinder paints the page's base translucent, and frame.css
+ *   clears the canvas behind the page, so the blurred desktop shows. */
+@media not -moz-pref("browser.display.permit_backplate") {
+  :root {
+    --omafire-backplate: 0 !important;
+  }
+}
+@media -moz-pref("omafire.translucency") {
+  @media -moz-pref("omafire.glass-pages") {
+    :root {
+      /* (web content processes can't see string prefs: live-palette.uc.js
+       * publishes omafire.transparency as --omafire-glass-alpha) */
+      --omafire-glass-pages: var(--omafire-glass-alpha, 0.85) !important;
+    }
+  }
+}

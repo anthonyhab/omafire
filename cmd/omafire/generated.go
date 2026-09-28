@@ -225,6 +225,9 @@ func refreshFFProfileColors(profile string, p *palette) {
 		"user_pref(\"browser.display.use_system_colors\", false);\n" +
 		fmt.Sprintf("user_pref(\"browser.anchor_color\", \"%s\");\n", p.get("accent")) +
 		fmt.Sprintf("user_pref(\"browser.visited_color\", \"%s\");\n", p.get("magenta")) +
+		// Forced colours draw a Canvas plate behind every text run, which
+		// would box the text on Cinder's surface steps and on glass pages.
+		"user_pref(\"browser.display.permit_backplate\", false);\n" +
 		fmt.Sprintf("user_pref(\"ui.accentcolor\", \"%s\");\n", accent) +
 		fmt.Sprintf("user_pref(\"ui.accentcolortext\", \"%s\");\n", textOn(p, accent)) +
 		ffPrefsEnd + "\n"

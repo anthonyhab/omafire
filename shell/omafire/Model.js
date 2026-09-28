@@ -32,6 +32,9 @@ var ROWS = [
   { key: "opacity", section: "LOOK", label: "Opacity", type: "slider",
     min: 0.5, max: 1, step: 0.01,
     when: function(c) { return c.glass === true } },
+  { key: "glass-pages", section: "LOOK", label: "Glass pages", type: "toggle",
+    hint: "Pages show the desktop behind them. Needs Cinder.",
+    when: function(c) { return c.glass === true } },
   { key: "tab-numbers", section: "LOOK", label: "Tab numbers", type: "toggle" },
   { key: "extension-glyphs", section: "LOOK", label: "Extension glyphs", type: "toggle",
     hint: "Monochrome icons for extensions." }

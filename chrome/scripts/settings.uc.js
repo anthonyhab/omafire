@@ -116,6 +116,13 @@
       when: () => get("omafire.translucency", false),
     },
     {
+      label: "Glass pages", kind: "toggle", prefs: ["omafire.glass-pages"],
+      read: () => get("omafire.glass-pages", false),
+      write: v => set("omafire.glass-pages", v),
+      when: () => get("omafire.translucency", false),
+      hint: "Pages show the desktop behind them. Needs Cinder.",
+    },
+    {
       label: "Tab numbers", kind: "toggle", prefs: ["omafire.tab-numbers"],
       read: () => get("omafire.tab-numbers", false),
       write: v => set("omafire.tab-numbers", v),

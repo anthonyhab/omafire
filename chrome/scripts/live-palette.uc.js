@@ -82,14 +82,10 @@
     }
   }
 
-  let timer = null;
-  async function refresh() {
-    const css = await build();
-    if (!css) {
-      return;
-    }
+  // Replace the user sheet remembered under `key` with `css`.
+  function swap(key, css) {
     const uri = "data:text/css;charset=utf-8," + encodeURIComponent(css);
-    const previous = defaults.getStringPref(CURRENT, "");
+    const previous = defaults.getStringPref(key, "");
     if (previous === uri) {
       return;             // another window got there first
     }
@@ -103,8 +99,28 @@
         sss.unregisterSheet(old, sss.USER_SHEET);
       }
     }
-    defaults.setStringPref(CURRENT, uri);
+    defaults.setStringPref(key, uri);
   }
+
+  let timer = null;
+  async function refresh() {
+    const css = await build();
+    if (css) {
+      swap(CURRENT, css);
+    }
+  }
+
+  // Glass pages take the chrome's glass alpha (the theme's content.css).
+  // Web content processes never see string prefs, so it reaches them as a
+  // variable in a user sheet too, and follows the opacity setting live.
+  const ALPHA = "omafire.transparency";
+  function glassAlpha() {
+    const v = parseFloat(Services.prefs.getStringPref(ALPHA, ""));
+    swap("omafire.internal.glass-alpha-sheet",
+      `:root { --omafire-glass-alpha: ${v >= 0.5 && v <= 1 ? v.toFixed(2) : "0.85"} !important; }`);
+  }
+  glassAlpha();
+  Services.prefs.addObserver(ALPHA, glassAlpha);
 
   const observer = {
     observe() {
@@ -120,6 +136,7 @@
   window.addEventListener("unload", () => {
     clearTimeout(timer);
     Services.obs.removeObserver(observer, TOPIC);
+    Services.prefs.removeObserver(ALPHA, glassAlpha);
   }, {once: true});
 
   window.OmafireLivePalette = {refresh};

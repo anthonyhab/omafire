@@ -53,6 +53,17 @@
     background-color: transparent !important;
   }
 
+  /* Glass pages: every page may be clear. Cinder paints each page's base
+   * translucent itself (and a page it doesn't recolour, its own canvas),
+   * so the window surface shows only through that. */
+  @media -moz-pref("omafire.translucency") {
+    @media -moz-pref("omafire.glass-pages") {
+      & .browserContainer {
+        background-color: transparent !important;
+      }
+    }
+  }
+
   /* Split view: the active page is framed in the focus colour, 1px
    * inside its edge. The frame is a positioned layer above the page, as
    * the status panel is: the page (another process) paints over its
