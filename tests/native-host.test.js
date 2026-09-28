@@ -30,6 +30,11 @@ const firstImage = path.join(imageDir, "first.jpg");
 const secondImage = path.join(imageDir, "second.PNG");
 const firstImageBytes = crypto.randomBytes(1300 * 1024);
 const secondImageBytes = crypto.randomBytes(600 * 1024 + 1);
+// Omarchy's current theme name, and a stand-in omafire that logs each sync
+// (and prints to stdout, which must never reach the browser's channel)
+const themeNameFile = path.join(wallpaperDir, "theme.name");
+const syncLog = path.join(testDir, "sync.log");
+const fakeOmafire = path.join(testDir, "omafire");
 const nativeMessageLimit = 1024 * 1024;
 const chunkBytes = 512 * 1024;
 
@@ -55,12 +60,18 @@ function waitFor(predicate, message) {
   fs.writeFileSync(firstImage, firstImageBytes);
   fs.writeFileSync(secondImage, secondImageBytes);
   fs.symlinkSync(firstImage, wallpaperLink);
+  fs.writeFileSync(themeNameFile, "first\n");
+  fs.writeFileSync(fakeOmafire,
+    `#!/bin/sh\necho "noise on stdout"\necho "$1 $OMAFIRE_SKIP_VERSION_CHECK" >> "${syncLog}"\n`,
+    { mode: 0o755 });
 
   const child = spawn(hostPath, [], {
     env: {
       ...process.env,
       OMAFIRE_STATE_FILE: stateFile,
-      OMAFIRE_WALLPAPER_FILE: wallpaperLink
+      OMAFIRE_WALLPAPER_FILE: wallpaperLink,
+      OMAFIRE_THEME_NAME_FILE: themeNameFile,
+      OMAFIRE_SYNC_COMMAND: fakeOmafire
     },
     stdio: ["pipe", "pipe", "pipe"]
   });
@@ -182,6 +193,15 @@ function waitFor(predicate, message) {
     assert.ok(restored.bytes.equals(firstImageBytes));
     assert.equal(wallpapers.length, 9);
     assert.equal(messages.length, 3);
+
+    // A theme swap syncs at once, not after Omarchy's hooks; startup doesn't.
+    const syncs = () => fs.existsSync(syncLog) ? fs.readFileSync(syncLog, "utf8").trim().split("\n") : [];
+    assert.deepEqual(syncs(), [], "the host synced without a theme swap");
+    fs.writeFileSync(themeNameFile, "second\n");
+    await waitFor(() => syncs().length >= 1, "native host did not sync on a theme swap");
+    assert.deepEqual(syncs(), ["sync 1"]);
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    assert.equal(messages.length, 3, "the sync's stdout reached the browser");
 
     child.stdin.end();
     const [exitCode] = await new Promise((resolve, reject) => {

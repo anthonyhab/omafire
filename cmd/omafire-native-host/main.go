@@ -2,6 +2,13 @@
 // starts. It sends the theme message in ~/.local/state/omafire/theme.json
 // and the Omarchy wallpaper whenever either changes, asleep on inotify in
 // between, and exits when the browser closes stdin.
+//
+// It also starts `omafire sync` the moment Omarchy swaps a theme in (it
+// writes current/theme.name right after moving the theme into place),
+// rather than waiting for the theme-set hook: Omarchy runs its hooks only
+// after every app's retint has finished, about half a second later, and
+// Firefox was the last thing on the desktop to change. The hook still runs
+// and finds nothing left to do.
 package main
 
 import (
@@ -10,6 +17,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
+	"os/exec"
 	"os/signal"
 	"path/filepath"
 	"strings"
@@ -323,6 +331,44 @@ func consumeEvents(fd int, targets []*watchTarget) error {
 	}
 }
 
+// syncCommand is the omafire binary to run on a theme swap, or "" when
+// omafire isn't set up for this user (its theme-set hook is what setup
+// installs).
+func syncCommand() string {
+	if command := os.Getenv("OMAFIRE_SYNC_COMMAND"); command != "" {
+		return command
+	}
+	home := os.Getenv("HOME")
+	if home == "" {
+		return ""
+	}
+	if _, err := os.Stat(home + "/.config/omarchy/hooks/theme-set.d/omafire"); err != nil {
+		return ""
+	}
+	return "/usr/bin/omafire"
+}
+
+// startSyncer runs `omafire sync` once per request, one at a time; requests
+// made while one runs collapse into one more run, so the last theme wins.
+func startSyncer(command string) func() {
+	requests := make(chan struct{}, 1)
+	go func() {
+		for range requests {
+			cmd := exec.Command(command, "sync")
+			cmd.Env = append(os.Environ(), "OMAFIRE_SKIP_VERSION_CHECK=1")
+			// (nil: /dev/null. Our stdout is the browser's message channel.)
+			cmd.Stdin, cmd.Stdout, cmd.Stderr = nil, nil, nil
+			_ = cmd.Run()
+		}
+	}()
+	return func() {
+		select {
+		case requests <- struct{}{}:
+		default:
+		}
+	}
+}
+
 func main() {
 	statePath := os.Getenv("OMAFIRE_STATE_FILE")
 	if statePath == "" {
@@ -335,9 +381,22 @@ func main() {
 		fmt.Fprintln(os.Stderr, "omafire native host: invalid state path")
 		os.Exit(1)
 	}
-	// targets[0] is the theme state file; the rest are wallpaper candidates.
+	// targets[0] is the theme state file, then the wallpaper candidates,
+	// then (when omafire is set up) Omarchy's current theme name.
 	wallpapers := wallpaperTargets()
 	targets := append([]*watchTarget{theme}, wallpapers...)
+	isWallpaper := func(index int) bool { return index > 0 && index <= len(wallpapers) }
+	var requestSync func()
+	if command := syncCommand(); command != "" {
+		namePath := os.Getenv("OMAFIRE_THEME_NAME_FILE")
+		if namePath == "" && os.Getenv("HOME") != "" {
+			namePath = os.Getenv("HOME") + "/.local/state/omarchy/current/theme.name"
+		}
+		if name, ok := newTarget(namePath); namePath != "" && ok {
+			targets = append(targets, name)
+			requestSync = startSyncer(command)
+		}
+	}
 
 	signal.Ignore(syscall.SIGPIPE)
 	inotify, err := unix.InotifyInit1(unix.IN_CLOEXEC | unix.IN_NONBLOCK)
@@ -362,8 +421,8 @@ func main() {
 				themeWatchMissing = themeWatchMissing || index == 0
 				continue
 			}
-			wallpaperWatched = wallpaperWatched || index > 0
-			if !added {
+			wallpaperWatched = wallpaperWatched || isWallpaper(index)
+			if !added || !isWallpaper(index) && index > 0 {
 				continue
 			}
 			if index == 0 && checkTheme(theme.path, &lastMessage) != nil {
@@ -413,8 +472,11 @@ func main() {
 				lastMessage = nil
 			}
 			for index, t := range targets {
-				if index > 0 && (t.changed || t.lost) {
+				if isWallpaper(index) && (t.changed || t.lost) {
 					wallpaperPending = true
+				}
+				if index > len(wallpapers) && t.changed && !t.removed {
+					requestSync()
 				}
 				if t.lost {
 					t.wd = -1
