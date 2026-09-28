@@ -74,7 +74,6 @@
 
   let timer = null;
   async function refresh() {
-    await pagePalette();
     const css = await build();
     if (!css) {
       return;
@@ -99,6 +98,9 @@
 
   const observer = {
     observe() {
+      // Pages recolour with the chrome's first repaint, not after the
+      // settle: the prefs only change once, and they're cheap to compare.
+      pagePalette().catch(e => console.error("[omafire:live-palette]", e));
       // The extension repaints a window at a time; settle once.
       clearTimeout(timer);
       timer = setTimeout(() => refresh().catch(e => console.error("[omafire:live-palette]", e)), 300);
