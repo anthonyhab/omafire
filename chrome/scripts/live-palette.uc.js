@@ -64,6 +64,16 @@
   };
   async function pagePalette() {
     const text = await IOUtils.readUTF8(file("omafire-content-palette.css")).catch(() => "");
+    // the scheme sites see: dark or light, as the theme is (sync's user.js
+    // content-override, which is read at startup)
+    const scheme = text.match(/--omarchy-color-scheme\s*:\s*(dark|light)/);
+    if (scheme) {
+      const value = scheme[1] === "light" ? 1 : 0;
+      const pref = "layout.css.prefers-color-scheme.content-override";
+      if (Services.prefs.getIntPref(pref, -1) !== value) {
+        Services.prefs.setIntPref(pref, value);
+      }
+    }
     for (const [pref, prop] of Object.entries(PAGE)) {
       const m = text.match(new RegExp(`^\\s*${prop}\\s*:\\s*(#[0-9a-fA-F]{6})\\s*;`, "m"));
       if (m && Services.prefs.getStringPref(pref, "") !== m[1]) {
