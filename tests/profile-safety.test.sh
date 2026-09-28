@@ -23,6 +23,9 @@ MARKER='/* OMAFIRE FIREFOX BRIDGE MANAGED FILE */'
 PREFS_BEGIN='// BEGIN OMAFIRE FIREFOX BRIDGE'
 
 cleanup() {
+  if [[ -n ${OVL_MOUNT:-} ]] && mountpoint -q "$OVL_MOUNT"; then
+    fusermount3 -u "$OVL_MOUNT" 2>/dev/null || fusermount -u "$OVL_MOUNT" 2>/dev/null || true
+  fi
   rm -rf "$TEST_ROOT"
 }
 trap cleanup EXIT
@@ -181,6 +184,24 @@ printf '/* d */\n' > "$PAYLOAD/src/d.css"
 out=$("$OMAFIRE_BIN" setup 2>&1)
 [[ $out == *"Configured Firefox profile: $PLAIN"*"Firefox is running with this profile"* ]]
 rm "$PLAIN/lock"
+
+# ---- psd's fuse-overlayfs: a payload in the lower layer can't be renamed --
+# (EXDEV), so the swap falls back to removing our tree and moving the new
+# one in. Needs FUSE; skipped where there is none (CI containers).
+if command -v fuse-overlayfs >/dev/null && [[ -w /dev/fuse ]]; then
+  OVL_LOWER="$TEST_ROOT/ovl-lower" OVL_MOUNT="$PSD_RUN/user-firefox-ovl.default"
+  mkdir -p "$OVL_LOWER/chrome" "$TEST_ROOT/ovl-upper" "$TEST_ROOT/ovl-work" "$OVL_MOUNT"
+  cp -r "$PLAIN/chrome/omafire" "$OVL_LOWER/chrome/omafire"   # an owned, older payload
+  printf '/* stale */\n' > "$OVL_LOWER/chrome/omafire/src/stale.css"
+  fuse-overlayfs -o "lowerdir=$OVL_LOWER,upperdir=$TEST_ROOT/ovl-upper,workdir=$TEST_ROOT/ovl-work" "$OVL_MOUNT"
+  ln -s "$OVL_MOUNT" "$FF_ROOT/ovl.default"
+  printf '\n[Profile4]\nName=ovl\nIsRelative=1\nPath=ovl.default\n' >> "$FF_ROOT/profiles.ini"
+  out=$("$OMAFIRE_BIN" setup 2>&1) || { echo "$out"; exit 1; }
+  [[ $out == *"Configured Firefox profile: $FF_ROOT/ovl.default"* ]]
+  [[ $(tree_hash "$OVL_MOUNT/chrome/omafire") == "$(tree_hash "$PAYLOAD")" ]]
+  [[ ! -e "$OVL_MOUNT/chrome/omafire/src/stale.css" ]]
+  [[ -z $(find "$OVL_MOUNT/chrome" -maxdepth 1 -name '.omafire.*') ]]
+fi
 
 # ---- remove: through the same guards; backups outlive it ----------------
 : > "$TEST_ROOT/systemctl.log"

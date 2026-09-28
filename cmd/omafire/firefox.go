@@ -135,16 +135,27 @@ func installFFPayload(chrome, payload string) {
 		// No atomic exchange here: two renames, the window between them a
 		// missing (not a mixed) payload that the next run repairs.
 		old, err := os.MkdirTemp(chrome, "."+ffPayloadDirname+".old.*")
-		if err != nil || unix.Rmdir(old) != nil || os.Rename(payload, old) != nil {
+		if err == nil && unix.Rmdir(old) == nil && os.Rename(payload, old) == nil {
+			if os.Rename(stage, payload) != nil {
+				os.Rename(old, payload)
+				removeTree(stage)
+				fail("could not replace the Firefox payload: %s", payload)
+			}
+			removeTree(old)
+			break
+		}
+		// Nor a rename of the old tree: profile-sync-daemon's fuse-overlayfs
+		// refuses one (EXDEV) once psd has synced it to the lower layer. Our
+		// own tree goes, and the new one moves in: the same window.
+		if !ffPayloadOwned(payload) {
 			removeTree(stage)
 			fail("could not replace the Firefox payload: %s", payload)
 		}
-		if os.Rename(stage, payload) != nil {
-			os.Rename(old, payload)
+		removeTree(payload)
+		if pathExists(payload) || os.Rename(stage, payload) != nil {
 			removeTree(stage)
 			fail("could not replace the Firefox payload: %s", payload)
 		}
-		removeTree(old)
 	}
 	fsyncParent(payload)
 }
