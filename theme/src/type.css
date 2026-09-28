@@ -27,7 +27,8 @@ findbar :is(label, description, checkbox, input, .findbar-textbox),
 /* Sidebar panels (bookmarks, history, synced tabs…) and the Library are
  * their own chrome documents, some XUL, some HTML with custom elements. */
 @-moz-document url-prefix("chrome://browser/content/sidebar/"),
-               url-prefix("chrome://browser/content/places/") {
+               url-prefix("chrome://browser/content/places/"),
+               url("chrome://browser/content/webext-panels.xhtml") {
   :root, :root * {
     font-family: var(--oc-font) !important;
   }

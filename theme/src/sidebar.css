@@ -90,6 +90,26 @@ button[aria-pressed="true"]:not(:hover) > .button-background {
   padding: 6px var(--oc-gap) !important;
 }
 
+/* An extension's sidebar: its page starts three units in, the panel
+ * header's title with it (Firefox's --space-large, 13.33px, falls
+ * between pixels). Extension pages can't read the tokens, so the unit is
+ * the one they can match (Cinder's panel pads 12px). */
+@-moz-document url("chrome://browser/content/webext-panels.xhtml") {
+  /* (the frame's window paints Firefox's stock window grey over the
+   * panel; History's document is clear, and so is this one) */
+  #webextpanels-window {
+    background: transparent !important;
+  }
+
+  /* (History's page pads the header's box by --space-large and the
+   * header pulls itself up by as much; this frame doesn't pad it, so
+   * without the pull the title sits where History's does) */
+  sidebar-panel-header {
+    padding-inline: calc(var(--oc-u) * 3) !important;
+    margin-block-start: 0 !important;
+  }
+}
+
 /* ---- column edge ------------------------------------------------------
  *
  * Where the page sits flush against the tab column (no floating card), a
@@ -112,13 +132,16 @@ button[aria-pressed="true"]:not(:hover) > .button-background {
 }
 
 /* ---- panel documents -------------------------------------------------
- * History, Synced tabs… (sidebar/) and Bookmarks (places/, which also
- * serves the Library window) are chrome documents of their own,
+ * History, Synced tabs… (sidebar/), Bookmarks (places/, which also
+ * serves the Library window) and every extension's sidebar (the
+ * webext-panels frame around its page: the same panel header and close
+ * button) are chrome documents of their own,
  * built from design-system components that redeclare Firefox's tokens on
  * each :host, which a user sheet cannot match; so, as on the about:
  * pages (content.css), the bridge is set on every element. */
 @-moz-document url-prefix("chrome://browser/content/sidebar/"),
-               url-prefix("chrome://browser/content/places/") {
+               url-prefix("chrome://browser/content/places/"),
+               url("chrome://browser/content/webext-panels.xhtml") {
   * {
     /* Focus: the 1px accent ring (tokens.css). */
     --focus-outline-color: var(--oc-focus) !important;
