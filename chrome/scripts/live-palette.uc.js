@@ -53,8 +53,28 @@
       + `@-moz-document url-prefix("about:") { ${block([...content, ...geometry])} }\n`;
   }
 
+  // The page palette Firefox's forced colours paint from (the colour
+  // override, and Cinder on top of it): omafire sync writes it to user.js,
+  // read at startup; a switch sets it here, and open pages repaint.
+  const PAGE = {
+    "browser.display.background_color": "--omarchy-background",
+    "browser.display.foreground_color": "--omarchy-foreground",
+    "browser.anchor_color": "--omarchy-accent",
+    "browser.visited_color": "--omarchy-magenta",
+  };
+  async function pagePalette() {
+    const text = await IOUtils.readUTF8(file("omafire-content-palette.css")).catch(() => "");
+    for (const [pref, prop] of Object.entries(PAGE)) {
+      const m = text.match(new RegExp(`^\\s*${prop}\\s*:\\s*(#[0-9a-fA-F]{6})\\s*;`, "m"));
+      if (m && Services.prefs.getStringPref(pref, "") !== m[1]) {
+        Services.prefs.setStringPref(pref, m[1]);
+      }
+    }
+  }
+
   let timer = null;
   async function refresh() {
+    await pagePalette();
     const css = await build();
     if (!css) {
       return;

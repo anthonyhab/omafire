@@ -218,6 +218,13 @@ func refreshFFProfileColors(profile string, p *palette) {
 		fmt.Sprintf("user_pref(\"layout.css.prefers-color-scheme.content-override\", %d);\n", override) +
 		fmt.Sprintf("user_pref(\"browser.display.background_color\", \"%s\");\n", p.get("background")) +
 		fmt.Sprintf("user_pref(\"browser.display.foreground_color\", \"%s\");\n", p.get("foreground")) +
+		// Forced colours (Firefox's colour override, which Cinder builds on)
+		// paint every page from these and the two above: links would keep
+		// Firefox's #0000ee otherwise. live-palette.uc.js follows theme
+		// switches.
+		"user_pref(\"browser.display.use_system_colors\", false);\n" +
+		fmt.Sprintf("user_pref(\"browser.anchor_color\", \"%s\");\n", p.get("accent")) +
+		fmt.Sprintf("user_pref(\"browser.visited_color\", \"%s\");\n", p.get("magenta")) +
 		fmt.Sprintf("user_pref(\"ui.accentcolor\", \"%s\");\n", accent) +
 		fmt.Sprintf("user_pref(\"ui.accentcolortext\", \"%s\");\n", textOn(p, accent)) +
 		ffPrefsEnd + "\n"

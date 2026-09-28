@@ -181,6 +181,10 @@ for profile in "$RELATIVE_PROFILE" "$ABSOLUTE_PROFILE"; do
   # Native widgets (checkboxes, GTK focus rings) follow Hyprland's border.
   grep -Fqx 'user_pref("ui.accentcolor", "#e68e0d");' "$profile/user.js"
   grep -Fq 'user_pref("ui.accentcolortext", "#' "$profile/user.js"
+  # Forced colours paint pages from the theme, links included.
+  grep -Fqx 'user_pref("browser.display.use_system_colors", false);' "$profile/user.js"
+  grep -Fqx 'user_pref("browser.anchor_color", "#509475");' "$profile/user.js"
+  grep -Fqx 'user_pref("browser.visited_color", "#D2689C");' "$profile/user.js"
   grep -Fqx 'user_pref("layout.css.prefers-color-scheme.content-override", 0);' \
     "$profile/user.js"
 done
