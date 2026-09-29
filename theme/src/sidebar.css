@@ -97,8 +97,13 @@ button[aria-pressed="true"]:not(:hover) > .button-background {
 @-moz-document url("chrome://browser/content/webext-panels.xhtml") {
   /* (the frame's window paints Firefox's stock window grey over the
    * panel; History's document is clear, and so is this one) */
+  /* (and its text is the system's sidebar text, -moz-sidebartext: white
+   * from a dark GTK theme on a light Omarchy one; History's document takes
+   * the theme's) */
   #webextpanels-window {
     background: transparent !important;
+    color: var(--oc-text) !important;
+    --sidebar-text-color: var(--oc-text) !important;
   }
 
   /* (History's page pads the header's box by --space-large and the
