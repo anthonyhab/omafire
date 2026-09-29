@@ -215,6 +215,9 @@ func refreshFFProfileColors(profile string, p *palette) {
 		"user_pref(\"browser.nova.enabled\", true);\n" +
 		"user_pref(\"browser.newtabpage.activity-stream.nova.enabled\", true);\n" +
 		"user_pref(\"widget.gtk.rounded-bottom-corners.enabled\", true);\n" +
+		// A dragged tab's "drop here to pin" zone opens after 500ms by
+		// default, long enough to read as missing: open it sooner.
+		"user_pref(\"browser.tabs.dragDrop.pinInteractionCue.delayMS\", 150);\n" +
 		fmt.Sprintf("user_pref(\"layout.css.prefers-color-scheme.content-override\", %d);\n", override) +
 		fmt.Sprintf("user_pref(\"browser.display.background_color\", \"%s\");\n", p.get("background")) +
 		fmt.Sprintf("user_pref(\"browser.display.foreground_color\", \"%s\");\n", p.get("foreground")) +
