@@ -425,6 +425,58 @@
     border-radius: 2px !important;
     height: 2px !important;
   }
+
+  /* "Drop tab here to pin": two rows on the row pitch, square, the icon
+   * over the label (the dragged tab covers one row of it). Its own edge
+   * is a dashed hairline while a tab nears it; over it (the drop would
+   * pin), the hairline turns solid and the hover fill comes in. Firefox's
+   * is a 70px lilac box. Collapsed, it is a pinned tile: the icon alone. */
+  & > #pinned-drop-indicator[visible] {
+    height: calc(2 * var(--oc-row) + var(--oc-u)) !important;
+    width: auto !important;
+    margin: calc(var(--oc-u) / 2) var(--oc-inset) !important;
+    gap: var(--oc-u) !important;
+    border-radius: 0 !important;
+    color: var(--oc-text-label) !important;
+    background: transparent !important;
+    outline: 1px dashed var(--oc-line-strong) !important;
+    outline-offset: -1px !important;
+    font: var(--oc-label-size) var(--oc-font) !important;
+    transition: background-color var(--oc-fast) var(--oc-ease),
+      color var(--oc-fast) var(--oc-ease) !important;
+
+    &[interactive] {
+      color: var(--oc-text) !important;
+      background: var(--oc-hover) !important;
+      outline-style: solid !important;
+    }
+
+    & > #pinned-drop-indicator-icon {
+      width: 14px !important;
+      height: 14px !important;
+    }
+  }
+
+  &:not([expanded]) > #pinned-drop-indicator[visible] {
+    width: var(--oc-button) !important;
+    height: var(--oc-row) !important;
+    margin-inline: auto !important;
+
+    & > #pinned-drop-indicator-text {
+      display: none !important;
+    }
+  }
+
+  /* Dropping here makes a group: the tab (or split pair) takes the new
+   * group's colour, as its hairline and a light fill. The rest of the
+   * theme clears unselected tab backgrounds, which hid Firefox's cue. */
+  &[movingtab-group] .tabbrowser-tab .tab-background[dragover-groupTarget],
+  &[movingtab-group] tab-split-view-wrapper[dragover-groupTarget] {
+    background-color: color-mix(in srgb, var(--dragover-tab-group-color) 18%, transparent) !important;
+    background-image: none !important;
+    box-shadow: inset 0 0 0 1px var(--dragover-tab-group-color) !important;
+    outline: none !important;
+  }
 }
 
 /* The active tab's light pours in from its active edge. Only the size
