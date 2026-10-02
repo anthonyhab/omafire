@@ -121,6 +121,13 @@
     }
   }
 
+  /* The tab column, which both shapes keep clear of. */
+  @media -moz-pref("omafire.layout", "sidebar") {
+    #main-window:not([customizing]) #sidebar-container {
+      anchor-name: --oc-column !important;
+    }
+  }
+
   /* Drop: the console belongs to the page, not the window. It is anchored
    * to the page's box (the tabbox; CSS anchor positioning reaches from the
    * top layer), so it follows the column's resizable width, the sidebar
@@ -148,9 +155,6 @@
     /* Compact mode floats the column over the page, and reveals it while
      * the urlbar is focused: start past the column instead. */
     @media -moz-pref("omafire.compact") and -moz-pref("omafire.layout", "sidebar") {
-      #main-window:not([customizing]) #sidebar-container {
-        anchor-name: --oc-column !important;
-      }
       #main-window:not([customizing]):has(sidebar-main[expanded]) #urlbar:is([popover-open], [focused]) {
         left: calc(anchor(--oc-column right, 0px) + var(--oc-gap) + var(--oc-inset)) !important;
 
@@ -172,6 +176,35 @@
       --urlbar-background-overhang-open: var(--oc-launcher-bleed) !important;
       --urlbarView-joint-background-outset-block: var(--oc-launcher-bleed) !important;
       --oc-urlbar-card-top: calc(-1 * var(--oc-launcher-bleed));
+    }
+
+    /* Beside the tab column (compact mode reveals it while the field is
+     * focused), a narrow window would put the card over it: the card's
+     * column-side edge stops one gap past the column, and it slides away
+     * from it, shrinking only once it meets the window's far edge. Where
+     * the centred card already clears the column, both clamps resolve to
+     * the centred edges. anchor() measures from the side its inset names:
+     * in `right`, anchor(--oc-column right) is how far the column's right
+     * edge is from the window's right edge. */
+    @media -moz-pref("omafire.layout", "sidebar") {
+      #main-window:not([customizing]) #urlbar:is([popover-open], [focused]) {
+        --oc-launcher-edge: calc(50vw - var(--oc-launcher-width) / 2);
+        --oc-launcher-clear: calc(var(--oc-gap) + var(--oc-launcher-bleed));
+        width: auto !important;
+        left: max(var(--oc-launcher-edge),
+                  calc(anchor(--oc-column right, 0px) + var(--oc-launcher-clear))) !important;
+        right: max(var(--oc-launcher-clear),
+                   min(var(--oc-launcher-edge),
+                       calc(anchor(--oc-column right, 100vw) - var(--oc-launcher-clear) - var(--oc-launcher-width)))) !important;
+
+        @media not -moz-pref("sidebar.position_start") {
+          right: max(var(--oc-launcher-edge),
+                     calc(anchor(--oc-column left, 0px) + var(--oc-launcher-clear))) !important;
+          left: max(var(--oc-launcher-clear),
+                    min(var(--oc-launcher-edge),
+                        calc(anchor(--oc-column left, 100vw) - var(--oc-launcher-clear) - var(--oc-launcher-width)))) !important;
+        }
+      }
     }
   }
 }
