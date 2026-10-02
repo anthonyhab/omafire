@@ -1,28 +1,24 @@
 # Extension glyph sources
 
-Generators for `src/icons/extensions/*.svg`. The glyphs sit beside Firefox's
-Nova toolbar icons (sidebar, back, forward, reload, downloads, extensions,
-menu) and are drawn to their rules:
+`export.py` writes `src/icons/extensions/*.svg` from the brand marks in
+`brand/` (DEC-63; the earlier "Omarchy line" metaphors were rejected as
+unrecognisable). Rules:
 
-- 16×16 grid, 1.5px strokes (Nova's width), round caps and round joins.
-- Straight 90°/45° geometry with 1–1.5px corner radii; true circles only
-  where the concept is round. That precision is the Omarchy half.
-- Solids only as Nova-sized accents: r≈0.75–1.15 dots, small arrowheads.
-- Ink coverage in the native band: Nova toolbar icons measure 16–35%
-  (back 16, menu 21, downloads 22, reload 23, extensions 28, sidebar 35);
-  the glyphs measure 11–34%, median 25%.
-- One concept per extension, never a letter or a traced logo.
+- Each extension's own mark, in one colour: Simple Icons (CC0) where it has the
+  brand (uBlock Origin, 1Password, Dark Reader, Steam, Rakuten, Reddit);
+  otherwise a potrace of the add-on's own icon (Greasemonkey, SponsorBlock,
+  DeArrow, Redirector, Bypass Paywalls Clean), the add-on's own monochrome
+  glyph (Multi-Account Containers, the omafox mark), or a hand-drawn mark
+  where a trace turns to mush at 16px (Vimium C's V, Tether's infinity).
+- Fitted by visual bounding box into a 12.5px square centred on the 16px
+  grid, the optical size of Nova's toolbar icons; 14px read heavier than
+  the line icons beside them.
+- One `context-fill` path per glyph (strokes outlined, shapes unioned), so a
+  disabled button dims evenly.
 
-Files:
-
-- `lib.py`: geometry helpers, rendering, metrics, toolbar strips that put the
-  glyphs between the real Nova icons (dark and light, @1x/1.6x/2x).
-- `native.py`: extracts the Nova icons from the installed Firefox into
-  `native/` (not committed). Run it first.
-- `glyphs.py`: the glyphs (the "Omarchy line" direction, picked over a
-  softer Nova one and a brutalist one); prints metrics and writes preview sheets
-  to `out/`.
-- `export.py`: outlines and unions each glyph into one `context-fill` path
-  with Inkscape, writes the SVGs and diffs them against the stroke source.
+A new glyph: add `brand/<name>.svg` (no `width`/`height` on the root, so its
+units are its viewBox's), a title in `export.py`, the rule in `src/icons.css`,
+then run `export.py` (needs Inkscape, rsvg-convert, ImageMagick). It prints
+each result's pixel difference from the fitted source.
 
 Not part of the theme payload; only `src/` ships.
