@@ -5,10 +5,9 @@
  * the left edge until the pointer reaches it. A --oc-reveal flag (0/1)
  * drives every moving part so they can never disagree.
  *
- * The urlbar is a top-layer popover, so it does not inherit the toolbox's
- * translate. Firefox exposes --toolbar-shift-translate for exactly this
- * (it uses it for the fullscreen toolbar slide); we feed it the same
- * distance, expressed in the urlbar's own width. */
+ * The urlbar rides the toolbox's translate. While it is open the toolbox
+ * drops the translate and its clip: the launcher's field is a fixed box
+ * (launcher.css), which a transformed or clipped ancestor would trap. */
 
 @media -moz-pref("omafire.compact") and -moz-pref("omafire.layout", "sidebar") and -moz-pref("sidebar.verticalTabs") {
   :root:not([customizing], [popup-window], [taskbartab], [chromehidden~="toolbar"], [inDOMFullscreen]):has(sidebar-main[expanded]) {
@@ -81,15 +80,9 @@
       clip-path: inset(0 -40px -40px -40px) !important;
     }
 
-    /* The urlbar sits one gap (nav-bar padding) inside the toolbox on each
-     * side, so it travels its own width plus three gaps. */
-    & #urlbar:not([breakout-extend]) {
-      --toolbar-shift-translate: calc((1 - var(--oc-reveal)) * (-100% - 3 * var(--oc-gap) + var(--oc-trigger))) 0 !important;
-      opacity: var(--oc-reveal) !important;
-      transition:
-        translate var(--oc-slow) var(--oc-ease),
-        opacity var(--oc-slow) var(--oc-ease) !important;
-      transition-delay: calc((1 - var(--oc-reveal)) * 180ms) !important;
+    &:has(#urlbar:is([popover-open], [focused])) #navigator-toolbox {
+      translate: none !important;
+      clip-path: none !important;
     }
 
     /* Sidebar on the right (sidebar.position_start = false): the same card
@@ -109,10 +102,6 @@
       & :is(#navigator-toolbox, #sidebar-container) {
         margin-inline: 0 var(--oc-gap) !important;
         translate: calc((1 - var(--oc-reveal)) * (100% + var(--oc-gap) - var(--oc-trigger))) 0 !important;
-      }
-
-      & #urlbar:not([breakout-extend]) {
-        --toolbar-shift-translate: calc((1 - var(--oc-reveal)) * (100% + 3 * var(--oc-gap) - var(--oc-trigger))) 0 !important;
       }
     }
   }

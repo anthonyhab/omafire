@@ -10,14 +10,16 @@
  * Zen mode's default keeps the field inline in its navigation row
  * (zen.css) and only borrows the console look from here.
  *
- * Firefox 156 keeps the urlbar in the top layer as a popover while it can
- * break out ([breakout]); while extended, JS writes only an inline `top`.
- * So the launcher is plain inset overrides: the top layer escapes every
- * containing block, and ::backdrop gives the scrim.
+ * Since Firefox 157 only the results view is a top-layer popover, anchored
+ * to the field (.urlbar-input-container); the field stays in its toolbar.
+ * So the launcher makes the field itself a fixed box: the view follows it
+ * by anchor, and the toolbar keeps the field's slot (#urlbar-container).
+ * Fixed escapes the column unless an ancestor is transformed (compact.css
+ * drops its translate while the field is open).
  *
- * Firefox extends ([breakout-extend]) only while the results view is
- * open, and a new tab focuses the field without opening it. The launcher
- * therefore also opens on [focused] alone, as a bare field. */
+ * The view opens ([popover-open]) only while there are results, and a new
+ * tab focuses the field without opening it. The launcher therefore also
+ * opens on [focused] alone, as a bare field. */
 
 /* The drop: the slab slides down out of its own top edge, the way
  * Omarchy's quake console leaves the screen's. The clip holds that edge
@@ -44,12 +46,17 @@
 
 @media -moz-pref("omafire.layout", "sidebar") and (not -moz-pref("omafire.launcher", "center")),
        -moz-pref("omafire.zen-mode") and -moz-pref("omafire.zen-mode-active") and (not -moz-pref("omafire.launcher", "center")) {
-  #main-window:not([customizing]) #urlbar[breakout]:is([breakout-extend], [focused]) {
-    & > .urlbar-background {
+  #main-window:not([customizing]) #urlbar:is([popover-open], [focused]) {
+    & > .urlbar-background,
+    & > .urlbarView > .urlbarView-background {
       background-color: var(--oc-console) !important;
       border: 1px solid var(--oc-line-strong) !important;
       border-radius: 0 !important;
       box-shadow: inset 0 calc(-1 * var(--oc-rule)) 0 var(--oc-focus) !important;
+    }
+
+    & > .urlbarView > .urlbarView-background {
+      box-shadow: none !important;
     }
 
     & .urlbarView {
@@ -72,7 +79,7 @@
   }
 
   /* With results open the bar sits between field and results instead. */
-  #main-window:not([customizing]) #urlbar[breakout][breakout-extend] > .urlbar-background {
+  #main-window:not([customizing]) #urlbar[popover-open] > .urlbar-background {
     box-shadow: none !important;
   }
 }
@@ -81,10 +88,15 @@
 
 @media -moz-pref("omafire.layout", "sidebar"),
        -moz-pref("omafire.zen-mode") and -moz-pref("omafire.zen-mode-active") and -moz-pref("omafire.launcher", "center") {
-  #main-window:not([customizing]) #urlbar[breakout]:is([breakout-extend], [focused]) {
+  /* The fixed field paints in the toolbox's stacking context: lift it over
+   * the page and the tab column. */
+  #main-window:not([customizing]):has(#urlbar:is([popover-open], [focused])) #navigator-toolbox {
+    z-index: 10 !important;
+  }
+
+  #main-window:not([customizing]) #urlbar:is([popover-open], [focused]) {
+    position: fixed !important;
     margin: 0 !important;
-    /* Firefox shifts the popover along with a sliding toolbar
-     * (--toolbar-shift-translate); the launcher is window-anchored. */
     translate: none !important;
 
     /* A tall field whose leading chip starts at its inner edge. Through
@@ -97,8 +109,15 @@
       font-size: 1.15em !important;
     }
 
-    &::backdrop {
-      pointer-events: none !important;
+    /* The card frames the field by the bleed whether or not results are
+     * open (Firefox moves the background only while they are). Its foot
+     * is the view's half while open. */
+    & > .urlbar-background {
+      inset-inline: calc(-1 * var(--urlbar-background-overhang-open)) !important;
+      inset-block-start: var(--oc-urlbar-card-top) !important;
+    }
+    &:not([popover-open]) > .urlbar-background {
+      inset-block-end: calc(-1 * var(--urlbarView-joint-background-outset-block)) !important;
     }
   }
 
@@ -114,13 +133,14 @@
         anchor-name: --oc-page !important;
       }
 
-      & #urlbar[breakout]:is([breakout-extend], [focused]) {
+      & #urlbar:is([popover-open], [focused]) {
         top: anchor(--oc-page top, 0px) !important;
         left: calc(anchor(--oc-page left, 0px) + var(--oc-inset)) !important;
         right: calc(anchor(--oc-page right, 0px) + var(--oc-inset)) !important;
         width: auto !important;
-        --urlbar-background-inset-breakout:
-          0 calc(-1 * var(--oc-inset)) calc(-1 * var(--oc-launcher-bleed)) !important;
+        --urlbar-background-overhang-open: var(--oc-inset) !important;
+        --urlbarView-joint-background-outset-block: var(--oc-launcher-bleed) !important;
+        --oc-urlbar-card-top: 0px;
         animation: oc-drop var(--oc-console-in) var(--oc-ease-enter) !important;
       }
     }
@@ -131,7 +151,7 @@
       #main-window:not([customizing]) #sidebar-container {
         anchor-name: --oc-column !important;
       }
-      #main-window:not([customizing]):has(sidebar-main[expanded]) #urlbar[breakout]:is([breakout-extend], [focused]) {
+      #main-window:not([customizing]):has(sidebar-main[expanded]) #urlbar:is([popover-open], [focused]) {
         left: calc(anchor(--oc-column right, 0px) + var(--oc-gap) + var(--oc-inset)) !important;
 
         /* Column on the right: end before it instead. */
@@ -144,17 +164,14 @@
   }
 
   @media -moz-pref("omafire.launcher", "center") {
-    #main-window:not([customizing]) #urlbar[breakout]:is([breakout-extend], [focused]) {
+    #main-window:not([customizing]) #urlbar:is([popover-open], [focused]) {
       top: var(--oc-launcher-top) !important;
       left: calc(50vw - var(--oc-launcher-width) / 2) !important;
       width: var(--oc-launcher-width) !important;
       /* Floating: the card bleeds evenly on every side. */
-      --urlbar-background-inset-breakout: calc(-1 * var(--oc-launcher-bleed)) !important;
-
-      /* A floating card over a dimmed window. */
-      &::backdrop {
-        background: var(--oc-scrim) !important;
-      }
+      --urlbar-background-overhang-open: var(--oc-launcher-bleed) !important;
+      --urlbarView-joint-background-outset-block: var(--oc-launcher-bleed) !important;
+      --oc-urlbar-card-top: calc(-1 * var(--oc-launcher-bleed));
     }
   }
 }

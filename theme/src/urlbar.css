@@ -9,14 +9,20 @@
   --urlbar-background-color-focus: var(--oc-panel) !important;
   --urlbar-border-radius: var(--oc-radius-small) !important;
   --urlbar-background-border-radius: var(--oc-radius-small) !important;  /* Nova: a 24px pill */
-  /* Nova derives the open card's inset from its pill radius (height/2 -
-   * radius); with square corners that would shrink the card inside the
-   * field. The card frames field and results by one bleed instead, and
-   * in the toolbar its top stops at the toolbar's edge. */
-  --urlbar-background-inset-breakout:
-    calc((var(--oc-button) - var(--oc-toolbar)) / 2) calc(-1 * var(--oc-launcher-bleed))
-    calc(-1 * var(--oc-launcher-bleed)) !important;
-  --urlbar-background-inset-breakout-compact: var(--urlbar-background-inset-breakout) !important;
+  /* Open, the card is two halves (Firefox 157): the field's
+   * .urlbar-background and the results' .urlbarView-background, clipped to
+   * meet at the field's bottom edge. Both frame field and results by one
+   * bleed; the results sit flush under the field (no view margin), so the
+   * view's outsets are the bleed alone. Firefox derives the outsets on
+   * :root, so they are restated here, where the inputs change. */
+  --urlbar-background-overhang-open: var(--oc-launcher-bleed) !important;
+  --urlbarView-row-gutter: 0px !important;
+  --urlbarView-margin-block: 0px !important;
+  --urlbarView-margin-inline: 0px !important;
+  --urlbarView-joint-background-outset-inline: var(--urlbar-background-overhang-open) !important;
+  --urlbarView-joint-background-outset-block: var(--urlbar-background-overhang-open) !important;
+  /* In the toolbar the card's top stops at the toolbar's edge. */
+  --oc-urlbar-card-top: calc((var(--oc-button) - var(--oc-toolbar)) / 2);
   --urlbar-box-background-color: transparent !important;
   --urlbar-box-background-color-hover: var(--oc-hover) !important;
   --urlbar-box-background-color-active: var(--oc-active) !important;
@@ -36,7 +42,7 @@
 
 /* At rest the field is a box like a pinned tile: its hairline edge over a
  * faint fill. Hovered, the fill deepens and the edge firms up. */
-#urlbar:not([focused], [breakout-extend]) > .urlbar-background {
+#urlbar:not([focused], [popover-open]) > .urlbar-background {
   box-shadow: inset 0 0 0 1px var(--oc-line) !important;
 }
 
@@ -51,14 +57,28 @@
   display: none !important;
 }
 
-/* In-place dropdown (top layout): the field lifts onto the panel surface
- * with the focus edge; geometry stays Firefox's own. The centred launcher
- * lives in launcher.css. */
-#urlbar[breakout][breakout-extend] > .urlbar-background {
-  background-color: var(--oc-panel) !important;
-  border-radius: var(--oc-radius) !important;
-  box-shadow: inset 0 0 0 1px var(--oc-focus), var(--oc-shadow-float) !important;
+/* In-place dropdown (top layout): the field lifts onto the console slab
+ * with the focus edge; geometry stays Firefox's own. The slab is solid even
+ * on glass: the results hang over the page, which the chrome cannot blur.
+ * The centred
+ * launcher lives in launcher.css. */
+#urlbar[popover-open] > .urlbar-background,
+#urlbar[popover-open] > .urlbarView > .urlbarView-background {
+  background-color: var(--oc-console) !important;
+  border: none !important;
+  box-shadow: inset 0 0 0 1px var(--oc-focus) !important;
   animation: none !important;
+}
+
+#urlbar[popover-open] > .urlbar-background {
+  inset-block-start: var(--oc-urlbar-card-top) !important;
+  border-start-start-radius: var(--oc-radius) !important;
+  border-start-end-radius: var(--oc-radius) !important;
+}
+
+#urlbar[popover-open] > .urlbarView > .urlbarView-background {
+  border-end-start-radius: var(--oc-radius) !important;
+  border-end-end-radius: var(--oc-radius) !important;
 }
 
 /* ---- results --------------------------------------------------------
@@ -70,8 +90,6 @@
  * (one chip padding further in), on both ends. */
 
 .urlbarView {
-  margin: 0 !important;
-  width: 100% !important;
   box-sizing: border-box !important;
   padding-block: var(--oc-gap) !important;
   padding-inline: var(--urlbar-input-container-padding) !important;

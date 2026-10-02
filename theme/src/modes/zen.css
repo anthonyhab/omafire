@@ -34,7 +34,7 @@
 
     /* Open while editing the address, while anything in the row is open
      * (extension popups, menus), or while the row has keyboard focus. */
-    &:has(#urlbar:is([breakout-extend], [focused]), #nav-bar [open], #nav-bar:focus-within) {
+    &:has(#urlbar:is([popover-open], [focused]), #nav-bar [open], #nav-bar:focus-within) {
       --oc-zen-open: 1;
       --oc-zen-motion: var(--oc-console-in) var(--oc-ease-enter) 0s;
     }
@@ -97,10 +97,9 @@
       --oc-zen-pad-end: 0px;
 
       /* Where the row's top edge is: parked one row plus a gap above the
-       * window, or docked. Both the row and the field (a top-layer
-       * popover that anchor positioning does not track while the row
-       * moves) take their top from it with the same transition, so they
-       * slide as one. */
+       * window, or docked. Both the row and the field (fixed, to centre on
+       * the page, so it does not ride the row) take their top from it with
+       * the same transition, so they slide as one. */
       --oc-zen-top: calc((var(--oc-zen-open) - 1) * (var(--oc-zen-row) + var(--oc-gap)));
 
       & #tabbrowser-tabbox {
@@ -140,7 +139,10 @@
         margin: 0 auto !important;
       }
 
-      & #urlbar[breakout] {
+      /* Fixed, not absolute in the row: only a viewport-placed box may
+       * anchor to the page (the tabbox follows the row in tree order). */
+      & #urlbar {
+        position: fixed !important;
         top: calc(var(--oc-zen-top) + var(--oc-zen-pad-start)
                   + (var(--oc-zen-row) - var(--oc-zen-pad-start) - var(--oc-zen-pad-end) - var(--urlbar-height)) / 2) !important;
         /* Centred on the page, snapped to whole pixels: an odd page
@@ -152,15 +154,17 @@
         translate: none !important;
         transition: top var(--oc-zen-motion) !important;
         /* Open, the results hang from the field as one card its width. */
-        --urlbar-background-inset-breakout: 0px !important;
+        --urlbar-background-overhang-open: 0px !important;
+        --oc-urlbar-card-top: 0px;
       }
 
-      & #urlbar > .urlbar-background {
+      & #urlbar > .urlbar-background,
+      & #urlbar > .urlbarView > .urlbarView-background {
         border-radius: 0 !important;
       }
 
       /* The results unroll down out of the field. */
-      & #urlbar[breakout-extend] .urlbarView {
+      & #urlbar[popover-open] > .urlbarView {
         box-sizing: border-box !important;
         animation: oc-unroll var(--oc-console-in) var(--oc-ease-enter) !important;
       }
@@ -190,7 +194,7 @@
         --oc-zen-pad-start: var(--oc-inset);
         --oc-zen-pad-end: calc(var(--oc-inset) + 1px);
 
-        & #urlbar[breakout] {
+        & #urlbar {
           --urlbar-height: var(--oc-row) !important;
         }
 
@@ -242,24 +246,20 @@
         padding: 0 !important;
       }
 
-      & #urlbar:not([breakout-extend], [focused]) {
+      & #urlbar:not([popover-open], [focused]) {
         opacity: 0 !important;
       }
     }
 
-    /* Center: dim the page and sidebar under the floating card. The
-     * launcher's own ::backdrop would also dim the row, which is not in
-     * the top layer. The drop leaves the page undimmed: its rules do the
+    /* Center: dim the page and sidebar under the floating card (the row
+     * and the card are fixed boxes outside #browser, so its filter does
+     * not trap them). The drop leaves the page undimmed: its rules do the
      * separating. */
-    & #urlbar[breakout-extend]::backdrop {
-      background: transparent !important;
-    }
-
     @media -moz-pref("omafire.launcher", "center") {
       & #browser {
         transition: filter var(--oc-slow) var(--oc-ease) !important;
       }
-      &:has(#urlbar:is([breakout-extend], [focused])) #browser {
+      &:has(#urlbar:is([popover-open], [focused])) #browser {
         filter: brightness(0.72) !important;
       }
     }
