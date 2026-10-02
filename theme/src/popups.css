@@ -117,8 +117,8 @@ tooltip {
 }
 
 /* The status label sits over the page, where no desktop blur reaches, so
- * it takes the console's opaque slab: glass would let page text show
- * through the URL. Split view's footer (the inactive page's host, in its
+ * it takes the console: on glass, B frosting the page (translucency.css),
+ * so page text never shows through the URL. Split view's footer (the inactive page's host, in its
  * bottom corner) is the same kind of label. */
 #statuspanel-label,
 split-view-footer {

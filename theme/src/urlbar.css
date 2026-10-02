@@ -58,10 +58,9 @@
 }
 
 /* In-place dropdown (top layout): the field lifts onto the console slab
- * with the focus edge; geometry stays Firefox's own. The slab is solid even
- * on glass: the results hang over the page, which the chrome cannot blur.
- * The centred
- * launcher lives in launcher.css. */
+ * with the focus edge; geometry stays Firefox's own. On glass the slab is
+ * B, frosting the page (translucency.css). The centred launcher lives in
+ * launcher.css. */
 #urlbar[popover-open] > .urlbar-background,
 #urlbar[popover-open] > .urlbarView > .urlbarView-background {
   background-color: var(--oc-console) !important;

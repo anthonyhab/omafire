@@ -18,6 +18,17 @@
     --oc-panel: color-mix(in srgb,
       color-mix(in srgb, var(--oc-frame), var(--oc-text) 5%) calc(max(var(--oc-glass-alpha), 0.8) * 100%),
       transparent);
+    /* B, the one material for raised chrome (DEC-65): the panels' tint,
+     * frosted where it hangs over the page (below). The console is no
+     * longer a solid slab on glass. */
+    --oc-console: var(--oc-panel);
+    /* Glass pages' backdrop: what shows around a site's main container
+     * (below). Pages read it as --omafire-glass-backdrop (content.css). */
+    --oc-glass-backdrop: max(calc(var(--oc-glass-alpha) - 0.22), 0.4);
+    /* What lifts the backdrop back to the window's alpha. Alphas stack as
+     * 1 - (1 - a)(1 - b), so the step is solved for, not added. */
+    --oc-surface-rise: color-mix(in srgb, var(--oc-frame)
+      calc((1 - (1 - var(--oc-glass-alpha)) / (1 - var(--oc-glass-backdrop))) * 100%), transparent);
     background: transparent !important;
   }
 
@@ -62,7 +73,7 @@
 
   #main-window:not([customizing]) #urlbar[popover-open] > .urlbar-background,
   #main-window:not([customizing]) #urlbar[popover-open] > .urlbarView > .urlbarView-background {
-    background-color: color-mix(in srgb, var(--oc-console) calc(max(var(--oc-glass-alpha), 0.8) * 100%), transparent) !important;
+    background-color: var(--oc-console) !important;
     backdrop-filter: blur(8px) !important;
   }
 
@@ -99,9 +110,103 @@
       animation: none !important;
 
       & > .urlbar-background {
-        background-color: color-mix(in srgb, var(--oc-console) calc(max(var(--oc-glass-alpha), 0.8) * 100%), transparent) !important;
+        background-color: var(--oc-console) !important;
         backdrop-filter: blur(8px) !important;
       }
+    }
+  }
+}
+
+/* ---- the material ladder (DEC-65) ------------------------------------
+ *
+ * Totals over the desktop, at the window's alpha a (0.82 here):
+ *   backdrop  a - 0.22, floor 0.4   glass pages' surround (0.60)
+ *   window    a                     chrome, and a page with no container
+ *   B         max(a, 0.8) + 5% text panels, consoles, a page's container
+ * Each layer paints only the step from what is under it, solved from
+ * 1 - (1 - a)(1 - b): naively, 0.82 over 0.60 is 0.93, not 0.82.
+ *
+ * Glass pages: the window under the page is the backdrop, and everything
+ * outside the page lifts to the window's alpha by a box anchored to the
+ * page that paints the step as a spread (not a visible shadow: it has no
+ * blur and ends at the page's edge). It sits at z-index -1, under all
+ * chrome, over the root's backdrop. Cinder lifts a page back to the window
+ * with its base, or leaves the base clear and puts the site's main
+ * container at B (its kit's @main). */
+@media -moz-pref("omafire.translucency") and -moz-pref("omafire.glass-pages") {
+  /* (#main-window is the root: translucency clears it by id) */
+  #main-window:root:not([inDOMFullscreen], [customizing]) {
+    background-color: color-mix(in srgb, var(--oc-frame) calc(var(--oc-glass-backdrop) * 100%), transparent) !important;
+
+    & body {
+      background-color: transparent !important;
+    }
+
+    & #tabbrowser-tabbox {
+      anchor-name: --oc-page !important;
+    }
+
+    & body::after {
+      content: "" !important;
+      position: fixed !important;
+      position-anchor: --oc-page !important;
+      inset: anchor(top) anchor(right) anchor(bottom) anchor(left) !important;
+      z-index: -1 !important;
+      pointer-events: none !important;
+      border-radius: var(--oc-card-radius) !important;
+      box-shadow: 0 0 0 100vmax var(--oc-surface-rise) !important;
+    }
+
+    /* Zen's row with vertical tabs holds its own space inside the page's
+     * box (the page slides down under it): it is window, not backdrop. */
+    @media -moz-pref("omafire.zen-mode") and -moz-pref("omafire.zen-mode-active") and -moz-pref("sidebar.verticalTabs") and (not -moz-pref("omafire.layout", "sidebar")) {
+      & #nav-bar {
+        background-color: var(--oc-surface-rise) !important;
+      }
+    }
+
+    /* The new tab is omafire's own, clear page: the window's alpha. */
+    &:has(.tabbrowser-tab[selected][image*="PHN2ZyBpZD0ib21hZm94LW5ld3RhYiIg"])
+        #tabbrowser-tabpanels > .deck-selected .browserContainer {
+      background-color: var(--oc-surface-rise) !important;
+    }
+  }
+}
+
+/* B over the page: the zen row (horizontal tabs: with vertical tabs it
+ * holds its own space) and the status label hang over it, so they frost
+ * it while shown, with the page layer of DEC-64. The row's
+ * blur is a layer of its own: a backdrop-filter on #nav-bar would make it
+ * the fixed urlbar's containing block and its card's backdrop root. */
+@media -moz-pref("omafire.translucency") {
+  @media -moz-pref("omafire.zen-mode") and -moz-pref("omafire.zen-mode-active") and (not -moz-pref("omafire.layout", "sidebar")) and (not -moz-pref("sidebar.verticalTabs")) {
+    #main-window:not([customizing], [inDOMFullscreen]) {
+      &:has(#urlbar:is([popover-open], [focused]), #nav-bar [open], #nav-bar:focus-within, #navigator-toolbox:hover)
+          #tabbrowser-tabpanels .browserSidebarContainer {
+        will-change: transform !important;
+        backface-visibility: hidden !important;
+      }
+
+      & #nav-bar::before {
+        content: "" !important;
+        position: absolute !important;
+        inset: 0 !important;
+        z-index: -1 !important;
+        pointer-events: none !important;
+        backdrop-filter: blur(8px) !important;
+      }
+    }
+  }
+
+  #main-window:not([customizing], [inDOMFullscreen]) {
+    &:has(#statuspanel:not([inactive])) #tabbrowser-tabpanels .browserSidebarContainer {
+      will-change: transform !important;
+      backface-visibility: hidden !important;
+    }
+
+    & #statuspanel-label,
+    & split-view-footer {
+      backdrop-filter: blur(8px) !important;
     }
   }
 }

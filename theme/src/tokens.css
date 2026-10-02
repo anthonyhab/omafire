@@ -171,9 +171,9 @@
   --oc-panel: color-mix(in srgb, var(--oc-frame), var(--oc-text) 5%);
   --oc-shadow: 0 1px 2px rgb(0 0 0 / 0.14), 0 0 0 1px var(--oc-line);
   --oc-shadow-float: 0 12px 40px rgb(0 0 0 / 0.36), 0 0 0 1px var(--oc-line);
-  /* The quake console (launcher.css, zen.css): an opaque slab held by
-   * hard rules, never shadows. Glass (translucency.css) leaves it solid so
-   * the page cannot show through the results. */
+  /* The quake console (launcher.css, zen.css): a slab held by hard rules,
+   * never shadows. On glass it is B, the panels' material, frosting the
+   * page under it (translucency.css, DEC-65). */
   --oc-console: color-mix(in srgb, var(--oc-frame), var(--oc-text) 5%);
   --oc-rule: 2px;
   /* Fill for alpha masks (tab-number notches): only its opacity counts. */
