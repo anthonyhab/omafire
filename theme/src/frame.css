@@ -67,11 +67,12 @@
   /* Split view: the active page is framed in the focus colour, 1px
    * inside its edge. The frame is a positioned layer above the page, as
    * the status panel is: the page (another process) paints over its
-   * container's own inset shadow and outline. */
+   * container's own inset shadow and outline. The panes sit on the
+   * frame like a single page (flush, or the card's gap); the divider is
+   * the only space between them, not Firefox's --space-xsmall margin. */
   & #tabbrowser-tabpanels[splitview] {
-    & .split-view-panel > .browserContainer {
-      border: none !important;
-      outline: none !important;
+    & .split-view-panel.split-view-panel-active {
+      margin: 0 !important;
     }
     & .split-view-panel.deck-selected > .browserContainer {
       position: relative !important;
@@ -117,4 +118,12 @@
 :root[inDOMFullscreen] {
   & #tabbrowser-tabbox { margin: 0 !important; }
   & .browserContainer { border-radius: 0 !important; box-shadow: none !important; }
+}
+
+/* Split view's native active-pane cue (a focus outline on the selected
+ * page) is replaced by the frame above, and must not come back on the
+ * pane a page took fullscreen. */
+#tabbrowser-tabpanels[splitview] > .split-view-panel > .browserContainer {
+  border: none !important;
+  outline: none !important;
 }

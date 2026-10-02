@@ -176,4 +176,48 @@ assert.throws(
   /Unexpected palette/
 );
 
+// Split view in the chrome theme (omafire-v2z.6). These read the source;
+// the measured geometry is in the bead's fxlab evidence.
+const fs = require("node:fs");
+const path = require("node:path");
+const themeSource = (name) =>
+  fs.readFileSync(path.join(__dirname, "../theme/src", name), "utf8");
+const frameCss = themeSource("frame.css");
+const sidebarCss = themeSource("sidebar.css");
+
+// Panes sit on the frame like one page: Firefox's --space-xsmall margin
+// around each active pane is cancelled, the divider is the only space.
+assert.match(
+  frameCss,
+  /#tabbrowser-tabpanels\[splitview\] \{\s*& \.split-view-panel\.split-view-panel-active \{\s*margin: 0 !important;/
+);
+
+// Firefox's native cue (a focus outline on the selected pane) stays off in
+// DOM fullscreen too, so it is a top-level rule, not under the
+// :root:not([inDOMFullscreen]) frame block.
+assert.match(
+  frameCss,
+  /^#tabbrowser-tabpanels\[splitview\] > \.split-view-panel > \.browserContainer \{\s*border: none !important;\s*outline: none !important;/m
+);
+
+// The new tab clears only its own (selected) pane, never the other one.
+assert.match(
+  frameCss,
+  /&:has\(\.tabbrowser-tab\[selected\]\[image\*="PHN2ZyBpZD0ib21hZm94LW5ld3RhYiIg"\]\)\s*#tabbrowser-tabpanels > \.deck-selected \.browserContainer \{\s*background-color: transparent !important;/
+);
+
+// Compact's card keeps its start gap where the layout's "the launcher
+// splitter is the gap" rule (same selector) would zero it.
+assert.match(
+  themeSource("modes/compact.css"),
+  /&,\s*&:has\(#sidebar-container:not\(\[hidden\]\)\) \{\s*& #tabbrowser-tabbox \{\s*grid-column: side \/ ai-split !important;\s*margin-inline-start: var\(--oc-gap\) !important;/
+);
+
+// F11 folds the tab column to nothing; its flush-mode edge goes with it.
+const columnEdges = sidebarCss.match(/^\s*:root:not\([^)]*\) #sidebar-container \{/gm) ?? [];
+assert.equal(columnEdges.length, 2);
+for (const rule of columnEdges) {
+  assert.match(rule, /:root:not\(\[inDOMFullscreen\], \[fullscreenNavToolboxHidden\]\)/);
+}
+
 console.log("theme.test.js: ok");

@@ -44,9 +44,15 @@
       --oc-reveal: 1;
     }
 
-    & #tabbrowser-tabbox {
-      grid-column: side / ai-split !important;
-      margin-inline-start: var(--oc-gap) !important;
+    /* Named as the layout names its "the launcher splitter is the gap"
+     * rule, which drops this margin to 0 otherwise: the card then met the
+     * window's start edge while its end kept the gap. */
+    &,
+    &:has(#sidebar-container:not([hidden])) {
+      & #tabbrowser-tabbox {
+        grid-column: side / ai-split !important;
+        margin-inline-start: var(--oc-gap) !important;
+      }
     }
 
     & #sidebar-launcher-splitter {
