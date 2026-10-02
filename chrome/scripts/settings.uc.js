@@ -37,9 +37,17 @@
   const layout = () => get("omafire.layout", "top") === "sidebar" ? "sidebar" : "top";
   const vertical = () => get("sidebar.verticalTabs", false);
   const zen = () => get("omafire.zen-mode", false) && get("omafire.zen-mode-active", false);
+  // The theme's glass floor (DEC-66, written by omafire sync): below it
+  // text stops reading, so the theme ignores lower values and the slider
+  // stops there.
+  const glassFloor = () => {
+    const v = Number.parseFloat(getComputedStyle(document.documentElement)
+      .getPropertyValue("--omafire-glass-floor"));
+    return Number.isFinite(v) && v >= 0.5 && v <= 1 ? v : 0.5;
+  };
   const glassAlpha = () => {
     const v = Number.parseFloat(get("omafire.transparency", "0.85"));
-    return Number.isFinite(v) && v >= 0.5 && v <= 1 ? v : 0.85;
+    return Math.max(Number.isFinite(v) && v >= 0.5 && v <= 1 ? v : 0.85, glassFloor());
   };
 
   // Rows in order. `when` greys a row out where the theme ignores it.
@@ -111,7 +119,7 @@
     },
     {
       label: "Opacity", kind: "range", prefs: ["omafire.transparency"],
-      read: glassAlpha,
+      read: glassAlpha, min: glassFloor,
       write: v => set("omafire.transparency", v.toFixed(2)),
       when: () => get("omafire.translucency", false),
     },
@@ -312,6 +320,7 @@
       });
       control = h("span", {class: "omafire-range"}, input, out);
       render = () => {
+        input.min = row.min().toFixed(2);
         const v = row.read();
         input.value = String(v);
         out.value = Math.round(v * 100) + "%";

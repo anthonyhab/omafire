@@ -31,6 +31,7 @@ var version = "unknown"
 var (
 	themeDir           string
 	themeNameFile      string
+	backgroundLink     string
 	hookPath           string
 	stateDir           string
 	stateFile          string
@@ -69,6 +70,7 @@ func initPaths() {
 	home := homeDir()
 	themeDir = envOr("OMAFIRE_THEME_DIR", home+"/.local/state/omarchy/current/theme")
 	themeNameFile = envOr("OMAFIRE_THEME_NAME_FILE", home+"/.local/state/omarchy/current/theme.name")
+	backgroundLink = envOr("OMAFIRE_BACKGROUND", home+"/.local/state/omarchy/current/background")
 	hookPath = home + "/.config/omarchy/hooks/theme-set.d/omafire"
 	stateDir = home + "/.local/state/omafire"
 	stateFile = stateDir + "/theme.json"

@@ -9,11 +9,14 @@
  * Menus and panels keep a floor of 0.8 so dense text stays readable.
  *
  * omafire.transparency (a string, "0.50" to "1.00" in 0.01 steps, as the
- * original theme stored it) picks the alpha; anything else means 0.85. */
+ * original theme stored it) picks the alpha; anything else means 0.85. It
+ * never goes below the theme's glass floor (DEC-66), which omafire sync
+ * measures against the wallpapers: below it text stops reading. */
 
 @media -moz-pref("omafire.translucency") {
   :root {
-    --oc-glass-alpha: 0.85;
+    --oc-glass-chosen: 0.85;
+    --oc-glass-alpha: max(var(--oc-glass-chosen), var(--omafire-glass-floor, 0.5));
     --oc-surface: color-mix(in srgb, var(--oc-frame) calc(var(--oc-glass-alpha) * 100%), transparent);
     --oc-panel: color-mix(in srgb,
       color-mix(in srgb, var(--oc-frame), var(--oc-text) 5%) calc(max(var(--oc-glass-alpha), 0.8) * 100%),
@@ -212,54 +215,54 @@
 }
 
 /* Alpha steps. Media queries can only compare a pref to a literal. */
-@media -moz-pref("omafire.transparency", "0.50") { :root { --oc-glass-alpha: 0.50; } }
-@media -moz-pref("omafire.transparency", "0.51") { :root { --oc-glass-alpha: 0.51; } }
-@media -moz-pref("omafire.transparency", "0.52") { :root { --oc-glass-alpha: 0.52; } }
-@media -moz-pref("omafire.transparency", "0.53") { :root { --oc-glass-alpha: 0.53; } }
-@media -moz-pref("omafire.transparency", "0.54") { :root { --oc-glass-alpha: 0.54; } }
-@media -moz-pref("omafire.transparency", "0.55") { :root { --oc-glass-alpha: 0.55; } }
-@media -moz-pref("omafire.transparency", "0.56") { :root { --oc-glass-alpha: 0.56; } }
-@media -moz-pref("omafire.transparency", "0.57") { :root { --oc-glass-alpha: 0.57; } }
-@media -moz-pref("omafire.transparency", "0.58") { :root { --oc-glass-alpha: 0.58; } }
-@media -moz-pref("omafire.transparency", "0.59") { :root { --oc-glass-alpha: 0.59; } }
-@media -moz-pref("omafire.transparency", "0.60") { :root { --oc-glass-alpha: 0.60; } }
-@media -moz-pref("omafire.transparency", "0.61") { :root { --oc-glass-alpha: 0.61; } }
-@media -moz-pref("omafire.transparency", "0.62") { :root { --oc-glass-alpha: 0.62; } }
-@media -moz-pref("omafire.transparency", "0.63") { :root { --oc-glass-alpha: 0.63; } }
-@media -moz-pref("omafire.transparency", "0.64") { :root { --oc-glass-alpha: 0.64; } }
-@media -moz-pref("omafire.transparency", "0.65") { :root { --oc-glass-alpha: 0.65; } }
-@media -moz-pref("omafire.transparency", "0.66") { :root { --oc-glass-alpha: 0.66; } }
-@media -moz-pref("omafire.transparency", "0.67") { :root { --oc-glass-alpha: 0.67; } }
-@media -moz-pref("omafire.transparency", "0.68") { :root { --oc-glass-alpha: 0.68; } }
-@media -moz-pref("omafire.transparency", "0.69") { :root { --oc-glass-alpha: 0.69; } }
-@media -moz-pref("omafire.transparency", "0.70") { :root { --oc-glass-alpha: 0.70; } }
-@media -moz-pref("omafire.transparency", "0.71") { :root { --oc-glass-alpha: 0.71; } }
-@media -moz-pref("omafire.transparency", "0.72") { :root { --oc-glass-alpha: 0.72; } }
-@media -moz-pref("omafire.transparency", "0.73") { :root { --oc-glass-alpha: 0.73; } }
-@media -moz-pref("omafire.transparency", "0.74") { :root { --oc-glass-alpha: 0.74; } }
-@media -moz-pref("omafire.transparency", "0.75") { :root { --oc-glass-alpha: 0.75; } }
-@media -moz-pref("omafire.transparency", "0.76") { :root { --oc-glass-alpha: 0.76; } }
-@media -moz-pref("omafire.transparency", "0.77") { :root { --oc-glass-alpha: 0.77; } }
-@media -moz-pref("omafire.transparency", "0.78") { :root { --oc-glass-alpha: 0.78; } }
-@media -moz-pref("omafire.transparency", "0.79") { :root { --oc-glass-alpha: 0.79; } }
-@media -moz-pref("omafire.transparency", "0.80") { :root { --oc-glass-alpha: 0.80; } }
-@media -moz-pref("omafire.transparency", "0.81") { :root { --oc-glass-alpha: 0.81; } }
-@media -moz-pref("omafire.transparency", "0.82") { :root { --oc-glass-alpha: 0.82; } }
-@media -moz-pref("omafire.transparency", "0.83") { :root { --oc-glass-alpha: 0.83; } }
-@media -moz-pref("omafire.transparency", "0.84") { :root { --oc-glass-alpha: 0.84; } }
-@media -moz-pref("omafire.transparency", "0.85") { :root { --oc-glass-alpha: 0.85; } }
-@media -moz-pref("omafire.transparency", "0.86") { :root { --oc-glass-alpha: 0.86; } }
-@media -moz-pref("omafire.transparency", "0.87") { :root { --oc-glass-alpha: 0.87; } }
-@media -moz-pref("omafire.transparency", "0.88") { :root { --oc-glass-alpha: 0.88; } }
-@media -moz-pref("omafire.transparency", "0.89") { :root { --oc-glass-alpha: 0.89; } }
-@media -moz-pref("omafire.transparency", "0.90") { :root { --oc-glass-alpha: 0.90; } }
-@media -moz-pref("omafire.transparency", "0.91") { :root { --oc-glass-alpha: 0.91; } }
-@media -moz-pref("omafire.transparency", "0.92") { :root { --oc-glass-alpha: 0.92; } }
-@media -moz-pref("omafire.transparency", "0.93") { :root { --oc-glass-alpha: 0.93; } }
-@media -moz-pref("omafire.transparency", "0.94") { :root { --oc-glass-alpha: 0.94; } }
-@media -moz-pref("omafire.transparency", "0.95") { :root { --oc-glass-alpha: 0.95; } }
-@media -moz-pref("omafire.transparency", "0.96") { :root { --oc-glass-alpha: 0.96; } }
-@media -moz-pref("omafire.transparency", "0.97") { :root { --oc-glass-alpha: 0.97; } }
-@media -moz-pref("omafire.transparency", "0.98") { :root { --oc-glass-alpha: 0.98; } }
-@media -moz-pref("omafire.transparency", "0.99") { :root { --oc-glass-alpha: 0.99; } }
-@media -moz-pref("omafire.transparency", "1.00") { :root { --oc-glass-alpha: 1.00; } }
+@media -moz-pref("omafire.transparency", "0.50") { :root { --oc-glass-chosen: 0.50; } }
+@media -moz-pref("omafire.transparency", "0.51") { :root { --oc-glass-chosen: 0.51; } }
+@media -moz-pref("omafire.transparency", "0.52") { :root { --oc-glass-chosen: 0.52; } }
+@media -moz-pref("omafire.transparency", "0.53") { :root { --oc-glass-chosen: 0.53; } }
+@media -moz-pref("omafire.transparency", "0.54") { :root { --oc-glass-chosen: 0.54; } }
+@media -moz-pref("omafire.transparency", "0.55") { :root { --oc-glass-chosen: 0.55; } }
+@media -moz-pref("omafire.transparency", "0.56") { :root { --oc-glass-chosen: 0.56; } }
+@media -moz-pref("omafire.transparency", "0.57") { :root { --oc-glass-chosen: 0.57; } }
+@media -moz-pref("omafire.transparency", "0.58") { :root { --oc-glass-chosen: 0.58; } }
+@media -moz-pref("omafire.transparency", "0.59") { :root { --oc-glass-chosen: 0.59; } }
+@media -moz-pref("omafire.transparency", "0.60") { :root { --oc-glass-chosen: 0.60; } }
+@media -moz-pref("omafire.transparency", "0.61") { :root { --oc-glass-chosen: 0.61; } }
+@media -moz-pref("omafire.transparency", "0.62") { :root { --oc-glass-chosen: 0.62; } }
+@media -moz-pref("omafire.transparency", "0.63") { :root { --oc-glass-chosen: 0.63; } }
+@media -moz-pref("omafire.transparency", "0.64") { :root { --oc-glass-chosen: 0.64; } }
+@media -moz-pref("omafire.transparency", "0.65") { :root { --oc-glass-chosen: 0.65; } }
+@media -moz-pref("omafire.transparency", "0.66") { :root { --oc-glass-chosen: 0.66; } }
+@media -moz-pref("omafire.transparency", "0.67") { :root { --oc-glass-chosen: 0.67; } }
+@media -moz-pref("omafire.transparency", "0.68") { :root { --oc-glass-chosen: 0.68; } }
+@media -moz-pref("omafire.transparency", "0.69") { :root { --oc-glass-chosen: 0.69; } }
+@media -moz-pref("omafire.transparency", "0.70") { :root { --oc-glass-chosen: 0.70; } }
+@media -moz-pref("omafire.transparency", "0.71") { :root { --oc-glass-chosen: 0.71; } }
+@media -moz-pref("omafire.transparency", "0.72") { :root { --oc-glass-chosen: 0.72; } }
+@media -moz-pref("omafire.transparency", "0.73") { :root { --oc-glass-chosen: 0.73; } }
+@media -moz-pref("omafire.transparency", "0.74") { :root { --oc-glass-chosen: 0.74; } }
+@media -moz-pref("omafire.transparency", "0.75") { :root { --oc-glass-chosen: 0.75; } }
+@media -moz-pref("omafire.transparency", "0.76") { :root { --oc-glass-chosen: 0.76; } }
+@media -moz-pref("omafire.transparency", "0.77") { :root { --oc-glass-chosen: 0.77; } }
+@media -moz-pref("omafire.transparency", "0.78") { :root { --oc-glass-chosen: 0.78; } }
+@media -moz-pref("omafire.transparency", "0.79") { :root { --oc-glass-chosen: 0.79; } }
+@media -moz-pref("omafire.transparency", "0.80") { :root { --oc-glass-chosen: 0.80; } }
+@media -moz-pref("omafire.transparency", "0.81") { :root { --oc-glass-chosen: 0.81; } }
+@media -moz-pref("omafire.transparency", "0.82") { :root { --oc-glass-chosen: 0.82; } }
+@media -moz-pref("omafire.transparency", "0.83") { :root { --oc-glass-chosen: 0.83; } }
+@media -moz-pref("omafire.transparency", "0.84") { :root { --oc-glass-chosen: 0.84; } }
+@media -moz-pref("omafire.transparency", "0.85") { :root { --oc-glass-chosen: 0.85; } }
+@media -moz-pref("omafire.transparency", "0.86") { :root { --oc-glass-chosen: 0.86; } }
+@media -moz-pref("omafire.transparency", "0.87") { :root { --oc-glass-chosen: 0.87; } }
+@media -moz-pref("omafire.transparency", "0.88") { :root { --oc-glass-chosen: 0.88; } }
+@media -moz-pref("omafire.transparency", "0.89") { :root { --oc-glass-chosen: 0.89; } }
+@media -moz-pref("omafire.transparency", "0.90") { :root { --oc-glass-chosen: 0.90; } }
+@media -moz-pref("omafire.transparency", "0.91") { :root { --oc-glass-chosen: 0.91; } }
+@media -moz-pref("omafire.transparency", "0.92") { :root { --oc-glass-chosen: 0.92; } }
+@media -moz-pref("omafire.transparency", "0.93") { :root { --oc-glass-chosen: 0.93; } }
+@media -moz-pref("omafire.transparency", "0.94") { :root { --oc-glass-chosen: 0.94; } }
+@media -moz-pref("omafire.transparency", "0.95") { :root { --oc-glass-chosen: 0.95; } }
+@media -moz-pref("omafire.transparency", "0.96") { :root { --oc-glass-chosen: 0.96; } }
+@media -moz-pref("omafire.transparency", "0.97") { :root { --oc-glass-chosen: 0.97; } }
+@media -moz-pref("omafire.transparency", "0.98") { :root { --oc-glass-chosen: 0.98; } }
+@media -moz-pref("omafire.transparency", "0.99") { :root { --oc-glass-chosen: 0.99; } }
+@media -moz-pref("omafire.transparency", "1.00") { :root { --oc-glass-chosen: 1.00; } }

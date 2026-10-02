@@ -237,9 +237,9 @@
     :root {
       /* (web content processes can't see string prefs: live-palette.uc.js
        * publishes omafire.transparency as --omafire-glass-alpha) */
-      --omafire-glass-pages: var(--omafire-glass-alpha, 0.85) !important;
+      --omafire-glass-pages: max(var(--omafire-glass-alpha, 0.85), var(--omafire-glass-floor, 0.5)) !important;
       /* (translucency.css's --oc-glass-backdrop: keep them one formula) */
-      --omafire-glass-backdrop: max(calc(var(--omafire-glass-alpha, 0.85) - 0.22), 0.4) !important;
+      --omafire-glass-backdrop: max(calc(var(--omafire-glass-pages) - 0.22), 0.4) !important;
     }
   }
 }

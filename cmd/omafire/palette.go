@@ -41,6 +41,7 @@ var (
 type palette struct {
 	mode  string // "dark" or "light" once filled
 	color map[string]string
+	floor float64 // the glass floor, measured on first use (glassFloor)
 }
 
 func (p *palette) get(key string) string { return p.color[key] }

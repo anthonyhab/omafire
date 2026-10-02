@@ -8,12 +8,18 @@ import (
 // rawPaletteVars renders every palette color as --omarchy-<key>. The theme
 // reads these only where the lightweight theme has no equivalent (tab-group
 // swatches, about: pages); live chrome colors come from the extension.
+// The glass floor (DEC-66) rides along: chrome and glass pages both clamp
+// their alpha to it.
 func rawPaletteVars(p *palette) string {
 	var out strings.Builder
 	out.WriteString(":root {\n")
 	for _, key := range colorKeys {
 		fmt.Fprintf(&out, "  --omarchy-%s: %s;\n", key, p.get(key))
 	}
+	if p.floor == 0 {
+		p.floor = glassFloor(p)
+	}
+	fmt.Fprintf(&out, "  --omafire-glass-floor: %.2f;\n", p.floor)
 	out.WriteString("}\n")
 	return out.String()
 }

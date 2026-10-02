@@ -170,6 +170,9 @@ for profile in "$RELATIVE_PROFILE" "$ABSOLUTE_PROFILE"; do
   grep -Fqx '/* OMAFIRE GENERATED PALETTE — written by omafire sync; do not edit. */' \
     "$profile/chrome/omafire-palette.css"
   grep -Fq -- '--omarchy-background: #111c18;' "$profile/chrome/omafire-palette.css"
+  # The glass floor (DEC-66) rides in both palettes.
+  grep -Eqx -- '  --omafire-glass-floor: (0\.[5-9][0-9]|1\.00);' "$profile/chrome/omafire-palette.css"
+  grep -Eqx -- '  --omafire-glass-floor: (0\.[5-9][0-9]|1\.00);' "$profile/chrome/omafire-content-palette.css"
   # Cold-start mirror of the lightweight theme, inert once it lands.
   grep -Fqx ':root:not([lwtheme]) {' "$profile/chrome/omafire-palette.css"
   grep -Fq -- '--tabpanel-background-color: #111c18 !important;' \

@@ -55,7 +55,7 @@ for script in "$PROJECT_DIR"/chrome/scripts/*.uc.js; do
 done
 unformatted=$(cd "$PROJECT_DIR" && gofmt -l cmd config)
 [[ -z $unformatted ]] || { echo "gofmt needed: $unformatted" >&2; exit 1; }
-(cd "$PROJECT_DIR" && go vet ./...)
+(cd "$PROJECT_DIR" && go vet ./... && go test ./...)
 
 # One version: VERSION, which make links in; the PKGBUILD must agree.
 version=$(cat "$PROJECT_DIR/VERSION")
