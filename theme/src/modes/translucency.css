@@ -28,6 +28,84 @@
   }
 }
 
+/* ---- glass over the page (DEC-64) -----------------------------------
+ *
+ * The urlbar card hangs over the page, so it can only be frosted if
+ * WebRender composites the page itself: will-change: transform on the
+ * page's container (from Zia) lets the chrome's backdrop-filter sample it.
+ * That costs CPU while the page moves (scroll x1.6), so the layer is on
+ * only while the card is open. The card is the panels' material: their
+ * tint floor and about Hyprland's own blur.
+ *
+ * A backdrop-filter samples only up to its nearest ancestor with
+ * opacity, clip-path, filter or mask, so nothing above the card's
+ * backgrounds may carry those: the console's clip-path entrances (zen's
+ * unroll, the launcher's drop) left the page sharp through the card for
+ * their whole run, and a fade crossfades from the sharp page. The console
+ * still unrolls, by clipping the view's background half itself (a clip on
+ * the filtered box keeps its backdrop) and its rows, which are siblings. */
+
+/* From fully clipped to Firefox's own seam clip (urlbar.css,
+ * .urlbarView-background), which the animation's end state falls back to. */
+@keyframes oc-glass-unroll {
+  from {
+    clip-path: inset(var(--urlbar-joint-background-overlap) calc(-1 * var(--urlbar-joint-background-shadow-margin))
+                      100% calc(-1 * var(--urlbar-joint-background-shadow-margin)));
+  }
+}
+
+@media -moz-pref("omafire.translucency") {
+  #main-window:not([customizing]):has(#urlbar[popover-open]) #tabbrowser-tabpanels .browserSidebarContainer {
+    will-change: transform !important;
+    backface-visibility: hidden !important;
+  }
+
+  #main-window:not([customizing]) #urlbar[popover-open] > .urlbar-background,
+  #main-window:not([customizing]) #urlbar[popover-open] > .urlbarView > .urlbarView-background {
+    background-color: color-mix(in srgb, var(--oc-console) calc(max(var(--oc-glass-alpha), 0.8) * 100%), transparent) !important;
+    backdrop-filter: blur(8px) !important;
+  }
+
+  /* No clip on the card's ancestors: the field and the view stand still. */
+  #main-window:not([customizing]) #urlbar[popover-open],
+  #main-window:not([customizing]) #urlbar[popover-open] > .urlbarView {
+    animation: none !important;
+  }
+
+  /* Where the console moved (zen's inline field, the sidebar's drop), it
+   * unrolls down out of the field. */
+  @media -moz-pref("omafire.zen-mode") and -moz-pref("omafire.zen-mode-active") and (not -moz-pref("omafire.launcher", "center")),
+         -moz-pref("omafire.layout", "sidebar") and (not -moz-pref("omafire.launcher", "center")) {
+    #main-window:not([customizing]) #urlbar[popover-open] > .urlbarView {
+      & > .urlbarView-background {
+        animation: oc-glass-unroll var(--oc-console-in) var(--oc-ease-enter) !important;
+      }
+      & > .urlbarView-body-outer {
+        animation: oc-unroll var(--oc-console-in) var(--oc-ease-enter) !important;
+      }
+    }
+  }
+
+  /* The launcher's bare field (focused, nothing listed) is over the page
+   * too. */
+  @media -moz-pref("omafire.layout", "sidebar"),
+         -moz-pref("omafire.zen-mode") and -moz-pref("omafire.zen-mode-active") and -moz-pref("omafire.launcher", "center") {
+    #main-window:not([customizing]):has(#urlbar[focused]) #tabbrowser-tabpanels .browserSidebarContainer {
+      will-change: transform !important;
+      backface-visibility: hidden !important;
+    }
+
+    #main-window:not([customizing]) #urlbar[focused] {
+      animation: none !important;
+
+      & > .urlbar-background {
+        background-color: color-mix(in srgb, var(--oc-console) calc(max(var(--oc-glass-alpha), 0.8) * 100%), transparent) !important;
+        backdrop-filter: blur(8px) !important;
+      }
+    }
+  }
+}
+
 /* Alpha steps. Media queries can only compare a pref to a literal. */
 @media -moz-pref("omafire.transparency", "0.50") { :root { --oc-glass-alpha: 0.50; } }
 @media -moz-pref("omafire.transparency", "0.51") { :root { --oc-glass-alpha: 0.51; } }
