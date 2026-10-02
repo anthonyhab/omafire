@@ -1,0 +1,5 @@
+#!/bin/sh
+# Waits for Forgejo CI on a pushed commit and exits 0 only if it passed.
+#   scripts/ci-wait SHA
+set -eu
+exec fj watch --sha "${1:?usage: scripts/ci-wait SHA}" -R habibe/omafire

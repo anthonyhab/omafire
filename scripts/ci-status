@@ -1,0 +1,8 @@
+#!/bin/sh
+# Exits 0 only if Forgejo ran CI on exactly SHA and every run passed. The
+# Kandev Land step asks this before it fast-forwards main.
+#   scripts/ci-status SHA
+set -eu
+sha=$(git rev-parse "${1:?usage: scripts/ci-status SHA}^{commit}")
+fj runs --sha "$sha" -R habibe/omafire --json |
+  jq -e --arg s "$sha" '[.[] | select(.commit_sha == $s)] | length > 0 and all(.status == "success")' >/dev/null

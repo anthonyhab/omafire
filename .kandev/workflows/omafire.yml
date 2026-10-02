@@ -1,0 +1,236 @@
+# Kandev workflow for omafire (portable import format). Set up with the Beads plugin's
+# e2e/kandev-setup: CLAUDE_PROFILE="Opus 5.5" REVIEW_PROFILE="gangway review"
+# APPROVE_PROFILE="gangway approve". The plugin source line carries
+# `remote=forgejo | mirrors= | label=kandev-omafire`: origin here is upstream omafox on GitHub,
+# never ours to push.
+#
+# Implement and Review run in parallel worktrees, each with its own fxlab on headless sway.
+# Live rig is the fxlab VM (real Hyprland): one card at a time, fed from Rig queue by the
+# plugin. Ship gets a CI-green commit. Approve's agent, a fresh session, lands what passes;
+# anything a user sees is labelled design and waits for the user (they judge chrome by eye).
+version: 1
+type: kandev_workflow
+workflows:
+  - name: Omafire
+    description: omafire beads, cross-reviewed, VM-proven where it matters, landed on approval.
+    prompt: |
+      You are one of several agents working on omafire in parallel, each in its own git worktree of
+      the omafire repo. One thread carries this task through every step your agent runs: read
+      ~/Projects/omarchy-firefox-bundle/AGENTS.md, this repo's AGENTS.md and `bd show <id>` once,
+      and on later steps only the new bead notes. The bundle (decisions, plans, reports, tools/fxlab)
+      is read-only to you. Work in this thread; no subagents. The Bead is the spec and bd is the
+      record: notes with `bd update <id> --append-notes`, follow-ups with `bd create`. Never close
+      the bead: landing does.
+      Route this task when your step is done: put what the next step needs in the bead notes, then
+      `bd update <id> --set-metadata next_step="<step name>"` and end your turn. "Move to X" below
+      means exactly that; the Beads plugin moves the card once your turn is over. Run each bd command
+      as its own call, not inside a pipeline or script. Don't call Kandev's task or workflow tools.
+      Never push main, never touch the main checkout, never touch the user's running Firefox or its
+      profile, and never run tools/sign.
+    steps:
+      - name: Backlog
+        position: 0
+        color: bg-neutral-400
+        is_start_step: false
+        show_in_command_panel: true
+        allow_manual_move: true
+        events: {}
+
+      - name: Implement
+        position: 1
+        color: bg-blue-500
+        is_start_step: true
+        show_in_command_panel: true
+        allow_manual_move: true
+        wip_limit: 2
+        pull_from_step_position: 0
+        agent_profile:
+          agent_name: Claude
+        profile_session_end_policy: park
+        prompt: |
+          [IMPLEMENT]
+          {{task_prompt}}
+
+          1. Unless this thread already ran it, `~/.agents/hindsight/cli context --bead <id> --claim`
+             (loads the task and lessons, claims it). On a return trip, the new bead notes say what to fix.
+          2. Implement it in this worktree. Prove it offline: `tests/run.sh`, plus fxlab in host mode
+             against this worktree with your own state and port, never the defaults:
+             `export FXLAB_STATE=$(mktemp -d) && ~/Projects/omarchy-firefox-bundle/tools/fxlab up
+             --port <free port 3000-3999> --theme $PWD/theme --scripts $PWD/chrome ...`, and `fxlab down`
+             when done. Measure rects at uidensity 0 and 1. Not the VM (`--vm`): that is Live rig.
+             Tests: one per acceptance criterion or failure path, each the smallest that would catch a
+             wrong implementation. Don't edit the gate files in .kandev/protected: Land refuses it.
+          3. A product or design call the bead and AGENTS.md don't settle (a new look, a decision that
+             belongs in docs/decisions.md): render the candidates in fxlab per AGENTS.md's design bar,
+             save them to `~/.local/share/kandev-evidence/<bead id>/`, and ask with
+             ask_user_question_kandev. Don't pick a look yourself.
+          4. Commit on this branch (explicit paths, never `git add .`), Bead id in the message.
+          5. `bd update <id> --append-notes` what you did, the evidence (commands, measured values,
+             screenshot paths), and what is still unproven (anything needing real Hyprland: alpha,
+             blur, first paint under the compositor).
+          6. Move to Review.
+        events:
+          on_enter:
+            - type: auto_start_agent
+
+      - name: Review
+        position: 2
+        color: bg-yellow-500
+        is_start_step: false
+        show_in_command_panel: true
+        allow_manual_move: true
+        wip_limit: 2
+        agent_profile:
+          agent_name: Codex
+        profile_session_start_policy: reuse
+        prompt: |
+          [CROSS-REVIEW] Another agent wrote this branch; you review it, you don't rewrite it.
+          {{task_prompt}}
+
+          If you reviewed this branch earlier in this thread, review what changed since the commit you
+          noted (`git diff <that sha>`) and check each earlier finding was fixed; don't start over.
+
+          Diff: `git diff $(git merge-base forgejo/main HEAD)` (includes anything uncommitted). Read
+          ~/Projects/omarchy-firefox-bundle/AGENTS.md and the Bead with its notes. Look for: unmet
+          acceptance criteria, CSS that breaks the token rule (colours only in token files, `--oc-*`),
+          anything that would change the user's live profile or Firefox, first-paint regressions,
+          races and failure paths, claims the evidence doesn't support, deleted, skipped or loosened
+          tests, and code that special-cases what a test checks. Run `tests/run.sh`. Report only
+          findings you would bet on, each with file:line and why.
+
+          A finding blocks only if you can name what breaks: the input or sequence that makes it fail,
+          or the rule it breaks (tests/run.sh failing, an acceptance criterion unmet, a protected gate
+          file changed). Style and "consider..." never block; note at most three, as non-blocking.
+
+          Note the verdict on the bead with the HEAD you reviewed, then route it:
+          - Blocking findings: move to Implement.
+          - Clean, and proving it needs real Hyprland (transparency, blur, compositor first paint):
+            move to Rig queue, saying exactly what the VM must show.
+          - Clean, and host fxlab plus tests are enough: move to Ship.
+        events:
+          on_enter:
+            - type: auto_start_agent
+
+      - name: Rig queue
+        position: 3
+        color: bg-orange-400
+        is_start_step: false
+        show_in_command_panel: true
+        allow_manual_move: true
+        events: {}
+
+      - name: Live rig
+        position: 4
+        color: bg-red-500
+        is_start_step: false
+        show_in_command_panel: true
+        allow_manual_move: true
+        wip_limit: 1
+        agent_profile:
+          agent_name: Claude
+        prompt: |
+          [LIVE RIG] You alone hold the fxlab VM (real Hyprland, VirGL: alpha but no blur).
+          {{task_prompt}}
+
+          1. `export FXLAB_STATE=$(mktemp -d)`, then `~/Projects/omarchy-firefox-bundle/tools/fxlab up
+             --vm --theme $PWD/theme --scripts $PWD/chrome ...`. If the VM is busy or won't start,
+             note it on the bead, move back to Rig queue, and stop.
+          2. Verify exactly what Review asked for (in the VM, register CSS from a data: URI, not a host
+             path). For first paint, capture early frames during a restart.
+          3. Save screenshots to `~/.local/share/kandev-evidence/<bead id>/` (before and after, when
+             that helps).
+          4. `fxlab down`, even when the check failed.
+          5. `bd update <id> --append-notes` the evidence, listing the files.
+          6. Proven: move to Ship. Disproven: move to Implement with what failed.
+        events:
+          on_enter:
+            - type: auto_start_agent
+
+      - name: Ship
+        position: 5
+        color: bg-cyan-500
+        is_start_step: false
+        show_in_command_panel: true
+        allow_manual_move: true
+        wip_limit: 2
+        agent_profile:
+          agent_name: Claude
+        prompt: |
+          [SHIP] Get this branch onto a CI-green commit that fast-forwards main.
+          {{task_prompt}}
+
+          1. `git fetch forgejo main` and rebase onto forgejo/main. Resolve conflicts yourself; if a
+             conflict changes behaviour, move to Implement instead and say why. If the bead was proven
+             in the VM and the rebase needed conflict resolution, that proof no longer covers the
+             branch: note it, move to Rig queue, and stop.
+          2. `tests/run.sh`.
+          3. Push the branch: `git push --force-with-lease forgejo HEAD:refs/heads/kandev/<bead id>`
+             (only ever a kandev/ branch, only ever the forgejo remote), then
+             `scripts/ci-wait $(git rev-parse HEAD)`.
+          4. Green: `bd update <id> --set-metadata ship_sha=$(git rev-parse HEAD)`, note the commit and
+             CI result on the bead with a two-line summary for the user, and move to Approve.
+             Red: fix it if the cause is mechanical and go again; otherwise move to Implement.
+        events:
+          on_enter:
+            - type: auto_start_agent
+
+      - name: Approve
+        position: 6
+        color: bg-purple-500
+        is_start_step: false
+        show_in_command_panel: true
+        allow_manual_move: true
+        agent_profile:
+          agent_name: Claude
+        profile_session_start_policy: new
+        prompt: |
+          [APPROVE] You are the independent approver. You didn't build, review or test this branch,
+          and you change nothing in it: no edits, builds, VM, or pushes. You decide whether it lands
+          without the user.
+          {{task_prompt}}
+
+          Read `bd show <id>` (criteria and every note) and its ship_sha (`bd show <id> --json`).
+          Diff: `git fetch forgejo main`, then `git diff forgejo/main...<ship_sha>`.
+
+          Check each, citing the note or command that shows it:
+          1. CI: `scripts/ci-status <ship_sha>` passes.
+          2. Review: the last review verdict is clean, for ship_sha or a commit `git range-diff` shows
+             it only rebased cleanly.
+          3. VM: if Review asked for it, the last Live rig note proves a matching commit.
+          4. Every acceptance criterion maps to evidence: a named test, an fxlab measurement or a VM
+             observation. One left unproven needs a reason the user would accept.
+          5. The diff holds nothing the notes don't explain.
+          6. Design eye: the bead is labelled design, or it changes what a user sees (chrome look,
+             layout, spacing, motion, colours, glass, icons, words on screen). In omafire that is most
+             CSS and most chrome scripts.
+
+          Note your verdict on the bead (`bd update <id> --append-notes`, starting "APPROVE:"), then:
+          - A check fails: move to the step that fixes it (Implement for the code, Rig queue for
+            missing VM proof, Ship for CI) with exactly what's missing.
+          - Passes, no design eye: `bd update <id> --set-metadata approved_sha=<ship_sha>`, then
+            `agent-chat send omafire "<bead id>" "<two lines: what landed, what proves it>" --create`,
+            then move to Land. The plugin lands it and closes the bead.
+          - Passes, needs the design eye: `bd label add <id> design`, then
+            `agent-chat send omafire "<bead id>" "<what changed on screen, what to look at; drag
+            Approve to Land in Kandev to ship it>" --create --file <each screenshot from the notes>`,
+            and end your turn without routing: the card waits in Approve for the user.
+        events:
+          on_enter:
+            - type: auto_start_agent
+
+      - name: Land
+        position: 7
+        color: bg-emerald-600
+        is_start_step: false
+        show_in_command_panel: true
+        allow_manual_move: true
+        events: {}
+
+      - name: Done
+        position: 8
+        color: bg-green-500
+        is_start_step: false
+        show_in_command_panel: true
+        allow_manual_move: true
+        complete_task_on_enter: true
+        events: {}

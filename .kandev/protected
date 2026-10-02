@@ -1,0 +1,10 @@
+# Files that gate omafire's work. The Kandev Beads plugin reads this list from
+# main and refuses to land a branch that changes one unless the user approved
+# that change in a Spec commit. An agent that can edit a gate can pass it.
+tests/run.sh
+theme/scripts/lint.mjs
+scripts/check-xpi.sh
+scripts/ci-status
+scripts/ci-wait
+.forgejo/
+.kandev/
