@@ -314,7 +314,9 @@ not touched. Each case below says what you see and what to do.
 - **`malformed Omafire markers in Firefox profile file: <path>`.** The
   `BEGIN`/`END OMAFIRE FIREFOX BRIDGE` lines in that file are not one ordered
   pair. Nothing was changed. Delete the stray marker lines, or the whole
-  block between them, and run setup again.
+  block between them, and run setup again. Until you do, every theme
+  change's sync also stops at that profile: profiles after it and the
+  browser extension keep the old palette.
 - **`refusing to replace symlinked …`, `… is not a regular file` or
   `could not read … larger than 4 MB`.** omafire will not write through a
   symlink, or rewrite a file it cannot read whole. Nothing was changed.
