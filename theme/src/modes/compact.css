@@ -72,6 +72,24 @@
       transition-delay: calc((1 - var(--oc-reveal)) * 180ms) !important;
     }
 
+    /* The edge and the column it reveals are one continuous :hover, as in
+     * zen mode: the column comes out a gap in from the edge, so without
+     * this strip the pointer that touched the edge was left in the gap,
+     * the column parked again under it and flickered. The strip fills the
+     * gap; the column's clip lets it through. */
+    & :is(#navigator-toolbox, #sidebar-container) {
+      position: relative !important;
+      overflow-clip-margin: var(--oc-gap) !important;
+
+      &::before {
+        content: "" !important;
+        position: absolute !important;
+        inset-block: 0 !important;
+        inset-inline-end: 100% !important;
+        width: var(--oc-gap) !important;
+      }
+    }
+
     /* One card: the toolbox is its top, the tab column its bottom. The
      * shadow is clipped where they meet so no seam shows. */
     & #navigator-toolbox {
@@ -108,6 +126,10 @@
       & :is(#navigator-toolbox, #sidebar-container) {
         margin-inline: 0 var(--oc-gap) !important;
         translate: calc((1 - var(--oc-reveal)) * (100% + var(--oc-gap) - var(--oc-trigger))) 0 !important;
+
+        &::before {
+          inset-inline: 100% auto !important;
+        }
       }
     }
   }

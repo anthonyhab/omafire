@@ -213,6 +213,16 @@ assert.match(
   /&,\s*&:has\(#sidebar-container:not\(\[hidden\]\)\) \{\s*& #tabbrowser-tabbox \{\s*grid-column: side \/ ai-split !important;\s*margin-inline-start: var\(--oc-gap\) !important;/
 );
 
+// The revealed column sits a gap in from the edge that revealed it; a
+// strip on the column fills that gap (start side, mirrored at the end),
+// or the pointer resting on the edge loses :hover and the column parks.
+const compactCss = themeSource("modes/compact.css");
+assert.match(
+  compactCss,
+  /& :is\(#navigator-toolbox, #sidebar-container\) \{\s*position: relative !important;\s*overflow-clip-margin: var\(--oc-gap\) !important;\s*&::before \{\s*content: "" !important;\s*position: absolute !important;\s*inset-block: 0 !important;\s*inset-inline-end: 100% !important;\s*width: var\(--oc-gap\) !important;/
+);
+assert.match(compactCss, /&::before \{\s*inset-inline: 100% auto !important;/);
+
 // F11 folds the tab column to nothing; its flush-mode edge goes with it.
 const columnEdges = sidebarCss.match(/^\s*:root:not\([^)]*\) #sidebar-container \{/gm) ?? [];
 assert.equal(columnEdges.length, 2);
