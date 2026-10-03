@@ -281,7 +281,8 @@ done
 [[ ! -e $CHECKOUT_PROFILE/chrome/omafire-palette.css ]]
 [[ ! -e $CHECKOUT_PROFILE/chrome/omafire-radius.css ]]
 grep -Fqx '/* checkout tokens */' "$CHECKOUT_PROFILE/chrome/src/tokens.css"
-grep -Fqx '@import "src/tokens.css";' "$CHECKOUT_PROFILE/chrome/userChrome.css"
+# The checkout's tracked userChrome.css, marker pair included, is its own.
+cmp "$TEST_ROOT/checkout-userChrome.css" "$CHECKOUT_PROFILE/chrome/userChrome.css"
 [[ ! -e $CHECKOUT_PROFILE/user.js ]]
 cmp "$TEST_ROOT/original-userChrome.css" "$RELATIVE_PROFILE/chrome/userChrome.css"
 cmp "$TEST_ROOT/original-userContent.css" "$RELATIVE_PROFILE/chrome/userContent.css"

@@ -25,7 +25,7 @@ var legacyGeneratedNames = []string{"omafox-palette.css", "omafox-content-palett
 func removeLegacyFFPayload(chrome string) {
 	dir := chrome + "/" + legacyFFPayloadDirname
 	if !pathIsSymlink(dir) && ffPayloadOwned(dir) {
-		removeTree(dir)
+		removeFFPayloadTree(dir)
 		fsyncParent(dir)
 	}
 }

@@ -91,6 +91,33 @@ func copyTree(src, dst string) {
 	}
 }
 
+// removeFFPayloadTree removes a payload tree with its ownership marker (the
+// entrypoint) last, and only once everything else is gone: a removal cut
+// short leaves a tree still marked as ours, which the next run finishes,
+// never an unmarked one that setup and remove must refuse as the user's.
+func removeFFPayloadTree(dir string) {
+	st, err := os.Lstat(dir)
+	if err != nil || !st.IsDir() {
+		return
+	}
+	entries, _ := os.ReadDir(dir)
+	for _, entry := range entries {
+		child := dir + "/" + entry.Name()
+		switch {
+		case entry.Name() == ffPayloadEntry:
+		case entry.IsDir():
+			removeTree(child)
+		default:
+			unix.Unlink(child)
+		}
+	}
+	if rest, _ := os.ReadDir(dir); len(rest) > 1 || len(rest) == 1 && rest[0].Name() != ffPayloadEntry {
+		return
+	}
+	unix.Unlink(dir + "/" + ffPayloadEntry)
+	unix.Rmdir(dir)
+}
+
 // Staging names beside the payload: .omafire.new.*, .omafire.old.*
 func ffPayloadLeftover(name string) bool {
 	return strings.HasPrefix(name, "."+ffPayloadDirname+".new.") ||
@@ -104,7 +131,7 @@ func cleanFFPayloadLeftovers(chrome string) {
 	for _, entry := range entries {
 		path := chrome + "/" + entry.Name()
 		if ffPayloadLeftover(entry.Name()) && !pathIsSymlink(path) && ffPayloadOwned(path) {
-			removeTree(path)
+			removeFFPayloadTree(path)
 		}
 	}
 }
@@ -120,17 +147,17 @@ func installFFPayload(chrome, payload string) {
 	}
 	copyTree(ffPayloadSource, stage)
 	if !ffPayloadOwned(stage) {
-		removeTree(stage)
+		removeFFPayloadTree(stage)
 		fail("staged Firefox payload has no ownership marker: %s", stage)
 	}
 	switch {
 	case !pathExists(payload):
 		if os.Rename(stage, payload) != nil {
-			removeTree(stage)
+			removeFFPayloadTree(stage)
 			fail("could not install the Firefox payload: %s", payload)
 		}
 	case unix.Renameat2(unix.AT_FDCWD, stage, unix.AT_FDCWD, payload, unix.RENAME_EXCHANGE) == nil:
-		removeTree(stage) // now the previous payload
+		removeFFPayloadTree(stage) // now the previous payload
 	default:
 		// No atomic exchange here: two renames, the window between them a
 		// missing (not a mixed) payload that the next run repairs.
@@ -138,22 +165,22 @@ func installFFPayload(chrome, payload string) {
 		if err == nil && unix.Rmdir(old) == nil && os.Rename(payload, old) == nil {
 			if os.Rename(stage, payload) != nil {
 				os.Rename(old, payload)
-				removeTree(stage)
+				removeFFPayloadTree(stage)
 				fail("could not replace the Firefox payload: %s", payload)
 			}
-			removeTree(old)
+			removeFFPayloadTree(old)
 			break
 		}
 		// Nor a rename of the old tree: profile-sync-daemon's fuse-overlayfs
 		// refuses one (EXDEV) once psd has synced it to the lower layer. Our
 		// own tree goes, and the new one moves in: the same window.
 		if !ffPayloadOwned(payload) {
-			removeTree(stage)
+			removeFFPayloadTree(stage)
 			fail("could not replace the Firefox payload: %s", payload)
 		}
-		removeTree(payload)
+		removeFFPayloadTree(payload)
 		if pathExists(payload) || os.Rename(stage, payload) != nil {
-			removeTree(stage)
+			removeFFPayloadTree(stage)
 			fail("could not replace the Firefox payload: %s", payload)
 		}
 	}
@@ -184,7 +211,7 @@ func configureFFProfile(profile string) {
 			ffCSSBegin+"\n@import \""+ffPaletteName+"\";\n"+ffCSSEnd+"\n", "Firefox profile file")
 		removeManagedBlock(f.userContent, ffCSSBegin, ffCSSEnd, "Firefox profile file")
 		if ffPayloadOwned(f.payload) {
-			removeTree(f.payload)
+			removeFFPayloadTree(f.payload)
 		}
 	} else {
 		installFFPayload(f.chrome, f.payload)
@@ -284,17 +311,22 @@ func ffProfileStatus(profile string) string {
 func removeFFProfile(profile string) {
 	f := ffPaths(profile)
 	validateFFPayload(f.payload)
+	// A checkout's userChrome.css carries the marker pair as tracked source
+	// (theme/userChrome.css): the checkout's, never ours to strip.
+	checkout := ffChromeIsCheckout(f.chrome)
 	configured := pathExists(f.payload) ||
 		ffPayloadOwned(f.chrome+"/"+legacyFFPayloadDirname) ||
-		managedMarkerPresent(f.userChrome, ffCSSBegin, ffCSSEnd) ||
+		!checkout && managedMarkerPresent(f.userChrome, ffCSSBegin, ffCSSEnd) ||
 		managedMarkerPresent(f.userContent, ffCSSBegin, ffCSSEnd) ||
 		managedMarkerPresent(f.userPrefs, ffPrefsBegin, ffPrefsEnd)
 
-	removeManagedBlock(f.userChrome, ffCSSBegin, ffCSSEnd, "Firefox profile file")
+	if !checkout {
+		removeManagedBlock(f.userChrome, ffCSSBegin, ffCSSEnd, "Firefox profile file")
+	}
 	removeManagedBlock(f.userContent, ffCSSBegin, ffCSSEnd, "Firefox profile file")
 	removeManagedBlock(f.userPrefs, ffPrefsBegin, ffPrefsEnd, "Firefox profile file")
 	if ffPayloadOwned(f.payload) {
-		removeTree(f.payload)
+		removeFFPayloadTree(f.payload)
 	}
 	removeLegacyFFPayload(f.chrome)
 	cleanLegacyGenerated(f.chrome, true)
