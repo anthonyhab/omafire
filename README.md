@@ -291,6 +291,55 @@ If a browser does not update after a theme change:
 You can report reproducible problems on [GitHub
 Issues](https://github.com/cover/omafox/issues).
 
+## Recovery
+
+A run of `setup`, `sync` or `remove` that stops part way, because it was
+killed, the machine lost power or a write failed, leaves every file either as
+it was or fully written, never half-written. Your own files and preferences are
+not touched. Each case below says what you see and what to do.
+
+- **A run stopped part way.** `omafire status` shows a profile as
+  `incomplete`, `outdated` or `not configured`. Run the same command again.
+  It finishes the job, leaves finished profiles as they are, and ends in the
+  same state as a run that was never interrupted. Hidden `.omafire.<digits>`
+  files or `.omafire.new.*` directories may be left in the profile, its
+  `chrome/` or `~/.local/state/omafire/`. They are copies, never loaded, and
+  safe to delete while no omafire command is running.
+- **`refusing to modify unmanaged Firefox payload: <profile>/chrome/omafire`,
+  status `conflict`.** That directory is not the packaged theme. If it is
+  yours, rename it. If it holds only a few of omafire's own files, a `remove`
+  or upgrade by omafire 0.6.7 or older was interrupted while deleting it:
+  delete the directory. Then run the command again. Until then setup and
+  remove refuse to change any profile.
+- **`malformed Omafire markers in Firefox profile file: <path>`.** The
+  `BEGIN`/`END OMAFIRE FIREFOX BRIDGE` lines in that file are not one ordered
+  pair. Nothing was changed. Delete the stray marker lines, or the whole
+  block between them, and run setup again.
+- **`refusing to replace symlinked …`, `… is not a regular file` or
+  `could not read … larger than 4 MB`.** omafire will not write through a
+  symlink, or rewrite a file it cannot read whole. Nothing was changed.
+  Replace the link with the file itself, or move the file aside, then run
+  setup again.
+- **`could not create temp file`, `could not stage` or `could not replace`
+  for a profile.** That profile's directory cannot be written (permissions,
+  a full disk). Profiles listed before it were configured. Fix the directory
+  and run setup again.
+- **`Quattro palette not found`, `could not read Quattro palette` or
+  `Omarchy is not installed`.** Nothing was changed. Set a theme with
+  `omarchy theme set <name>` and run the command again. A `colors.toml` with
+  no colour omafire can read is not reported: browsers get fallback colours.
+  Check with `omafire payload`.
+- **Undo one file.** setup and remove copy each of your files to
+  `~/.local/state/omafire/backups/<time>-<command>-<pid>/<path>` before
+  changing it. Copying it back also discards anything you changed in that
+  file since that run, so compare the two first
+  (`diff <backup> <file>`).
+- **Go back to an earlier release.** Install its package with
+  `sudo pacman -U`, then run `omafire setup`. Your own lines in `user.js`,
+  `userChrome.css`, `userContent.css` and `customChrome.css` are kept, edits
+  made since included. Only the managed blocks and the `omafire/` theme
+  change.
+
 ## Privacy
 
 Omafire makes no network requests and does not collect or transmit data. It
@@ -318,6 +367,16 @@ Zen copies `user.js` values into `prefs.js` when it starts, so the preferences
 `zen.theme.disable-lightweight` may remain as user-set values after removal.
 Use Reset for those entries in `about:config` if you want to return them to
 Zen's defaults.
+
+Firefox does the same, and `omafire remove` does not reset them yet.
+`omafire.managed` stays `true`, so while the package is installed its chrome
+scripts still load in that profile. The palette colours
+(`browser.display.background_color`, `browser.display.foreground_color`,
+`browser.display.use_system_colors`, `browser.display.permit_backplate`,
+`ui.accentcolor`, `ui.accentcolortext`) also stay. Reset them and the
+`omafire.*` entries in `about:config`, then restart Firefox. A theme
+checkout used as `chrome/` keeps its own files. remove deletes only the
+generated `omafire-*.css` beside them.
 
 ## Releases
 
