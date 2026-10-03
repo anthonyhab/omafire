@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"strings"
 
@@ -92,15 +94,20 @@ func copyTree(src, dst string) {
 }
 
 // removeFFPayloadTree removes a payload tree with its ownership marker (the
-// entrypoint) last, and only once everything else is gone: a removal cut
-// short leaves a tree still marked as ours, which the next run finishes,
-// never an unmarked one that setup and remove must refuse as the user's.
-func removeFFPayloadTree(dir string) {
+// entrypoint) last, and only once a listing proves everything else gone: a
+// removal cut short, or one that cannot list the tree, leaves it still
+// marked as ours, which the next run finishes, never an unmarked one that
+// setup and remove must refuse as the user's. It reports whether the tree
+// is gone.
+func removeFFPayloadTree(dir string) bool {
 	st, err := os.Lstat(dir)
 	if err != nil || !st.IsDir() {
-		return
+		return err != nil && errors.Is(err, fs.ErrNotExist)
 	}
-	entries, _ := os.ReadDir(dir)
+	entries, err := readOwnDir(dir)
+	if err != nil {
+		return false
+	}
 	for _, entry := range entries {
 		child := dir + "/" + entry.Name()
 		switch {
@@ -111,11 +118,12 @@ func removeFFPayloadTree(dir string) {
 			unix.Unlink(child)
 		}
 	}
-	if rest, _ := os.ReadDir(dir); len(rest) > 1 || len(rest) == 1 && rest[0].Name() != ffPayloadEntry {
-		return
+	rest, err := readOwnDir(dir)
+	if err != nil || len(rest) > 1 || len(rest) == 1 && rest[0].Name() != ffPayloadEntry {
+		return false
 	}
 	unix.Unlink(dir + "/" + ffPayloadEntry)
-	unix.Rmdir(dir)
+	return unix.Rmdir(dir) == nil
 }
 
 // Staging names beside the payload: .omafire.new.*, .omafire.old.*
@@ -210,8 +218,8 @@ func configureFFProfile(profile string) {
 		replaceManagedBlockInPlace(f.userChrome, ffCSSBegin, ffCSSEnd,
 			ffCSSBegin+"\n@import \""+ffPaletteName+"\";\n"+ffCSSEnd+"\n", "Firefox profile file")
 		removeManagedBlock(f.userContent, ffCSSBegin, ffCSSEnd, "Firefox profile file")
-		if ffPayloadOwned(f.payload) {
-			removeFFPayloadTree(f.payload)
+		if ffPayloadOwned(f.payload) && !removeFFPayloadTree(f.payload) {
+			fail("could not remove the Firefox payload from the theme checkout (still marked as omafire's; rerun once it can be deleted): %s", f.payload)
 		}
 	} else {
 		installFFPayload(f.chrome, f.payload)
@@ -325,8 +333,8 @@ func removeFFProfile(profile string) {
 	}
 	removeManagedBlock(f.userContent, ffCSSBegin, ffCSSEnd, "Firefox profile file")
 	removeManagedBlock(f.userPrefs, ffPrefsBegin, ffPrefsEnd, "Firefox profile file")
-	if ffPayloadOwned(f.payload) {
-		removeFFPayloadTree(f.payload)
+	if ffPayloadOwned(f.payload) && !removeFFPayloadTree(f.payload) {
+		fail("could not remove the Firefox payload (still marked as omafire's; rerun once it can be deleted): %s", f.payload)
 	}
 	removeLegacyFFPayload(f.chrome)
 	cleanLegacyGenerated(f.chrome, true)

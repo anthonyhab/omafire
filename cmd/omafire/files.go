@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -156,7 +157,10 @@ func removeTree(dir string) {
 	if err != nil || !st.IsDir() {
 		return
 	}
-	entries, _ := os.ReadDir(dir)
+	entries, err := readOwnDir(dir)
+	if err != nil {
+		return
+	}
 	for _, entry := range entries {
 		child := dir + "/" + entry.Name()
 		if entry.IsDir() {
@@ -166,6 +170,19 @@ func removeTree(dir string) {
 		}
 	}
 	unix.Rmdir(dir)
+}
+
+// readOwnDir lists a directory omafire made. One left unreadable (mode
+// 0311, say: searchable, so its files still open) gets back the 0700 that
+// mkdirP700 gives every directory it makes, and is read again. An error
+// that remains is returned, never an empty listing that a removal would
+// take for an empty directory.
+func readOwnDir(dir string) ([]os.DirEntry, error) {
+	entries, err := os.ReadDir(dir)
+	if errors.Is(err, fs.ErrPermission) && os.Chmod(dir, 0o700) == nil {
+		entries, err = os.ReadDir(dir)
+	}
+	return entries, err
 }
 
 // ------------------------------------------------------------- run safety

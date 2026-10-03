@@ -185,6 +185,13 @@ out=$("$OMAFIRE_BIN" setup 2>&1)
 [[ $out == *"Configured Firefox profile: $PLAIN"*"Firefox is running with this profile"* ]]
 rm "$PLAIN/lock"
 
+# An owned payload left unreadable (0311: its marker still opens) is listed
+# and replaced whole, never left behind without its marker (omafire-v2z.21).
+chmod 311 "$PLAIN/chrome/omafire" "$PLAIN/chrome/omafire/src"
+"$OMAFIRE_BIN" setup >/dev/null 2>&1
+[[ $(tree_hash "$PLAIN/chrome/omafire") == "$(tree_hash "$PAYLOAD")" ]]
+[[ -z $(find "$PLAIN/chrome" -maxdepth 1 -name '.omafire.*') ]]
+
 # ---- psd's fuse-overlayfs: a payload in the lower layer can't be renamed --
 # (EXDEV), so the swap falls back to removing our tree and moving the new
 # one in. Needs FUSE; skipped where there is none (CI containers).
@@ -205,11 +212,12 @@ fi
 
 # ---- remove: through the same guards; backups outlive it ----------------
 : > "$TEST_ROOT/systemctl.log"
+chmod 311 "$PLAIN/chrome/omafire"   # and remove finishes such a payload too
 out=$("$OMAFIRE_BIN" remove 2>&1)
 [[ $out == *"Removed Firefox profile bridge: $LIVE"* ]]
 [[ $out == *"Asked profile-sync-daemon"* ]]
 cmp "$TEST_ROOT/original-live-user.js" "$LIVE_TMPFS/user.js"
-[[ ! -e "$LIVE_TMPFS/chrome/omafire" ]]
+[[ ! -e "$LIVE_TMPFS/chrome/omafire" && ! -e "$PLAIN/chrome/omafire" ]]
 [[ ! -e "$TEST_HOME/.local/state/omafire/lock" ]]
 [[ -d "$TEST_HOME/.local/state/omafire/backups" ]]
 after_copies=$(for d in "$FF_ROOT"/*-back*; do tree_hash "$d"; done)

@@ -80,8 +80,33 @@ func TestRemoveFFPayloadTreeKeepsMarkerWhenNotEmptied(t *testing.T) {
 	os.Chmod(dir+"/src", 0o500)
 	defer os.Chmod(dir+"/src", 0o700)
 
-	removeFFPayloadTree(dir)
+	if removeFFPayloadTree(dir) {
+		t.Fatal("reported a payload it could not empty as removed")
+	}
 	if !ffPayloadOwned(dir) {
 		t.Fatal("a payload removal that could not finish dropped its ownership marker")
+	}
+}
+
+// A payload directory left unreadable but searchable (0311) still shows its
+// marker; removal must list it (restoring our 0700) and finish, never take
+// the failed listing for an empty tree and drop the marker (omafire-v2z.21).
+func TestRemoveFFPayloadTreeUnreadableDir(t *testing.T) {
+	dir := t.TempDir() + "/omafire"
+	if err := os.MkdirAll(dir+"/src", 0o700); err != nil {
+		t.Fatal(err)
+	}
+	os.WriteFile(dir+"/"+ffPayloadEntry, []byte(ffBridgeMarker+"\n"), 0o600)
+	os.WriteFile(dir+"/userContent.css", []byte("c\n"), 0o600)
+	os.WriteFile(dir+"/src/a.css", []byte("a\n"), 0o600)
+	os.Chmod(dir+"/src", 0o311)
+	os.Chmod(dir, 0o311)
+	defer os.Chmod(dir, 0o700)
+	if !ffPayloadOwned(dir) {
+		t.Fatal("fixture: the marker should be readable through a 0311 directory")
+	}
+
+	if !removeFFPayloadTree(dir) || pathExists(dir) {
+		t.Fatal("an owned 0311 payload was not removed")
 	}
 }
