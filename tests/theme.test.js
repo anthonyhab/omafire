@@ -176,4 +176,6 @@ assert.throws(
   /Unexpected palette/
 );
 
+require("./contrast.test.js");
+
 console.log("theme.test.js: ok");

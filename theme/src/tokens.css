@@ -108,23 +108,26 @@
 
   /* Translucent overlays of the text color: legible on any palette, and
    * they stack (hover over selected stays visible). */
-  /* Contrast floors (2026-09-27, all 25 installed Omarchy themes). Text
-   * tokens are alpha over the surface, and on a light palette the same
-   * alpha reads lighter: 80% labels fell to 4.2:1 and 62% to 2.8:1 on
-   * rose-pine. Light palettes take stronger mixes (labels >= 4.5:1,
-   * dim >= 3:1); dark palettes keep theirs (>= 5.3:1 and >= 3.8:1).
-   * --oc-text-dim is for secondary glyphs and de-emphasized metadata:
-   * its target is 3:1, which is all 62% meets on dark themes too. */
+  /* Contrast floors (sRGB, all installed Omarchy themes; tests/contrast.js
+   * measures them, tests/contrast.test.js holds them). Text tokens are
+   * alpha over the surface, and on a light palette the same alpha reads
+   * lighter. Labels reach 4.5:1 on rest and hover (light palettes take
+   * 95%); marks reach 3:1. --oc-text-dim is for secondary glyphs and
+   * de-emphasized metadata and is held at 3:1 on purpose (3.4:1 dark, 3.1:1
+   * light, hover included): a 4.5:1 dim would be the label tone and the
+   * hierarchy would vanish. */
   --oc-text-dim: light-dark(
-    color-mix(in srgb, var(--oc-text) 70%, transparent),
+    color-mix(in srgb, var(--oc-text) 75%, transparent),
     color-mix(in srgb, var(--oc-text) 62%, transparent));
   /* Resting tab labels: quieter than the active tab, never so dim that an
    * ordinary tab reads as disabled (62% did, on glass). Secondary glyphs
-   * on a row (its digit, close button) stay --oc-text-dim. */
+   * on a row (its digit, close button) stay --oc-text-dim. Held to 4.5:1
+   * on a hovered row too (omafire-v2z.7): light palettes need 95% for that
+   * on rose-pine, whose text clears only 5.3:1 against its own toolbar. */
   --oc-text-label: light-dark(
-    color-mix(in srgb, var(--oc-text) 90%, transparent),
+    color-mix(in srgb, var(--oc-text) 95%, transparent),
     color-mix(in srgb, var(--oc-text) 80%, transparent));
-  /* The accent as a state mark (focus rings; the glow on about: pages).
+  /* The accent as a state mark (focus rings; links on about: pages).
    * Light palettes' accents run weak against their own page (rose-pine
    * 3.1:1, 2.6:1 on a panel), so there it leans 30% toward the text:
    * 3.25:1 at worst. Dark palettes' accents clear 3.8:1 as they are. */
@@ -153,8 +156,16 @@
   /* The active tab's hairline carries the same light: the glow colour at
    * the edge the light comes from, settling into the ordinary strong
    * hairline across the tab. Same direction as --oc-glow-falloff. */
+  /* Its lit end is a state mark, held to 3:1 (omafire-v2z.7). Dark
+   * palettes' glow clears that at 85% (3.2:1 at worst); a light
+   * palette's accent, or a site colour, can sit at 2.2:1 even solid, so
+   * there the edge is solid and leans 30% toward the text, as
+   * --oc-accent-mark does: 3.25:1 at worst. */
+  --oc-glow-lead: light-dark(
+    color-mix(in srgb, var(--oc-glow), var(--oc-text) 30%),
+    color-mix(in srgb, var(--oc-glow) 85%, transparent));
   --oc-glow-edge:
-    color-mix(in srgb, var(--oc-glow) 85%, transparent),
+    var(--oc-glow-lead),
     color-mix(in srgb, var(--oc-glow) 40%, transparent) 40%,
     var(--oc-line-strong) 85%;
   /* Destructive actions (a tab's close button) warn in the palette's red.
