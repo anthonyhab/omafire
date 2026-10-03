@@ -1,6 +1,9 @@
 "use strict";
 
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const vm = require("node:vm");
 const {
   ACTION,
   COLOR_KEYS,
@@ -178,8 +181,6 @@ assert.throws(
 
 // Split view in the chrome theme (omafire-v2z.6). These read the source;
 // the measured geometry is in the bead's fxlab evidence.
-const fs = require("node:fs");
-const path = require("node:path");
 const themeSource = (name) =>
   fs.readFileSync(path.join(__dirname, "../theme/src", name), "utf8");
 const frameCss = themeSource("frame.css");
@@ -230,4 +231,86 @@ for (const rule of columnEdges) {
   assert.match(rule, /:root:not\(\[inDOMFullscreen\], \[fullscreenNavToolboxHidden\]\)/);
 }
 
-console.log("theme.test.js: ok");
+// Compact sidebar: compact.uc.js marks what compact.css can't see (an open
+// menupopup the column launched, keyboard focus on the sidebar's tools),
+// and compact.css reveals the column on those marks.
+const root = path.join(__dirname, "..");
+assert.match(compactCss, /&\[omafire-column-popup\],\s*&\[omafire-tools-focus\],\s*&:has\(/);
+// A native menupopup never carries [open] (Firefox 157), so these never matched.
+assert.doesNotMatch(compactCss,
+  /#(tabContextMenu|new-tab-button-popup|sidebar-context-menu|open-tab-group-context-menu|saved-tab-group-context-menu)\[open\]/);
+
+function loadCompact() {
+  const listeners = {};
+  const marks = new Set();
+  const document = {
+    documentElement: { toggleAttribute: (name, on) => on ? marks.add(name) : marks.delete(name) }
+  };
+  const focus = {
+    FLAG_BYMOUSE: 0x1000, FLAG_BYKEY: 0x2000, focusedElement: null, method: 0,
+    getLastFocusMethod() { return this.method; }
+  };
+  const window = { addEventListener: (type, fn) => (listeners[type] ??= []).push(fn) };
+  vm.runInNewContext(fs.readFileSync(path.join(root, "chrome/scripts/compact.uc.js"), "utf8"),
+    { window, document, Services: { focus }, Promise });
+  const fire = (type, target) => listeners[type].forEach(fn => fn({ target }));
+  // the column: toolbox and sidebar, the tab strip slotted into sidebar-main,
+  // the tools inside its shadow root
+  const node = (props, parentNode = null) => ({ ownerDocument: document, parentNode, ...props });
+  const sidebar = node({ id: "sidebar-container" });
+  const sidebarMain = node({ localName: "sidebar-main" }, sidebar);
+  const shadow = { parentNode: null, host: sidebarMain };
+  const tool = node({ localName: "button" }, shadow);
+  const newTab = node({ id: "tabs-newtab-button" }, node({ id: "vertical-tabs" }, sidebarMain));
+  const page = node({ localName: "browser" }, node({ id: "browser" }));
+  return { marks, fire, focus, tool, newTab, page };
+}
+
+(async () => {
+  const settle = () => new Promise(resolve => setImmediate(resolve));
+  const c = loadCompact();
+  const tabMenu = { localName: "menupopup", triggerNode: c.newTab };
+  const toolMenu = { localName: "menupopup", triggerNode: c.tool };
+  const pageMenu = { localName: "menupopup", triggerNode: c.page };
+  const tooltip = { localName: "tooltip", triggerNode: c.tool };
+
+  c.fire("popupshown", pageMenu);
+  c.fire("popupshown", tooltip);
+  assert.equal(c.marks.has("omafire-column-popup"), false);
+  c.fire("popupshown", tabMenu);
+  c.fire("popupshown", toolMenu);
+  assert.equal(c.marks.has("omafire-column-popup"), true);
+  c.fire("popuphidden", tabMenu);
+  assert.equal(c.marks.has("omafire-column-popup"), true);
+  c.fire("popuphidden", toolMenu);
+  assert.equal(c.marks.has("omafire-column-popup"), false);
+
+  // a panel anchored in the column (no trigger) counts too
+  const editor = { localName: "panel", anchorNode: c.newTab };
+  c.fire("popupshown", editor);
+  assert.equal(c.marks.has("omafire-column-popup"), true);
+  c.fire("popuphidden", editor);
+  assert.equal(c.marks.has("omafire-column-popup"), false);
+
+  const focusOn = async (el, method) => {
+    c.focus.focusedElement = el;
+    c.focus.method = method;
+    c.fire("focusin", el);
+    await settle();
+  };
+  await focusOn(c.tool, c.focus.FLAG_BYKEY);
+  assert.equal(c.marks.has("omafire-tools-focus"), true);
+  await focusOn(c.tool, c.focus.FLAG_BYMOUSE);
+  assert.equal(c.marks.has("omafire-tools-focus"), false);
+  // the slotted tab strip is :focus-visible's job, not the mark's
+  await focusOn(c.newTab, c.focus.FLAG_BYKEY);
+  assert.equal(c.marks.has("omafire-tools-focus"), false);
+  await focusOn(c.tool, c.focus.FLAG_BYKEY);
+  await focusOn(c.page, c.focus.FLAG_BYKEY);
+  assert.equal(c.marks.has("omafire-tools-focus"), false);
+
+  console.log("theme.test.js: ok");
+})().catch(error => {
+  console.error(error);
+  process.exitCode = 1;
+});

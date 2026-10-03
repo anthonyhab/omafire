@@ -247,6 +247,10 @@ own root-owned files: nothing is loaded from the profile.
   rounding and Firefox's own pages (settings, add-ons) without a restart.
 - **Extension.** Installs or updates the bundled signed extension. Remove
   it in `about:addons` and it stays removed until a newer version ships.
+- **Compact sidebar.** Keeps the hidden column out while a menu it opened
+  (a tab's or the toolbar's context menu, the new-tab container menu,
+  Back's history) is open, or while the keyboard is on a sidebar tool.
+  Without it those menus open over a column that has already hidden.
 
 Turn them all off with `omafire.scripts` = false, or some with
 `omafire.scripts.disabled` (e.g. `keys, live-palette`). `config` in that list
