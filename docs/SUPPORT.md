@@ -115,7 +115,13 @@ not touched. Each case below says what you see and what to do.
   `omarchy theme set <name>` and run the command again. A `colors.toml` with
   some colours is fine: the missing ones fall back. Check with
   `omafire payload`.
-- **Undo one file.** setup and remove copy each of your files to
+- **Undo a run.** `omafire restore [<set>]` (the newest set by default;
+  names are in `~/.local/state/omafire/backups/`) puts back each file that
+  setup or remove changed, but only if the file still holds what that run
+  left. A file you edited since is listed as kept and not touched. What
+  restore replaces is itself backed up, so it can be undone too. Sets
+  from earlier releases have no record of what the run wrote: use the next item.
+- **Undo one file by hand.** setup and remove copy each of your files to
   `~/.local/state/omafire/backups/<time>-<command>-<pid>/<path>` before
   changing it. Copying it back also discards anything you changed in that
   file since that run, so compare the two first

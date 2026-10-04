@@ -32,7 +32,7 @@ export OMAFIRE_THEME_NAME_FILE="$THEME_DIR/theme.name"
 
 [[ $("$OMAFIRE_BIN" version) == "$(cat "$TEST_DIR/../VERSION")" ]]
 help_output=$("$OMAFIRE_BIN" help)
-expected_commands=$'Commands:\n  sync     Queue the current palette for connected browsers\n  payload  Print the current JSON protocol message\n  status   Show the current theme and integration state (--json for scripts)\n  setup    Enable the packaged Omafire integration for this user\n  remove   Remove this user\'s Omafire hook and theme state\n  get      Print the settings, or one: get [--json | <setting>]\n  set      Change settings: set <setting> <value> [<setting> <value>]...\n  reset    Return settings to their defaults: reset <setting>...\n  watch    Print the settings as a JSON line now and after every change\n  version  Print the Omafire version\n  help     Show this help'
+expected_commands=$'Commands:\n  sync     Queue the current palette for connected browsers\n  payload  Print the current JSON protocol message\n  status   Show the current theme and integration state (--json for scripts)\n  setup    Enable the packaged Omafire integration for this user\n  remove   Remove this user\'s Omafire hook and theme state\n  restore  Put back the files a setup or remove changed, unless edited since: restore [<set>]\n  get      Print the settings, or one: get [--json | <setting>]\n  set      Change settings: set <setting> <value> [<setting> <value>]...\n  reset    Return settings to their defaults: reset <setting>...\n  watch    Print the settings as a JSON line now and after every change\n  version  Print the Omafire version\n  help     Show this help'
 [[ $help_output == *"$expected_commands"* ]]
 
 if unknown_error=$("$OMAFIRE_BIN" unknown-command 2>&1); then

@@ -170,6 +170,7 @@ func cmdSetup() {
 		fmt.Println("Restart Firefox once to load the Omafire bridge.")
 	}
 	if backupDir != "" {
+		recordWrote()
 		fmt.Printf("Backed up the files it changed to %s\n", backupDir)
 	}
 	psdResync()
@@ -196,6 +197,7 @@ func cmdRemove() {
 	unix.Unlink(stateDir + "/lock")
 	unix.Rmdir(stateDir)
 	if backupDir != "" {
+		recordWrote()
 		fmt.Printf("Backed up the files it changed to %s\n", backupDir)
 	}
 	psdResync()
@@ -214,6 +216,7 @@ Commands:
   status   Show the current theme and integration state (--json for scripts)
   setup    Enable the packaged Omafire integration for this user
   remove   Remove this user's Omafire hook and theme state
+  restore  Put back the files a setup or remove changed, unless edited since: restore [<set>]
   get      Print the settings, or one: get [--json | <setting>]
   set      Change settings: set <setting> <value> [<setting> <value>]...
   reset    Return settings to their defaults: reset <setting>...
@@ -237,7 +240,7 @@ func main() {
 	}
 
 	switch command {
-	case "sync", "setup", "remove":
+	case "sync", "setup", "remove", "restore":
 		migrateLegacyState()
 		acquireLock()
 	}
@@ -262,6 +265,8 @@ func main() {
 		cmdSetup()
 	case "remove":
 		cmdRemove()
+	case "restore":
+		cmdRestore(os.Args[2:])
 	case "version", "-V", "--version":
 		fmt.Println(version)
 	case "help", "-h", "--help":
