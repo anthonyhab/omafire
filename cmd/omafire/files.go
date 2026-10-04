@@ -282,10 +282,6 @@ func runCommand(argv []string, capture bool) (int, string) {
 	}
 }
 
-// leftoverTempAge keeps the sweep off a write that is still in flight (runs
-// are serialised by the lock, but a hand-run omafire is not our only writer).
-const leftoverTempAge = time.Minute
-
 var leftoverTemp = regexp.MustCompile(`^\.omafire\.([0-9]+|(new|old)\.[0-9]+)$`)
 
 // sweepTemps removes what an interrupted run left in dir: atomicWrite's
@@ -302,10 +298,6 @@ func sweepTemps(dir string) {
 			continue
 		}
 		path := dir + "/" + e.Name()
-		info, err := os.Lstat(path)
-		if err != nil || time.Since(info.ModTime()) < leftoverTempAge {
-			continue
-		}
 		if e.IsDir() {
 			os.RemoveAll(path)
 		} else {

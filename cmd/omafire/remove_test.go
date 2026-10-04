@@ -103,7 +103,7 @@ func TestReadPaletteRefusesNoValidColour(t *testing.T) {
 }
 
 // An interrupted run's temp files and unmarked stages go (omafire-v2z.17);
-// recent ones, other names and the user's files stay.
+// other names and the user's files stay.
 func TestSweepTemps(t *testing.T) {
 	dir := t.TempDir()
 	old := time.Now().Add(-time.Hour)
@@ -119,7 +119,7 @@ func TestSweepTemps(t *testing.T) {
 	mk(".omafire.123456", false, old)
 	mk(".omafire.new.987", true, old)
 	mk(".omafire.old.55", true, old)
-	mk(".omafire.777", false, time.Now()) // in flight
+	mk(false, time.Now()) // in flight
 	mk(".omafire.new.abc", true, old)     // not our name
 	mk(".omafire.123.bak", false, old)    // not our name
 	mk("user.js", false, old)
@@ -129,7 +129,7 @@ func TestSweepTemps(t *testing.T) {
 			t.Errorf("%s was not swept", gone)
 		}
 	}
-	for _, kept := range []string{".omafire.777", ".omafire.new.abc", ".omafire.123.bak", "user.js"} {
+	for _, kept := range []string{".omafire.new.abc", ".omafire.123.bak", "user.js"} {
 		if _, err := os.Lstat(dir + "/" + kept); err != nil {
 			t.Errorf("%s was removed", kept)
 		}
