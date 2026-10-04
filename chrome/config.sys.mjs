@@ -172,6 +172,7 @@ let applying = false;
 const pending = new Map(); // key -> value waiting to go through `omafire set`
 let flushTimer = null;
 let inFlight = false;
+let batchInFlight = new Map(); // key -> value the running `omafire set` is writing
 let binary = null;
 let watcher = null;
 let stopping = false;
@@ -213,7 +214,9 @@ async function run(args) {
   if (exitCode !== 0 || err) {
     console.error(LOG, `omafire ${args.join(" ")}:`, exitCode, err.trim());
   }
-  return exitCode;
+  if (exitCode !== 0) {
+    throw new Error(`omafire ${args[0]} exited ${exitCode}`);
+  }
 }
 
 async function flush() {
@@ -223,16 +226,27 @@ async function flush() {
   }
   inFlight = true;
   const batch = new Map(pending);
+  batchInFlight = batch;
+  let written = false;
   try {
     await run(["set", ...[...batch].flatMap(([k, v]) => [k, word(v)])]);
+    written = true;
   } catch (error) {
     console.error(LOG, error);
   } finally {
     inFlight = false;
+    batchInFlight = new Map();
+    const revert = [];
     for (const [k, v] of batch) {
       if (pending.get(k) === v) {
         pending.delete(k);
+        if (!written) {
+          revert.push(k);     // refused: the prefs go back to the file's value
+        }
       }
+    }
+    if (revert.length && current) {
+      apply(current, revert);
     }
     if (pending.size) {
       schedule();
@@ -255,7 +269,11 @@ const observer = {
         continue;
       }
       const value = fromPrefs(setting);
-      if (value === undefined || value === current[setting.key]) {
+      // What this change must beat: the value a running write is about to
+      // make the file's, else the file's own.
+      const settled = batchInFlight.has(setting.key)
+        ? batchInFlight.get(setting.key) : current[setting.key];
+      if (value === undefined || value === settled) {
         pending.delete(setting.key);
         continue;
       }
