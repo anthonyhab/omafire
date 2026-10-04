@@ -12,7 +12,8 @@
  * The derived block mirrors tokens.css; scripts/lint.mjs checks that the
  * two agree. */
 
-@-moz-document url-prefix("about:preferences"), url-prefix("about:settings"), url-prefix("about:addons"), url-prefix("about:downloads"), url-prefix("about:logins"), url-prefix("about:profiling"), url-prefix("about:config") {
+@-moz-document url-prefix("about:preferences"), url-prefix("about:settings"), url-prefix("about:addons"), url-prefix("about:downloads"), url-prefix("about:logins"), url-prefix("about:profiling"), url-prefix("about:config"),
+  regexp("moz-extension://[^/]+/(popup-fenix|dashboard|settings|3p-filters|1p-filters|dyna-rules|whitelist|support|about|advanced-settings|logger-ui|devtools|document-blocked)\\.html.*") {
   :root {
     /* ---- geometry and type ------------------------------------------ */
 
