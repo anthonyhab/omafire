@@ -63,9 +63,10 @@ var guarded bool
 // ("" when it finished): one unit of work (a profile) may refuse without
 // ending the run for the others. Not for concurrent use.
 func guard(fn func()) (msg string) {
+	outer := guarded
 	guarded = true
 	defer func() {
-		guarded = false
+		guarded = outer
 		if r := recover(); r != nil {
 			f, ok := r.(guardedFailure)
 			if !ok {
@@ -126,6 +127,7 @@ func cmdSync() {
 	// what tells the live-palette chrome script to reread them.
 	skipped := refreshFFProfilesColors(p)
 	storeThemePayload(payload)
+	sweepLeftoverTemps()
 	if skipped > 0 {
 		// The refusals were printed as they happened; the exit status
 		// still says that not every profile follows the theme.
@@ -178,6 +180,7 @@ func cmdRemove() {
 	removeZenProfiles()
 	removeFFProfiles()
 	removeShellPlugin()
+	sweepLeftoverTemps()
 
 	if pathExists(hookPath) {
 		unix.Unlink(hookPath)

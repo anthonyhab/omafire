@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
@@ -278,5 +279,53 @@ func runCommand(argv []string, capture bool) (int, string) {
 		return exit.ExitCode(), out.String()
 	default:
 		return 127, ""
+	}
+}
+
+// leftoverTempAge keeps the sweep off a write that is still in flight (runs
+// are serialised by the lock, but a hand-run omafire is not our only writer).
+const leftoverTempAge = time.Minute
+
+var leftoverTemp = regexp.MustCompile(`^\.omafire\.([0-9]+|(new|old)\.[0-9]+)$`)
+
+// sweepTemps removes what an interrupted run left in dir: atomicWrite's
+// .omafire.<digits> temp files (full copies of user.js, a stylesheet or
+// theme.json) and .omafire.new/old.<digits> payload stages that died before
+// their ownership marker was written. Names are the ones omafire generates.
+func sweepTemps(dir string) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return
+	}
+	for _, e := range entries {
+		if !leftoverTemp.MatchString(e.Name()) {
+			continue
+		}
+		path := dir + "/" + e.Name()
+		info, err := os.Lstat(path)
+		if err != nil || time.Since(info.ModTime()) < leftoverTempAge {
+			continue
+		}
+		if e.IsDir() {
+			os.RemoveAll(path)
+		} else {
+			os.Remove(path)
+		}
+	}
+}
+
+// sweepLeftoverTemps covers every directory omafire writes into.
+func sweepLeftoverTemps() {
+	sweepTemps(stateDir)
+	for _, list := range []struct{ file, root string }{{ffProfilesFile, ffRoot}, {zenProfilesFile, zenRoot}} {
+		if !isRegularFile(list.file) {
+			continue
+		}
+		for _, profile := range listProfiles(list.file, list.root) {
+			if profileWritable(profile, "", false) {
+				sweepTemps(profile)
+				sweepTemps(profile + "/chrome")
+			}
+		}
 	}
 }

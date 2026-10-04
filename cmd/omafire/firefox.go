@@ -153,7 +153,13 @@ func installFFPayload(chrome, payload string) {
 	if err != nil {
 		fail("could not stage the Firefox payload in %s", chrome)
 	}
-	copyTree(ffPayloadSource, stage)
+	// A copy that refuses (a file over the size limit, a full disk) must not
+	// leave its stage behind: one that dies before its marker is written is
+	// never recognised as ours.
+	if msg := guard(func() { copyTree(ffPayloadSource, stage) }); msg != "" {
+		os.RemoveAll(stage)
+		fail("%s", msg)
+	}
 	if !ffPayloadOwned(stage) {
 		removeFFPayloadTree(stage)
 		fail("staged Firefox payload has no ownership marker: %s", stage)
