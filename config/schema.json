@@ -105,6 +105,34 @@
       "type": "bool",
       "default": true,
       "prefs": [{ "name": "omafire.extension-glyphs" }]
+    },
+    {
+      "key": "key-zen",
+      "about": "Shortcut: Hide the chrome (the compact sidebar's toggle on the sidebar layout). Modifiers plus one key, like Ctrl+Alt+Z; empty turns it off.",
+      "type": "chord",
+      "default": "Ctrl+Alt+H",
+      "prefs": [{ "name": "omafire.keys.zen" }]
+    },
+    {
+      "key": "key-layout",
+      "about": "Shortcut: Switch between the top and sidebar toolbar. Modifiers plus one key, like Ctrl+Alt+Z; empty turns it off.",
+      "type": "chord",
+      "default": "Ctrl+Alt+S",
+      "prefs": [{ "name": "omafire.keys.layout" }]
+    },
+    {
+      "key": "key-glass",
+      "about": "Shortcut: Turn glass on or off. Modifiers plus one key, like Ctrl+Alt+Z; empty turns it off.",
+      "type": "chord",
+      "default": "Ctrl+Alt+G",
+      "prefs": [{ "name": "omafire.keys.glass" }]
+    },
+    {
+      "key": "key-settings",
+      "about": "Shortcut: Open the settings panel. Modifiers plus one key, like Ctrl+Alt+Z; empty turns it off.",
+      "type": "chord",
+      "default": "Ctrl+Alt+O",
+      "prefs": [{ "name": "omafire.keys.settings" }]
     }
   ]
 }

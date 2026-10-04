@@ -40,7 +40,11 @@ var ROWS = [
     hint: "Show them only while Alt is held; Alt, then digits, switches on release.",
     when: function(c) { return c["tab-numbers"] === true } },
   { key: "extension-glyphs", section: "LOOK", label: "Extension glyphs", type: "toggle",
-    hint: "Monochrome icons for extensions." }
+    hint: "Monochrome icons for extensions." },
+  { key: "key-zen", section: "KEYS", label: "Hide the chrome", type: "chord" },
+  { key: "key-layout", section: "KEYS", label: "Switch toolbar", type: "chord" },
+  { key: "key-glass", section: "KEYS", label: "Glass", type: "chord" },
+  { key: "key-settings", section: "KEYS", label: "This panel", type: "chord" }
 ]
 
 function visibleRows(config) {

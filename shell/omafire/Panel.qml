@@ -293,6 +293,19 @@ Panel {
                       onChanged: function(v) { omafire.set(rowRoot.row.key, v) }
                     }
 
+                    // A shortcut: shown here, changed with `omafire set key-... Ctrl+Alt+Z`
+                    // (empty turns it off). Read-only until the panel can record a chord.
+                    Text {
+                      textFormat: Text.PlainText
+                      visible: rowRoot.row.type === "chord"
+                      text: String(rowRoot.value) || "off"
+                      color: root.foreground
+                      opacity: String(rowRoot.value) ? 1 : 0.6
+                      font.family: root.fontFamily
+                      font.pixelSize: Style.font.bodySmall
+                      anchors.verticalCenter: parent.verticalCenter
+                    }
+
                     Text {
                       textFormat: Text.PlainText
                       visible: rowRoot.row.type === "slider"

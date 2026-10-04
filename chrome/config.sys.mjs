@@ -67,6 +67,7 @@ function valid(setting, v) {
     case "enum": return typeof v === "string" && setting.values.includes(v);
     case "bool": return typeof v === "boolean";
     case "number": return typeof v === "number" && v >= setting.min && v <= setting.max;
+    case "chord": return typeof v === "string" && (v === "" || CHORD.test(v));
   }
   return false;
 }
@@ -97,6 +98,9 @@ function readPref(name) {
   }
   return undefined;
 }
+
+// A shortcut: modifiers plus one letter or digit (config/config.go's chordPattern).
+const CHORD = /^((ctrl|control|alt|shift|super|meta)\+)+[a-z0-9]$/i;
 
 function writePref(name, value) {
   if (readPref(name) === value) {

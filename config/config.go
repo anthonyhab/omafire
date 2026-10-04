@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -48,6 +49,9 @@ func Lookup(key string) (Setting, bool) {
 	return Settings[i], true
 }
 
+// chordPattern is a shortcut: one or more modifiers, then one letter or digit.
+var chordPattern = regexp.MustCompile(`(?i)^((ctrl|control|alt|shift|super|meta)\+)+[a-z0-9]$`)
+
 // Check reports whether v, as decoded from JSON, is a valid value.
 func (s Setting) Check(v any) error {
 	switch s.Type {
@@ -61,6 +65,11 @@ func (s Setting) Check(v any) error {
 			return nil
 		}
 		return fmt.Errorf("%s must be true or false", s.Key)
+	case "chord":
+		if str, ok := v.(string); ok && (str == "" || chordPattern.MatchString(str)) {
+			return nil
+		}
+		return fmt.Errorf("%s must be modifiers plus one key like Ctrl+Alt+Z, or empty", s.Key)
 	case "number":
 		n, ok := v.(float64)
 		if ok && !math.IsNaN(n) && (s.Min == nil || n >= *s.Min) && (s.Max == nil || n <= *s.Max) {

@@ -1,6 +1,7 @@
 // Omafire keybindings: the theme's modes, one chord each.
 //
-// Each binding is a pref, omafire.keys.<action>, like "Ctrl+Alt+Z"; an
+// Each binding is a pref, omafire.keys.<action> (the key-<action> settings in
+// config.json), like "Ctrl+Alt+Z"; an
 // empty string turns it off. A chord Firefox already uses is skipped, not
 // taken over. Changing a binding applies to windows opened afterwards.
 // Loaded into each browser window by omafire.cfg.
@@ -15,7 +16,7 @@
 
   const ACTIONS = [
     {
-      name: "zen", chord: "Ctrl+Alt+H", label: "Hide the chrome",
+      name: "zen", pref: "omafire.keys.zen", chord: "Ctrl+Alt+H", label: "Hide the chrome",
       run() {
         // Top layout only; the sidebar layout's counterpart is compact.
         if (prefs.getStringPref("omafire.layout", "top") === "sidebar") {
@@ -28,7 +29,7 @@
       },
     },
     {
-      name: "layout", chord: "Ctrl+Alt+S", label: "Switch toolbar",
+      name: "layout", pref: "omafire.keys.layout", chord: "Ctrl+Alt+S", label: "Switch toolbar",
       run() {
         const sidebar = prefs.getStringPref("omafire.layout", "top") === "sidebar";
         if (!sidebar) {
@@ -38,13 +39,13 @@
       },
     },
     {
-      name: "glass", chord: "Ctrl+Alt+G", label: "Glass",
+      name: "glass", pref: "omafire.keys.glass", chord: "Ctrl+Alt+G", label: "Glass",
       run() {
         prefs.setBoolPref("omafire.translucency", !bool("omafire.translucency", false));
       },
     },
     {
-      name: "settings", chord: "Ctrl+Alt+O", label: "This panel",
+      name: "settings", pref: "omafire.keys.settings", chord: "Ctrl+Alt+O", label: "This panel",
       run() {
         window.OmafireSettings?.open();
       },
@@ -100,13 +101,13 @@
   const keyset = document.createXULElement("keyset");
   keyset.id = "omafire-keyset";
   for (const action of ACTIONS) {
-    const chord = prefs.getStringPref(`omafire.keys.${action.name}`, action.chord);
+    const chord = prefs.getStringPref(action.pref, action.chord);
     if (!chord) {
       continue;
     }
     const spec = parse(chord);
     if (!spec) {
-      console.warn(`[omafire:keys] omafire.keys.${action.name}: cannot read "${chord}"`);
+      console.warn(`[omafire:keys] ${action.pref}: cannot read "${chord}"`);
       continue;
     }
     const owner = taken(spec);
