@@ -146,6 +146,7 @@ omafire watch                # a JSON line now and after every change
 | `glass` | `true`, `false` | `false` |
 | `opacity` | `0.5` to `1` | `0.85` |
 | `tab-numbers` | `true`, `false` | `false` |
+| `tab-numbers-hold` | `true`, `false` (with `tab-numbers`) | `false` |
 | `extension-glyphs` | `true`, `false` | `true` |
 
 The first Firefox to start without a file creates it from that profile's

@@ -136,6 +136,13 @@
       write: v => set("omafire.tab-numbers", v),
     },
     {
+      label: "Numbers on hold", kind: "toggle", prefs: ["omafire.tab-numbers-hold"],
+      read: () => get("omafire.tab-numbers-hold", false),
+      write: v => set("omafire.tab-numbers-hold", v),
+      when: () => get("omafire.tab-numbers", false),
+      hint: "Show them only while Alt is held; Alt, then digits, switches on release.",
+    },
+    {
       label: "Extension glyphs", kind: "toggle", prefs: ["omafire.extension-glyphs"],
       read: () => get("omafire.extension-glyphs", true),
       write: v => set("omafire.extension-glyphs", v),

@@ -93,6 +93,13 @@
       "prefs": [{ "name": "omafire.tab-numbers" }]
     },
     {
+      "key": "tab-numbers-hold",
+      "about": "Show the tab numbers only while Alt is held; Alt+digits (1 then 2 is tab 12) switch on release.",
+      "type": "bool",
+      "default": false,
+      "prefs": [{ "name": "omafire.tab-numbers-hold" }]
+    },
+    {
       "key": "extension-glyphs",
       "about": "Draw extension toolbar icons as monochrome glyphs.",
       "type": "bool",

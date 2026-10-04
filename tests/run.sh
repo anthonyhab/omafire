@@ -87,6 +87,7 @@ node "$PROJECT_DIR/theme/scripts/lint.mjs"
 "$PROJECT_DIR/scripts/check-xpi.sh"
 
 node "$SCRIPT_DIR/theme.test.js"
+node "$SCRIPT_DIR/tab-numbers.test.js"
 node "$SCRIPT_DIR/background.test.js"
 node "$SCRIPT_DIR/tabglow.test.js"
 node "$SCRIPT_DIR/tabglow-race.test.js"

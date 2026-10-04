@@ -166,4 +166,24 @@
       linear-gradient(var(--oc-mask) 0 0) 0 calc(var(--oc-row) / 2 - 4.5px) / 3px 9px no-repeat,
       linear-gradient(var(--oc-mask) 0 0) 0 calc(var(--oc-row) * 1.5 + var(--oc-u) - 4.5px) / 3px 9px no-repeat !important;
   }
+
+  /* On hold (omafire.tab-numbers-hold, tab-numbers.uc.js): the numbers show
+   * only while Alt is down. Everything above stays; this takes the legends
+   * and their notches back out, at a weight that outranks every rule above. */
+  :root[omafire-tab-numbers-hold]:not([omafire-numbers-held]) {
+    & #tabbrowser-tabs .tabbrowser-tab .tab-content::after {
+      content: none !important;
+    }
+
+    & #tabbrowser-tabs .tabbrowser-tab .tab-background,
+    & #tabbrowser-tabs tab-split-view-wrapper::before {
+      mask: none !important;
+    }
+  }
+
+  /* The tab the typed digits point at: its digit in the accent hue, at
+   * full weight. */
+  :root[omafire-numbers-held] #tabbrowser-tabs .tabbrowser-tab[omafire-num-lit] .tab-content::after {
+    color: var(--oc-accent-mark) !important;
+  }
 }

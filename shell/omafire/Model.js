@@ -36,6 +36,9 @@ var ROWS = [
     hint: "Pages show the desktop behind them. Needs Cinder.",
     when: function(c) { return c.glass === true } },
   { key: "tab-numbers", section: "LOOK", label: "Tab numbers", type: "toggle" },
+  { key: "tab-numbers-hold", section: "LOOK", label: "Numbers on hold", type: "toggle",
+    hint: "Show them only while Alt is held; Alt, then digits, switches on release.",
+    when: function(c) { return c["tab-numbers"] === true } },
   { key: "extension-glyphs", section: "LOOK", label: "Extension glyphs", type: "toggle",
     hint: "Monochrome icons for extensions." }
 ]
