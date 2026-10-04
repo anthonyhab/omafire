@@ -28,12 +28,12 @@
     --oc-canvas: var(--omarchy-background, var(--oc-frame));
     --oc-accent: var(--omarchy-accent, AccentColor);
     --oc-focus: var(--oc-accent-mark);  /* see tokens.css */
-    --oc-glow: var(--oc-accent-mark);
+    --oc-glow: var(--oc-accent);  /* its lit edge leans as the mark does */
 
     /* ---- color: derived (mirrors tokens.css) ------------------------ */
 
     --oc-text-dim: light-dark(
-      color-mix(in srgb, var(--oc-text) 70%, transparent),
+      color-mix(in srgb, var(--oc-text) 75%, transparent),
       color-mix(in srgb, var(--oc-text) 62%, transparent));
     --oc-accent-mark: light-dark(
       color-mix(in srgb, var(--oc-accent), var(--oc-text) 30%),
@@ -49,8 +49,11 @@
       color-mix(in srgb, var(--oc-glow) 22%, transparent),
       color-mix(in srgb, var(--oc-glow) 6%, transparent) 45%,
       transparent 75%;
+    --oc-glow-lead: light-dark(
+      color-mix(in srgb, var(--oc-glow), var(--oc-text) 30%),
+      color-mix(in srgb, var(--oc-glow) 85%, transparent));
     --oc-glow-edge:
-      color-mix(in srgb, var(--oc-glow) 85%, transparent),
+      var(--oc-glow-lead),
       color-mix(in srgb, var(--oc-glow) 40%, transparent) 40%,
       var(--oc-line-strong) 85%;
 

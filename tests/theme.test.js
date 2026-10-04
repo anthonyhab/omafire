@@ -179,6 +179,8 @@ assert.throws(
   /Unexpected palette/
 );
 
+require("./contrast.test.js");
+
 // Split view in the chrome theme (omafire-v2z.6). These read the source;
 // the measured geometry is in the bead's fxlab evidence.
 const themeSource = (name) =>
