@@ -3,7 +3,7 @@
 # https://github.com/cover/omafox (MIT), whose name it carried until 0.3.0.
 
 pkgname=omafire
-pkgver=0.6.7
+pkgver=0.6.8
 pkgrel=1
 pkgdesc="The Firefox theme and toolkit for Omarchy: a themed, live-synced Firefox with settings, keys and profile-safe setup"
 arch=('x86_64' 'aarch64')
