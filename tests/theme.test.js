@@ -243,16 +243,32 @@ assert.doesNotMatch(compactCss,
 function loadCompact() {
   const listeners = {};
   const marks = new Set();
+  // sidebar-main as the tools observer sees it (omafire-v2z.13): the native
+  // readings it would act on, and where the column is
+  const tools = { readings: [], updates: 0, rect: { left: -258, right: 0, width: 258 }, frames: [] };
+  const toolsMain = {
+    getBoundingClientRect: () => tools.rect,
+    requestUpdate: () => tools.updates++,
+    createToolsObservers() {
+      this._toolsIntersectionObserver = new window.IntersectionObserver(entries => tools.readings.push(entries));
+    }
+  };
   const document = {
-    documentElement: { toggleAttribute: (name, on) => on ? marks.add(name) : marks.delete(name) }
+    documentElement: { toggleAttribute: (name, on) => on ? marks.add(name) : marks.delete(name) },
+    querySelector: selector => selector === "sidebar-main" ? toolsMain : null
   };
   const focus = {
     FLAG_BYMOUSE: 0x1000, FLAG_BYKEY: 0x2000, focusedElement: null, method: 0,
     getLastFocusMethod() { return this.method; }
   };
-  const window = { addEventListener: (type, fn) => (listeners[type] ??= []).push(fn) };
+  const window = {
+    addEventListener: (type, fn) => (listeners[type] ??= []).push(fn),
+    IntersectionObserver: class { constructor(callback) { tools.callback = callback; } },
+    innerWidth: 1000,
+    requestAnimationFrame: fn => tools.frames.push(fn)
+  };
   vm.runInNewContext(fs.readFileSync(path.join(root, "chrome/scripts/compact.uc.js"), "utf8"),
-    { window, document, Services: { focus }, Promise });
+    { window, document, Services: { focus, obs: { addObserver() {}, removeObserver() {} } }, Promise });
   const fire = (type, target) => listeners[type].forEach(fn => fn({ target }));
   // the column: toolbox and sidebar, the tab strip slotted into sidebar-main,
   // the tools inside its shadow root
@@ -263,7 +279,7 @@ function loadCompact() {
   const tool = node({ localName: "button" }, shadow);
   const newTab = node({ id: "tabs-newtab-button" }, node({ id: "vertical-tabs" }, sidebarMain));
   const page = node({ localName: "browser" }, node({ id: "browser" }));
-  return { marks, fire, focus, tool, newTab, page };
+  return { marks, fire, focus, tool, newTab, page, tools, window };
 }
 
 (async () => {
@@ -308,6 +324,25 @@ function loadCompact() {
   await focusOn(c.tool, c.focus.FLAG_BYKEY);
   await focusOn(c.page, c.focus.FLAG_BYKEY);
   assert.equal(c.marks.has("omafire-tools-focus"), false);
+
+  // the tools observer ignores readings while the column is off-screen (omafire-v2z.13),
+  // and re-reads the tools once it is wholly inside the window
+  const t = c.tools;
+  assert.equal(c.window.IntersectionObserver.name, "IntersectionObserver", "the native class is put back");
+  const updates = t.updates;
+  t.callback(["parked"]);
+  assert.deepEqual(t.readings, [], "a parked column's reading is dropped");
+  t.rect = { left: -101, right: 157, width: 258 };
+  t.frames.shift()();
+  t.callback(["sliding"]);
+  assert.deepEqual(t.readings, [], "so is a sliding one");
+  assert.equal(t.updates, updates, "no re-read while it slides");
+  t.frames.shift()();
+  t.rect = { left: 8, right: 266, width: 258 };
+  t.frames.shift()();
+  assert.equal(t.updates, updates + 1, "re-read once it is in");
+  t.callback(["settled"]);
+  assert.deepEqual(t.readings, [["settled"]]);
 
   console.log("theme.test.js: ok");
 })().catch(error => {

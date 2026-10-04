@@ -15,6 +15,13 @@
 //   focused after its menu closes. [omafire-tools-focus] marks the root
 //   while a tool holds focus that the mouse didn't give it.
 //
+// A third thing is Firefox's own: sidebar-main decides which tools fit with
+// an IntersectionObserver, and a column parked or sliding in from off-screen
+// reads as overflowing (a » shows for ~80 ms on every reveal, the gear is
+// missing until the end; omafire-v2z.13). The observer is replaced by one
+// that ignores readings while the column is not wholly inside the window,
+// and re-reads the tools once it is.
+//
 // Loaded into each browser window by omafire.cfg.
 (function () {
   "use strict";
@@ -72,4 +79,74 @@
   for (const type of ["focusin", "focusout"]) {
     window.addEventListener(type, () => Promise.resolve().then(syncFocus), true);
   }
+
+  // ---- sidebar tools: no overflow readings while the column is off-screen ----
+  function guardToolsObserver(sidebarMain) {
+    if (typeof sidebarMain.createToolsObservers !== "function") {
+      return;               // Firefox changed it: leave the native behaviour
+    }
+    const NativeObserver = window.IntersectionObserver;
+    let watching = false;
+    const inView = () => {
+      const r = sidebarMain.getBoundingClientRect();
+      return r.width > 0 && r.left >= -0.5 && r.right <= window.innerWidth + 0.5;
+    };
+    function settle() {
+      if (watching) {
+        return;
+      }
+      watching = true;
+      const tick = () => {
+        if (!inView()) {
+          window.requestAnimationFrame(tick);
+          return;
+        }
+        watching = false;
+        sidebarMain.requestUpdate();   // observe the tools again: fresh readings
+      };
+      window.requestAnimationFrame(tick);
+    }
+    sidebarMain._toolsIntersectionObserver?.disconnect();
+    sidebarMain._toolsResizeObserver?.disconnect();
+    window.IntersectionObserver = class extends NativeObserver {
+      constructor(callback, options) {
+        super((entries, observer) => {
+          if (inView()) {
+            callback(entries, observer);
+          } else {
+            settle();
+          }
+        }, options);
+      }
+    };
+    try {
+      sidebarMain.createToolsObservers();
+    } finally {
+      window.IntersectionObserver = NativeObserver;
+    }
+    sidebarMain.requestUpdate();
+  }
+
+  function withSidebarMain(fn) {
+    const find = () => document.querySelector("sidebar-main");
+    const el = find();
+    if (el) {
+      fn(el);
+      return;
+    }
+    const topic = "browser-delayed-startup-finished";
+    const observer = {
+      observe(subject) {
+        if (subject === window) {
+          Services.obs.removeObserver(observer, topic);
+          const late = find();
+          if (late) {
+            fn(late);
+          }
+        }
+      },
+    };
+    Services.obs.addObserver(observer, topic);
+  }
+  withSidebarMain(guardToolsObserver);
 })();
