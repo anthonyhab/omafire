@@ -32,6 +32,10 @@ Panel {
   property bool cursorActive: false
   property string selectedKey: ""
   property int lastIndex: 0
+  // The chord row being recorded ("" when none), and why the last key
+  // pressed was not taken.
+  property string recording: ""
+  property string recordHint: ""
   readonly property var cursorKeys: {
     var keys = rows.map(function(r) { return r.key })
     if (needsRepair) keys.push("repair")
@@ -85,6 +89,16 @@ Panel {
     if (row.type === "toggle") omafire.set(row.key, delta === 0 ? !value : delta > 0)
     else if (row.type === "choice") omafire.set(row.key, Model.stepChoice(row.options, value, delta === 0 ? 1 : delta, delta === 0))
     else if (row.type === "slider" && delta !== 0) omafire.set(row.key, Model.stepSlider(row, value, delta))
+    else if (row.type === "chord" && delta === 0) {
+      recordHint = ""
+      recording = row.key
+      Qt.callLater(function() { recorder.forceActiveFocus() })
+    }
+  }
+
+  function stopRecording() {
+    recording = ""
+    Qt.callLater(function() { keys.forceActiveFocus() })
   }
 
   Service {
@@ -118,6 +132,7 @@ Panel {
     PanelKeyCatcher {
       id: keys
       anchors.fill: parent
+      blocked: root.recording !== ""
       onCloseRequested: root.close()
       onTabRequested: function(direction) { root.switchPanel(direction) }
       onMoveRequested: function(dx, dy) {
@@ -133,6 +148,42 @@ Panel {
       }
       onTextKey: function(t) {
         if (t === "r" || t === "R") omafire.repair()
+      }
+
+      // Takes the keys while a chord row records: a chord is a modifier
+      // (Ctrl, Alt or Super) and a letter or digit, the form keys.uc.js reads.
+      Item {
+        id: recorder
+        focus: false
+        Keys.onPressed: function(event) {
+          event.accepted = true
+          var k = event.key
+          if (k === Qt.Key_Escape) { root.stopRecording(); return }
+          if (k === Qt.Key_Backspace || k === Qt.Key_Delete) {
+            omafire.set(root.recording, "")
+            root.stopRecording()
+            return
+          }
+          if (k === Qt.Key_Shift || k === Qt.Key_Control || k === Qt.Key_Alt
+              || k === Qt.Key_Meta || k === Qt.Key_AltGr || k === Qt.Key_Super_L || k === Qt.Key_Super_R) return
+          var ctrl = (event.modifiers & Qt.ControlModifier) !== 0
+          var alt = (event.modifiers & Qt.AltModifier) !== 0
+          var sup = (event.modifiers & Qt.MetaModifier) !== 0
+          var shift = (event.modifiers & Qt.ShiftModifier) !== 0
+          var isChar = (k >= Qt.Key_A && k <= Qt.Key_Z) || (k >= Qt.Key_0 && k <= Qt.Key_9)
+          if (!isChar || !(ctrl || alt || sup)) {
+            root.recordHint = "Ctrl/Alt/Super + a key"
+            return
+          }
+          var parts = []
+          if (ctrl) parts.push("Ctrl")
+          if (alt) parts.push("Alt")
+          if (shift) parts.push("Shift")
+          if (sup) parts.push("Super")
+          parts.push(String.fromCharCode(k))
+          omafire.set(root.recording, parts.join("+"))
+          root.stopRecording()
+        }
       }
 
       // Scrolls when the screen is shorter than the panel.
@@ -293,14 +344,15 @@ Panel {
                       onChanged: function(v) { omafire.set(rowRoot.row.key, v) }
                     }
 
-                    // A shortcut: shown here, changed with `omafire set key-... Ctrl+Alt+Z`
-                    // (empty turns it off). Read-only until the panel can record a chord.
+                    // A shortcut: Enter records a new one (Esc cancels, Backspace turns it
+                    // off); `omafire set key-... Ctrl+Alt+Z` does the same from a shell.
                     Text {
+                      readonly property bool recording: root.recording === rowRoot.row.key
                       textFormat: Text.PlainText
                       visible: rowRoot.row.type === "chord"
-                      text: String(rowRoot.value) || "off"
-                      color: root.foreground
-                      opacity: String(rowRoot.value) ? 1 : 0.6
+                      text: recording ? (root.recordHint || "press the new chord") : (String(rowRoot.value) || "off")
+                      color: recording ? root.accent : root.foreground
+                      opacity: recording || String(rowRoot.value) ? 1 : 0.6
                       font.family: root.fontFamily
                       font.pixelSize: Style.font.bodySmall
                       anchors.verticalCenter: parent.verticalCenter
