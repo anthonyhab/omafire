@@ -17,6 +17,13 @@ import hashlib, json, os, re, stat, sys
 MANAGED = {"user.js", "userChrome.css", "userContent.css"}
 BEGIN = re.compile(r"^(/\* |// )BEGIN OMAF(IRE|OX) (FIREFOX|ZEN) BRIDGE( \*/)?$")
 END = re.compile(r"^(/\* |// )END OMAF(IRE|OX) (FIREFOX|ZEN) BRIDGE( \*/)?$")
+# prefs.js lines `omafire remove` clears (cmd/omafire/firefox.go ffOwnedPrefs):
+# the rest of prefs.js is the user's and must survive byte for byte.
+OWNED_PREFS = re.compile(
+    r'^user_pref\("(omafire\.managed|omafire\.extension\.offered|'
+    r'browser\.display\.(background_color|foreground_color|use_system_colors|permit_backplate)|'
+    r'browser\.anchor_color|browser\.visited_color|ui\.accentcolor(text)?|'
+    r'layout\.css\.prefers-color-scheme\.content-override)",')
 # Firefox's own churn on a run; not ours to judge.
 VOLATILE = re.compile(r"(^|/)(\.cache|\.local/state/omafire/backups|cache2|startupCache|"
                       r"datareporting|saved-telemetry-pings|sessionstore|crashes|minidumps|"
@@ -56,6 +63,10 @@ def snap(home):
                 e.update(type="file", size=len(data), sha256=sha(data))
                 if b"SENTINEL" in data or b"sentinel" in data:
                     e["sentinel"] = True
+                if name == "prefs.js":
+                    keep = [l for l in data.decode("utf-8", "replace").split("\n")
+                            if not OWNED_PREFS.match(l)]
+                    e["prefs_user_sha256"] = sha("\n".join(keep).encode())
                 if name in MANAGED:
                     rest, begins = remainder(data.decode("utf-8", "replace"))
                     e["user_sha256"], e["blocks"] = sha(rest.encode()), begins
@@ -91,7 +102,11 @@ def diff(a, b):
             continue
         what = [k for k in sorted(set(x) | set(y)) if x.get(k) != y.get(k)]
         print(f"~ {rel} {', '.join(what)}{tag}")
-        if x.get("sentinel") and not x.get("user_sha256") and x.get("sha256") != y.get("sha256"):
+        if x.get("prefs_user_sha256"):
+            # prefs.js: only the lines remove clears may go
+            if x["prefs_user_sha256"] != y.get("prefs_user_sha256"):
+                bad.append(f"user prefs changed: {rel}")
+        elif x.get("sentinel") and not x.get("user_sha256") and x.get("sha256") != y.get("sha256"):
             bad.append(f"sentinel changed: {rel}")
         if x.get("mode") != y.get("mode") and not volatile:
             bad.append(f"mode changed: {rel} {x['mode']} -> {y['mode']}")
