@@ -126,8 +126,11 @@ not touched. Each case below says what you see and what to do.
   changing it. Copying it back also discards anything you changed in that
   file since that run, so compare the two first
   (`diff <backup> <file>`).
-- **Go back to an earlier release.** Install its package with
-  `sudo pacman -U`, then run `omafire setup`. Your own lines in `user.js`,
+- **Go back to an earlier release.** Pacman keeps the packages it installed
+  (`ls /var/cache/pacman/pkg/omafire-*`), so the previous one is usually
+  already on disk. Install its package with
+  `sudo pacman -U /var/cache/pacman/pkg/omafire-<version>-x86_64.pkg.tar.zst`,
+  then run `omafire setup`. Your own lines in `user.js`,
   `userChrome.css`, `userContent.css` and `customChrome.css` are kept, edits
   made since included. Only the managed blocks and the `omafire/` theme
   change.
