@@ -1,0 +1,28 @@
+/* Bitwarden's popup, sidebar and options (omafire-mjl.4): its new hex design tokens
+ * (--color-bg-*, --color-fg-*) pointed at the content tokens. The older channel-triple tokens
+ * (--color-background: 32 39 51) can't take a colour and are left, so components still on them
+ * keep Bitwarden's blue; its type is left alone too (the mono face breaks its fixed-height
+ * illustration layout); success, danger and warning hues are left on purpose. */
+@-moz-document regexp("moz-extension://[^/]+/(popup|sidebar|options)/index\\.html.*") {
+  :root {
+    --color-bg-primary: var(--oc-canvas) !important;
+    --color-bg-secondary: var(--oc-frame) !important;
+    --color-bg-tertiary: var(--oc-canvas) !important;
+    --color-bg-quaternary: var(--oc-field-hover) !important;
+    --color-fg-heading: var(--oc-text) !important;
+    --color-fg-body: var(--oc-text) !important;
+    --color-fg-body-subtle: var(--oc-text-dim) !important;
+    --color-fg-inactive: var(--oc-text-dim) !important;
+    --color-fg-brand: var(--oc-accent-mark) !important;
+    --color-fg-brand-soft: var(--oc-accent-mark) !important;
+    --color-fg-brand-strong: var(--oc-text) !important;
+  }
+  html, body {
+    background-color: var(--oc-canvas) !important;
+    color: var(--oc-text) !important;
+  }
+  :focus-visible {
+    outline: 1px solid var(--oc-focus) !important;
+    outline-offset: -1px !important;
+  }
+}

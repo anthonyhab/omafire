@@ -11,6 +11,7 @@
 @import "src/reader.css";
 @import "src/extensions/ublock-origin.css";
 @import "src/extensions/violentmonkey.css";
+@import "src/extensions/bitwarden.css";
 @import "src/extensions/sponsorblock.css";
 @import "src/extensions/vimium-c.css";
 

@@ -1,6 +1,8 @@
 /* Violentmonkey's popup, dashboard and install-confirm pages (omafire-mjl.4): its own custom
  * properties pointed at the content tokens. Its paths are generic (popup/index.html), but the
- * properties set here are its own, so another extension at the same path is unaffected. */
+ * properties set here are its own, so another extension at the same path is unaffected: that is
+ * also why this sheet sets no font and no element rule (Bitwarden shares popup/index.html, and
+ * a mono face broke its layout). */
 @-moz-document regexp("moz-extension://[^/]+/(popup|options|confirm)/index\\.html.*") {
   :root {
     --bg: var(--oc-canvas) !important;
@@ -16,13 +18,5 @@
     --menu-group-color: var(--oc-text-dim) !important;
     --button-hover-inactive-bg: var(--oc-field-hover) !important;
     --scrollbar-bg: var(--oc-canvas) !important;
-    font-family: var(--oc-font) !important;
-  }
-  html, body {
-    font-family: var(--oc-font) !important;
-  }
-  :focus-visible {
-    outline: 1px solid var(--oc-focus) !important;
-    outline-offset: -1px !important;
   }
 }
