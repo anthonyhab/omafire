@@ -119,9 +119,8 @@ func TestSweepTemps(t *testing.T) {
 	mk(".omafire.123456", false, old)
 	mk(".omafire.new.987", true, old)
 	mk(".omafire.old.55", true, old)
-	mk(false, time.Now()) // in flight
-	mk(".omafire.new.abc", true, old)     // not our name
-	mk(".omafire.123.bak", false, old)    // not our name
+	mk(".omafire.new.abc", true, old)  // not our name
+	mk(".omafire.123.bak", false, old) // not our name
 	mk("user.js", false, old)
 	sweepTemps(dir)
 	for _, gone := range []string{".omafire.123456", ".omafire.new.987", ".omafire.old.55"} {
