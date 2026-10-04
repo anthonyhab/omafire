@@ -53,7 +53,7 @@ func writePaletteCSS(p *palette, path string) {
 func writeContentPaletteCSS(p *palette, path string) {
 	css := "/* OMAFIRE GENERATED CONTENT PALETTE — written by omafire sync; do not edit. */\n" +
 		":root {\n  --omarchy-color-scheme: " + p.mode + ";\n}\n\n" +
-		rawPaletteVars(p)
+		rawPaletteVars(p) + highlightVars(p)
 	atomicWrite(path, css, 0o600, false)
 }
 
@@ -238,6 +238,9 @@ func refreshFFProfileColors(profile string, p *palette) {
 		// Forced colours draw a Canvas plate behind every text run, which
 		// would box the text on Cinder's surface steps and on glass pages.
 		"user_pref(\"browser.display.permit_backplate\", false);\n" +
+		// Selection and search hits on forced-colour pages: the theme's
+		// accent, not the system's blue and Mark yellow (highlight.go).
+		highlightPrefs(p) +
 		fmt.Sprintf("user_pref(\"ui.accentcolor\", \"%s\");\n", accent) +
 		fmt.Sprintf("user_pref(\"ui.accentcolortext\", \"%s\");\n", textOn(p, accent)) +
 		ffPrefsEnd + "\n"

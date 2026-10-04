@@ -376,6 +376,7 @@ var ffOwnedPrefs = []string{
 	"browser.display.use_system_colors", "browser.display.permit_backplate",
 	"browser.anchor_color", "browser.visited_color",
 	"ui.accentcolor", "ui.accentcolortext",
+	"ui.highlight", "ui.highlighttext", "ui.mark", "ui.marktext",
 	"layout.css.prefers-color-scheme.content-override",
 }
 

@@ -61,6 +61,10 @@
     "browser.display.foreground_color": "--omarchy-foreground",
     "browser.anchor_color": "--omarchy-accent",
     "browser.visited_color": "--omarchy-magenta",
+    "ui.highlight": "--omafire-highlight",
+    "ui.highlighttext": "--omafire-highlight-text",
+    "ui.mark": "--omafire-mark",
+    "ui.marktext": "--omafire-mark-text",
   };
   async function pagePalette() {
     const text = await IOUtils.readUTF8(file("omafire-content-palette.css")).catch(() => "");
