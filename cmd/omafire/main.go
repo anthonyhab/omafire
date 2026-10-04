@@ -136,6 +136,7 @@ func cmdSync() {
 
 func cmdSetup() {
 	requireQuattro()
+	readPalette() // refuses an unusable palette before anything is changed
 	if unix.Access(nativeHostPath, unix.X_OK) != nil {
 		fail("packaged native host not found: %s", nativeHostPath)
 	}
