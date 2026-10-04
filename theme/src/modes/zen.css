@@ -93,6 +93,8 @@
        * centres between: a toolbar, or with vertical tabs the head band
        * (tokens.css), whose line sits on the column's first block. */
       --oc-zen-row: var(--oc-toolbar);
+      --oc-zen-clear: 80px;      /* kept free either side of the open field for the buttons */
+      --oc-zen-open-max: 440px;   /* the open field's growth stops here */
       --oc-zen-pad-start: 0px;
       --oc-zen-pad-end: 0px;
 
@@ -156,6 +158,16 @@
         /* Open, the results hang from the field as one card its width. */
         --urlbar-background-overhang-open: 0px !important;
         --oc-urlbar-card-top: 0px;
+
+        /* Open on a narrow page the field grows, as Firefox's own does, and
+         * the results hang from it: one card, one edge. Half the page leaves
+         * a switch-to-tab title a few characters (omafire-ahh); the field
+         * keeps a clearance either side for the navigation and the actions,
+         * and never passes the cap. Closed, it is back to half. */
+        &[popover-open] {
+          --oc-zen-field: round(down, min(var(--oc-field-width), max(calc(anchor-size(--oc-page width, 100vw) / 2),
+            min(calc(anchor-size(--oc-page width, 100vw) - 2 * var(--oc-zen-clear)), var(--oc-zen-open-max)))), 2px);
+        }
       }
 
       & #urlbar > .urlbar-background,
