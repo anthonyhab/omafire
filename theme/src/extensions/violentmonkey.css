@@ -1,0 +1,28 @@
+/* Violentmonkey's popup, dashboard and install-confirm pages (omafire-mjl.4): its own custom
+ * properties pointed at the content tokens. Its paths are generic (popup/index.html), but the
+ * properties set here are its own, so another extension at the same path is unaffected. */
+@-moz-document regexp("moz-extension://[^/]+/(popup|options|confirm)/index\\.html.*") {
+  :root {
+    --bg: var(--oc-canvas) !important;
+    --fg: var(--oc-text) !important;
+    --input-bg: var(--oc-field-rest) !important;
+    --focus-border-color: var(--oc-focus) !important;
+    --tooltip-bg: var(--oc-panel) !important;
+    --tooltip-color: var(--oc-text) !important;
+    --tooltip-border-color: var(--oc-line) !important;
+    --vl-tooltip-bg: var(--oc-panel) !important;
+    --menu-hover-bg: var(--oc-hover) !important;
+    --menu-hover-color: var(--oc-text) !important;
+    --menu-group-color: var(--oc-text-dim) !important;
+    --button-hover-inactive-bg: var(--oc-field-hover) !important;
+    --scrollbar-bg: var(--oc-canvas) !important;
+    font-family: var(--oc-font) !important;
+  }
+  html, body {
+    font-family: var(--oc-font) !important;
+  }
+  :focus-visible {
+    outline: 1px solid var(--oc-focus) !important;
+    outline-offset: -1px !important;
+  }
+}

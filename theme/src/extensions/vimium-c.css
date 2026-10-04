@@ -1,0 +1,39 @@
+/* Vimium C's action popup and options page (omafire-mjl.4): its own --vc-* custom properties
+ * pointed at the content tokens. */
+@-moz-document regexp("moz-extension://[^/]+/pages/(action|options|show)\\.html.*") {
+  :root {
+    --vc-background-color: var(--oc-canvas) !important;
+    --vc-panel-background-color: var(--oc-frame) !important;
+    --vc-plain-color: var(--oc-text) !important;
+    --vc-heading-color: var(--oc-text) !important;
+    --vc-heading-border-color: var(--oc-line) !important;
+    --vc-item-caption-color: var(--oc-text-dim) !important;
+    --vc-link-color: var(--oc-accent-mark) !important;
+    --vc-link-hover-color: var(--oc-text) !important;
+    --vc-link-active-color: var(--oc-text) !important;
+    --vc-input-color: var(--oc-text) !important;
+    --vc-input-border-color: var(--oc-line-strong) !important;
+    --vc-input-focus-border-color: var(--oc-focus) !important;
+    --vc-button-background-color: var(--oc-field-rest) !important;
+    --vc-button-color: var(--oc-text) !important;
+    --vc-button-border-color: var(--oc-line) !important;
+    --vc-button-hover-color: var(--oc-text) !important;
+    --vc-button-hover-border-color: var(--oc-line-strong) !important;
+    --vc-button-hover-background-color: var(--oc-field-hover) !important;
+    --vc-icon-button-hover-color: var(--oc-accent-mark) !important;
+    --vc-icon-button-active-color: var(--oc-accent-mark) !important;
+    --vc-state-color: var(--oc-accent-mark) !important;
+    --vc-read-only-background-color: var(--oc-field-rest) !important;
+    --vc-read-only-color: var(--oc-text-dim) !important;
+    --vc-code-block-border-color: var(--oc-line) !important;
+    --vc-select-option-background-color: var(--oc-panel) !important;
+    font-family: var(--oc-font) !important;
+  }
+  html, body {
+    font-family: var(--oc-font) !important;
+  }
+  :focus-visible {
+    outline: 1px solid var(--oc-focus) !important;
+    outline-offset: -1px !important;
+  }
+}
