@@ -26,7 +26,9 @@ workflows:
       means exactly that; the Beads plugin moves the card once your turn is over. Run each bd command
       as its own call, not inside a pipeline or script. Don't call Kandev's task or workflow tools.
       Never push main, never touch the main checkout, never touch the user's running Firefox or its
-      profile, and never run tools/sign.
+      profile, and never run tools/sign. Never run omafire (the installed or a built binary: setup,
+      sync, remove) or the theme hook against the real $HOME: reproduce only through tests/run.sh
+      or the tests/lifecycle sandbox (a review's `omafire remove` stripped the live setup once).
     steps:
       - name: Backlog
         position: 0
