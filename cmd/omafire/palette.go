@@ -255,6 +255,18 @@ func readPalette() *palette {
 			p.color[key] = parsed
 		}
 	}
+	// A partial palette is fine (the rest fall back); a file with no colour
+	// at all is a broken theme, and pushing the defaults to every browser
+	// over the last good palette would hide that.
+	valid := 0
+	for _, v := range p.color {
+		if _, ok := normalizeColor(v); ok {
+			valid++
+		}
+	}
+	if valid == 0 {
+		fail("no colour omafire can read in %s/colors.toml; nothing was changed (expected lines like background = \"#1e1e2e\")", themeDir)
+	}
 	p.fillFallbacks()
 	return p
 }

@@ -76,3 +76,27 @@ func TestGuardReturnsTheFailure(t *testing.T) {
 		t.Error("guard left itself armed")
 	}
 }
+
+// A colors.toml with no readable colour is refused (omafire-v2z.18); a
+// partial one is fine and falls back for the rest.
+func TestReadPaletteRefusesNoValidColour(t *testing.T) {
+	dir := t.TempDir()
+	old := themeDir
+	themeDir = dir
+	defer func() { themeDir = old }()
+	write := func(s string) {
+		if err := os.WriteFile(dir+"/colors.toml", []byte(s), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, bad := range []string{"", "garbage\n", "background = \"#zzzzzz\"\n", "mode = \"dark\"\n"} {
+		write(bad)
+		if msg := guard(func() { readPalette() }); !strings.Contains(msg, "no colour omafire can read") {
+			t.Errorf("%q: guard = %q, want a refusal", bad, msg)
+		}
+	}
+	write("background = \"#101010\"\n")
+	if msg := guard(func() { readPalette() }); msg != "" {
+		t.Errorf("partial palette refused: %q", msg)
+	}
+}

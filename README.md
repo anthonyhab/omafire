@@ -335,11 +335,12 @@ not touched. Each case below says what you see and what to do.
   for a profile.** That profile's directory cannot be written (permissions,
   a full disk). Profiles listed before it were configured. Fix the directory
   and run setup again.
-- **`Quattro palette not found`, `could not read Quattro palette` or
-  `Omarchy is not installed`.** Nothing was changed. Set a theme with
+- **`Quattro palette not found`, `could not read Quattro palette`,
+  `no colour omafire can read` or `Omarchy is not installed`.** Nothing was
+  changed (profiles and browsers keep the last palette). Set a theme with
   `omarchy theme set <name>` and run the command again. A `colors.toml` with
-  no colour omafire can read is not reported: browsers get fallback colours.
-  Check with `omafire payload`.
+  some colours is fine: the missing ones fall back. Check with
+  `omafire payload`.
 - **Undo one file.** setup and remove copy each of your files to
   `~/.local/state/omafire/backups/<time>-<command>-<pid>/<path>` before
   changing it. Copying it back also discards anything you changed in that
