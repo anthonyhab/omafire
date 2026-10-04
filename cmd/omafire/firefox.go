@@ -351,6 +351,63 @@ func removeFFProfile(profile string) {
 		fmt.Printf("Removed Firefox profile bridge: %s\n", profile)
 		noteWrittenProfile(profile, "Firefox")
 	}
+	switch cleared, pending := clearOwnedFFPrefs(profile); {
+	case cleared:
+		fmt.Printf("Cleared Omafire preferences from prefs.js: %s\n", profile)
+	case pending:
+		fmt.Printf("Firefox is running with this profile: close it and run omafire remove again to clear Omafire preferences from prefs.js: %s\n", profile)
+	}
+}
+
+// ffOwnedPrefs are the preferences the bridge block sets that keep a profile
+// looking managed after the block is gone: Firefox copies user.js values into
+// prefs.js, and the loader (omafire.cfg) and the forced page colours key on
+// them. Feature toggles the block also sets (nova, wayland, drag delay) stay:
+// they are harmless without the theme and may have been the user's already.
+var ffOwnedPrefs = []string{
+	"omafire.managed", "omafire.extension.offered",
+	"browser.display.background_color", "browser.display.foreground_color",
+	"browser.display.use_system_colors", "browser.display.permit_backplate",
+	"browser.anchor_color", "browser.visited_color",
+	"ui.accentcolor", "ui.accentcolortext",
+	"layout.css.prefers-color-scheme.content-override",
+}
+
+func ownedFFPrefLine(line string) bool {
+	for _, name := range ffOwnedPrefs {
+		if strings.HasPrefix(line, "user_pref(\""+name+"\",") {
+			return true
+		}
+	}
+	return false
+}
+
+// clearOwnedFFPrefs drops those preferences from prefs.js. A running Firefox
+// rewrites prefs.js from memory when it exits, so the edit waits (pending)
+// until the profile is closed; a rerun of remove then does it.
+func clearOwnedFFPrefs(profile string) (cleared, pending bool) {
+	path := profile + "/prefs.js"
+	data, ok := readFile(path)
+	if !ok {
+		return false, false
+	}
+	var keep []string
+	found := false
+	for _, line := range lines(data) {
+		if ownedFFPrefLine(line) {
+			found = true
+			continue
+		}
+		keep = append(keep, line)
+	}
+	if !found {
+		return false, false
+	}
+	if profileRunning(profile) {
+		return false, true
+	}
+	atomicWrite(path, strings.Join(keep, "\n")+"\n", 0o600, true)
+	return true, false
 }
 
 func removeFFProfiles() {

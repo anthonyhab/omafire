@@ -265,7 +265,8 @@ s7() {
   printf '// END OMAFIRE FIREFOX BRIDGE\n' >> "$SB_HOME/$P_PERS/user.js"
   use_theme catppuccin-latte
   op $s sync-one-malformed "$PKG_HEAD" omafire sync
-  expect $s "sync with one malformed profile: exit status" test "$OP_RC" = 0
+  expect $s "sync with one malformed profile: exits nonzero, naming the skipped profile" \
+    bash -c 'test "$1" != 0 && grep -q "skipped Firefox profile .*personal.default" "$2"' _ "$OP_RC" "$OP_OUT"
   expect $s "sync with one malformed profile: later profiles still get the new palette" \
     grep -q 'My Profile.default/chrome/omafire-palette.css' "$OP_DIFF"
   expect $s "sync with one malformed profile: theme.json still updated for the extension" \

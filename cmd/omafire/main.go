@@ -47,8 +47,35 @@ var (
 )
 
 func fail(format string, args ...any) {
+	if guarded {
+		panic(guardedFailure(fmt.Sprintf(format, args...)))
+	}
 	fmt.Fprintf(os.Stderr, programName+": "+format+"\n", args...)
 	os.Exit(1)
+}
+
+// guardedFailure is what fail raises inside guard instead of exiting.
+type guardedFailure string
+
+var guarded bool
+
+// guard runs fn and returns the message of the first fail inside it
+// ("" when it finished): one unit of work (a profile) may refuse without
+// ending the run for the others. Not for concurrent use.
+func guard(fn func()) (msg string) {
+	guarded = true
+	defer func() {
+		guarded = false
+		if r := recover(); r != nil {
+			f, ok := r.(guardedFailure)
+			if !ok {
+				panic(r)
+			}
+			msg = string(f)
+		}
+	}()
+	fn()
+	return ""
 }
 
 func envOr(name, fallback string) string {
@@ -97,8 +124,14 @@ func cmdSync() {
 	// Profile files first: the same palette for the first painted frame, and
 	// ready before theme.json below wakes the extension, whose repaint is
 	// what tells the live-palette chrome script to reread them.
-	refreshFFProfilesColors(p)
+	skipped := refreshFFProfilesColors(p)
 	storeThemePayload(payload)
+	if skipped > 0 {
+		// The refusals were printed as they happened; the exit status
+		// still says that not every profile follows the theme.
+		fmt.Fprintf(os.Stderr, programName+": %d Firefox profile(s) skipped; fix them and run omafire sync again\n", skipped)
+		os.Exit(1)
+	}
 }
 
 func cmdSetup() {

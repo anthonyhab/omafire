@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strings"
 )
 
@@ -248,13 +249,20 @@ func refreshFFProfileColors(profile string, p *palette) {
 	cleanLegacyGenerated(f.chrome, false)
 }
 
-func refreshFFProfilesColors(p *palette) {
+// A profile that refuses (malformed markers, a symlinked file) is skipped
+// with a line on stderr and counted; the others still follow the palette.
+func refreshFFProfilesColors(p *palette) (skipped int) {
 	if !isRegularFile(ffProfilesFile) {
-		return
+		return 0
 	}
 	for _, profile := range listProfiles(ffProfilesFile, ffRoot) {
-		if profileWritable(profile, "Firefox", false) {
-			refreshFFProfileColors(profile, p)
+		if !profileWritable(profile, "Firefox", false) {
+			continue
+		}
+		if msg := guard(func() { refreshFFProfileColors(profile, p) }); msg != "" {
+			fmt.Fprintf(os.Stderr, programName+": skipped Firefox profile %s: %s\n", profile, msg)
+			skipped++
 		}
 	}
+	return skipped
 }

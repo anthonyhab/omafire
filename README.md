@@ -271,8 +271,13 @@ and only inside their own marked blocks and the `omafire/` payload.
   and swapped in one step.
 - **One run at a time.** A lock in `~/.local/state/omafire/` serializes the
   theme hook's syncs with setup and remove.
-- **Running browsers** are fine: omafire never touches `prefs.js`, and it
-  names any profile that needs a restart.
+- **Running browsers** are fine: setup and sync never touch `prefs.js`, and
+  they name any profile that needs a restart. `omafire remove` edits
+  `prefs.js` only while the profile is closed (see Uninstallation).
+- **One bad profile does not stop the others.** `omafire sync` skips a
+  profile it refuses (malformed Omafire markers, a symlinked file), names it on
+  stderr, updates the rest and the extension's `theme.json`, and exits 1 at the
+  end. Fix the profile and sync again.
 
 ## Troubleshooting
 
@@ -358,6 +363,15 @@ Remove the per-user integration before uninstalling the package:
 omafire remove
 sudo pacman -Rns omafire
 ```
+
+`omafire remove` also deletes the preferences that mark a Firefox profile as
+Omafire's from `prefs.js` (`omafire.managed`, the forced page colours,
+`omafire.extension.offered`, the accent colours): Firefox copies `user.js`
+values there, and the loader keeps running while `omafire.managed` is set.
+It only edits `prefs.js` while Firefox is closed, because a running Firefox
+rewrites the file on exit; if Firefox is running it says so, and you run
+`omafire remove` again after closing it. Feature toggles from the block
+(Nova, Wayland, drag delay) stay.
 
 Then remove the Omafire extension from Firefox's `about:addons` page. Omafire
 can be removed from Zen on the same page. Restart Zen after removal. The
