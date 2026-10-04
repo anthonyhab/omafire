@@ -41,6 +41,7 @@ make -C "$PROJECT_DIR" \
 [[ -f "$PACKAGE_ROOT/usr/share/omafire/firefox/chrome/userChrome.css" ]]
 [[ -f "$PACKAGE_ROOT/usr/share/doc/omafire/README.md" ]]
 [[ -f "$PACKAGE_ROOT/usr/share/licenses/omafire/LICENSE" ]]
+[[ -f "$PACKAGE_ROOT/usr/share/licenses/omafire/THIRD_PARTY_NOTICES.md" ]]
 [[ $($SYSTEM_COMMAND version) == "$(cat "$PROJECT_DIR/VERSION")" ]]
 # omafox's name forwards to omafire (the old theme hook calls it).
 grep -Fqx 'exec /usr/bin/omafire "$@"' "$PACKAGE_ROOT/usr/bin/omafox"

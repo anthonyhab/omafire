@@ -48,6 +48,7 @@ install: all
 	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/omafire/shell/omafire" shell/omafire/manifest.json shell/omafire/*.qml shell/omafire/*.js
 	install -Dm644 README.md "$(DESTDIR)$(PREFIX)/share/doc/omafire/README.md"
 	install -Dm644 LICENSE "$(DESTDIR)$(PREFIX)/share/licenses/omafire/LICENSE"
+	install -Dm644 THIRD_PARTY_NOTICES.md "$(DESTDIR)$(PREFIX)/share/licenses/omafire/THIRD_PARTY_NOTICES.md"
 
 # The Firefox payload, built from theme/ on every build: cheap, and never stale.
 payload: | $(BUILD_DIR)
