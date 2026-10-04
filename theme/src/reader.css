@@ -1,0 +1,31 @@
+/* Reader view (about:reader) on the content tokens (omafire-k9b.30.5): the page, its ink,
+ * links, quotes and code take the palette. The reader's own font choice (sans, serif) and
+ * size are the reader's to keep. Its dark/light/sepia switch still works: colours set here
+ * apply to the dark scheme only, and omafire runs dark. */
+@-moz-document url-prefix("about:reader") {
+  body.dark, body.dark .container {
+    background-color: var(--oc-canvas) !important;
+    color: var(--oc-text) !important;
+  }
+  body.dark a, body.dark a:visited {
+    color: var(--oc-accent-mark) !important;
+  }
+  body.dark a:hover {
+    color: var(--oc-text) !important;
+  }
+  body.dark blockquote {
+    border-inline-start: 2px solid var(--oc-line-strong) !important;
+    color: var(--oc-text-dim) !important;
+  }
+  body.dark pre, body.dark code {
+    background-color: var(--oc-field-rest) !important;
+    border-radius: 0 !important;
+  }
+  body.dark hr, body.dark .credits, body.dark .meta-data {
+    border-color: var(--oc-line) !important;
+    color: var(--oc-text-dim) !important;
+  }
+  body.dark ::selection {
+    background-color: var(--oc-selected) !important;
+  }
+}
