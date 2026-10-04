@@ -24,6 +24,8 @@ OWNED_PREFS = re.compile(
     r'browser\.display\.(background_color|foreground_color|use_system_colors|permit_backplate)|'
     r'browser\.anchor_color|browser\.visited_color|ui\.accentcolor(text)?|'
     r'layout\.css\.prefers-color-scheme\.content-override)",')
+# omafire's own write temporaries and stages: a copy, never the user's file.
+OMAFIRE_TEMP = re.compile(r"(^|/)\.omafire\.([0-9]+|(new|old)\.[0-9]+)(/|$)")
 # Firefox's own churn on a run; not ours to judge.
 VOLATILE = re.compile(r"(^|/)(\.cache|\.local/state/omafire/backups|cache2|startupCache|"
                       r"datareporting|saved-telemetry-pings|sessionstore|crashes|minidumps|"
@@ -97,6 +99,8 @@ def diff(a, b):
             continue
         if y is None:
             print(f"- {rel} {x['type']} {x['mode']}{tag}")
+            if OMAFIRE_TEMP.search(rel):
+                continue   # an interrupted run's temp copy, swept (omafire-v2z.17)
             if x.get("sentinel") or (x.get("user_sha256") and remainder_nonempty(x)):
                 bad.append(f"removed user-owned {rel}")
             continue
