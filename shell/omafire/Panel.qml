@@ -350,9 +350,18 @@ Panel {
                       readonly property bool recording: root.recording === rowRoot.row.key
                       textFormat: Text.PlainText
                       visible: rowRoot.row.type === "chord"
-                      text: recording ? (root.recordHint || "press the new chord") : (String(rowRoot.value) || "off")
-                      color: recording ? root.accent : root.foreground
-                      opacity: recording || String(rowRoot.value) ? 1 : 0.6
+                      // keys.uc.js leaves a chord the browser already uses unbound
+                      // and reports it through `omafire status`.
+                      readonly property var clash: {
+                        var all = omafire.status ? omafire.status.keyConflicts : null
+                        var c = all ? all[rowRoot.row.key] : null
+                        return c && c.chord === String(rowRoot.value) ? c : null
+                      }
+                      text: recording ? (root.recordHint || "press the new chord")
+                          : clash ? String(rowRoot.value) + "  taken by " + clash.owner
+                          : (String(rowRoot.value) || "off")
+                      color: recording ? root.accent : clash ? root.urgent : root.foreground
+                      opacity: recording || clash || String(rowRoot.value) ? 1 : 0.6
                       font.family: root.fontFamily
                       font.pixelSize: Style.font.bodySmall
                       anchors.verticalCenter: parent.verticalCenter

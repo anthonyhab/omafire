@@ -39,6 +39,39 @@ type statusReport struct {
 	ShellPlugin    fileState    `json:"shellPlugin"`
 	Zen            browserState `json:"zen"`
 	Firefox        browserState `json:"firefox"`
+	// Chords the browser already uses, as keys.uc.js last reported them from a
+	// running window: setting name ("key-glass") -> chord and owner.
+	KeyConflicts map[string]keyConflict `json:"keyConflicts"`
+}
+
+type keyConflict struct {
+	Chord string `json:"chord"`
+	Owner string `json:"owner"`
+}
+
+// keyConflicts merges omafire-keys.json from the browsers' profiles.
+func keyConflicts(browsers ...browserState) map[string]keyConflict {
+	out := map[string]keyConflict{}
+	for _, b := range browsers {
+		for _, p := range b.Profiles {
+			data, ok := readFile(p.Path + "/omafire-keys.json")
+			if !ok {
+				continue
+			}
+			var report struct {
+				Conflicts map[string]keyConflict `json:"conflicts"`
+			}
+			if json.Unmarshal([]byte(data), &report) != nil {
+				continue
+			}
+			for name, c := range report.Conflicts {
+				if c.Chord != "" {
+					out["key-"+name] = c
+				}
+			}
+		}
+	}
+	return out
 }
 
 type settingsInfo struct {
@@ -70,6 +103,8 @@ func collectStatus() statusReport {
 	if contents, ok := readFile(themeNameFile); ok {
 		name = firstLine(contents)
 	}
+	zen := browserStatus(zenProfilesFile, zenRoot, zenProfileStatus)
+	ff := browserStatus(ffProfilesFile, ffRoot, ffProfileStatus)
 	return statusReport{
 		Version:        version,
 		Theme:          name,
@@ -80,8 +115,9 @@ func collectStatus() statusReport {
 		NativeManifest: fileState{nativeManifestPath, isRegularFile(nativeManifestPath)},
 		Settings:       settingsInfo{configFile, configStatus()},
 		ShellPlugin:    fileState{shellPluginLink, shellPluginLinked()},
-		Zen:            browserStatus(zenProfilesFile, zenRoot, zenProfileStatus),
-		Firefox:        browserStatus(ffProfilesFile, ffRoot, ffProfileStatus),
+		Zen:            zen,
+		Firefox:        ff,
+		KeyConflicts:   keyConflicts(zen, ff),
 	}
 }
 

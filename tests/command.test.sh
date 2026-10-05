@@ -60,7 +60,8 @@ import json, sys
 r = json.loads(sys.argv[1])
 home = sys.argv[2]
 assert set(r) == {"version", "theme", "palette", "hook", "themeState", "nativeHost",
-                  "nativeManifest", "settings", "shellPlugin", "zen", "firefox"}, r
+                  "nativeManifest", "settings", "shellPlugin", "zen", "firefox", "keyConflicts"}, r
+assert r["keyConflicts"] == {}
 assert r["theme"] == "osaka-jade"
 assert r["hook"] == {"path": home + "/.config/omarchy/hooks/theme-set.d/omafire", "present": False}
 assert r["settings"] == {"path": home + "/.config/omafire/config.json", "status": "defaults, no file"}

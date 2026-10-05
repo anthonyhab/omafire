@@ -98,6 +98,7 @@
   }
 
   const active = [];
+  const conflicts = {};
   const keyset = document.createXULElement("keyset");
   keyset.id = "omafire-keyset";
   for (const action of ACTIONS) {
@@ -113,6 +114,7 @@
     const owner = taken(spec);
     if (owner) {
       console.warn(`[omafire:keys] ${chord} is taken by ${owner}; ${action.label} left unbound`);
+      conflicts[action.name] = {chord, owner};
       continue;
     }
     const key = document.createXULElement("key");
@@ -131,6 +133,11 @@
     active.push(`${chord}  ${action.label}`);
   }
   document.documentElement.append(keyset);
+
+  // The chords skipped above, for `omafire status` and the shell panel to
+  // show beside the row: a console warning nobody reads is not a report.
+  IOUtils.writeJSON(PathUtils.join(PathUtils.profileDir, "omafire-keys.json"), {conflicts})
+    .catch(error => console.warn("[omafire:keys] cannot write omafire-keys.json", error));
 
   window.OmafireKeys = {
     describe: () => active.slice(),
