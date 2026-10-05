@@ -65,6 +65,7 @@ diff -r "$PROJECT_DIR/shell/omafire" "$PACKAGE_ROOT/usr/share/omafire/shell/omaf
 # The settings module the loader starts, with the CLI's schema beside it.
 grep -Fq 'resource://omafire/config.sys.mjs' "$FIREFOX_DIR/omafire.cfg"
 cmp "$PROJECT_DIR/chrome/config.sys.mjs" "$FIREFOX_DIR/omafire/config.sys.mjs"
+cmp "$PROJECT_DIR/chrome/pseudo-state.sys.mjs" "$FIREFOX_DIR/omafire/pseudo-state.sys.mjs"
 cmp "$PROJECT_DIR/config/schema.json" "$FIREFOX_DIR/omafire/config-schema.json"
 
 python3 - "$SYSTEM_MANIFEST" <<'PY'

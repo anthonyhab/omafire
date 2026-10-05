@@ -50,6 +50,7 @@ node --check "$PROJECT_DIR/shell/omafire/Model.js"
 node --check "$PROJECT_DIR/chrome/omafire-prefs.js"
 node --check - < "$PROJECT_DIR/chrome/omafire.cfg"
 node --check "$PROJECT_DIR/chrome/config.sys.mjs"
+node --check "$PROJECT_DIR/chrome/pseudo-state.sys.mjs"
 for script in "$PROJECT_DIR"/chrome/scripts/*.uc.js; do
   node --check "$script"
 done
