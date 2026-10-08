@@ -12,7 +12,6 @@ bash -n \
   "$PROJECT_DIR/packaging/omafire-hook" \
   "$SCRIPT_DIR/command.test.sh" \
   "$SCRIPT_DIR/package.test.sh" \
-  "$SCRIPT_DIR/zen-integration.test.sh" \
   "$SCRIPT_DIR/firefox-integration.test.sh" \
   "$SCRIPT_DIR/managed-files.test.sh" \
   "$SCRIPT_DIR/profile-safety.test.sh" \
@@ -28,7 +27,6 @@ shellcheck \
   "$SCRIPT_DIR/run.sh" \
   "$SCRIPT_DIR/command.test.sh" \
   "$SCRIPT_DIR/package.test.sh" \
-  "$SCRIPT_DIR/zen-integration.test.sh" \
   "$SCRIPT_DIR/firefox-integration.test.sh" \
   "$SCRIPT_DIR/managed-files.test.sh" \
   "$SCRIPT_DIR/profile-safety.test.sh" \
@@ -103,7 +101,6 @@ node "$SCRIPT_DIR/wallpaper.test.js"
 node "$SCRIPT_DIR/native-host.test.js"
 node "$SCRIPT_DIR/shell-plugin.test.js"
 "$SCRIPT_DIR/command.test.sh"
-"$SCRIPT_DIR/zen-integration.test.sh"
 "$SCRIPT_DIR/firefox-integration.test.sh"
 "$SCRIPT_DIR/managed-files.test.sh"
 "$SCRIPT_DIR/profile-safety.test.sh"

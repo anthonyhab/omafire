@@ -35,7 +35,6 @@ install: all
 	install -Dm755 $(NATIVE_HOST) "$(DESTDIR)$(PREFIX)/lib/omafire/omafire-native-host"
 	install -Dm644 packaging/org.omarchy.omafox.json "$(DESTDIR)$(PREFIX)/lib/mozilla/native-messaging-hosts/org.omarchy.omafox.json"
 	install -Dm755 packaging/omafire-hook "$(DESTDIR)$(PREFIX)/share/omafire/hooks/omafire"
-	install -Dm644 packaging/zen/omafire.css "$(DESTDIR)$(PREFIX)/share/omafire/zen/omafire.css"
 	mkdir -p "$(DESTDIR)$(PREFIX)/share/omafire/firefox"
 	rm -rf "$(DESTDIR)$(PREFIX)/share/omafire/firefox/chrome"
 	cp -a $(PAYLOAD) "$(DESTDIR)$(PREFIX)/share/omafire/firefox/chrome"

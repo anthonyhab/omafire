@@ -36,8 +36,7 @@ carried its name until 0.3.0.
 ## Requirements
 
 - Omarchy 4 (Quattro) or newer.
-- Firefox 156 or newer, or a current native Zen Browser installation
-  (Zen 1.22+, Gecko 156). Flatpak Zen is not supported.
+- Firefox 156 or newer. Zen Browser is not supported.
 
 What is tested, what is not, and the limits are in [docs/SUPPORT.md](docs/SUPPORT.md).
 
@@ -70,9 +69,7 @@ page](https://git.hab.rip/habibe/omafire/releases).
 
 For Firefox that is all: the package carries the Mozilla-signed Omafire
 extension, and the first browser window of each set-up profile installs it.
-Do not also install upstream's `@omafox` from AMO in Firefox. Zen Browser
-still needs [upstream's omafox
-extension](https://addons.mozilla.org/en-US/firefox/addon/omafox/) from AMO.
+Do not also install upstream's `@omafox` from AMO in Firefox.
 
 To build it yourself instead: `makepkg -si` with this repository's
 `PKGBUILD` (it builds the Forgejo tag), or `make && sudo make install` for
@@ -82,17 +79,14 @@ Setup registers the Omarchy theme-change hook and immediately sends your
 current palette to every connected browser. For each profile in
 `~/.mozilla/firefox/profiles.ini` it installs the theme, small marked blocks
 in `user.js`, `userChrome.css` and `userContent.css`, and the stylesheets that
-keep the first paint on your palette; Zen profiles
-(`~/.config/zen/profiles.ini`, once Zen has been launched) get a CSS bridge
-instead. Restart each browser once after setup. Run setup once for each
+keep the first paint on your palette. Restart Firefox once after setup. Run setup once for each
 desktop user, and rerun it after creating a new browser profile. How each
 file is written, and what is left alone, is in
 [docs/SUPPORT.md](docs/SUPPORT.md#profile-safety).
 
 ## Usage
 
-After setup, use Omarchy as usual. Changing the theme updates Firefox and
-Zen:
+After setup, use Omarchy as usual. Changing the theme updates Firefox:
 
 ```bash
 omarchy theme set catppuccin
@@ -165,7 +159,7 @@ yet.
 `omafire setup` adds an Omafire icon to the right of the Omarchy bar (a
 plugin the package installs to `/usr/share/omafire/shell/omafire`, linked
 into `~/.config/omarchy/plugins/omafire`). Its panel holds every setting
-above and the state of each Firefox and Zen profile, with a Repair button
+above and the state of each Firefox profile, with a Repair button
 (`omafire setup`) when one needs it; the icon turns red until then.
 Right-click toggles glass. Keyboard: j/k move, h/l change, Enter toggles,
 r repairs.
@@ -201,16 +195,7 @@ rewrites the file on exit; if Firefox is running it says so, and you run
 `omafire remove` again after closing it. Feature toggles from the block
 (Nova, Wayland, drag delay) stay.
 
-Then remove the Omafire extension from Firefox's `about:addons` page. Omafire
-can be removed from Zen on the same page. Restart Zen after removal. The
-command deletes the Omafire stylesheet and its managed `userChrome.css` and
-`user.js` blocks without removing other profile customizations.
-
-Zen copies `user.js` values into `prefs.js` when it starts, so the preferences
-`toolkit.legacyUserProfileCustomizations.stylesheets` and
-`zen.theme.disable-lightweight` may remain as user-set values after removal.
-Use Reset for those entries in `about:config` if you want to return them to
-Zen's defaults.
+Then remove the Omafire extension from Firefox's `about:addons` page.
 
 A theme checkout used as `chrome/` keeps its own files: remove deletes only the
 generated `omafire-*.css` beside them. If `remove` reports Firefox running, the

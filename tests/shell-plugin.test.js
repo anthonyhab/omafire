@@ -64,8 +64,7 @@ const status = {
   hook: { path: "/h", present: true },
   firefox: { detected: true, profiles: [
     { path: "/home/u/.mozilla/firefox/3ix5m4nz.default-release", status: "configured", ok: true },
-    { path: "/home/u/.mozilla/firefox/7aybxa48.default", status: "not configured", ok: false }] },
-  zen: { detected: false, profiles: [] }
+    { path: "/home/u/.mozilla/firefox/7aybxa48.default", status: "not configured", ok: false }] }
 };
 let s = Model.summary(status);
 assert.equal(s.meta, "elysian · 1 thing needs setup");

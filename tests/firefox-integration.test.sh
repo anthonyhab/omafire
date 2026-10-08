@@ -127,7 +127,6 @@ export OMAFIRE_NATIVE_MANIFEST_PATH="$NATIVE_MANIFEST"
 export OMAFIRE_HOOK_SOURCE="$HOOK_SOURCE"
 export OMAFIRE_FIREFOX_ROOT="$FF_ROOT"
 export OMAFIRE_FIREFOX_PAYLOAD_SOURCE="$FF_PAYLOAD_SOURCE"
-export OMAFIRE_ZEN_PROFILES_FILE="$TEST_ROOT/missing-zen-profiles.ini"
 
 # The shell plugin: linked and enabled once by setup.
 export OMAFIRE_SHELL_PLUGIN_SOURCE="$TEST_ROOT/share/shell/omafire"

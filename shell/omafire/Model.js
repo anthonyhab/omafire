@@ -98,16 +98,10 @@ function wordFor(value) {
 // `omafire status --json`. null status: not read yet.
 function summary(status) {
   if (!status) return { meta: "Reading status…", broken: [], profiles: [] }
-  var profiles = []
-  var groups = [["Firefox", status.firefox], ["Zen", status.zen]]
-  for (var g = 0; g < groups.length; g++) {
-    var b = groups[g][1]
-    if (!b || !b.profiles) continue
-    for (var i = 0; i < b.profiles.length; i++) {
-      var p = b.profiles[i]
-      profiles.push({ browser: groups[g][0], name: profileName(p.path), status: p.status, ok: p.ok })
-    }
-  }
+  var listed = (status.firefox && status.firefox.profiles) || []
+  var profiles = listed.map(function(p) {
+    return { browser: "Firefox", name: profileName(p.path), status: p.status, ok: p.ok }
+  })
   var broken = profiles.filter(function(p) { return !p.ok })
   if (!status.hook || !status.hook.present) broken.unshift({ browser: "Omarchy", name: "theme hook", status: "missing", ok: false })
   var theme = status.theme || "unknown"

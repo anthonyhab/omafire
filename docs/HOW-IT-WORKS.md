@@ -24,11 +24,6 @@ Omafire is made up of a few small parts:
 - The extension validates the message, maps the Omarchy colors to standard
   Firefox theme properties, and saves the result in the browser's local
   extension storage.
-- For Zen profiles, `omafire setup` installs
-  `chrome/omafire.css`, adds a managed import to `chrome/userChrome.css`, and
-  adds the required preferences to a managed block in `user.js`. Existing
-  profile customizations outside those marked blocks are preserved. Setup
-  refuses to overwrite an unrelated `chrome/omafire.css` file.
 - For Firefox profiles, `omafire setup` installs the packaged theme payload to
   `chrome/omafire/`, adds managed imports to `chrome/userChrome.css`
   and `chrome/userContent.css`, and adds the required preferences to a
@@ -53,7 +48,7 @@ Theme hook (omafire sync) → local state file → native messaging host → bro
         ↓                                                          ↓
   generated palette CSS →                     Firefox theme properties
   Firefox profile first paint                          ↓
-                                       Firefox UI or Zen CSS bridge
+                                              Firefox UI
 ```
 
 When a supported browser starts, the extension restores its saved theme and

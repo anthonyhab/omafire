@@ -1,11 +1,11 @@
-// omafire: Omarchy → Firefox/Zen theme sync command.
+// omafire: Omarchy → Firefox theme sync command.
 //
 // Speaks the omafox v1 protocol so both the upstream-signed @omafox
 // WebExtension and the Omafire extension work unmodified: `sync` normalizes
 // the current Quattro palette into ~/.local/state/omafire/theme.json and the
 // native host pushes it to connected browsers over inotify.
 //
-// Firefox support adds the same managed-block pattern used for Zen:
+// Firefox profiles get managed blocks:
 //
 //	chrome/userChrome.css       BEGIN/END OMAFIRE FIREFOX BRIDGE import block
 //	user.js                     managed prefs (stylesheet loading, dark canvas)
@@ -38,9 +38,6 @@ var (
 	nativeHostPath     string
 	nativeManifestPath string
 	hookSource         string
-	zenRoot            string
-	zenProfilesFile    string
-	zenBridgeSource    string
 	ffRoot             string
 	ffProfilesFile     string
 	ffPayloadSource    string
@@ -106,9 +103,6 @@ func initPaths() {
 	nativeManifestPath = envOr("OMAFIRE_NATIVE_MANIFEST_PATH",
 		"/usr/lib/mozilla/native-messaging-hosts/org.omarchy.omafox.json")
 	hookSource = envOr("OMAFIRE_HOOK_SOURCE", "/usr/share/omafire/hooks/omafire")
-	zenRoot = envOr("OMAFIRE_ZEN_ROOT", home+"/.config/zen")
-	zenProfilesFile = envOr("OMAFIRE_ZEN_PROFILES_FILE", zenRoot+"/profiles.ini")
-	zenBridgeSource = envOr("OMAFIRE_ZEN_BRIDGE_SOURCE", "/usr/share/omafire/zen/omafire.css")
 	ffRoot = envOr("OMAFIRE_FIREFOX_ROOT", home+"/.mozilla/firefox")
 	ffProfilesFile = envOr("OMAFIRE_FIREFOX_PROFILES_FILE", ffRoot+"/profiles.ini")
 	ffPayloadSource = envOr("OMAFIRE_FIREFOX_PAYLOAD_SOURCE", "/usr/share/omafire/firefox/chrome")
@@ -157,15 +151,11 @@ func cmdSetup() {
 	fmt.Printf("Using packaged native host: %s\n", nativeHostPath)
 
 	backupCommand = "setup"
-	zenConfigured := setupZenProfiles()
 	ffConfigured := setupFFProfiles()
 	setupShellPlugin()
 	backupCommand = "" // the palette refresh below changes no user file
 	cmdSync()
 	fmt.Println("Queued the current Omarchy palette for connected browsers.")
-	if zenConfigured > 0 {
-		fmt.Println("Restart Zen Browser once to load the Omafire bridge.")
-	}
 	if ffConfigured > 0 {
 		fmt.Println("Restart Firefox once to load the Omafire bridge.")
 	}
@@ -178,7 +168,6 @@ func cmdSetup() {
 
 func cmdRemove() {
 	backupCommand = "remove"
-	removeZenProfiles()
 	removeFFProfiles()
 	removeShellPlugin()
 	sweepLeftoverTemps()
@@ -207,7 +196,7 @@ func cmdRemove() {
 func usage() {
 	fmt.Print(`Usage: omafire <command>
 
-Keep Firefox and Zen Browser in sync with the current Omarchy Quattro palette.
+Keep Firefox in sync with the current Omarchy Quattro palette.
 Settings live in ~/.config/omafire/config.json; Firefox follows them live.
 
 Commands:

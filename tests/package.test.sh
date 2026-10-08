@@ -14,7 +14,6 @@ SYSTEM_COMMAND="$PACKAGE_ROOT/usr/bin/omafire"
 SYSTEM_HOST="$PACKAGE_ROOT/usr/lib/omafire/omafire-native-host"
 SYSTEM_MANIFEST="$PACKAGE_ROOT/usr/lib/mozilla/native-messaging-hosts/org.omarchy.omafox.json"
 SYSTEM_HOOK_SOURCE="$PACKAGE_ROOT/usr/share/omafire/hooks/omafire"
-SYSTEM_ZEN_BRIDGE="$PACKAGE_ROOT/usr/share/omafire/zen/omafire.css"
 
 cleanup() {
   rm -rf "$TEST_ROOT"
@@ -37,7 +36,7 @@ make -C "$PROJECT_DIR" \
 [[ -x $SYSTEM_HOST ]]
 [[ -f $SYSTEM_MANIFEST ]]
 [[ -x $SYSTEM_HOOK_SOURCE ]]
-[[ -f $SYSTEM_ZEN_BRIDGE ]]
+[[ ! -e "$PACKAGE_ROOT/usr/share/omafire/zen" ]]
 [[ -f "$PACKAGE_ROOT/usr/share/omafire/firefox/chrome/userChrome.css" ]]
 [[ -f "$PACKAGE_ROOT/usr/share/doc/omafire/README.md" ]]
 [[ -f "$PACKAGE_ROOT/usr/share/licenses/omafire/LICENSE" ]]
@@ -90,10 +89,10 @@ export PATH="$MOCK_BIN:$PATH"
 export OMAFIRE_NATIVE_HOST_PATH="$SYSTEM_HOST"
 export OMAFIRE_NATIVE_MANIFEST_PATH="$SYSTEM_MANIFEST"
 export OMAFIRE_HOOK_SOURCE="$SYSTEM_HOOK_SOURCE"
-export OMAFIRE_ZEN_BRIDGE_SOURCE="$SYSTEM_ZEN_BRIDGE"
 export OMAFIRE_THEME_DIR="$THEME_DIR"
 export OMAFIRE_THEME_NAME_FILE="$THEME_DIR/theme.name"
 
+# A Zen profile: omafire no longer supports Zen and must leave it alone.
 ZEN_PROFILE="$TEST_HOME/.config/zen/Profiles/default-release"
 mkdir -p "$ZEN_PROFILE"
 printf '%s\n' \
@@ -108,9 +107,7 @@ STATE_FILE="$TEST_HOME/.local/state/omafire/theme.json"
 [[ -x $USER_HOOK ]]
 cmp "$SYSTEM_HOOK_SOURCE" "$USER_HOOK"
 [[ -f $STATE_FILE ]]
-cmp "$SYSTEM_ZEN_BRIDGE" "$ZEN_PROFILE/chrome/omafire.css"
-grep -Fqx '@import url("omafire.css");' "$ZEN_PROFILE/chrome/userChrome.css"
-grep -Fqx 'user_pref("zen.theme.disable-lightweight", false);' "$ZEN_PROFILE/user.js"
+[[ -z $(ls -A "$ZEN_PROFILE") ]]
 python3 - "$STATE_FILE" <<'PY'
 import json
 import sys
@@ -126,18 +123,15 @@ assert message["palette"]["mode"] == "dark"
 PY
 status_output=$("$SYSTEM_COMMAND" status)
 [[ $status_output == *"Native host: $SYSTEM_HOST (installed)"* ]]
-[[ $status_output == *"Zen profile: $ZEN_PROFILE (configured)"* ]]
+[[ $status_output != *Zen* ]]
 
 "$SYSTEM_COMMAND" remove >/dev/null
 [[ ! -e $USER_HOOK ]]
 [[ ! -e $STATE_FILE ]]
-[[ ! -e $ZEN_PROFILE/chrome/omafire.css ]]
-[[ ! -e $ZEN_PROFILE/chrome/userChrome.css ]]
-[[ ! -e $ZEN_PROFILE/user.js ]]
+[[ -z $(ls -A "$ZEN_PROFILE") ]]
 [[ ! -d "$TEST_HOME/.local/state/omafire" ]]
 [[ -x $SYSTEM_COMMAND ]]
 [[ -x $SYSTEM_HOST ]]
 [[ -f $SYSTEM_MANIFEST ]]
-[[ -f $SYSTEM_ZEN_BRIDGE ]]
 
 echo "package.test.sh: ok"

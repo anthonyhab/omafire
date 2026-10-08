@@ -8,7 +8,7 @@ source.
 | | |
 |---|---|
 | **Firefox** | 156 or newer, with Nova (`browser.nova.enabled`, the default from Firefox 157; setup turns it on in the profiles it manages). The layout matrix baseline is Firefox 157 (156 was the original target). Later versions are allowed and untested until the matrix passes on them; there is no maximum-version check, so a new Firefox is never blocked, only unverified. |
-| **Zen Browser** | 1.22 or newer (Gecko 156), a native install. Flatpak Zen is not supported: its sandbox cannot use the native-messaging manifest. Zen gets the colour bridge only, not the Firefox layout, settings panel or keybindings. |
+| **Zen Browser** | Not supported: omafire leaves Zen profiles alone. |
 | **Omarchy** | 4 (Quattro) or newer, with Hyprland. Omafire reads the current theme's `colors.toml`. |
 | **Packaging** | The Arch package `omafire` (from a release, or `makepkg` on the repository's `PKGBUILD`). Not tested: other distributions, Snap or Flatpak Firefox. |
 
@@ -61,15 +61,11 @@ not appear, check the version in `about:support` first.
 
 If a browser does not update after a theme change:
 
-1. Confirm that the `omafire` package is installed and, in Zen,
-   the Omafire extension.
+1. Confirm that the `omafire` package is installed.
 2. Run `omafire status` and check that the theme state, native host, and native
-   manifest are present. For Zen, also check that each profile says
-   `configured`. A `conflict` status means the profile already contains an
-   unrelated `chrome/omafire.css`; rename or remove that file before setup.
-3. Run `omafire setup`, followed by `omafire sync`.
-4. Restart Zen if its bridge was newly installed or updated.
-5. Open the Omafire popup to check its connection status or reapply the theme.
+   manifest are present, and that each Firefox profile says `configured`.
+3. Run `omafire setup`, followed by `omafire sync`, and restart Firefox.
+4. Open the Omafire popup to check its connection status or reapply the theme.
 
 If that does not fix it, see [Getting help](#getting-help).
 

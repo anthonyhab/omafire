@@ -37,7 +37,6 @@ type statusReport struct {
 	NativeManifest fileState    `json:"nativeManifest"`
 	Settings       settingsInfo `json:"settings"`
 	ShellPlugin    fileState    `json:"shellPlugin"`
-	Zen            browserState `json:"zen"`
 	Firefox        browserState `json:"firefox"`
 	// Chords the browser already uses, as keys.uc.js last reported them from a
 	// running window: setting name ("key-glass") -> chord and owner.
@@ -103,7 +102,6 @@ func collectStatus() statusReport {
 	if contents, ok := readFile(themeNameFile); ok {
 		name = firstLine(contents)
 	}
-	zen := browserStatus(zenProfilesFile, zenRoot, zenProfileStatus)
 	ff := browserStatus(ffProfilesFile, ffRoot, ffProfileStatus)
 	return statusReport{
 		Version:        version,
@@ -115,9 +113,8 @@ func collectStatus() statusReport {
 		NativeManifest: fileState{nativeManifestPath, isRegularFile(nativeManifestPath)},
 		Settings:       settingsInfo{configFile, configStatus()},
 		ShellPlugin:    fileState{shellPluginLink, shellPluginLinked()},
-		Zen:            zen,
 		Firefox:        ff,
-		KeyConflicts:   keyConflicts(zen, ff),
+		KeyConflicts:   keyConflicts(ff),
 	}
 }
 
@@ -155,6 +152,5 @@ func showStatus(args []string) {
 	fmt.Printf("Native manifest: %s (%s)\n", r.NativeManifest.Path, installed[r.NativeManifest.Present])
 	fmt.Printf("Settings: %s (%s)\n", r.Settings.Path, r.Settings.Status)
 	fmt.Printf("Shell plugin: %s (%s)\n", r.ShellPlugin.Path, map[bool]string{true: "linked", false: "not linked"}[r.ShellPlugin.Present])
-	printBrowserStatus("Zen", r.Zen)
 	printBrowserStatus("Firefox", r.Firefox)
 }

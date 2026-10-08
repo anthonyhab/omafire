@@ -103,7 +103,6 @@ export OMAFIRE_NATIVE_MANIFEST_PATH="$TEST_ROOT/package/manifest.json"
 export OMAFIRE_HOOK_SOURCE="$TEST_ROOT/package/omafire-hook"
 export OMAFIRE_FIREFOX_ROOT="$FF_ROOT"
 export OMAFIRE_FIREFOX_PAYLOAD_SOURCE="$PAYLOAD"
-export OMAFIRE_ZEN_PROFILES_FILE="$TEST_ROOT/missing-zen-profiles.ini"
 unset OMAFIRE_PSD_RESYNC
 
 # ---- psd: write through the live symlink only ---------------------------

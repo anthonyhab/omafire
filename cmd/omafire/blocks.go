@@ -7,12 +7,6 @@ import (
 )
 
 const (
-	zenBridgeMarker = "/* OMAFIRE ZEN BRIDGE MANAGED FILE */"
-	zenCSSBegin     = "/* BEGIN OMAFIRE ZEN BRIDGE */"
-	zenCSSEnd       = "/* END OMAFIRE ZEN BRIDGE */"
-	zenPrefsBegin   = "// BEGIN OMAFIRE ZEN BRIDGE"
-	zenPrefsEnd     = "// END OMAFIRE ZEN BRIDGE"
-
 	ffBridgeMarker = "/* OMAFIRE FIREFOX BRIDGE MANAGED FILE */"
 	ffCSSBegin     = "/* BEGIN OMAFIRE FIREFOX BRIDGE */"
 	ffCSSEnd       = "/* END OMAFIRE FIREFOX BRIDGE */"
@@ -24,17 +18,12 @@ const (
 // The markers' names as omafox (<= 0.2.0), recognised so an upgrade
 // replaces them in place and remove still finds them. Never written.
 var legacyMarkers = map[string]string{
-	zenBridgeMarker: "/* OMAFOX ZEN BRIDGE MANAGED FILE */",
-	zenCSSBegin:     "/* BEGIN OMAFOX ZEN BRIDGE */",
-	zenCSSEnd:       "/* END OMAFOX ZEN BRIDGE */",
-	zenPrefsBegin:   "// BEGIN OMAFOX ZEN BRIDGE",
-	zenPrefsEnd:     "// END OMAFOX ZEN BRIDGE",
-	ffBridgeMarker:  "/* OMAFOX FIREFOX BRIDGE MANAGED FILE */",
-	ffCSSBegin:      "/* BEGIN OMAFOX FIREFOX BRIDGE */",
-	ffCSSEnd:        "/* END OMAFOX FIREFOX BRIDGE */",
-	ffPrefsBegin:    "// BEGIN OMAFOX FIREFOX BRIDGE",
-	ffPrefsEnd:      "// END OMAFOX FIREFOX BRIDGE",
-	ffRadiusMarker:  "/* OMAFOX GENERATED GEOMETRY — written by omafox sync; do not edit. */",
+	ffBridgeMarker: "/* OMAFOX FIREFOX BRIDGE MANAGED FILE */",
+	ffCSSBegin:     "/* BEGIN OMAFOX FIREFOX BRIDGE */",
+	ffCSSEnd:       "/* END OMAFOX FIREFOX BRIDGE */",
+	ffPrefsBegin:   "// BEGIN OMAFOX FIREFOX BRIDGE",
+	ffPrefsEnd:     "// END OMAFOX FIREFOX BRIDGE",
+	ffRadiusMarker: "/* OMAFOX GENERATED GEOMETRY — written by omafox sync; do not edit. */",
 }
 
 // markerIs: a line is a marker when it is the marker or its omafox name.

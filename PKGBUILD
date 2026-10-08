@@ -25,7 +25,6 @@ options=('!debug')
 optdepends=(
   'hyprland: window rounding for the Firefox theme geometry'
   'firefox: supported browser'
-  'zen-browser: supported browser'
 )
 # Firefox gets a chrome script loader (autoconfig: omafire.cfg) with the
 # settings panel, keybindings and live palette, and the Mozilla-signed

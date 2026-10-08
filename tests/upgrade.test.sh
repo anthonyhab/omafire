@@ -1,7 +1,8 @@
 #!/bin/bash
-# Upgrade from omafox (<= 0.2.0): profiles, the Zen bridge, the hook and the
-# state directory it left are moved to omafire's names by one setup, with
-# the user's own content untouched; remove then finds both generations.
+# Upgrade from omafox (<= 0.2.0): profiles, the hook and the state directory
+# it left are moved to omafire's names by one setup, with the user's own
+# content untouched; remove then finds both generations. Zen profiles, which
+# omafire no longer supports, are left exactly as they are.
 
 set -euo pipefail
 
@@ -49,7 +50,6 @@ printf '%s\n' 'osaka-jade' > "$THEME_DIR/theme.name"
 install -m 755 "$PROJECT_DIR/packaging/omafire-hook" "$TEST_ROOT/package/omafire"
 install -m 755 /dev/null "$TEST_ROOT/package/omafire-native-host"
 install -m 644 "$PROJECT_DIR/packaging/org.omarchy.omafox.json" "$TEST_ROOT/package/manifest.json"
-install -m 644 "$PROJECT_DIR/packaging/zen/omafire.css" "$TEST_ROOT/package/omafire.css"
 printf '%s\n%s\n' '/* OMAFIRE FIREFOX BRIDGE MANAGED FILE */' '@import "src/a.css";' \
   > "$PAYLOAD/userChrome.css"
 printf '/* content */\n' > "$PAYLOAD/userContent.css"
@@ -150,6 +150,8 @@ IsRelative=1
 Path=old-checkout.default
 EOF
 printf '[Profile0]\nName=default\nIsRelative=1\nPath=Profiles/default\n' > "$ZEN_ROOT/profiles.ini"
+zen_tree() { (cd "$ZEN_ROOT" && find . -type f -exec sha256sum {} + | sort); }
+zen_before=$(zen_tree)
 
 export HOME="$TEST_HOME"
 # Settings follow XDG_CONFIG_HOME; never the caller's.
@@ -162,7 +164,6 @@ export OMAFIRE_THEME_NAME_FILE="$THEME_DIR/theme.name"
 export OMAFIRE_NATIVE_HOST_PATH="$TEST_ROOT/package/omafire-native-host"
 export OMAFIRE_NATIVE_MANIFEST_PATH="$TEST_ROOT/package/manifest.json"
 export OMAFIRE_HOOK_SOURCE="$TEST_ROOT/package/omafire"
-export OMAFIRE_ZEN_BRIDGE_SOURCE="$TEST_ROOT/package/omafire.css"
 export OMAFIRE_FIREFOX_ROOT="$FF_ROOT"
 export OMAFIRE_FIREFOX_PAYLOAD_SOURCE="$PAYLOAD"
 export OMAFIRE_PSD_RESYNC=0
@@ -179,7 +180,7 @@ out=$("$OMAFIRE_BIN" setup 2>&1)
 
 # No omafox marker survives anywhere; each file has exactly one new block.
 refute grep -rq 'OMAFOX' "$PLAIN/user.js" "$PLAIN/chrome/userChrome.css" \
-  "$PLAIN/chrome/userContent.css" "$ZEN/user.js" "$ZEN/chrome/userChrome.css"
+  "$PLAIN/chrome/userContent.css"
 for f in "$PLAIN/chrome/userChrome.css" "$PLAIN/chrome/userContent.css"; do
   [[ $(grep -cFx '/* BEGIN OMAFIRE FIREFOX BRIDGE */' "$f") -eq 1 ]]
 done
@@ -192,8 +193,6 @@ grep -Fq '@import url("omafire/userChrome.css");' "$PLAIN/chrome/userChrome.css"
 grep -Fqx '/* my rule */' "$PLAIN/chrome/userChrome.css"
 grep -Fqx '/* my content rule */' "$PLAIN/chrome/userContent.css"
 grep -Fqx 'user_pref("my.own", 1);' "$PLAIN/user.js"
-grep -Fqx '/* my zen rule */' "$ZEN/chrome/userChrome.css"
-grep -Fqx 'user_pref("my.zen", 1);' "$ZEN/user.js"
 
 # Payload and generated files: the new ones in, omafox's out.
 [[ -f "$PLAIN/chrome/omafire/userChrome.css" ]]
@@ -210,9 +209,8 @@ done
 [[ -f "$OLD_CHECKOUT/chrome/omarchy-radius.css" ]]
 [[ ! -e "$OLD_CHECKOUT/chrome/omafox-content-palette.css" ]]
 
-# Zen bridge.
-[[ -f "$ZEN/chrome/omafire.css" && ! -e "$ZEN/chrome/omafox.css" ]]
-grep -Fq '@import url("omafire.css");' "$ZEN/chrome/userChrome.css"
+# Zen: untouched.
+[[ $(zen_tree) == "$zen_before" ]]
 
 # Hook and state.
 [[ -x "$HOOKS/omafire" && ! -e "$HOOKS/omafox" && ! -e "$HOOKS/00-omafox" ]]
@@ -225,20 +223,19 @@ out=$("$OMAFIRE_BIN" status 2>&1)
 
 # ---- a second setup changes nothing --------------------------------------
 sets=$(find "$NEW_STATE/backups" -mindepth 1 -maxdepth 1 | wc -l)
-before=$(cat "$PLAIN/user.js" "$PLAIN/chrome/userChrome.css" "$ZEN/user.js" | sha256sum)
+before=$(cat "$PLAIN/user.js" "$PLAIN/chrome/userChrome.css" | sha256sum)
 "$OMAFIRE_BIN" setup >/dev/null 2>&1
 [[ $(find "$NEW_STATE/backups" -mindepth 1 -maxdepth 1 | wc -l) -eq $sets ]]
-[[ $before == "$(cat "$PLAIN/user.js" "$PLAIN/chrome/userChrome.css" "$ZEN/user.js" | sha256sum)" ]]
+[[ $before == "$(cat "$PLAIN/user.js" "$PLAIN/chrome/userChrome.css" | sha256sum)" ]]
 
 # ---- remove finds omafox's leftovers too ---------------------------------
 old_generated "$PLAIN/chrome"
 mkdir -p "$PLAIN/chrome/omarchy-firefox"
 printf '%s\n' '/* OMAFOX FIREFOX BRIDGE MANAGED FILE */' > "$PLAIN/chrome/omarchy-firefox/userChrome.css"
-printf '%s\n' '/* OMAFOX ZEN BRIDGE MANAGED FILE */' > "$ZEN/chrome/omafox.css"
 "$OMAFIRE_BIN" remove >/dev/null 2>&1
 [[ $(cat "$PLAIN/chrome/userChrome.css") == '/* my rule */' ]]
 [[ $(cat "$PLAIN/user.js") == 'user_pref("my.own", 1);' ]]
 [[ -z $(find "$PLAIN/chrome" -maxdepth 1 -name 'omafox*' -o -maxdepth 1 -name 'omarchy-*' -o -maxdepth 1 -name 'omafire*') ]]
-[[ ! -e "$ZEN/chrome/omafox.css" && ! -e "$ZEN/chrome/omafire.css" ]]
+[[ $(zen_tree) == "$zen_before" ]]
 
 echo "upgrade.test.sh: ok"

@@ -15,8 +15,8 @@ fixture's unrelated files, must be byte-identical with the same mode.
 import hashlib, json, os, re, stat, sys
 
 MANAGED = {"user.js", "userChrome.css", "userContent.css"}
-BEGIN = re.compile(r"^(/\* |// )BEGIN OMAF(IRE|OX) (FIREFOX|ZEN) BRIDGE( \*/)?$")
-END = re.compile(r"^(/\* |// )END OMAF(IRE|OX) (FIREFOX|ZEN) BRIDGE( \*/)?$")
+BEGIN = re.compile(r"^(/\* |// )BEGIN OMAF(IRE|OX) FIREFOX BRIDGE( \*/)?$")
+END = re.compile(r"^(/\* |// )END OMAF(IRE|OX) FIREFOX BRIDGE( \*/)?$")
 # prefs.js lines `omafire remove` clears (cmd/omafire/firefox.go ffOwnedPrefs):
 # the rest of prefs.js is the user's and must survive byte for byte.
 OWNED_PREFS = re.compile(

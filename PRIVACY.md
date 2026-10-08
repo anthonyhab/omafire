@@ -11,7 +11,7 @@ nothing in it sends data to any server.
   per theme change to keep glass legible, and shown on Omafire's new-tab page.
 - **Hyprland's window rounding and border settings**, with `hyprctl`, to match
   the browser's corners.
-- **Firefox and Zen's `profiles.ini`, and the files setup manages in each
+- **Firefox's `profiles.ini`, and the files setup manages in each
   profile** (`user.js`, `userChrome.css`, `userContent.css`, and `prefs.js` on
   removal, to clear the preferences Omafire set).
 
@@ -35,7 +35,7 @@ All of it stays on your device, and `omafire remove` takes it out.
 
 ## Data in the browser extension
 
-The Firefox/Zen extension receives the current theme name, colour palette and
+The Firefox extension receives the current theme name, colour palette and
 wallpaper from the locally installed Omafire native messaging host over
 Firefox's native-messaging channel, which is local to your machine. It uses
 them only to theme the browser and Omafire's new-tab page. To colour a tab's

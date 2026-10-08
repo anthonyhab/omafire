@@ -47,7 +47,6 @@ export OMAFIRE_NATIVE_MANIFEST_PATH="$TEST_ROOT/host/manifest.json"
 export OMAFIRE_HOOK_SOURCE="$TEST_ROOT/host/hook"
 export OMAFIRE_FIREFOX_ROOT="$FF_ROOT"
 export OMAFIRE_FIREFOX_PAYLOAD_SOURCE="$PAYLOAD"
-export OMAFIRE_ZEN_PROFILES_FILE="$TEST_ROOT/missing-zen-profiles.ini"
 
 profiles() {
   local index=0

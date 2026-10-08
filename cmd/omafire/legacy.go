@@ -13,7 +13,6 @@ import (
 
 const (
 	legacyFFPayloadDirname = "omarchy-firefox"
-	legacyZenBridgeName    = "omafox.css"
 	legacyGeneratedPrefix  = "/* OMAFOX GENERATED "
 	legacyHookCommand      = "exec /usr/bin/omafox sync"
 )
@@ -51,16 +50,6 @@ func cleanLegacyGenerated(chrome string, all bool) {
 			unix.Unlink(path)
 			fsyncParent(path)
 		}
-	}
-}
-
-// removeLegacyZenBridge removes omafox's Zen bridge file, once
-// userChrome.css imports the new one.
-func removeLegacyZenBridge(chrome string) {
-	bridge := chrome + "/" + legacyZenBridgeName
-	if zenBridgeOwned(bridge) {
-		unix.Unlink(bridge)
-		fsyncParent(bridge)
 	}
 }
 

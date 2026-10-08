@@ -306,15 +306,13 @@ func sweepTemps(dir string) {
 // sweepLeftoverTemps covers every directory omafire writes into.
 func sweepLeftoverTemps() {
 	sweepTemps(stateDir)
-	for _, list := range []struct{ file, root string }{{ffProfilesFile, ffRoot}, {zenProfilesFile, zenRoot}} {
-		if !isRegularFile(list.file) {
-			continue
-		}
-		for _, profile := range listProfiles(list.file, list.root) {
-			if profileWritable(profile, "", false) {
-				sweepTemps(profile)
-				sweepTemps(profile + "/chrome")
-			}
+	if !isRegularFile(ffProfilesFile) {
+		return
+	}
+	for _, profile := range listProfiles(ffProfilesFile, ffRoot) {
+		if profileWritable(profile, "", false) {
+			sweepTemps(profile)
+			sweepTemps(profile + "/chrome")
 		}
 	}
 }

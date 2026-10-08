@@ -449,7 +449,7 @@ Panel {
           visible: root.summary.profiles.length === 0 && omafire.status !== null
           width: parent.width
           leftPadding: Style.space(8)
-          text: "No Firefox or Zen profiles found."
+          text: "No Firefox profiles found."
           color: root.dim
           font.family: root.fontFamily
           font.pixelSize: Style.font.bodySmall
