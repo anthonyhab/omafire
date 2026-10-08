@@ -50,7 +50,7 @@
   }
 
   // The old add-on kept the page's settings in its storage.local
-  // ("newtab") and a picked image in its IndexedDB ("omafox", "files",
+  // ("newtab", and the popup's "siteColorTabs") and a picked image in its IndexedDB ("omafox", "files",
   // "custom-wallpaper"); both are readable only while it runs. Resolves
   // false while it is enabled but not yet running: its removal waits.
   async function migrate() {
@@ -67,7 +67,11 @@
       "resource://gre/modules/ExtensionStorageIDB.sys.mjs");
     const db = await ExtensionStorageIDB.open(
       ExtensionStorageIDB.getStoragePrincipal(policy.extension));
-    const {newtab} = await db.get(["newtab"]);
+    const {newtab, siteColorTabs} = await db.get(["newtab", "siteColorTabs"]);
+    // Its popup's site-coloured tab toggle is the site-colors setting now.
+    if (siteColorTabs === true && !Services.prefs.prefHasUserValue("omafire.site-colors")) {
+      Services.prefs.setBoolPref("omafire.site-colors", true);
+    }
     if (newtab?.background === "custom") {
       const blob = await new Promise((resolve, reject) => {
         const open = indexedDB.openForPrincipal(policy.extension.principal, "omafox", 1);
