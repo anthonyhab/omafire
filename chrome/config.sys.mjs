@@ -309,7 +309,13 @@ async function watch() {
             console.error(LOG, line);   // the CLI's warnings
             continue;
           }
-          const values = effective(JSON.parse(line));
+          let values;
+          try {
+            values = effective(JSON.parse(line));
+          } catch (error) {
+            console.error(LOG, "watch line:", error);
+            continue;
+          }
           const changed = SCHEMA.map(s => s.key).filter(k => values[k] !== current[k]);
           current = values;
           apply(values, changed);
