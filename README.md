@@ -142,6 +142,7 @@ omafire watch                # a JSON line now and after every change
 | `glass-pages` | `true`, `false` (with `glass` and Cinder) | `false` |
 | `tab-numbers` | `true`, `false` | `false` |
 | `tab-numbers-hold` | `true`, `false` (with `tab-numbers`) | `false` |
+| `new-tab` | `true`, `false` | `true` |
 | `site-colors` | `true`, `false` | `false` |
 | `extension-glyphs` | `true`, `false` | `true` |
 | `key-zen` | a shortcut such as `Ctrl+Alt+H`, or empty for none | `Ctrl+Alt+H` |

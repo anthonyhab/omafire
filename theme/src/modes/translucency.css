@@ -169,7 +169,7 @@
     }
 
     /* The new tab is omafire's own, clear page: the window's alpha. */
-    &:has(.tabbrowser-tab[selected][image*="PHN2ZyBpZD0ib21hZm94LW5ld3RhYiIg"])
+    &:has(.tabbrowser-tab[selected][image="chrome://omafire/content/icon.svg"])
         #tabbrowser-tabpanels > .deck-selected .browserContainer {
       background-color: var(--oc-surface-rise) !important;
     }

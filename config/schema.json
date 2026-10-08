@@ -100,6 +100,13 @@
       "prefs": [{ "name": "omafire.tab-numbers-hold" }]
     },
     {
+      "key": "new-tab",
+      "about": "Omafire's new tab page (clock, shortcuts, the Omarchy wallpaper) instead of Firefox's.",
+      "type": "bool",
+      "default": true,
+      "prefs": [{ "name": "omafire.newtab" }]
+    },
+    {
       "key": "site-colors",
       "about": "Light the active tab in its site's colour (from the favicon) instead of the accent.",
       "type": "bool",

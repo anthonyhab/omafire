@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"git.hab.rip/habibe/omafire/config"
@@ -143,8 +144,9 @@ func cmdReset(args []string) {
 
 // watch prints the effective settings as one JSON line now and after every
 // change that alters them. A file that does not parse is reported and
-// skipped until it does. A sync's new palette prints a "palette" line: sync
-// writes theme.json last, after the profiles' palette files. When stdin is a
+// skipped until it does. A sync's new palette prints a "palette" line (sync
+// writes theme.json last, after the profiles' palette files), and a new
+// Omarchy wallpaper a "wallpaper" line. When stdin is a
 // pipe (Firefox), its end ends the watch, so a crashed browser does not
 // leave one behind.
 func cmdWatch(args []string) {
@@ -172,16 +174,27 @@ func cmdWatch(args []string) {
 		wd = w
 	}
 	addWatch()
-	// The state directory is sync's to create and remove's to delete: watch
-	// it while it exists, and look for it again every few seconds while not.
-	stateWD := -1
-	addStateWatch := func() {
-		if w, err := unix.InotifyAddWatch(fd, stateDir, unix.IN_CLOSE_WRITE|unix.IN_MOVED_TO); err == nil {
-			stateWD = w
-		}
+	// The signals' directories belong to others (sync creates the state
+	// directory and remove deletes it): each is watched while it exists and
+	// looked for again every few seconds while not. One mask for all, as a
+	// directory watched twice shares one watch.
+	signals := []*watchSignal{
+		{dir: stateDir, name: filepath.Base(stateFile), line: "palette\n", wd: -1},
+		{dir: filepath.Dir(backgroundLink), name: filepath.Base(backgroundLink), line: "wallpaper\n", wd: -1},
 	}
-	addStateWatch()
-	stateName := filepath.Base(stateFile)
+	addSignals := func() (missing bool) {
+		for _, sig := range signals {
+			if sig.wd < 0 {
+				if w, err := unix.InotifyAddWatch(fd, sig.dir, unix.IN_CLOSE_WRITE|unix.IN_MOVED_TO|unix.IN_CREATE); err == nil {
+					sig.wd = w
+				} else {
+					missing = true
+				}
+			}
+		}
+		return missing
+	}
+	addSignals()
 
 	var last string
 	lastWarnings := ""
@@ -224,9 +237,8 @@ func cmdWatch(args []string) {
 	buf := make([]byte, 64*1024)
 	for {
 		timeout := -1
-		if stateWD < 0 {
+		if addSignals() {
 			timeout = 3000
-			addStateWatch()
 		}
 		if _, err := unix.Poll(fds, timeout); err != nil {
 			if errors.Is(err, unix.EINTR) {
@@ -246,7 +258,8 @@ func cmdWatch(args []string) {
 		if err != nil {
 			continue
 		}
-		relevant, gone, palette := false, false, false
+		relevant, gone := false, false
+		var lines []string
 		for off := 0; off+unix.SizeofInotifyEvent <= n; {
 			evWD := int(int32(binary.NativeEndian.Uint32(buf[off:])))
 			evMask := binary.NativeEndian.Uint32(buf[off+4:])
@@ -257,13 +270,15 @@ func cmdWatch(args []string) {
 			if evMask&unix.IN_Q_OVERFLOW != 0 {
 				relevant = true
 			}
-			if evWD == stateWD {
-				if evMask&unix.IN_IGNORED != 0 {
-					stateWD = -1
-				} else if string(evName) == stateName {
-					palette = true
+			for _, sig := range signals {
+				if evWD != sig.wd {
+					continue
 				}
-				continue
+				if evMask&unix.IN_IGNORED != 0 {
+					sig.wd = -1
+				} else if string(evName) == sig.name && !slices.Contains(lines, sig.line) {
+					lines = append(lines, sig.line)
+				}
 			}
 			if evWD != wd {
 				continue
@@ -282,10 +297,16 @@ func cmdWatch(args []string) {
 		if relevant {
 			emit()
 		}
-		if palette {
-			if _, err := os.Stdout.WriteString("palette\n"); err != nil {
+		for _, line := range lines {
+			if _, err := os.Stdout.WriteString(line); err != nil {
 				os.Exit(0)
 			}
 		}
 	}
+}
+
+// watchSignal is a file whose change watch reports as line.
+type watchSignal struct {
+	dir, name, line string
+	wd              int
 }

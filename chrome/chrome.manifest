@@ -1,0 +1,3 @@
+# The Omafire new tab page, chrome://omafire/content/newtab.html; newtab.uc.js
+# registers this file.
+content omafire newtab/

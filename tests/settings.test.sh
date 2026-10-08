@@ -17,7 +17,7 @@ cleanup() {
 trap cleanup EXIT
 
 export HOME="$TEST_ROOT/home"
-unset XDG_CONFIG_HOME OMAFIRE_CONFIG
+unset XDG_CONFIG_HOME OMAFIRE_CONFIG OMAFIRE_BACKGROUND
 # Nor the host's installed shell plugin.
 export OMAFIRE_SHELL_PLUGIN_SOURCE="$HOME/no-shell-plugin"
 CONFIG="$HOME/.config/omafire/config.json"
@@ -90,7 +90,7 @@ XDG_CONFIG_HOME="$TEST_ROOT/xdg" "$OMAFIRE_BIN" set glass on
 # a sync's new theme.json is a "palette" line; the end of stdin (a pipe)
 # ends it.
 mkfifo "$TEST_ROOT/in"
-mkdir -p "$HOME/.local/state/omafire"
+mkdir -p "$HOME/.local/state/omafire" "$HOME/.local/state/omarchy/current"
 "$OMAFIRE_BIN" watch < "$TEST_ROOT/in" > "$TEST_ROOT/out" 2> "$TEST_ROOT/err" &
 WATCH_PID=$!
 exec 3> "$TEST_ROOT/in"
@@ -120,6 +120,8 @@ lines 5
 printf '{}\n' > "$TEST_ROOT/theme.json"
 mv "$TEST_ROOT/theme.json" "$HOME/.local/state/omafire/theme.json"
 lines 6
+ln -sfn "$TEST_ROOT/in" "$HOME/.local/state/omarchy/current/background"
+lines 7
 exec 3>&-
 for _ in $(seq 50); do
   kill -0 "$WATCH_PID" 2>/dev/null || break
@@ -134,7 +136,8 @@ WATCH_PID=
 python3 - "$TEST_ROOT/out" <<'PY'
 import json, sys
 lines = open(sys.argv[1]).read().splitlines()
-assert lines.pop() == "palette", lines
+assert lines[-2:] == ["palette", "wallpaper"], lines
+del lines[-2:]
 got = [json.loads(l) for l in lines]
 want = [(False, 0.85, "horizontal"), (True, 0.85, "horizontal"), (True, 0.9, "horizontal"),
         (False, 0.85, "horizontal"), (False, 0.85, "vertical")]

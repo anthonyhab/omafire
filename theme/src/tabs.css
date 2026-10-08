@@ -173,9 +173,9 @@
    * rasterised copy, so its context-fill never meets the row's colour and
    * it vanishes on dark chrome. Swap in the same glyph from the theme,
    * which tints with the row (needs svg.context-properties.content.enabled,
-   * which omafire sets). Known by the base64 fingerprint frame.css uses; no
-   * site favicon is touched. */
-  & .tabbrowser-tab[image*="PHN2ZyBpZD0ib21hZm94LW5ld3RhYiIg"] .tab-icon-image {
+   * which omafire sets). Known by its URL, as in frame.css; no site
+   * favicon is touched. */
+  & .tabbrowser-tab[image="chrome://omafire/content/icon.svg"] .tab-icon-image {
     content: url("icons/tabs/omafox-newtab.svg") !important;
     -moz-context-properties: fill !important;
     fill: currentColor !important;

@@ -143,6 +143,12 @@
       hint: "Show them only while Alt is held; Alt, then digits, switches on release.",
     },
     {
+      label: "New tab page", kind: "toggle", prefs: ["omafire.newtab"],
+      read: () => get("omafire.newtab", true),
+      write: v => set("omafire.newtab", v),
+      hint: "Clock, shortcuts and the Omarchy wallpaper. Press , on it for its options.",
+    },
+    {
       label: "Site colours", kind: "toggle", prefs: ["omafire.site-colors"],
       read: () => get("omafire.site-colors", false),
       write: v => set("omafire.site-colors", v),

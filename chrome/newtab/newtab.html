@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="dark light">
+  <meta http-equiv="Content-Security-Policy" content="default-src chrome:; img-src chrome: data: file: page-icon: moz-icon:; style-src chrome:">
+  <title>New Tab</title>
+  <link rel="icon" href="icon.svg">
+  <link rel="stylesheet" href="newtab.css">
+</head>
+<body>
+  <div id="backdrop" aria-hidden="true"></div>
+
+  <main>
+    <header>
+      <div id="time">
+        <p id="greeting"></p>
+        <time id="clock" aria-live="off"></time>
+      </div>
+      <p id="date"></p>
+    </header>
+    <nav id="sites" aria-label="Shortcuts"></nav>
+  </main>
+
+  <button id="settings-toggle" type="button" aria-controls="settings" aria-expanded="false"
+          title="Customize (,)">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h7M12 4h2M2 12h2M7 12h7M9 2.5v3M4 10.5v3" /></svg>
+    <span class="label">Customize</span>
+  </button>
+
+  <aside id="settings" hidden aria-label="Customize new tab">
+    <div class="settings-head">
+      <h1>New tab</h1>
+      <button id="settings-close" type="button" title="Close (Esc)">Esc</button>
+    </div>
+    <form id="settings-form"></form>
+  </aside>
+
+  <script src="newtab.js"></script>
+</body>
+</html>

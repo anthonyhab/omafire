@@ -46,9 +46,8 @@
    * and it matches browser.display.background_color, which omafire keeps on
    * the palette. Needs browser.tabs.allow_transparent_browser (omafire sets
    * it). The page is known by its favicon, the one trait it owns that the
-   * chrome can see: Firefox inlines it as base64, and this is the base64
-   * of its opening `<svg id="omafox-newtab" `. */
-  &:has(.tabbrowser-tab[selected][image*="PHN2ZyBpZD0ib21hZm94LW5ld3RhYiIg"])
+   * chrome can see (chrome/newtab/icon.svg). */
+  &:has(.tabbrowser-tab[selected][image="chrome://omafire/content/icon.svg"])
       #tabbrowser-tabpanels > .deck-selected .browserContainer {
     background-color: transparent !important;
   }

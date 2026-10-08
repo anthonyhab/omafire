@@ -206,7 +206,7 @@ assert.match(
 // The new tab clears only its own (selected) pane, never the other one.
 assert.match(
   frameCss,
-  /&:has\(\.tabbrowser-tab\[selected\]\[image\*="PHN2ZyBpZD0ib21hZm94LW5ld3RhYiIg"\]\)\s*#tabbrowser-tabpanels > \.deck-selected \.browserContainer \{\s*background-color: transparent !important;/
+  /&:has\(\.tabbrowser-tab\[selected\]\[image="chrome:\/\/omafire\/content\/icon\.svg"\]\)\s*#tabbrowser-tabpanels > \.deck-selected \.browserContainer \{\s*background-color: transparent !important;/
 );
 
 // Compact's card keeps its start gap where the layout's "the launcher
