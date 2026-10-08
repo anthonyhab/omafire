@@ -10,6 +10,8 @@
 </head>
 <body>
   <div id="backdrop" aria-hidden="true"></div>
+  <div id="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+  <div id="glow" aria-hidden="true"></div>
 
   <main>
     <header>
@@ -17,7 +19,10 @@
         <p id="greeting"></p>
         <time id="clock" aria-live="off"></time>
       </div>
-      <p id="date"></p>
+      <div id="dateline">
+        <p id="date"></p>
+        <p id="weather"></p>
+      </div>
     </header>
     <nav id="sites" aria-label="Shortcuts"></nav>
     <section id="widgets" aria-label="Widgets"></section>

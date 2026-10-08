@@ -10,6 +10,8 @@
   /* The last shortcuts shown, so the grid is whole on the first frame
    * instead of arriving after the async top sites query. */
   const SITES_CACHE_PREF = "omafire.newtab.sites-cache";
+  /* 0.7.1 kept feed answers in this pref; now a file. */
+  const OLD_CACHE_PREF = "omafire.newtab.widget-cache";
   /* A picked image is copied into the profile. */
   const CUSTOM_FILE = PathUtils.join(PathUtils.profileDir, "omafire-newtab-image");
   /* Omarchy's current wallpaper link, newest layout first. */
@@ -29,6 +31,7 @@
     tint: 0, // desktop's dim: the window glass already tints it
     glass: true,
     clock: true,
+    clockStyle: "bold", // bold | thin | line
     hour12: false,
     seconds: false,
     date: true,
@@ -41,9 +44,12 @@
     hosts: true,
     align: "top", // top | center
     width: "normal", // normal | wide
-    widgets: [{ type: "calendar" }, { type: "closed" }], // [{ type, option }], in order
+    widgets: [{ type: "closed" }], // [{ type, option }], in order
     widgetPlace: "below", // below | beside
     tempUnit: "c", // c | f
+    weatherHeader: true, // the weather widget reads as a line under the clock
+    aurora: true, // the theme's blue, magenta and cyan drifting behind the clock
+    glow: true, // a pointer glow in the hovered shortcut's icon colour
     custom: [], // [{ url, title }]
     pinned: [], // [{ url, title }], dragged into place; they lead the grid
     hidden: [] // urls
@@ -130,6 +136,10 @@
     d.numbers = settings.numbers;
     d.hosts = settings.hosts;
     d.widgetPlace = settings.widgetPlace;
+    d.clockStyle = settings.clockStyle;
+    d.weatherHeader = settings.weatherHeader;
+    d.aurora = settings.aurora;
+    d.glow = settings.glow;
     root.style.setProperty("--blur", `${settings.blur}px`);
     root.style.setProperty("--dim", `${settings.background === "desktop" ? settings.tint : settings.dim}%`);
     document.querySelector("#time").hidden = !settings.clock && !settings.greeting;
@@ -174,9 +184,9 @@
       hourCycle: settings.hour12 ? "h12" : "h23"
     });
     clock.dateTime = now.toISOString();
-    date.textContent = now
-      .toLocaleDateString([], { weekday: "short", day: "numeric", month: "short" })
-      .replace(/,/g, "");
+    date.textContent = settings.clockStyle === "thin"
+      ? now.toLocaleDateString([], { weekday: "long", day: "numeric", month: "long" }).replace(/,/g, " ·")
+      : now.toLocaleDateString([], { weekday: "short", day: "numeric", month: "short" }).replace(/,/g, "");
     const hour = now.getHours();
     const part = hour < 5 ? "night" : hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
     const name = settings.name.trim();
@@ -282,6 +292,18 @@
 
     link.append(icon, number, title, hostLabel);
 
+    const pinnedHere = settings.pinned.some((entry) => entry.url === site.url);
+    item.classList.toggle("pinned", pinnedHere);
+    const pin = document.createElement("button");
+    pin.type = "button";
+    pin.className = "pin";
+    pin.title = pinnedHere ? "Unpin" : "Pin to the front";
+    pin.textContent = pinnedHere ? "−" : "+";
+    pin.addEventListener("click", () => {
+      const pinned = settings.pinned.filter((entry) => entry.url !== site.url);
+      save({ pinned: pinnedHere ? pinned : [...pinned, { url: site.url, title: site.title }] });
+    });
+
     const hide = document.createElement("button");
     hide.type = "button";
     hide.className = "hide";
@@ -296,8 +318,11 @@
       }
     });
 
-    item.append(link, hide);
+    item.append(link, pin, hide);
     item.dataset.url = site.url;
+    if (site.favicon) void iconColor(site.favicon).then((color) => {
+      if (color) item.style.setProperty("--icon", color);
+    });
     item.draggable = true;
     return item;
   }
@@ -420,6 +445,99 @@
     for (const item of sites.querySelectorAll(".drop-target")) item.classList.remove("drop-target");
   });
 
+  /* ---- glow -----------------------------------------------------------
+   * A soft radial light behind the grid that follows the pointer and takes
+   * the colour of the shortcut icon under it (the theme accent elsewhere).
+   * It drifts on its own while the pointer is away. Transform only, so the
+   * compositor moves it. */
+
+  const glow = document.querySelector("#glow");
+  const iconColors = new Map();
+
+  /* The icon's dominant colour: the mean of its saturated pixels. */
+  function iconColor(src) {
+    if (iconColors.has(src)) return iconColors.get(src);
+    const job = (async () => {
+      const image = new Image();
+      image.src = src;
+      try {
+        await image.decode();
+      } catch {
+        return null;
+      }
+      const size = 16;
+      const canvas = document.createElement("canvas");
+      canvas.width = canvas.height = size;
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      ctx.drawImage(image, 0, 0, size, size);
+      const { data } = ctx.getImageData(0, 0, size, size);
+      let r = 0, g = 0, b = 0, n = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        const [pr, pg, pb, pa] = [data[i], data[i + 1], data[i + 2], data[i + 3]];
+        if (pa < 128) continue;
+        const max = Math.max(pr, pg, pb), min = Math.min(pr, pg, pb);
+        const sat = max ? (max - min) / max : 0;
+        if (sat < 0.25 || max < 60) continue;
+        r += pr; g += pg; b += pb; n++;
+      }
+      if (n < 4) return null;
+      return `rgb(${Math.round(r / n)} ${Math.round(g / n)} ${Math.round(b / n)})`;
+    })();
+    iconColors.set(src, job);
+    return job;
+  }
+
+  const pointer = { x: innerWidth / 2, y: innerHeight * 0.4, inside: false };
+  const light = { x: pointer.x, y: pointer.y };
+  let drift = 0;
+  let glowFrame = null;
+  const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+
+  function moveGlow() {
+    glowFrame = null;
+    if (!settings.glow) return;
+    let tx = pointer.x, ty = pointer.y;
+    if (!pointer.inside) {
+      /* Away: wander on a slow Lissajous figure around the page centre. */
+      drift += 0.004;
+      tx = innerWidth * (0.5 + 0.3 * Math.sin(drift));
+      ty = innerHeight * (0.45 + 0.25 * Math.sin(drift * 0.7 + 1));
+    }
+    light.x += (tx - light.x) * 0.08;
+    light.y += (ty - light.y) * 0.08;
+    glow.style.transform = `translate(${light.x}px, ${light.y}px) translate(-50%, -50%)`;
+    const still = pointer.inside && Math.abs(tx - light.x) < 0.3 && Math.abs(ty - light.y) < 0.3;
+    if (!still && !reducedMotion.matches) glowFrame = requestAnimationFrame(moveGlow);
+  }
+
+  function wakeGlow() {
+    if (glowFrame === null) glowFrame = requestAnimationFrame(moveGlow);
+  }
+
+  document.addEventListener("mousemove", (event) => {
+    pointer.x = event.clientX;
+    pointer.y = event.clientY;
+    pointer.inside = true;
+    wakeGlow();
+  });
+  document.addEventListener("mouseleave", () => {
+    pointer.inside = false;
+    wakeGlow();
+  });
+  sites.addEventListener("mouseover", (event) => {
+    const tile = event.target.closest?.(".site");
+    glow.style.setProperty("--glow", tile?.style.getPropertyValue("--icon") || "var(--accent)");
+  });
+  sites.addEventListener("mouseleave", () => glow.style.setProperty("--glow", "var(--accent)"));
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") wakeGlow();
+    else if (glowFrame !== null) {
+      cancelAnimationFrame(glowFrame);
+      glowFrame = null;
+    }
+  });
+  wakeGlow();
+
   /* ---- widgets --------------------------------------------------------
    * Blocks under (or beside) the shortcuts, each a list on the same
    * hairline grid. Local ones read the browser: the calendar, recently
@@ -429,7 +547,9 @@
    * new tab paints at once and refreshes in the background. */
 
   const widgetsBox = document.querySelector("#widgets");
-  const WIDGET_CACHE_PREF = "omafire.newtab.widget-cache";
+  const weatherLine = document.querySelector("#weather");
+  /* Feed answers: too much for a pref, so a file beside the picked image. */
+  const WIDGET_CACHE_FILE = PathUtils.join(PathUtils.profileDir, "omafire-newtab-cache.json");
   const FEED_TTL = 10 * 60 * 1000;
   const FEED_LIMIT = 10;
   const chromeWindow = window.browsingContext.topChromeWindow;
@@ -456,18 +576,38 @@
     return node;
   }
 
-  /* One row: title left, meta right; a link, or a button for an action. */
-  function item({ url, title, meta, onClick }) {
-    const node = el(onClick ? "button" : "a", "item");
+  /* One row: title left, meta right. The title is the row's link (its
+   * hit area is the whole row); `aside` is a second link in the meta, as
+   * the article beside a Hacker News discussion. A row with onClick is a
+   * button instead. */
+  function item({ url, title, meta, onClick, aside }) {
     if (onClick) {
+      const node = el("button", "item");
       node.type = "button";
+      node.title = url || title;
       node.addEventListener("click", onClick);
-    } else {
-      node.href = url;
+      node.append(el("span", "item-title", title));
+      if (meta) node.append(el("span", "item-meta", meta));
+      return node;
     }
-    node.title = url || title;
-    node.append(el("span", "item-title", title));
-    if (meta) node.append(el("span", "item-meta", meta));
+    const node = el("div", "item");
+    const link = el("a", "item-title", title);
+    link.href = url;
+    link.title = url;
+    node.append(link);
+    if (meta || aside) {
+      const metaNode = el("span", "item-meta");
+      if (aside) {
+        /* The host shows when the row is hovered; the arrow is always there. */
+        const second = el("a", "item-aside");
+        second.href = aside.url;
+        second.title = aside.url;
+        second.append(el("span", "aside-host", aside.text), "↗");
+        metaNode.append(second, " ");
+      }
+      metaNode.append(meta || "");
+      node.append(metaNode);
+    }
     return node;
   }
 
@@ -526,41 +666,10 @@
    * resolving data, and render(data, option) returning the block's nodes.
    * `link` is where the header takes the user. */
   const WIDGETS = {
-    calendar: {
-      label: "Calendar",
-      local: true,
-      load: () => Date.now(),
-      render() {
-        const now = new Date();
-        const grid = el("div", "calendar");
-        const first = new Date(now.getFullYear(), now.getMonth(), 1);
-        const probe = new Date(2024, 0, 7); // a Sunday
-        const names = [];
-        for (let i = 0; i < 7; i++) {
-          names.push(new Date(probe.getTime() + i * 86400000).toLocaleDateString([], { weekday: "narrow" }));
-        }
-        /* Weeks start on Monday unless the locale starts them on Sunday. */
-        const startsSunday = /^en-(US|CA)|^(ja|zh|he|ar|pt-BR)/i.test(navigator.language);
-        const offset = startsSunday ? 0 : 1;
-        for (let i = 0; i < 7; i++) grid.append(el("span", "dow", names[(i + offset) % 7]));
-        const lead = (first.getDay() - offset + 7) % 7;
-        const daysBefore = new Date(now.getFullYear(), now.getMonth(), 0).getDate();
-        for (let i = lead; i > 0; i--) grid.append(el("span", "day pad", String(daysBefore - i + 1)));
-        const days = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-        for (let d = 1; d <= days; d++) {
-          const day = el("span", "day", String(d));
-          if (d === now.getDate()) day.classList.add("today");
-          grid.append(day);
-        }
-        const used = lead + days;
-        for (let d = 1; used + d <= Math.ceil(used / 7) * 7; d++) grid.append(el("span", "day pad", String(d)));
-        return [grid];
-      },
-      meta: () => new Date().toLocaleDateString([], { month: "long", year: "numeric" })
-    },
     closed: {
       label: "Recently closed",
       short: "Closed",
+      hue: "var(--accent)",
       local: true,
       load: () => (isPrivate ? [] : sessionStore().getClosedTabDataForWindow(chromeWindow))
         .slice(0, FEED_LIMIT)
@@ -645,6 +754,7 @@
     hn: {
       label: "Hacker News",
       short: "HN",
+      hue: "#ff6600",
       link: "https://news.ycombinator.com/",
       option: { label: "List", placeholder: "front_page, ask_hn, show_hn" },
       async load(option) {
@@ -652,16 +762,22 @@
         const data = await fetchJson(`https://hn.algolia.com/api/v1/search?tags=${encodeURIComponent(tag)}&hitsPerPage=${FEED_LIMIT}`);
         return data.hits.map((hit) => ({
           title: hit.title,
-          url: hit.url || `https://news.ycombinator.com/item?id=${hit.objectID}`,
+          discussion: `https://news.ycombinator.com/item?id=${hit.objectID}`,
+          url: hit.url || null,
           points: hit.points, comments: hit.num_comments, at: hit.created_at_i * 1000
         }));
       },
+      /* The title opens the discussion; the article's host beside it opens
+       * the article. */
       render: (hits) => list(hits.map((hit) => ({
-        url: hit.url, title: hit.title, meta: `${compact(hit.points)}p ${compact(hit.comments)}c ${ago(hit.at)}`
+        url: hit.discussion, title: hit.title,
+        aside: hit.url ? { url: hit.url, text: hostOf(hit.url) } : null,
+        meta: `${compact(hit.comments)} ${ago(hit.at)}`
       })), "Nothing to show")
     },
     reddit: {
       label: "Reddit",
+      hue: "#ff4500",
       option: { label: "Subreddit", placeholder: "linux" },
       link: (option) => `https://www.reddit.com/r/${encodeURIComponent(option.trim() || "popular")}/`,
       /* Reddit answers its JSON with a 403 to anything but a signed-in
@@ -731,19 +847,31 @@
         })];
       },
       meta: (data) => (data?.place ? `${data.place}${data.region ? `, ${data.region}` : ""}` : ""),
+      /* Also the header line under the clock. */
+      header: (data) => (data && !data.missing
+        ? `${Math.round(data.now.temperature_2m)}° ${WEATHER[data.now.weather_code] ?? ""} · ${data.place}`
+        : ""),
       /* The unit is a global setting: the feed must refetch when it flips. */
       key: () => settings.tempUnit
     }
   };
 
-  const widgetCache = (() => {
-    const stored = readPref(WIDGET_CACHE_PREF);
-    return stored && typeof stored === "object" ? stored : {};
-  })();
+  let widgetCache = {};
+  let cacheReady = false;
+  const cacheLoaded = IOUtils.readJSON(WIDGET_CACHE_FILE)
+    .then((stored) => {
+      if (stored && typeof stored === "object") widgetCache = stored;
+    }, () => {})
+    .finally(() => {
+      cacheReady = true;
+    });
 
+  let cacheWrite = Promise.resolve();
   function storeWidgetCache(keep) {
     for (const key of Object.keys(widgetCache)) if (!keep.has(key)) delete widgetCache[key];
-    prefs.setStringPref(WIDGET_CACHE_PREF, JSON.stringify(widgetCache));
+    const snapshot = JSON.stringify(widgetCache);
+    cacheWrite = cacheWrite.then(() => IOUtils.writeUTF8(WIDGET_CACHE_FILE, snapshot, { tmpPath: `${WIDGET_CACHE_FILE}.tmp` }))
+      .catch((error) => console.error("[omafire:newtab] cache:", error));
   }
 
   function widgetBlock(entry) {
@@ -755,6 +883,7 @@
     if (link) name.href = link;
     head.append(name, el("span", "meta"));
     block.append(head, el("div", "widget-body"));
+    block.style.setProperty("--hue", def.hue || "var(--line-strong)");
     return block;
   }
 
@@ -768,14 +897,21 @@
     }
     body.replaceChildren(...def.render(data, entry.option));
     meta.textContent = def.meta ? def.meta(data) : "";
+    if (def.header) weatherLine.textContent = def.header(data);
   }
 
   let widgetsRequest = 0;
   let widgetTimer = null;
   function loadWidgets() {
+    /* The first run waits for the cache so feeds paint from it. */
+    if (!cacheReady) {
+      void cacheLoaded.then(loadWidgets);
+      return;
+    }
     const request = ++widgetsRequest;
     clearTimeout(widgetTimer);
     const entries = settings.widgets;
+    if (!entries.some((entry) => entry.type === "weather")) weatherLine.textContent = "";
     if (!entries.length) {
       widgetsBox.replaceChildren();
       return;
@@ -856,10 +992,14 @@
         when: (s) => s.background === "desktop" && !glass },
       { type: "note", label: "", text: "No wallpaper from Omarchy yet",
         when: (s) => s.background === "wallpaper" && root.dataset.backdrop !== "true" },
-      { key: "glass", type: "toggle", label: "Glass", when: (s) => s.background !== "solid" }
+      { key: "glass", type: "toggle", label: "Glass", when: (s) => s.background !== "solid" },
+      { key: "aurora", type: "toggle", label: "Aurora" },
+      { key: "glow", type: "toggle", label: "Glow" }
     ]],
     ["Clock", [
       { key: "clock", type: "toggle", label: "Clock" },
+      { key: "clockStyle", type: "choice", label: "Style",
+        options: [["bold", "Bold"], ["thin", "Thin"], ["line", "Line"]], when: (s) => s.clock },
       { key: "hour12", type: "choice", label: "Format", options: [[false, "24h"], [true, "12h"]],
         when: (s) => s.clock },
       { key: "seconds", type: "toggle", label: "Seconds", when: (s) => s.clock },
@@ -883,6 +1023,8 @@
       { key: "widgetPlace", type: "choice", label: "Place", options: [["below", "Below"], ["beside", "Beside"]],
         when: (s) => s.widgets.length > 0 },
       { key: "tempUnit", type: "choice", label: "Degrees", options: [["c", "°C"], ["f", "°F"]],
+        when: (s) => s.widgets.some((w) => w.type === "weather") },
+      { key: "weatherHeader", type: "toggle", label: "By the clock",
         when: (s) => s.widgets.some((w) => w.type === "weather") },
       { type: "note", label: "", text: "Feeds and weather fetch from the sites they name",
         when: (s) => s.widgets.some((w) => !WIDGETS[w.type].local) }
@@ -1152,6 +1294,7 @@
   /* ---- start -------------------------------------------------------- */
 
   settings = normalize(readPref(SETTINGS_PREF));
+  if (prefs.prefHasUserValue(OLD_CACHE_PREF)) prefs.clearUserPref(OLD_CACHE_PREF);
   const cachedSites = readPref(SITES_CACHE_PREF);
   if (settings.sites && !isPrivate && Array.isArray(cachedSites)) showSites(cachedSites);
   applySettings();
