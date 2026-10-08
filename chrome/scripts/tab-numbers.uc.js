@@ -2,11 +2,13 @@
 //
 // With omafire.tab-numbers and omafire.tab-numbers-hold both on, the tab
 // numbers (tab-numbers.css) show only while Alt is held. Digits then pick a
-// tab and the switch happens when Alt is released, so nothing loads by
-// accident on the way: Alt, 1, 2 reaches tab 12. The tab the digits point at
-// is lit (omafire-num-lit) as they are typed. Alt+9 alone is the last tab,
-// as in Firefox; a number past the last tab is the last tab. Escape or the
-// window losing focus drops the entry.
+// tab, at once when no longer number could follow: with fewer than ten tabs
+// every digit switches as it is pressed. When one could (Alt, 1 with twelve
+// tabs), the switch waits for the next digit or Alt's release, so nothing
+// loads by accident on the way: Alt, 1, 2 reaches tab 12. The tab the digits
+// point at is lit (omafire-num-lit) while they wait. Alt+9 alone is the last
+// tab, as in Firefox; a number past the last tab is the last tab. Escape or
+// the window losing focus drops the entry.
 //
 // The root carries omafire-tab-numbers-hold (the setting is on) and, while
 // Alt is down, omafire-numbers-held; tab-numbers.css reads both.
@@ -23,7 +25,8 @@
   const SHOW = "omafire.tab-numbers";
 
   let held = false;      // Alt is down, with no other modifier
-  let entry = "";        // the digits typed so far
+  let entry = "";        // the digits typed so far, not yet switched to
+  let typed = false;     // a digit was used this hold: its release is no Alt tap
 
   const active = () => prefs.getBoolPref(SHOW, false) && prefs.getBoolPref(HOLD, false);
 
@@ -41,6 +44,21 @@
     return n >= 1 ? list[n - 1] : null;
   }
 
+  // Could another digit still make a number that names a tab?
+  function more() {
+    const n = tabs().length;
+    return entry === "9" ? n >= 90 : parseInt(entry, 10) * 10 <= n;
+  }
+
+  function go() {
+    const tab = target();
+    entry = "";
+    light();
+    if (tab && gBrowser.selectedTab !== tab) {
+      gBrowser.selectedTab = tab;
+    }
+  }
+
   function light() {
     for (const tab of document.querySelectorAll("[omafire-num-lit]")) {
       tab.removeAttribute("omafire-num-lit");
@@ -55,6 +73,7 @@
     } else {
       root.removeAttribute("omafire-numbers-held");
       entry = "";
+      typed = false;
       light();
     }
   }
@@ -99,11 +118,16 @@
     // Digits typed while Alt is down.
     const digit = digitOf(e);
     if (digit !== null && e.altKey && plain(e) && (entry || digit !== "0")) {
-      // Not Firefox's immediate Alt+digit switch: ours waits for the release.
+      // Ours, not Firefox's Alt+digit: it counts past nine.
       e.preventDefault();
       e.stopPropagation();
       entry += digit;
-      light();
+      typed = true;
+      if (more()) {
+        light();
+      } else {
+        go();
+      }
     }
   }, true);
 
@@ -111,17 +135,13 @@
     if (e.key !== "Alt" || !held) {
       return;
     }
-    const tab = target();
-    const typed = entry !== "";
-    setHeld(false);
     if (typed) {
       // A release that ends an entry is not a bare Alt tap: no menu bar.
       e.preventDefault();
       e.stopPropagation();
     }
-    if (tab && gBrowser.selectedTab !== tab) {
-      gBrowser.selectedTab = tab;
-    }
+    go();
+    setHeld(false);
   }, true);
 
   window.addEventListener("blur", () => setHeld(false));
