@@ -10,7 +10,7 @@
  *
  * omafire.transparency (a string, "0.50" to "1.00" in 0.01 steps, as the
  * original theme stored it) picks the alpha; anything else means 0.85. It
- * never goes below the theme's glass floor (DEC-66), which omafire sync
+ * never goes below the theme's glass floor, which omafire sync
  * measures against the wallpapers: below it text stops reading. */
 
 @media -moz-pref("omafire.translucency") {
@@ -21,7 +21,7 @@
     --oc-panel: color-mix(in srgb,
       color-mix(in srgb, var(--oc-frame), var(--oc-text) 5%) calc(max(var(--oc-glass-alpha), 0.8) * 100%),
       transparent);
-    /* B, the one material for raised chrome (DEC-65): the panels' tint,
+    /* B, the one material for raised chrome: the panels' tint,
      * frosted where it hangs over the page (below). The console is no
      * longer a solid slab on glass. */
     --oc-console: var(--oc-panel);
@@ -42,7 +42,7 @@
   }
 }
 
-/* ---- glass over the page (DEC-64) -----------------------------------
+/* ---- glass over the page ---------------------------------------------
  *
  * The urlbar card hangs over the page, so it can only be frosted if
  * WebRender composites the page itself: will-change: transform on the
@@ -120,7 +120,7 @@
   }
 }
 
-/* ---- the material ladder (DEC-65) ------------------------------------
+/* ---- the material ladder ---------------------------------------------
  *
  * Totals over the desktop, at the window's alpha a (0.82 here):
  *   backdrop  a - 0.22, floor 0.4   glass pages' surround (0.60)
@@ -178,7 +178,7 @@
 
 /* B over the page: the zen row (horizontal tabs: with vertical tabs it
  * holds its own space) and the status label hang over it, so they frost
- * it while shown, with the page layer of DEC-64. The row's
+ * it while shown, with the page layer (glass over the page, above). The row's
  * blur is a layer of its own: a backdrop-filter on #nav-bar would make it
  * the fixed urlbar's containing block and its card's backdrop root. */
 @media -moz-pref("omafire.translucency") {

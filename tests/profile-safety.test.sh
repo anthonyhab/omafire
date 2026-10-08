@@ -186,7 +186,7 @@ out=$("$OMAFIRE_BIN" setup 2>&1)
 rm "$PLAIN/lock"
 
 # An owned payload left unreadable (0311: its marker still opens) is listed
-# and replaced whole, never left behind without its marker (omafire-v2z.21).
+# and replaced whole, never left behind without its marker.
 chmod 311 "$PLAIN/chrome/omafire" "$PLAIN/chrome/omafire/src"
 "$OMAFIRE_BIN" setup >/dev/null 2>&1
 [[ $(tree_hash "$PLAIN/chrome/omafire") == "$(tree_hash "$PAYLOAD")" ]]

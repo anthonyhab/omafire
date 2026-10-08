@@ -1,5 +1,5 @@
 // Package config reads, validates and writes ~/.config/omafire/config.json
-// against schema.json (DEC-29). The file holds only what the user set;
+// against schema.json. The file holds only what the user set;
 // Effective fills in the rest from the schema's defaults.
 package config
 

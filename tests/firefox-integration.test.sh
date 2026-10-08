@@ -129,7 +129,7 @@ export OMAFIRE_FIREFOX_ROOT="$FF_ROOT"
 export OMAFIRE_FIREFOX_PAYLOAD_SOURCE="$FF_PAYLOAD_SOURCE"
 export OMAFIRE_ZEN_PROFILES_FILE="$TEST_ROOT/missing-zen-profiles.ini"
 
-# The shell plugin (DEC-30): linked and enabled once by setup.
+# The shell plugin: linked and enabled once by setup.
 export OMAFIRE_SHELL_PLUGIN_SOURCE="$TEST_ROOT/share/shell/omafire"
 mkdir -p "$OMAFIRE_SHELL_PLUGIN_SOURCE"
 PLUGIN_LINK="$TEST_HOME/.config/omarchy/plugins/omafire"
@@ -170,7 +170,7 @@ for profile in "$RELATIVE_PROFILE" "$ABSOLUTE_PROFILE"; do
   grep -Fqx '/* OMAFIRE GENERATED PALETTE — written by omafire sync; do not edit. */' \
     "$profile/chrome/omafire-palette.css"
   grep -Fq -- '--omarchy-background: #111c18;' "$profile/chrome/omafire-palette.css"
-  # The glass floor (DEC-66) rides in both palettes.
+  # The glass floor rides in both palettes.
   grep -Eqx -- '  --omafire-glass-floor: (0\.[5-9][0-9]|1\.00);' "$profile/chrome/omafire-palette.css"
   grep -Eqx -- '  --omafire-glass-floor: (0\.[5-9][0-9]|1\.00);' "$profile/chrome/omafire-content-palette.css"
   # Cold-start mirror of the lightweight theme, inert once it lands.

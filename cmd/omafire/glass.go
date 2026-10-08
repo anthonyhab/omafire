@@ -16,7 +16,7 @@ import (
 	_ "golang.org/x/image/webp"
 )
 
-// The glass floor (DEC-66): the lowest window alpha at which the chrome's
+// The glass floor: the lowest window alpha at which the chrome's
 // text tokens stay readable over the theme's wallpapers. The theme paints
 // max(omafire.transparency, floor), so the slider can't make a theme
 // unreadable, and themes that read at 0.50 keep their glass.

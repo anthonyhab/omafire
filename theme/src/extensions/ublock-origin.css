@@ -1,5 +1,5 @@
 /* uBlock Origin's own pages (popup, dashboard and its panes, logger), on the content tokens
- * (PLAN-10, omafire-mjl.2). Its pages read a ladder of custom properties; the ones that take a
+ *. Its pages read a ladder of custom properties; the ones that take a
  * whole colour are pointed at the --oc-* tokens, the surfaces and ink it paints through are set
  * directly, and the state colours (allow green, block red, the logger's rows) are left alone:
  * they carry meaning. The extension's UUID is per install, so the match is the page path. */

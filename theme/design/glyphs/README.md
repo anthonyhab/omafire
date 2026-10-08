@@ -1,7 +1,7 @@
 # Extension glyph sources
 
 `export.py` writes `src/icons/extensions/*.svg` from the brand marks in
-`brand/` (DEC-63; the earlier "Omarchy line" metaphors were rejected as
+`brand/` (the earlier "Omarchy line" metaphors were rejected as
 unrecognisable). Rules:
 
 - Each extension's own mark, in one colour: Simple Icons (CC0) where it has the

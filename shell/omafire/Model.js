@@ -1,4 +1,4 @@
-// The Omafire panel's rows over ~/.config/omafire/config.json (DEC-29).
+// The Omafire panel's rows over ~/.config/omafire/config.json.
 // Keys, values and defaults are the CLI's (config/schema.json); this file
 // adds only labels, sections and when a row applies. tests/shell-plugin.test.js
 // keeps the two in step.

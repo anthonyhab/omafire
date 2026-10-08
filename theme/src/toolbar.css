@@ -40,7 +40,7 @@
   }
 }
 
-/* Motion (omafire-wvz): the hover fill already says "pointed at", so the
+/* Motion: the hover fill already says "pointed at", so the
  * glyph does not move for it (it stays on the exact centre). Press shrinks
  * the glyph a step, and a button that becomes unavailable fades rather than
  * switching. Durations are tokens, so reduced motion zeroes them. Of three

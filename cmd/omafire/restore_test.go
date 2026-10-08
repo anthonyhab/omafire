@@ -7,8 +7,7 @@ import (
 	"testing"
 )
 
-// restore puts back what a run changed, but never over an edit made since
-// (omafire-6ty).
+// restore puts back what a run changed, but never over an edit made since.
 func TestRestoreKeepsLaterEdits(t *testing.T) {
 	state, prof := t.TempDir(), t.TempDir()
 	oldState, oldCmd, oldDir, oldBacked := stateDir, backupCommand, backupDir, backedUp

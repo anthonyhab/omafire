@@ -181,7 +181,7 @@ assert.throws(
 
 require("./contrast.test.js");
 
-// Split view in the chrome theme (omafire-v2z.6). These read the source;
+// Split view in the chrome theme. These read the source;
 // the measured geometry is in the bead's fxlab evidence.
 const themeSource = (name) =>
   fs.readFileSync(path.join(__dirname, "../theme/src", name), "utf8");
@@ -245,7 +245,7 @@ assert.doesNotMatch(compactCss,
 function loadCompact() {
   const listeners = {};
   const marks = new Set();
-  // sidebar-main as the tools observer sees it (omafire-v2z.13): the native
+  // sidebar-main as the tools observer sees it: the native
   // readings it would act on, and where the column is
   const tools = { readings: [], updates: 0, rect: { left: -258, right: 0, width: 258 }, frames: [] };
   const toolsMain = {
@@ -327,7 +327,7 @@ function loadCompact() {
   await focusOn(c.page, c.focus.FLAG_BYKEY);
   assert.equal(c.marks.has("omafire-tools-focus"), false);
 
-  // the tools observer ignores readings while the column is off-screen (omafire-v2z.13),
+  // the tools observer ignores readings while the column is off-screen,
   // and re-reads the tools once it is wholly inside the window
   const t = c.tools;
   assert.equal(c.window.IntersectionObserver.name, "IntersectionObserver", "the native class is put back");

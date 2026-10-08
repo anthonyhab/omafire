@@ -161,7 +161,7 @@
 
         /* Open on a narrow page the field grows, as Firefox's own does, and
          * the results hang from it: one card, one edge. Half the page leaves
-         * a switch-to-tab title a few characters (omafire-ahh); the field
+         * a switch-to-tab title a few characters; the field
          * keeps a clearance either side for the navigation and the actions,
          * and never passes the cap. Closed, it is back to half. */
         &[popover-open] {

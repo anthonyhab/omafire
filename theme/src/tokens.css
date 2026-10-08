@@ -122,7 +122,7 @@
   /* Resting tab labels: quieter than the active tab, never so dim that an
    * ordinary tab reads as disabled (62% did, on glass). Secondary glyphs
    * on a row (its digit, close button) stay --oc-text-dim. Held to 4.5:1
-   * on a hovered row too (omafire-v2z.7): light palettes need 95% for that
+   * on a hovered row too: light palettes need 95% for that
    * on rose-pine, whose text clears only 5.3:1 against its own toolbar. */
   --oc-text-label: light-dark(
     color-mix(in srgb, var(--oc-text) 95%, transparent),
@@ -156,7 +156,7 @@
   /* The active tab's hairline carries the same light: the glow colour at
    * the edge the light comes from, settling into the ordinary strong
    * hairline across the tab. Same direction as --oc-glow-falloff. */
-  /* Its lit end is a state mark, held to 3:1 (omafire-v2z.7). Dark
+  /* Its lit end is a state mark, held to 3:1. Dark
    * palettes' glow clears that at 85% (3.2:1 at worst); a light
    * palette's accent, or a site colour, can sit at 2.2:1 even solid, so
    * there the edge is solid and leans 30% toward the text, as
@@ -184,7 +184,7 @@
   --oc-shadow-float: 0 12px 40px rgb(0 0 0 / 0.36), 0 0 0 1px var(--oc-line);
   /* The quake console (launcher.css, zen.css): a slab held by hard rules,
    * never shadows. On glass it is B, the panels' material, frosting the
-   * page under it (translucency.css, DEC-65). */
+   * page under it (translucency.css). */
   --oc-console: color-mix(in srgb, var(--oc-frame), var(--oc-text) 5%);
   --oc-rule: 2px;
   /* Fill for alpha masks (tab-number notches): only its opacity counts. */

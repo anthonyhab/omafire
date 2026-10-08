@@ -1,7 +1,7 @@
 import QtQuick
 import Quickshell.Io
 
-// Omafire's state for the panel, all through the CLI (DEC-30):
+// Omafire's state for the panel, all through the CLI:
 //   settings  `omafire watch`, one JSON line per change, restarted if it dies
 //   writes    `omafire set <key> <value>`, one at a time, latest value per key
 //   status    `omafire status --json`, on open and after a repair

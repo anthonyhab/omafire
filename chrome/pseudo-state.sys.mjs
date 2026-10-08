@@ -1,4 +1,4 @@
-// Omafire pseudo-state actor (omafire-k9b.31.6): a page's own extension
+// Omafire pseudo-state actor: a page's own extension
 // asks for :hover/:focus/:active to be held on elements, so a state can be
 // looked at and audited without the pointer. Only chrome code may lock a
 // pseudo-class (InspectorUtils.addPseudoClassLock); a content script cannot.

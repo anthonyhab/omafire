@@ -134,7 +134,7 @@
 
 /* A switch-to-tab row shows no URL, its action chip is the destination: the
  * cap above would leave the title a third of the row and the rest blank
- * (omafire-ahh). The chip keeps its label; the title takes what is left. */
+ *. The chip keeps its label; the title takes what is left. */
 .urlbarView-row:is([type="switchtab"], [type="remotetab"]) .urlbarView-row-body-top-no-wrap {
   max-width: 100% !important;
 }

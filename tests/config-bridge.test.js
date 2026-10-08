@@ -3,9 +3,9 @@
 // The Firefox side of the config bridge (chrome/config.sys.mjs), run in node
 // against stubs for Services and Subprocess:
 //   - a setting changed back while its `omafire set` is still running is
-//     written again, not dropped (omafire-s6q);
+//     written again, not dropped;
 //   - a `omafire set` that fails (nonzero exit, or no process) puts the prefs
-//     back to the file's value instead of leaving them ahead of it (omafire-72s).
+//     back to the file's value instead of leaving them ahead of it.
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");

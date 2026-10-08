@@ -1,5 +1,5 @@
 {
-  "comment": "The settings in ~/.config/omafire/config.json (DEC-29). The omafire CLI embeds this file and Firefox reads it from the package, so both agree on keys, types and defaults. Each setting drives the prefs listed with it: a pref takes the setting's value, the value from map, or a constant; format fixed2 writes a number as a string with two decimals.",
+  "comment": "The settings in ~/.config/omafire/config.json. The omafire CLI embeds this file and Firefox reads it from the package, so both agree on keys, types and defaults. Each setting drives the prefs listed with it: a pref takes the setting's value, the value from map, or a constant; format fixed2 writes a number as a string with two decimals.",
   "settings": [
     {
       "key": "toolbar",

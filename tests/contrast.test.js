@@ -1,6 +1,6 @@
 "use strict";
 
-// The contrast floors of omafire-v2z.7, over every palette in
+// The theme's contrast floors, over every palette in
 // fixtures/palettes.json (the installed Omarchy themes, as omafire sync
 // normalizes them). Method and model: contrast.js.
 const assert = require("node:assert/strict");
@@ -16,7 +16,7 @@ const floors = {
   glowEdge: 3,
   label: 4.5,    // text, on rest and hover
   dim: 3,        // metadata and glyph tier, held at 3:1 (DEC draft in the bead)
-  navLabel: 4.6, // selected nav label: no regression from TASK-13
+  navLabel: 4.6, // selected nav label: never below what it was
   primary: 4.1   // primary-button text on its glow: no regression
 };
 for (const r of rows) {

@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-// restore (omafire-6ty): put back the files a setup or remove run changed, but
+// restore: put back the files a setup or remove run changed, but
 // only those still holding what that run wrote, so an edit made since is never
 // overwritten. A run records, next to its backups, the content hash of every
 // file it backed up as it stood when the run ended (wroteFile); restore

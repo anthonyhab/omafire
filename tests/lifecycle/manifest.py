@@ -100,7 +100,7 @@ def diff(a, b):
         if y is None:
             print(f"- {rel} {x['type']} {x['mode']}{tag}")
             if OMAFIRE_TEMP.search(rel):
-                continue   # an interrupted run's temp copy, swept (omafire-v2z.17)
+                continue   # an interrupted run's temp copy, swept
             if x.get("sentinel") or (x.get("user_sha256") and remainder_nonempty(x)):
                 bad.append(f"removed user-owned {rel}")
             continue

@@ -9,7 +9,7 @@ import (
 // rawPaletteVars renders every palette color as --omarchy-<key>. The theme
 // reads these only where the lightweight theme has no equivalent (tab-group
 // swatches, about: pages); live chrome colors come from the extension.
-// The glass floor (DEC-66) rides along: chrome and glass pages both clamp
+// The glass floor rides along: chrome and glass pages both clamp
 // their alpha to it.
 func rawPaletteVars(p *palette) string {
 	var out strings.Builder

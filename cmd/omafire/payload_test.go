@@ -10,7 +10,7 @@ import (
 )
 
 // A payload removal cut short must leave the tree marked as ours: the
-// entrypoint is deleted after every other entry (omafire-v2z.1: a remove
+// entrypoint is deleted after every other entry (a remove
 // killed after it left an unmarked chrome/omafire/ that blocked every later
 // setup and remove).
 func TestRemoveFFPayloadTreeDeletesMarkerLast(t *testing.T) {
@@ -90,7 +90,7 @@ func TestRemoveFFPayloadTreeKeepsMarkerWhenNotEmptied(t *testing.T) {
 
 // A payload directory left unreadable but searchable (0311) still shows its
 // marker; removal must list it (restoring our 0700) and finish, never take
-// the failed listing for an empty tree and drop the marker (omafire-v2z.21).
+// the failed listing for an empty tree and drop the marker.
 func TestRemoveFFPayloadTreeUnreadableDir(t *testing.T) {
 	dir := t.TempDir() + "/omafire"
 	if err := os.MkdirAll(dir+"/src", 0o700); err != nil {

@@ -1,4 +1,4 @@
-/* Bitwarden's popup, sidebar and options (omafire-mjl.4): its new hex design tokens
+/* Bitwarden's popup, sidebar and options: its new hex design tokens
  * (--color-bg-*, --color-fg-*) pointed at the content tokens. The older channel-triple tokens
  * (--color-background: 32 39 51) can't take a colour and are left, so components still on them
  * keep Bitwarden's blue; its type is left alone too (the mono face breaks its fixed-height

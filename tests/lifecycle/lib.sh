@@ -1,7 +1,7 @@
 # shellcheck shell=bash
 # Sourced: FF, OP_* and FF_* are results for the scenario scripts to read.
 # shellcheck disable=SC2034
-# Lifecycle harness (omafire-v2z.1): runs the staged package's omafire in a
+# Lifecycle harness: runs the staged package's omafire in a
 # bubblewrap sandbox where / is read-only and only the scratch root is
 # writable, so no run can reach the live home, profile or psd mount.
 # Not part of tests/run.sh: it needs bwrap, strace, makepkg and Firefox.

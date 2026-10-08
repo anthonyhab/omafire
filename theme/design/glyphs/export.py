@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Write src/icons/extensions/*.svg from the brand marks in brand/ (DEC-63).
+"""Write src/icons/extensions/*.svg from the brand marks in brand/.
 
 Each source is fitted, by its visual bounding box, into a BOX-px square
 centred on the 16px grid (12.5: the optical size of Nova's toolbar icons),

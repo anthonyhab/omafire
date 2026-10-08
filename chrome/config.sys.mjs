@@ -1,5 +1,4 @@
-// Omafire settings in Firefox: ~/.config/omafire/config.json drives prefs
-// (DEC-29).
+// Omafire settings in Firefox: ~/.config/omafire/config.json drives prefs.
 //
 // The theme reads prefs with -moz-pref(), so prefs stay what renders; this
 // module keeps them equal to the file. omafire.cfg starts it once per

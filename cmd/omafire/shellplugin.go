@@ -1,6 +1,6 @@
 package main
 
-// The Omarchy shell plugin (DEC-30): the package installs it to
+// The Omarchy shell plugin: the package installs it to
 // /usr/share/omafire/shell/omafire; setup links it into the user's plugin
 // directory, where the shell finds third-party plugins, and enables it
 // once. A user who disables it keeps it disabled across setups; a copy or

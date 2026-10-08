@@ -18,7 +18,7 @@
 // A third thing is Firefox's own: sidebar-main decides which tools fit with
 // an IntersectionObserver, and a column parked or sliding in from off-screen
 // reads as overflowing (a » shows for ~80 ms on every reveal, the gear is
-// missing until the end; omafire-v2z.13). The observer is replaced by one
+// missing until the end). The observer is replaced by one
 // that ignores readings while the column is not wholly inside the window,
 // and re-reads the tools once it is.
 //

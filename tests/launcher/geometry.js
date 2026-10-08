@@ -1,6 +1,6 @@
 // Launcher geometry at the current window size, text scale and density
 // (fxlab js, chrome context, with results open). Returns the rects and a
-// `fail` list, one entry per broken acceptance criterion (omafire-v2z.4):
+// `fail` list, one entry per broken acceptance criterion:
 //   AC1  field, card, results and auxiliary controls inside the viewport;
 //        the card off the tab column in the sidebar layout; the last row
 //        inside the card, or reachable by scrolling when below the viewport

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Launcher stress sweep (omafire-v2z.4): every layout's launcher with long-
+# Launcher stress sweep: every layout's launcher with long-
 # titled switch-to-tab results, measured by geometry.js and states.js.
 # Needs a browser, so it is not part of tests/run.sh. Against a running
 # fxlab host session of this worktree:

@@ -37,7 +37,7 @@
   const layout = () => get("omafire.layout", "top") === "sidebar" ? "sidebar" : "top";
   const vertical = () => get("sidebar.verticalTabs", false);
   const zen = () => get("omafire.zen-mode", false) && get("omafire.zen-mode-active", false);
-  // The theme's glass floor (DEC-66, written by omafire sync): below it
+  // The theme's glass floor (written by omafire sync): below it
   // text stops reading, so the theme ignores lower values and the slider
   // stops there.
   const glassFloor = () => {

@@ -1,6 +1,6 @@
 package main
 
-// get, set, reset and watch: ~/.config/omafire/config.json (DEC-29).
+// get, set, reset and watch: ~/.config/omafire/config.json.
 
 import (
 	"bytes"

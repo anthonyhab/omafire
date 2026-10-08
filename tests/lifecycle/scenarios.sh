@@ -202,7 +202,7 @@ s5() {
   local T='$SB_HOME/.local/state/omarchy/current/theme'
   invalid missing-palette "mv $T/colors.toml $SCR/colors.toml.aside" "mv $SCR/colors.toml.aside $T/colors.toml"
   invalid missing-theme-dir "mv $T $SCR/theme.aside" "mv $SCR/theme.aside $T"
-  # A palette with no valid colour is refused (omafire-v2z.18), changing nothing.
+  # A palette with no valid colour is refused, changing nothing.
   invalid malformed-palette "cp $T/colors.toml $SCR/colors.ok; printf 'this is [not toml\nbackground = \"#zzzzzz\"\n' > $T/colors.toml" \
     "cp $SCR/colors.ok $T/colors.toml"
   invalid malformed-palette-sync "printf 'garbage\n' > $T/colors.toml" "cp $LIVE_THEME/colors.toml $T/colors.toml" sync

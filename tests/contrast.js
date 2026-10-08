@@ -7,7 +7,7 @@
 // (tokens-content.css). Text and marks are composited over every surface
 // they sit on, and over that surface hovered, and the worst ratio counts.
 // Glass is left out: its alpha never drops below the theme's glass floor
-// (DEC-66), and what shows through is the wallpaper, not the palette.
+//, and what shows through is the wallpaper, not the palette.
 
 const fs = require("node:fs");
 const path = require("node:path");

@@ -224,7 +224,7 @@
  * - omafire turns off forced colours' text backplate (a Canvas plate
  *   behind each text run), so Cinder may draw surfaces in other steps.
  * - Glass pages: frame.css clears the canvas behind the page, and the
- *   window under it is the backdrop (translucency.css, DEC-65). Cinder
+ *   window under it is the backdrop (translucency.css). Cinder
  *   lifts the page's base back to the window's alpha, or leaves it clear
  *   around a site's main container, which it paints at B. */
 @media not -moz-pref("browser.display.permit_backplate") {

@@ -19,7 +19,7 @@ user_pref("ui.accentcolor", "#8d8d8d");
 user_pref("omafire.scripts", false);
 `
 
-// remove must clear what keeps a profile managed (omafire-v2z.16) and leave
+// remove must clear what keeps a profile managed and leave
 // the rest of prefs.js, including the user's own omafire.scripts switch.
 func TestClearOwnedFFPrefs(t *testing.T) {
 	dir := t.TempDir()
@@ -65,7 +65,7 @@ func TestClearOwnedFFPrefsWaitsForRunningFirefox(t *testing.T) {
 	}
 }
 
-// One profile's refusal ends that profile's work, not the run (omafire-v2z.20).
+// One profile's refusal ends that profile's work, not the run.
 func TestGuardReturnsTheFailure(t *testing.T) {
 	if msg := guard(func() { fail("bad %s", "markers") }); msg != "bad markers" {
 		t.Errorf("guard = %q", msg)
@@ -78,7 +78,7 @@ func TestGuardReturnsTheFailure(t *testing.T) {
 	}
 }
 
-// A colors.toml with no readable colour is refused (omafire-v2z.18); a
+// A colors.toml with no readable colour is refused; a
 // partial one is fine and falls back for the rest.
 func TestReadPaletteRefusesNoValidColour(t *testing.T) {
 	dir := t.TempDir()
@@ -102,7 +102,7 @@ func TestReadPaletteRefusesNoValidColour(t *testing.T) {
 	}
 }
 
-// An interrupted run's temp files and unmarked stages go (omafire-v2z.17);
+// An interrupted run's temp files and unmarked stages go;
 // other names and the user's files stay.
 func TestSweepTemps(t *testing.T) {
 	dir := t.TempDir()

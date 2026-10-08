@@ -1,4 +1,4 @@
-/* SponsorBlock's popup and options (omafire-mjl.4): its own custom properties pointed at the
+/* SponsorBlock's popup and options: its own custom properties pointed at the
  * content tokens. */
 @-moz-document regexp("moz-extension://[^/]+/(popup\\.html|options/options\\.html).*") {
   :root {

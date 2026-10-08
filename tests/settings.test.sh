@@ -1,5 +1,5 @@
 #!/bin/bash
-# omafire get/set/reset/watch and ~/.config/omafire/config.json (DEC-29).
+# omafire get/set/reset/watch and ~/.config/omafire/config.json.
 
 set -euo pipefail
 

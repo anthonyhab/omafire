@@ -2,7 +2,7 @@ package config
 
 import "testing"
 
-// A shortcut setting takes modifiers plus one key, or empty for none (omafire-1uc).
+// A shortcut setting takes modifiers plus one key, or empty for none.
 func TestChordCheck(t *testing.T) {
 	s, ok := Lookup("key-zen")
 	if !ok {

@@ -1,4 +1,4 @@
-/* Vimium C's action popup and options page (omafire-mjl.4): its own --vc-* custom properties
+/* Vimium C's action popup and options page: its own --vc-* custom properties
  * pointed at the content tokens. */
 @-moz-document regexp("moz-extension://[^/]+/pages/(action|options|show)\\.html.*") {
   :root {

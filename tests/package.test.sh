@@ -59,7 +59,7 @@ for name in "${scripts[@]}"; do
 done
 [[ $(find "$FIREFOX_DIR/omafire" -name '*.uc.js' | wc -l) -eq ${#scripts[@]} ]]
 cmp "$PROJECT_DIR/packaging/extension/omafire.xpi" "$FIREFOX_DIR/omafire/omafire.xpi"
-# The Omarchy shell plugin, byte for byte (DEC-30).
+# The Omarchy shell plugin, byte for byte.
 diff -r "$PROJECT_DIR/shell/omafire" "$PACKAGE_ROOT/usr/share/omafire/shell/omafire"
 
 # The settings module the loader starts, with the CLI's schema beside it.

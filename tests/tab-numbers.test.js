@@ -1,4 +1,4 @@
-// tab-numbers.uc.js (omafire-yz9): with tab-numbers and tab-numbers-hold on, Alt shows the
+// tab-numbers.uc.js: with tab-numbers and tab-numbers-hold on, Alt shows the
 // numbers, digits (Alt, 1, 2 = tab 12) light a tab and the switch waits for Alt's release.
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
