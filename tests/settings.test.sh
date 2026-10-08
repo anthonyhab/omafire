@@ -87,8 +87,10 @@ XDG_CONFIG_HOME="$TEST_ROOT/xdg" "$OMAFIRE_BIN" set glass on
 [[ -f $TEST_ROOT/xdg/omafire/config.json && ! -e $CONFIG ]]
 
 # watch: a line at start and per effective change; a broken file is skipped;
-# the end of stdin (a pipe) ends it.
+# a sync's new theme.json is a "palette" line; the end of stdin (a pipe)
+# ends it.
 mkfifo "$TEST_ROOT/in"
+mkdir -p "$HOME/.local/state/omafire"
 "$OMAFIRE_BIN" watch < "$TEST_ROOT/in" > "$TEST_ROOT/out" 2> "$TEST_ROOT/err" &
 WATCH_PID=$!
 exec 3> "$TEST_ROOT/in"
@@ -115,6 +117,9 @@ rm -r "$HOME/.config/omafire"           # gone: defaults
 lines 4
 "$OMAFIRE_BIN" set tabs vertical        # a new directory is still watched
 lines 5
+printf '{}\n' > "$TEST_ROOT/theme.json"
+mv "$TEST_ROOT/theme.json" "$HOME/.local/state/omafire/theme.json"
+lines 6
 exec 3>&-
 for _ in $(seq 50); do
   kill -0 "$WATCH_PID" 2>/dev/null || break
@@ -128,7 +133,9 @@ wait "$WATCH_PID"
 WATCH_PID=
 python3 - "$TEST_ROOT/out" <<'PY'
 import json, sys
-got = [json.loads(l) for l in open(sys.argv[1])]
+lines = open(sys.argv[1]).read().splitlines()
+assert lines.pop() == "palette", lines
+got = [json.loads(l) for l in lines]
 want = [(False, 0.85, "horizontal"), (True, 0.85, "horizontal"), (True, 0.9, "horizontal"),
         (False, 0.85, "horizontal"), (False, 0.85, "vertical")]
 assert [(g["glass"], g["opacity"], g["tabs"]) for g in got] == want, got

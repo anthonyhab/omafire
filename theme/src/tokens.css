@@ -3,11 +3,11 @@
  * The only file that chooses colors and geometry. Everything else reads the
  * --oc-* tokens below.
  *
- * Colors come from Firefox's own theme variables, which the Omafire
- * extension's lightweight theme sets live on every Omarchy theme change.
- * Reading them (instead of the generated --omarchy-* palette) is what keeps a
- * live theme switch repaint-only: omafire-palette.css is loaded once at
- * startup and only matters until the extension's theme lands.
+ * Colors come from Firefox's own theme variables, which omafire-palette.css
+ * sets from the Omarchy palette (the CLI picks readable text and fills, as a
+ * lightweight theme would), and from the generated --omarchy-* palette where
+ * Firefox has no variable. live-palette.uc.js lays a new palette over both
+ * on a theme switch, so a switch is repaint-only.
  *
  * Tokens are declared once on :root and inherit as computed values, so the
  * native variables can later be overridden on descendants (toolbars, panels)
@@ -78,7 +78,7 @@
   --oc-font-size: 12px;     /* buttons, menus */
   --oc-label-size: 13px;    /* tab labels, urlbar */
 
-  /* ---- color: live from the lightweight theme ---------------------- */
+  /* ---- color: from the generated palette -------------------------- */
 
   --oc-frame: var(--toolbar-background-color, var(--omarchy-dark_background));
   --oc-text: var(--toolbar-text-color, var(--omarchy-foreground));
@@ -95,14 +95,8 @@
    * palette it is the accent mark, held to 3:1 (below). */
   --oc-focus: var(--oc-accent-mark);
   /* The active tab's glow: the palette accent, or the page's own colour
-   * when Omafire's site-coloured tabs are on (it sets the lightweight
-   * theme's tab_loading per window). Outside a lightweight theme Firefox's
-   * own --tab-loading-fill is its default blue, so it only counts there. */
-  --oc-glow: var(--oc-accent);
-
-  &[lwtheme] {
-    --oc-glow: var(--tab-loading-fill, var(--oc-accent));
-  }
+   * on a window where site-coloured tabs set --omafire-site-color. */
+  --oc-glow: var(--omafire-site-color, var(--oc-accent));
 
   /* ---- color: derived --------------------------------------------- */
 
@@ -169,8 +163,8 @@
     color-mix(in srgb, var(--oc-glow) 40%, transparent) 40%,
     var(--oc-line-strong) 85%;
   /* Destructive actions (a tab's close button) warn in the palette's red.
-   * The lightweight theme carries no red, so like the tab-group swatches
-   * it follows the generated palette and catches up on restart. */
+   * Firefox has no red theme variable, so like the tab-group swatches it
+   * reads the palette directly. */
   --oc-danger: var(--omarchy-red, var(--oc-accent));
   --oc-danger-wash: color-mix(in srgb, var(--oc-danger) 18%, transparent);
   --oc-danger-line: color-mix(in srgb, var(--oc-danger) 45%, transparent);

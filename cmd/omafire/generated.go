@@ -7,8 +7,8 @@ import (
 )
 
 // rawPaletteVars renders every palette color as --omarchy-<key>. The theme
-// reads these only where the lightweight theme has no equivalent (tab-group
-// swatches, about: pages); live chrome colors come from the extension.
+// reads these where Firefox has no theme variable (tab-group swatches, the
+// danger red, about: pages).
 // The glass floor rides along: chrome and glass pages both clamp
 // their alpha to it.
 func rawPaletteVars(p *palette) string {
@@ -25,25 +25,12 @@ func rawPaletteVars(p *palette) string {
 	return out.String()
 }
 
-// writePaletteCSS writes the chrome palette. Besides the raw keys, it
-// mirrors the Firefox theme variables the extension's lightweight theme
-// sets, under :root:not([lwtheme]), so the first painted frame already uses
-// the current palette; the block goes inert the moment the extension's
-// theme lands and owns the same variables live. !important is required:
-// userChrome is user origin and Firefox's own defaults are author origin.
+// writePaletteCSS writes the chrome palette: the raw keys and the Firefox
+// theme variables (firefoxtheme.go), so the first painted frame already
+// uses the current palette and no add-on has to theme the chrome.
 func writePaletteCSS(p *palette, path string) {
 	css := "/* OMAFIRE GENERATED PALETTE — written by omafire sync; do not edit. */\n" +
-		rawPaletteVars(p) + "\n" +
-		":root:not([lwtheme]) {\n" +
-		"  color-scheme: " + p.mode + " !important;\n" +
-		"  --toolbar-background-color: " + p.get("dark_background") + " !important;\n" +
-		"  --toolbar-text-color: " + p.get("foreground") + " !important;\n" +
-		"  --toolbar-field-background-color: " + p.get("darker_background") + " !important;\n" +
-		"  --toolbar-field-text-color: " + p.get("light_foreground") + " !important;\n" +
-		"  --toolbar-field-border-color-focus: " + p.get("bright_blue") + " !important;\n" +
-		"  --lwt-tab-line-color: " + p.get("accent") + " !important;\n" +
-		"  --tabpanel-background-color: " + p.get("background") + " !important;\n" +
-		"}\n"
+		rawPaletteVars(p) + "\n" + firefoxThemeCSS(p)
 	atomicWrite(path, css, 0o600, false)
 }
 

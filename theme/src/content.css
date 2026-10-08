@@ -2,13 +2,11 @@
  *
  * Only about: pages are touched; ordinary websites are never styled.
  *
- * New tab / home: the Omafire lightweight theme colors these live
- * (Firefox marks the root [lwt-newtab] and sets --newtab-* inline). The
- * rules below are the cold-start fallback from the generated palette and
- * step aside as soon as the live theme arrives. */
+ * New tab / home: the palette's colours, which follow a theme switch
+ * (live-palette.uc.js). */
 
 @-moz-document url-prefix("about:newtab"), url-prefix("about:home"), url-prefix("about:privatebrowsing") {
-  :root:not([lwt-newtab]) {
+  :root {
     --newtab-background-color: var(--omarchy-background) !important;
     --newtab-background-color-secondary: var(--omarchy-dark_background) !important;
     --newtab-text-primary-color: var(--omarchy-foreground) !important;

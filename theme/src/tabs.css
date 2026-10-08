@@ -15,13 +15,8 @@
   --tab-selected-textcolor: var(--oc-text) !important;
   --tab-attention-dot-color: var(--oc-accent) !important;
 
-  /* The loading throbber and the active tab's glow (tokens.css) follow
-   * the accent. Under a lightweight theme Omafire owns tab_loading: it is
-   * the accent, or per window the page's colour with site-coloured tabs,
-   * so leave it be there. */
-  &:not([lwtheme]) {
-    --tab-loading-fill: var(--oc-accent) !important;
-  }
+  /* The loading throbber follows the accent. */
+  --tab-loading-fill: var(--oc-accent) !important;
 
   /* Tab-group swatches follow the Omarchy palette. */
   --tab-group-red: var(--omarchy-red) !important;

@@ -2,11 +2,10 @@
  *
  * The same --oc-* vocabulary as tokens.css, for content documents
  * (about:preferences, about:addons, …). tokens.css can't be imported
- * here: it reads the lightweight-theme variables first, and in a content
+ * here: it reads Firefox's chrome theme variables first, and in a content
  * document those resolve to Firefox's stock light-dark() defaults, not
- * the palette. These pages have no live theme hook, so the tokens read
- * the generated content palette directly and follow it as of the last
- * restart.
+ * the palette. So the tokens read the generated content palette directly,
+ * which live-palette.uc.js replaces on a theme switch.
  *
  * Scoped to the pages content.css styles, so websites never see them.
  * The derived block mirrors tokens.css; scripts/lint.mjs checks that the

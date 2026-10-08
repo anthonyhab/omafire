@@ -172,9 +172,11 @@ for profile in "$RELATIVE_PROFILE" "$ABSOLUTE_PROFILE"; do
   # The glass floor rides in both palettes.
   grep -Eqx -- '  --omafire-glass-floor: (0\.[5-9][0-9]|1\.00);' "$profile/chrome/omafire-palette.css"
   grep -Eqx -- '  --omafire-glass-floor: (0\.[5-9][0-9]|1\.00);' "$profile/chrome/omafire-content-palette.css"
-  # Cold-start mirror of the lightweight theme, inert once it lands.
-  grep -Fqx ':root:not([lwtheme]) {' "$profile/chrome/omafire-palette.css"
-  grep -Fq -- '--tabpanel-background-color: #111c18 !important;' \
+  # The Firefox theme variables, in place of a lightweight theme.
+  grep -Fqx '  --omafire-ff-color-scheme: dark;' "$profile/chrome/omafire-palette.css"
+  grep -Fqx '  color-scheme: var(--omafire-ff-color-scheme) !important;' "$profile/chrome/omafire-palette.css"
+  grep -Fqx '  --omafire-ff-tabpanel-background-color: #111c18;' "$profile/chrome/omafire-palette.css"
+  grep -Fqx '  --toolbarbutton-icon-fill: var(--omafire-ff-toolbarbutton-icon-fill) !important;' \
     "$profile/chrome/omafire-palette.css"
   grep -Fqx '  --omafire-radius-container: 9px;' "$profile/chrome/omafire-radius.css"
   grep -Fqx '  --omarchy-border-width: 2px;' "$profile/chrome/omafire-radius.css"
@@ -227,7 +229,7 @@ cp "$TEST_DIR/fixtures/minimal-colors.toml" "$THEME_DIR/colors.toml"
 grep -Fq -- '--omarchy-background: #FAFAFA;' "$RELATIVE_PROFILE/chrome/omafire-palette.css"
 grep -Fqx 'user_pref("layout.css.prefers-color-scheme.content-override", 1);' \
   "$RELATIVE_PROFILE/user.js"
-grep -Fqx '  color-scheme: light !important;' "$RELATIVE_PROFILE/chrome/omafire-palette.css"
+grep -Fqx '  --omafire-ff-color-scheme: light;' "$RELATIVE_PROFILE/chrome/omafire-palette.css"
 grep -Fq -- '--omarchy-background: #FAFAFA;' "$CHECKOUT_PROFILE/chrome/omafire-palette.css"
 cp "$TEST_DIR/fixtures/colors.toml" "$THEME_DIR/colors.toml"
 

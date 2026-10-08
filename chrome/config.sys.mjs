@@ -9,6 +9,8 @@
 //      user-set prefs seed it (`omafire set --if-missing`).
 //   2. `omafire watch` runs as a child process and prints the settings as a
 //      JSON line on every change; each changed setting is applied.
+//      A "palette" line (a sync wrote a new palette) is passed on as the
+//      omafire-palette-changed notification, for live-palette.uc.js.
 //   3. A mapped pref changed in Firefox (the Omafire panel, a keybinding,
 //      about:config) goes back through `omafire set`, which validates it and
 //      wakes every other Firefox through its own watch.
@@ -304,6 +306,10 @@ async function watch() {
         while ((nl = buffer.indexOf("\n")) >= 0) {
           const line = buffer.slice(0, nl);
           buffer = buffer.slice(nl + 1);
+          if (line === "palette") {
+            Services.obs.notifyObservers(null, "omafire-palette-changed");
+            continue;
+          }
           if (!line.startsWith("{")) {
             console.error(LOG, line);   // the CLI's warnings
             continue;

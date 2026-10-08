@@ -143,6 +143,12 @@
       hint: "Show them only while Alt is held; Alt, then digits, switches on release.",
     },
     {
+      label: "Site colours", kind: "toggle", prefs: ["omafire.site-colors"],
+      read: () => get("omafire.site-colors", false),
+      write: v => set("omafire.site-colors", v),
+      hint: "The active tab glows in its site's colour.",
+    },
+    {
       label: "Extension glyphs", kind: "toggle", prefs: ["omafire.extension-glyphs"],
       read: () => get("omafire.extension-glyphs", true),
       write: v => set("omafire.extension-glyphs", v),

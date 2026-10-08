@@ -143,8 +143,10 @@ func cmdReset(args []string) {
 
 // watch prints the effective settings as one JSON line now and after every
 // change that alters them. A file that does not parse is reported and
-// skipped until it does. When stdin is a pipe (Firefox), its end ends the
-// watch, so a crashed browser does not leave one behind.
+// skipped until it does. A sync's new palette prints a "palette" line: sync
+// writes theme.json last, after the profiles' palette files. When stdin is a
+// pipe (Firefox), its end ends the watch, so a crashed browser does not
+// leave one behind.
 func cmdWatch(args []string) {
 	if len(args) > 0 {
 		fail("command 'watch' does not accept arguments")
@@ -170,6 +172,16 @@ func cmdWatch(args []string) {
 		wd = w
 	}
 	addWatch()
+	// The state directory is sync's to create and remove's to delete: watch
+	// it while it exists, and look for it again every few seconds while not.
+	stateWD := -1
+	addStateWatch := func() {
+		if w, err := unix.InotifyAddWatch(fd, stateDir, unix.IN_CLOSE_WRITE|unix.IN_MOVED_TO); err == nil {
+			stateWD = w
+		}
+	}
+	addStateWatch()
+	stateName := filepath.Base(stateFile)
 
 	var last string
 	lastWarnings := ""
@@ -211,7 +223,12 @@ func cmdWatch(args []string) {
 	}
 	buf := make([]byte, 64*1024)
 	for {
-		if _, err := unix.Poll(fds, -1); err != nil {
+		timeout := -1
+		if stateWD < 0 {
+			timeout = 3000
+			addStateWatch()
+		}
+		if _, err := unix.Poll(fds, timeout); err != nil {
 			if errors.Is(err, unix.EINTR) {
 				continue
 			}
@@ -229,7 +246,7 @@ func cmdWatch(args []string) {
 		if err != nil {
 			continue
 		}
-		relevant, gone := false, false
+		relevant, gone, palette := false, false, false
 		for off := 0; off+unix.SizeofInotifyEvent <= n; {
 			evWD := int(int32(binary.NativeEndian.Uint32(buf[off:])))
 			evMask := binary.NativeEndian.Uint32(buf[off+4:])
@@ -239,6 +256,14 @@ func cmdWatch(args []string) {
 			off = nameStart + nameLen
 			if evMask&unix.IN_Q_OVERFLOW != 0 {
 				relevant = true
+			}
+			if evWD == stateWD {
+				if evMask&unix.IN_IGNORED != 0 {
+					stateWD = -1
+				} else if string(evName) == stateName {
+					palette = true
+				}
+				continue
 			}
 			if evWD != wd {
 				continue
@@ -256,6 +281,11 @@ func cmdWatch(args []string) {
 		}
 		if relevant {
 			emit()
+		}
+		if palette {
+			if _, err := os.Stdout.WriteString("palette\n"); err != nil {
+				os.Exit(0)
+			}
 		}
 	}
 }

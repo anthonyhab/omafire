@@ -1,13 +1,13 @@
 // Omafire live palette: a theme switch reaches everything without a restart.
 //
-// The chrome follows the Omafire extension's lightweight theme live, but
-// the files omafire sync writes beside the theme are read once, at startup:
-// the palette (tab-group swatches, the danger red), Hyprland's rounding,
-// and the content palette that Firefox's own pages (settings, add-ons) are
-// painted from. When the extension repaints the window, sync has already
-// rewritten those files (it writes them before theme.json); this rereads
-// them and lays their --omarchy-* values over the startup copies as one
-// user sheet, which reaches chrome and content documents alike.
+// The files omafire sync writes beside the theme are read once, at startup:
+// the chrome palette (the --omarchy-* colours and the Firefox theme
+// variables), Hyprland's rounding, and the content palette that Firefox's
+// own pages (settings, add-ons) are painted from. A sync rewrites them, then
+// theme.json, which `omafire watch` reports (config.sys.mjs passes it on as
+// omafire-palette-changed); this rereads them and lays their values over
+// the startup copies as one user sheet, which reaches chrome and content
+// documents alike.
 // Loaded into each browser window by omafire.cfg.
 (function () {
   "use strict";
@@ -15,7 +15,7 @@
     return;
   }
 
-  const TOPIC = "lightweight-theme-styling-update";
+  const TOPIC = "omafire-palette-changed";
   // Remembers the registered sheet across windows. A default-branch pref
   // is never written to prefs.js, so it lasts exactly one session.
   const CURRENT = "omafire.internal.live-palette-sheet";
@@ -29,10 +29,11 @@
   async function vars(name) {
     try {
       const text = await IOUtils.readUTF8(file(name));
-      // Only the palette's own variables: the chrome palette also holds a
-      // cold-start stand-in for the lightweight theme, which must never
-      // outlive startup.
-      return [...text.matchAll(/^\s*(--omarchy-[\w-]+)\s*:\s*([^;!]+?)\s*;/gm)]
+      // Every plain variable: the glass floor and the content palette's
+      // highlight colours are --omafire-*, the Firefox theme values
+      // --omafire-ff-*. The Firefox variables that read those (!important
+      // in the file) stay as they are.
+      return [...text.matchAll(/^\s*(--[\w-]+)\s*:\s*([^;!]+?)\s*;/gm)]
         .map(([, prop, value]) => `${prop}: ${value} !important;`);
     } catch {
       return [];
@@ -112,6 +113,8 @@
     if (css) {
       swap(CURRENT, css);
     }
+    // a light palette wants a deeper site colour
+    window.OmafireSiteColors?.paint();
   }
 
   // Glass pages take the chrome's glass alpha (the theme's content.css).
@@ -128,12 +131,10 @@
 
   const observer = {
     observe() {
-      // Pages recolour with the chrome's first repaint, not after the
-      // settle: the prefs only change once, and they're cheap to compare.
       pagePalette().catch(e => console.error("[omafire:live-palette]", e));
-      // The extension repaints a window at a time; settle once.
+      // A quick run of syncs (theme previews) settles once.
       clearTimeout(timer);
-      timer = setTimeout(() => refresh().catch(e => console.error("[omafire:live-palette]", e)), 300);
+      timer = setTimeout(() => refresh().catch(e => console.error("[omafire:live-palette]", e)), 100);
     },
   };
   Services.obs.addObserver(observer, TOPIC);

@@ -77,7 +77,7 @@ function edgeLead(defs, light) {
 // state theirs in tokens-content.css.
 function glowOf(defs, v, light) {
   const g = defs["--oc-glow"];
-  if (!g || g.includes("--tab-loading-fill")) return v.accent;
+  if (!g || g.includes("--omafire-site-color")) return v.accent;
   if (g === "var(--oc-accent)") return v.accent;
   return over(tokenModel(defs, g.match(/^var\((--oc-[\w-]+)\)$/)[1], light)(v));
 }

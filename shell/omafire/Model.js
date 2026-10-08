@@ -39,6 +39,8 @@ var ROWS = [
   { key: "tab-numbers-hold", section: "LOOK", label: "Numbers on hold", type: "toggle",
     hint: "Show them only while Alt is held; Alt, then digits, switches on release.",
     when: function(c) { return c["tab-numbers"] === true } },
+  { key: "site-colors", section: "LOOK", label: "Site colours", type: "toggle",
+    hint: "The active tab glows in its site's colour." },
   { key: "extension-glyphs", section: "LOOK", label: "Extension glyphs", type: "toggle",
     hint: "Monochrome icons for extensions." },
   { key: "key-zen", section: "KEYS", label: "Hide the chrome", type: "chord" },

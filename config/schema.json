@@ -100,6 +100,13 @@
       "prefs": [{ "name": "omafire.tab-numbers-hold" }]
     },
     {
+      "key": "site-colors",
+      "about": "Light the active tab in its site's colour (from the favicon) instead of the accent.",
+      "type": "bool",
+      "default": false,
+      "prefs": [{ "name": "omafire.site-colors" }]
+    },
+    {
       "key": "extension-glyphs",
       "about": "Draw extension toolbar icons as monochrome glyphs.",
       "type": "bool",
