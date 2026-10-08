@@ -1,3 +1,6 @@
+# shellcheck shell=bash
+# Sourced: FF, OP_* and FF_* are results for the scenario scripts to read.
+# shellcheck disable=SC2034
 # Lifecycle harness (omafire-v2z.1): runs the staged package's omafire in a
 # bubblewrap sandbox where / is read-only and only the scratch root is
 # writable, so no run can reach the live home, profile or psd mount.
@@ -117,15 +120,15 @@ ffstart() {
   lc_output
   SB_WAYLAND=$rt sandbox "$pkg" sh -c 'firefox --no-remote --profile "$1" about:blank & echo $! > "$2"; wait' \
     sh "$profile" "$pidfile" > "$dir/ff-$label.log" 2>&1 &
-  local runner=$! i
-  for i in $(seq 50); do [[ -s $pidfile ]] && break; sleep 0.1; done
-  [[ -s $pidfile ]] && lc_sway "assign [pid=$(cat "$pidfile")] workspace $LC_WORKSPACE" >/dev/null
+  local runner=$!
+  for _ in $(seq 50); do [[ -s $pidfile ]] && break; sleep 0.1; done
+  [[ -s $pidfile ]] && lc_sway "assign [pid=$(cat "$pidfile")] workspace $LC_WORKSPACE" >/dev/null || true
   sleep 3
-  [[ -s $pidfile ]] && lc_sway "[pid=$(cat "$pidfile")] move container to workspace $LC_WORKSPACE" >/dev/null 2>&1
+  [[ -s $pidfile ]] && lc_sway "[pid=$(cat "$pidfile")] move container to workspace $LC_WORKSPACE" >/dev/null 2>&1 || true
   sleep "${FF_SETTLE:-12}"
   if [[ -f $pidfile ]] && kill -0 "$(cat "$pidfile")" 2>/dev/null; then alive=yes; fi
   XDG_RUNTIME_DIR=$rt WAYLAND_DISPLAY=wayland-1 grim -o "$LC_OUTPUT" "$dir/ff-$label.png" 2>/dev/null || true
-  [[ -f $pidfile ]] && kill -TERM "$(cat "$pidfile")" 2>/dev/null
+  [[ -f $pidfile ]] && kill -TERM "$(cat "$pidfile")" 2>/dev/null || true
   wait "$runner" 2>/dev/null || true
   local addon=no
   grep -q 'omafire' "$profile/extensions.json" 2>/dev/null && addon=yes

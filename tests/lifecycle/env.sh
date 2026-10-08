@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # Shared settings for the lifecycle harness; source from the repo root.
 export SCR=${SCR:-$HOME/.cache/omafire-lc}
 export REPO=$PWD PKG_HEAD=$SCR/pkg-head PKG_PREV=$SCR/pkg-v066 PKG_REL=$SCR/pkg-rel

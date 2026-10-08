@@ -21,6 +21,12 @@ OUT=${1:?usage: sweep.sh [--size WxH] OUTDIR}
 mkdir -p "$OUT"
 F() { "$FXLAB" "$@"; }
 
+# Only a session this caller started: the default state dir may be another
+# agent's, and the sweep rewrites prefs and opens tabs in it.
+[[ -n ${FXLAB_STATE:-} ]] || { echo "sweep.sh: set FXLAB_STATE to your own fxlab session" >&2; exit 2; }
+mode=$(F status | python3 -c 'import json,sys; print(json.load(sys.stdin).get("mode", ""))') || exit 2
+[[ $mode == host || $mode == vm ]] || { echo "sweep.sh: session mode '$mode' is not host or vm" >&2; exit 2; }
+
 # fxlab up has no window size: resize its headless output directly.
 if [[ -n $SIZE ]]; then
   output=$(python3 -c 'import json,os,sys; print(json.load(open(os.environ["FXLAB_STATE"] + "/session.json"))["output"])')

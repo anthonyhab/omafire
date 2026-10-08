@@ -21,7 +21,7 @@ rm -rf "$WORK/xpi/META-INF"
 # What sign.sh uploads: the source tree less its ignores and the receipt.
 listing() {
   (cd "$1" && find . -type f \
-    ! -path './dist/*' ! -name sign.sh ! -name build.sh ! -name .amo-upload-uuid \
+    ! -path './dist/*' ! -name sign.sh ! -name .amo-upload-uuid \
     | sort)
 }
 if ! diff <(listing "$SOURCE") <(listing "$WORK/xpi") >"$WORK/files"; then

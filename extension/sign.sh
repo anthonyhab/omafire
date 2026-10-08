@@ -23,4 +23,4 @@ exec npx -y web-ext@10.6.0 sign \
   --source-dir "$EXTENSION_DIR" \
   --artifacts-dir "$EXTENSION_DIR/dist" \
   --channel unlisted \
-  --ignore-files "dist/**" "sign.sh" "build.sh"
+  --ignore-files "dist/**" "sign.sh"

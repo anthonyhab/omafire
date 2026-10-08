@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # make_fixture DIR: a pristine sandbox home under DIR/home with every §2
 # fixture profile and sentinel content. Paths are relative where they can
 # be, so a copy (cp -a) of DIR is a fixture of its own.

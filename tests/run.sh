@@ -9,7 +9,6 @@ make -C "$PROJECT_DIR" all >/dev/null
 export OMAFIRE_BIN="$PROJECT_DIR/build/omafire"
 
 bash -n \
-  "$PROJECT_DIR/extension/build.sh" \
   "$PROJECT_DIR/packaging/omafire-hook" \
   "$SCRIPT_DIR/command.test.sh" \
   "$SCRIPT_DIR/package.test.sh" \
@@ -23,7 +22,6 @@ bash -n \
   "$SCRIPT_DIR/fixtures/bin/omarchy"
 
 shellcheck \
-  "$PROJECT_DIR/extension/build.sh" \
   "$PROJECT_DIR/packaging/omafire-hook" \
   "$PROJECT_DIR/scripts/build-payload.sh" \
   "$PROJECT_DIR/scripts/check-xpi.sh" \
@@ -38,6 +36,14 @@ shellcheck \
   "$SCRIPT_DIR/settings.test.sh" \
   "$PROJECT_DIR/packaging/omafox-shim" \
   "$SCRIPT_DIR/fixtures/bin/omarchy"
+
+# Harness and release scripts that run outside this gate: warnings only.
+shellcheck -S warning \
+  "$PROJECT_DIR/extension/sign.sh" \
+  "$PROJECT_DIR/scripts/ci-status" \
+  "$PROJECT_DIR/scripts/ci-wait" \
+  "$SCRIPT_DIR/launcher/sweep.sh" \
+  "$SCRIPT_DIR"/lifecycle/*.sh
 
 node --check "$PROJECT_DIR/extension/theme.js"
 node --check "$PROJECT_DIR/extension/background.js"
