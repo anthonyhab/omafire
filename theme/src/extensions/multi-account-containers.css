@@ -1,0 +1,69 @@
+/* Firefox Multi-Account Containers' popup. Its whole palette is custom properties (the
+ * dark set on [data-theme="dark"]), pointed here at the content tokens: cyan primaries
+ * become the accent fill, greys the field and hover fills, its pink the palette's red.
+ * The container colours stay: they name the containers. Scoped by its own panel ids:
+ * popup.html is a common name (SponsorBlock, Redirector). */
+@-moz-document regexp("moz-extension://[^/]+/(popup\\.html|options/options\\.html).*") {
+  html:has(#container-panel),
+  html:has(#container-panel)[data-theme] {
+    --button-bg-color-primary: var(--oc-accent-fill) !important;
+    --button-bg-hover-color-primary: var(--oc-accent-fill-hover) !important;
+    --button-bg-active-color-primary: var(--oc-accent-fill-hover) !important;
+    --button-bg-focus-color-primary: var(--oc-accent-fill) !important;
+    --button-text-color-primary: var(--oc-text) !important;
+    --button-bg-color-secondary: var(--oc-field-rest) !important;
+    --button-bg-hover-color-secondary: var(--oc-field-hover) !important;
+    --button-bg-active-color-secondary: var(--oc-active) !important;
+    --button-destructive-bg-color: var(--oc-danger-fill) !important;
+    --button-destructive-bg-hover-color: var(--oc-danger-fill-hover) !important;
+    --button-destructive-bg-active-color: var(--oc-danger-fill-hover) !important;
+    --button-destructive-bg-focus-color: var(--oc-danger-fill) !important;
+    --button-destructive-text-color: var(--oc-text) !important;
+    --badge-destructive-bg-color: var(--oc-danger-fill) !important;
+    --badge-destructive-text-color: var(--oc-text) !important;
+    --input-bg-color: var(--oc-field-rest) !important;
+    --input-bg-focus-color: var(--oc-field-hover) !important;
+    --input-bg-active-color: var(--oc-field-hover) !important;
+    --input-border-color: var(--oc-line) !important;
+    --input-border-focus-color: var(--oc-focus) !important;
+    --input-border-active-color: var(--oc-focus) !important;
+    --text-color-primary: var(--oc-text) !important;
+    --text-normal-color: var(--oc-text) !important;
+    --menu-bg-hover-color: var(--oc-hover) !important;
+    --menu-bg-active-color: var(--oc-active) !important;
+    --panel-bg-color: var(--oc-canvas) !important;
+    --panel-separator-color: var(--oc-line) !important;
+    --bgColor: var(--oc-canvas) !important;
+    --bgDark: var(--oc-frame) !important;
+    --controllerActive: var(--oc-active) !important;
+    --link-color: var(--oc-accent-mark) !important;
+    --link-hover-color: var(--oc-text) !important;
+    --toggle-off-bg-color: var(--oc-field-rest) !important;
+    --toggle-off-bg-hover-color: var(--oc-field-hover) !important;
+    --toggle-off-bg-active-color: var(--oc-active) !important;
+    --toggle-off-bg-focus-color: var(--oc-field-rest) !important;
+    --toggle-off-border-color: var(--oc-line-strong) !important;
+    --toggle-on-bg-color: var(--oc-accent) !important;
+    --toggle-on-bg-hover-color: var(--oc-accent) !important;
+    --toggle-on-bg-active-color: var(--oc-accent) !important;
+    --toggle-on-bg-focus-color: var(--oc-accent) !important;
+    --toggle-on-border-color: var(--oc-accent) !important;
+    --toggle-on-handle-bg-color: var(--oc-canvas) !important;
+    --usercontext-bg-hover-color: var(--oc-hover) !important;
+    --usercontext-bg-focus-color: var(--oc-hover) !important;
+    --usercontext-bg-active-color: var(--oc-active) !important;
+    --small-radius: var(--oc-radius-small) !important;
+    --fontInter: var(--oc-font) !important;
+    --fontInterMedium: var(--oc-font) !important;
+    --fontMetropolis: var(--oc-font) !important;
+    --fontMetropolisLight: var(--oc-font) !important;
+  }
+  html:has(#container-panel) :is(button, input, select, .button) {
+    border-radius: var(--oc-radius-small) !important;
+  }
+  html:has(#container-panel) :focus-visible {
+    outline: 1px solid var(--oc-focus) !important;
+    outline-offset: -1px !important;
+    box-shadow: none !important;
+  }
+}

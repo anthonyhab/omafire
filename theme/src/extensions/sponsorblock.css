@@ -1,21 +1,161 @@
-/* SponsorBlock's popup and options: its own custom properties pointed at the
- * content tokens. */
+/* SponsorBlock's popup and options. Its colours are custom properties, pointed here at
+ * the content tokens: the popup's are --sb-*, the options page still has the older
+ * names. Its fixed reds and greens, pill and round corners are put back by hand.
+ * Scoped by its own ids: popup.html is a common name (Containers, Redirector). */
 @-moz-document regexp("moz-extension://[^/]+/(popup\\.html|options/options\\.html).*") {
-  :root {
+  html#sponsorBlockPopupHTML,
+  html:has(> body.sponsorBlockPageBody) {
+    --sb-main-font-family: var(--oc-font) !important;
+    --sb-main-bg-color: var(--oc-canvas) !important;
+    --sb-main-fg-color: var(--oc-text) !important;
+    --sb-grey-bg-color: var(--oc-field-rest) !important;
+    --sb-grey-bg-active-color: var(--oc-field-hover) !important;
+    --sb-grey-fg-color: var(--oc-text-dim) !important;
+    --sb-red-bg-color: var(--oc-accent-fill) !important;
+    --sb-red-bg-active-color: var(--oc-accent-fill-hover) !important;
+    --sb-skip-profile-bg: var(--oc-panel) !important;
+    --sb-skip-profile-option-bg: var(--oc-canvas) !important;
+    --sb-skip-profile-disabled: var(--oc-text-dim) !important;
+    --sb-skip-profile-highlighted: var(--oc-accent-fill) !important;
+
     --background: var(--oc-canvas) !important;
-    --header-color: var(--oc-frame) !important;
     --menu-background: var(--oc-frame) !important;
+    --menu-foreground: var(--oc-text) !important;
+    --tab-color: transparent !important;
+    --tab-button-hover: var(--oc-hover) !important;
+    --tab-hover: var(--oc-text) !important;
+    --tab-selected: var(--oc-active) !important;
+    --description: var(--oc-text) !important;
+    --title: var(--oc-text) !important;
+    --white: var(--oc-text) !important;
+    --disabled: var(--oc-field-rest) !important;
+    --slider: var(--oc-field-hover) !important;
+    --border-color: var(--oc-line) !important;
     --dialog-background: var(--oc-panel) !important;
     --dialog-border: var(--oc-line-strong) !important;
-    --tab-color: var(--oc-frame) !important;
-    --border-color: var(--oc-line) !important;
-    --text: var(--oc-text) !important;
+    --selector-red: var(--oc-accent-fill) !important;
+    --selector-red-hover: var(--oc-accent-fill-hover) !important;
     font-family: var(--oc-font) !important;
   }
-  html, body {
+  html#sponsorBlockPopupHTML body,
+  body.sponsorBlockPageBody {
     font-family: var(--oc-font) !important;
   }
-  :focus-visible {
+
+  /* Popup: boxes on the hairline in the theme's corners; the primary button in the
+   * accent; fields and link buttons as fields. */
+  #sponsorblockPopup :is(.sbControlsMenu, #mainControls, .sbYourWorkBox) {
+    border: 1px solid var(--oc-line) !important;
+    border-radius: var(--oc-radius-small) !important;
+  }
+  #sponsorblockPopup .sbControlsMenu {
+    background-color: transparent !important;
+  }
+  #sponsorblockPopup .sbYourWorkCols {
+    border-color: var(--oc-line) !important;
+  }
+  #sponsorblockPopup .sbControlsMenu-item:hover {
+    background-color: var(--oc-hover) !important;
+  }
+  #sponsorblockPopup .sbMediumButton {
+    border-radius: var(--oc-radius-small) !important;
+  }
+  #sponsorblockPopup :is(input, textarea, a#helpButton, a#debugLogs) {
+    background-color: var(--oc-field-rest) !important;
+    color: var(--oc-text) !important;
+    border: 1px solid var(--oc-line) !important;
+    border-radius: var(--oc-radius-small) !important;
+  }
+  #sponsorblockPopup :is(input, textarea, a#helpButton, a#debugLogs):hover {
+    background-color: var(--oc-field-hover) !important;
+    border-color: var(--oc-line-strong) !important;
+  }
+  #sponsorblockPopup #issueReporterTabs > span {
+    background-color: transparent !important;
+    border: 1px solid var(--oc-line) !important;
+    border-radius: var(--oc-radius-small) !important;
+  }
+  #sponsorblockPopup #issueReporterTabs > span.sbSelected {
+    background-color: var(--oc-selected) !important;
+    border-color: var(--oc-line-strong) !important;
+  }
+
+  /* The on/off switch: a hairline field, filled with the accent when on; a flat knob. */
+  #sponsorblockPopup .switchBg {
+    border-radius: var(--oc-radius-small) !important;
+    box-shadow: none !important;
+  }
+  #sponsorblockPopup .switchBg.shadow {
+    background-color: transparent !important;
+  }
+  #sponsorblockPopup .switchBg.white {
+    background-color: var(--oc-field-rest) !important;
+    border: 1px solid var(--oc-line-strong) !important;
+  }
+  #sponsorblockPopup .switchBg.green {
+    background-color: var(--oc-accent) !important;
+  }
+  #sponsorblockPopup .switchDot {
+    background-color: var(--oc-text) !important;
+    border-radius: var(--oc-radius-small) !important;
+    box-shadow: none !important;
+  }
+
+  /* Options: the side menu's tabs are rows, the open one lit from its leading edge
+   * like the active tab; selects are fields; switches as in the popup. */
+  body.sponsorBlockPageBody :is(#menubar, .tab-heading, .option-button, .key, .keybind-buttons, #keybind-dialog .dialog) {
+    border-radius: var(--oc-radius-small) !important;
+  }
+  body.sponsorBlockPageBody #keybind-dialog .dialog {
+    border-width: 1px !important;
+  }
+  body.sponsorBlockPageBody .blocker {
+    background-color: transparent !important;
+  }
+  body.sponsorBlockPageBody .tab-heading {
+    border: 1px solid transparent !important;
+  }
+  body.sponsorBlockPageBody .tab-heading.selected {
+    background-color: transparent !important;
+    background-image:
+      linear-gradient(90deg, var(--oc-glow-edge)),
+      linear-gradient(90deg, var(--oc-glow-falloff)) !important;
+    background-clip: border-area, padding-box !important;
+    background-origin: border-box !important;
+    background-repeat: no-repeat !important;
+    color: var(--oc-text) !important;
+  }
+  body.sponsorBlockPageBody :is(select, .optionsSelector, input:is([type="text"], [type="number"], :not([type])), textarea) {
+    background-color: var(--oc-field-rest) !important;
+    color: var(--oc-text) !important;
+    border: 1px solid var(--oc-line) !important;
+    border-radius: var(--oc-radius-small) !important;
+  }
+  body.sponsorBlockPageBody :is(select, .optionsSelector, input, textarea):hover {
+    background-color: var(--oc-field-hover) !important;
+    border-color: var(--oc-line-strong) !important;
+  }
+  body.sponsorBlockPageBody option {
+    background-color: var(--oc-panel) !important;
+    color: var(--oc-text) !important;
+  }
+  body.sponsorBlockPageBody .slider {
+    border: 1px solid var(--oc-line-strong) !important;
+    border-radius: var(--oc-radius-small) !important;
+    background-color: var(--oc-field-rest) !important;
+  }
+  body.sponsorBlockPageBody input:checked + .slider {
+    background-color: var(--oc-accent) !important;
+    border-color: var(--oc-accent) !important;
+  }
+  body.sponsorBlockPageBody .slider::before {
+    background-color: var(--oc-text) !important;
+    border-radius: var(--oc-radius-small) !important;
+    box-shadow: none !important;
+  }
+
+  html#sponsorBlockPopupHTML :focus-visible,
+  body.sponsorBlockPageBody :focus-visible {
     outline: 1px solid var(--oc-focus) !important;
     outline-offset: -1px !important;
   }

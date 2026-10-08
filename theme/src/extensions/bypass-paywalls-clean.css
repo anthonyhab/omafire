@@ -1,0 +1,59 @@
+/* Bypass Paywalls Clean's popup: links and two buttons in the default serif. The theme's
+ * canvas, font, links and fields; its blue/red switch as the theme's switches. Scoped by
+ * its own button: options/popup.html is not a name it owns. */
+@-moz-document regexp("moz-extension://[^/]+/options/popup\\.html.*") {
+  html:has(#clear_cookies) {
+    background-color: var(--oc-canvas) !important;
+    color-scheme: dark light !important;
+  }
+  body:has(#clear_cookies) {
+    /* Its 285px fits the serif; the theme's monospace needs a little more. */
+    width: 320px !important;
+    background-color: var(--oc-canvas) !important;
+    color: var(--oc-text) !important;
+    font: var(--oc-label-size) / 1.5 var(--oc-font) !important;
+  }
+  /* Its dark mode paints each link and label its own grey block. */
+  body:has(#clear_cookies) :is(div, span, strong, a) {
+    background-color: transparent !important;
+  }
+  body:has(#clear_cookies) a {
+    color: var(--oc-accent-mark) !important;
+    text-decoration: none !important;
+  }
+  body:has(#clear_cookies) a:hover {
+    color: var(--oc-text) !important;
+    text-decoration: underline !important;
+  }
+  body:has(#clear_cookies) button {
+    appearance: none !important;
+    background-color: var(--oc-field-rest) !important;
+    color: var(--oc-text) !important;
+    border: 1px solid var(--oc-line) !important;
+    border-radius: var(--oc-radius-small) !important;
+    font: inherit !important;
+    padding: 2px 8px !important;
+  }
+  body:has(#clear_cookies) button:hover {
+    background-color: var(--oc-field-hover) !important;
+    border-color: var(--oc-line-strong) !important;
+  }
+  body:has(#clear_cookies) .slider {
+    background-color: var(--oc-field-rest) !important;
+    border: 1px solid var(--oc-line-strong) !important;
+    border-radius: var(--oc-radius-small) !important;
+    box-shadow: none !important;
+  }
+  body:has(#clear_cookies) input:checked + .slider {
+    background-color: var(--oc-accent) !important;
+    border-color: var(--oc-accent) !important;
+  }
+  body:has(#clear_cookies) .slider::before {
+    background-color: var(--oc-text) !important;
+    border-radius: var(--oc-radius-small) !important;
+  }
+  body:has(#clear_cookies) :focus-visible {
+    outline: 1px solid var(--oc-focus) !important;
+    outline-offset: -1px !important;
+  }
+}

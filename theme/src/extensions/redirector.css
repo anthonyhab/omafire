@@ -1,0 +1,44 @@
+/* Redirector's popup: two buttons and two checkboxes on a white page in Arial. The theme's
+ * canvas, font and fields; its red "Disabled" note in the palette's red. Scoped by its own
+ * button: popup.html is a common name (SponsorBlock, Containers). */
+@-moz-document regexp("moz-extension://[^/]+/(popup\\.html|options/options\\.html).*") {
+  html:has(#toggle-disabled) {
+    background-color: var(--oc-canvas) !important;
+    color-scheme: dark light !important;
+  }
+  body:has(> #toggle-disabled) {
+    /* Its 180px fits Arial; the theme's monospace needs a little more. */
+    width: 220px !important;
+    color: var(--oc-text) !important;
+    font: var(--oc-label-size) var(--oc-font) !important;
+  }
+  body:has(> #toggle-disabled) h1 {
+    color: var(--oc-text) !important;
+    font-family: var(--oc-font) !important;
+    letter-spacing: 0.08em !important;
+  }
+  body:has(> #toggle-disabled) .disabled {
+    color: var(--oc-danger) !important;
+  }
+  body:has(> #toggle-disabled) button {
+    appearance: none !important;
+    background-color: var(--oc-field-rest) !important;
+    color: var(--oc-text) !important;
+    border: 1px solid var(--oc-line) !important;
+    border-radius: var(--oc-radius-small) !important;
+    font: inherit !important;
+    height: auto !important;
+    padding: 3px 8px !important;
+  }
+  body:has(> #toggle-disabled) button:hover {
+    background-color: var(--oc-field-hover) !important;
+    border-color: var(--oc-line-strong) !important;
+  }
+  body:has(> #toggle-disabled) input[type="checkbox"] {
+    accent-color: var(--oc-accent) !important;
+  }
+  body:has(> #toggle-disabled) :focus-visible {
+    outline: 1px solid var(--oc-focus) !important;
+    outline-offset: -1px !important;
+  }
+}

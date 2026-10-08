@@ -1,0 +1,67 @@
+/* Greasemonkey's toolbar menu: a white page on a CSS framework's variables. The page and
+ * its rows take the content tokens; its black back/next arrows are images, redrawn here
+ * as masks in the text colour. */
+@-moz-document regexp("moz-extension://[^/]+/src/browser/monkey-menu\\.html.*") {
+  :root {
+    --body-bg-color: var(--oc-canvas) !important;
+    --body-color: var(--oc-text) !important;
+    --headings-color: var(--oc-text) !important;
+    --link-color: var(--oc-accent-mark) !important;
+    --link-color-hover: var(--oc-text) !important;
+    --hr-border-color: var(--oc-line) !important;
+    --component-border-color: var(--oc-line) !important;
+    --placeholder-color: var(--oc-text-dim) !important;
+    --focus-color: var(--oc-hover) !important;
+    --font-family: var(--oc-font) !important;
+    color-scheme: dark light !important;
+  }
+  body {
+    background-color: var(--oc-canvas) !important;
+    color: var(--oc-text) !important;
+    font: var(--oc-label-size) var(--oc-font) !important;
+  }
+  section header,
+  menu heading,
+  section h2 a,
+  section.options .explain a {
+    color: var(--oc-text-dim) !important;
+  }
+  hr {
+    border-top: 1px solid var(--oc-line) !important;
+  }
+  menuitem:is(:hover, :focus) {
+    background-color: var(--oc-hover) !important;
+  }
+  menuitem .arrow {
+    background: var(--oc-text-dim) !important;
+    mask: url("/skin/next.svg") center / 16px no-repeat !important;
+  }
+  section menuitem.go-back::before {
+    content: "" !important;
+    display: block !important;
+    width: 16px !important;
+    height: 16px !important;
+    background-color: var(--oc-text) !important;
+    mask: url("/skin/back.svg") center / 16px no-repeat !important;
+  }
+  :is(input, textarea, select) {
+    background-color: var(--oc-field-rest) !important;
+    color: var(--oc-text) !important;
+    border: 1px solid var(--oc-line) !important;
+    border-radius: var(--oc-radius-small) !important;
+  }
+  button {
+    background-color: var(--oc-field-rest) !important;
+    color: var(--oc-text) !important;
+    border: 1px solid var(--oc-line) !important;
+    border-radius: var(--oc-radius-small) !important;
+  }
+  button:hover {
+    background-color: var(--oc-field-hover) !important;
+    border-color: var(--oc-line-strong) !important;
+  }
+  :focus-visible {
+    outline: 1px solid var(--oc-focus) !important;
+    outline-offset: -1px !important;
+  }
+}

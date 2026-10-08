@@ -15,6 +15,10 @@
 @import "src/extensions/sponsorblock.css";
 @import "src/extensions/vimium-c.css";
 @import "src/extensions/1password.css";
+@import "src/extensions/multi-account-containers.css";
+@import "src/extensions/greasemonkey.css";
+@import "src/extensions/redirector.css";
+@import "src/extensions/bypass-paywalls-clean.css";
 
 /* Personal overrides; never shipped or maintained here. */
 @import "customContent.css";
