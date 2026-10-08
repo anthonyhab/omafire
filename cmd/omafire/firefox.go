@@ -177,6 +177,12 @@ func installFFPayload(chrome, payload string) {
 		// missing (not a mixed) payload that the next run repairs.
 		old, err := os.MkdirTemp(chrome, "."+ffPayloadDirname+".old.*")
 		if err == nil && unix.Rmdir(old) == nil && os.Rename(payload, old) == nil {
+			// fuse-overlayfs can let a tree that replaced a deleted lower-layer
+			// tree be renamed, and the stale lower tree then shows through
+			// under the old name again. That one is ours too: it goes.
+			if pathExists(payload) && ffPayloadOwned(payload) {
+				removeFFPayloadTree(payload)
+			}
 			if os.Rename(stage, payload) != nil {
 				os.Rename(old, payload)
 				removeFFPayloadTree(stage)
