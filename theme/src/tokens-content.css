@@ -16,7 +16,9 @@
   regexp("moz-extension://[^/]+/(popup|options|confirm)/index\\.html.*"),
   regexp("moz-extension://[^/]+/(popup\\.html|options/options\\.html).*"),
   regexp("moz-extension://[^/]+/pages/(action|options|show)\\.html.*"),
-  regexp("moz-extension://[^/]+/(popup|sidebar|options)/index\\.html.*") {
+  regexp("moz-extension://[^/]+/(popup|sidebar|options)/index\\.html.*"),
+  regexp("moz-extension://[^/]+/src/browser/monkey-menu\\.html.*"),
+  regexp("moz-extension://[^/]+/options/popup\\.html.*") {
   :root {
     /* ---- geometry and type ------------------------------------------ */
 
@@ -49,6 +51,16 @@
     --oc-selected: color-mix(in srgb, var(--oc-text) 9%, transparent);
     --oc-field-rest: color-mix(in srgb, var(--oc-text) 5%, transparent);
     --oc-field-hover: color-mix(in srgb, var(--oc-text) 10%, transparent);
+    --oc-panel: color-mix(in srgb, var(--oc-frame), var(--oc-text) 5%);
+    /* Content only: an extension's primary button (white label) in the accent,
+     * deep enough to carry the label. */
+    --oc-accent-fill: color-mix(in srgb, var(--oc-accent) 40%, var(--oc-canvas));
+    --oc-accent-fill-hover: color-mix(in srgb, var(--oc-accent) 55%, var(--oc-canvas));
+    --oc-danger: var(--omarchy-red, var(--oc-accent));
+    --oc-danger-wash: color-mix(in srgb, var(--oc-danger) 18%, transparent);
+    --oc-danger-line: color-mix(in srgb, var(--oc-danger) 45%, transparent);
+    --oc-danger-fill: color-mix(in srgb, var(--oc-danger) 40%, var(--oc-canvas));
+    --oc-danger-fill-hover: color-mix(in srgb, var(--oc-danger) 55%, var(--oc-canvas));
     --oc-glow-falloff:
       color-mix(in srgb, var(--oc-glow) 22%, transparent),
       color-mix(in srgb, var(--oc-glow) 6%, transparent) 45%,

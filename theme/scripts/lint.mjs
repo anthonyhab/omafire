@@ -6,6 +6,9 @@
 //   2. Only the token files choose colors. Components read --oc-* tokens.
 //      src/tokens-content.css restates tokens.css's derived tokens for
 //      Firefox-owned pages; each one it shares must match tokens.css.
+//   3. Every var(--oc-*) a sheet reads is defined on its side (chrome or
+//      content), and every extension sheet's pages are in the content
+//      tokens' scope: otherwise the token resolves to nothing, silently.
 // Usage: node scripts/lint.mjs   (exit 1 on any finding)
 
 import { readFileSync, readdirSync } from "node:fs";
@@ -63,6 +66,29 @@ for (const [prop, [value, line]] of content) {
   if (theirs && value.includes("color-mix(") && value !== theirs[0])
     findings.push(`${TOKEN_FILES[1]}:${line}: ${prop} differs from ${TOKEN_FILES[0]}:${theirs[1]}`);
 }
+
+// A token a sheet reads must exist on its side: content documents only get
+// tokens-content.css, so a chrome-only token (or a typo) there resolves to
+// nothing, silently. Sides follow userChrome/userContent's @imports.
+const imports = (f) => [...readFileSync(join(root, f), "utf8")
+  .matchAll(/@import\s+"(src\/[^"]+)"/g)].map((m) => m[1]);
+for (const top of ["userChrome.css", "userContent.css"]) {
+  const side = imports(top);
+  const read = side.map((f) => [f, stripAtBlocks(stripComments(readFileSync(join(root, f), "utf8")))]);
+  const defined = new Set(read.flatMap(([, s]) => [...s.matchAll(/(--oc-[\w-]+)\s*:/g)].map((m) => m[1])));
+  for (const [f, s] of read)
+    for (const m of s.matchAll(/var\(\s*(--oc-[\w-]+)/g))
+      if (!defined.has(m[1]))
+        findings.push(`${f}:${s.slice(0, m.index).split("\n").length}: ${m[1]} is not defined for ${top}`);
+}
+
+// Content tokens are scoped to the pages they serve: an extension sheet's
+// pages must be in tokens-content.css's scope, or none of its tokens resolve.
+const contentScope = readFileSync(join(root, TOKEN_FILES[1]), "utf8");
+for (const f of imports("userContent.css").filter((f) => f.startsWith("src/extensions/")))
+  for (const m of readFileSync(join(root, f), "utf8").matchAll(/regexp\("[^"]*"\)/g))
+    if (!contentScope.includes(m[0]))
+      findings.push(`${f}: ${m[0]} is missing from ${TOKEN_FILES[1]}'s scope`);
 
 for (const f of findings) console.error(f);
 if (findings.length) process.exit(1);
