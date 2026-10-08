@@ -81,6 +81,17 @@ const ON = { "omafire.tab-numbers": true, "omafire.tab-numbers-hold": true };
   assert.equal(t.gBrowser.selectedTab, t.tabs[0], "a waiting 1 switches on the release");
 }
 
+// switching tabs blurs the window while Alt is down: the numbers stay; only deactivate drops them
+{
+  const t = load({ ...ON });
+  t.fire("keydown", { key: "Alt", code: "AltLeft", altKey: true });
+  t.fire("keydown", digit(3));
+  t.fire("blur", {});
+  assert.ok(t.attrs.has("omafire-numbers-held"), "a tab switch's blur keeps the hold");
+  t.fire("deactivate", {});
+  assert.ok(!t.attrs.has("omafire-numbers-held"), "the window losing focus drops it");
+}
+
 // under ten tabs every digit is instant
 {
   const t = load({ ...ON }, 5);

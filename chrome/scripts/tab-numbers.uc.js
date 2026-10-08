@@ -8,7 +8,7 @@
 // loads by accident on the way: Alt, 1, 2 reaches tab 12. The tab the digits
 // point at is lit (omafire-num-lit) while they wait. Alt+9 alone is the last
 // tab, as in Firefox; a number past the last tab is the last tab. Escape or
-// the window losing focus drops the entry.
+// the window losing focus (not a tab switch) drops the entry.
 //
 // The root carries omafire-tab-numbers-hold (the setting is on) and, while
 // Alt is down, omafire-numbers-held; tab-numbers.css reads both.
@@ -144,7 +144,9 @@
     setHeld(false);
   }, true);
 
-  window.addEventListener("blur", () => setHeld(false));
+  // The window losing focus drops the hold. Not blur: switching tabs moves
+  // focus into the new page, which blurs the window while Alt is still down.
+  window.addEventListener("deactivate", () => setHeld(false));
 
   const observer = {observe: sync};
   prefs.addObserver(HOLD, observer);
