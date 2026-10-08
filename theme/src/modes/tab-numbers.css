@@ -169,14 +169,16 @@
 
   /* On hold (omafire.tab-numbers-hold, tab-numbers.uc.js): the numbers show
    * only while Alt is down. Everything above stays; this takes the legends
-   * and their notches back out, at a weight that outranks every rule above. */
+   * and their notches back out, at a weight that outranks every rule above: the id is
+   * doubled, since the expanded rows' rule carries one more type selector than this
+   * would without it. */
   :root[omafire-tab-numbers-hold]:not([omafire-numbers-held]) {
-    & #tabbrowser-tabs .tabbrowser-tab .tab-content::after {
+    & #tabbrowser-tabs#tabbrowser-tabs .tabbrowser-tab .tab-content::after {
       content: none !important;
     }
 
-    & #tabbrowser-tabs .tabbrowser-tab .tab-background,
-    & #tabbrowser-tabs tab-split-view-wrapper::before {
+    & #tabbrowser-tabs#tabbrowser-tabs .tabbrowser-tab .tab-background,
+    & #tabbrowser-tabs#tabbrowser-tabs tab-split-view-wrapper::before {
       mask: none !important;
     }
   }
