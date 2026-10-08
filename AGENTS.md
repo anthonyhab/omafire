@@ -22,9 +22,3 @@ command in bwrap with only the scratch root writable).
 ## Remotes
 
 `forgejo` is ours (CI and releases). `origin` is upstream omafox on GitHub: never push there.
-
-## Kandev
-
-Beads labelled `kandev-omafire` become cards on the Omafire board (`.kandev/workflows/omafire.yml`);
-the step prompts are the rules there. Gate files are in `.kandev/protected`. The bundle's main thread
-runs the board with the kandev-factory skill.

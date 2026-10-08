@@ -1,6 +1,6 @@
 #!/bin/sh
-# Exits 0 only if Forgejo ran CI on exactly SHA and every run passed. The
-# Kandev Land step asks this before it fast-forwards main.
+# Exits 0 only if Forgejo ran CI on exactly SHA and every run passed. Ask it
+# before fast-forwarding main or installing a tag.
 #   scripts/ci-status SHA
 set -eu
 sha=$(git rev-parse "${1:?usage: scripts/ci-status SHA}^{commit}")
