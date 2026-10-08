@@ -1,0 +1,45 @@
+/* Checkboxes and radios on the extension pages that use the native ones (the GTK theme
+ * draws those: rounded, in its own colours). One design for all of them, after the
+ * switches: a hairline box on the field fill; checked, the accent inset by a canvas gap,
+ * so it reads as a solid square inside the box. Radios keep their round, so they still
+ * read as radios. Scoped to each page by its own hook, as its sheet is; pages that draw
+ * their own controls (uBlock, 1Password, Vimium C, Containers) aren't listed, and the
+ * hidden checkbox inside a .switch is left to the switch. */
+@-moz-document regexp("moz-extension://[^/]+/(popup\\.html|options/options\\.html).*"),
+  regexp("moz-extension://[^/]+/options/popup\\.html.*"),
+  regexp("moz-extension://[^/]+/src/browser/monkey-menu\\.html.*") {
+  :is(html:has(#toggle-disabled), html:has(#clear_cookies), html:has(> body.sponsorBlockPageBody), html:has(#mobile-wrapper)) input:is([type="checkbox"], [type="radio"]):not(.switch > input) {
+    appearance: none !important;
+    box-sizing: border-box !important;
+    width: 14px !important;
+    height: 14px !important;
+    margin-block: 0 !important;
+    vertical-align: -2px !important;
+    flex: none !important;
+    background-color: var(--oc-field-rest) !important;
+    border: 1px solid var(--oc-line-strong) !important;
+    border-radius: var(--oc-radius-small) !important;
+    box-shadow: none !important;
+    cursor: pointer !important;
+  }
+  :is(html:has(#toggle-disabled), html:has(#clear_cookies), html:has(> body.sponsorBlockPageBody), html:has(#mobile-wrapper)) input[type="radio"]:not(.switch > input) {
+    border-radius: 50% !important;
+  }
+  :is(html:has(#toggle-disabled), html:has(#clear_cookies), html:has(> body.sponsorBlockPageBody), html:has(#mobile-wrapper)) input:is([type="checkbox"], [type="radio"]):not(.switch > input):hover {
+    background-color: var(--oc-field-hover) !important;
+    border-color: var(--oc-text-dim) !important;
+  }
+  :is(html:has(#toggle-disabled), html:has(#clear_cookies), html:has(> body.sponsorBlockPageBody), html:has(#mobile-wrapper)) input:is([type="checkbox"], [type="radio"]):not(.switch > input):checked {
+    background-color: var(--oc-accent) !important;
+    border-color: var(--oc-accent) !important;
+    box-shadow: inset 0 0 0 2px var(--oc-canvas) !important;
+  }
+  :is(html:has(#toggle-disabled), html:has(#clear_cookies), html:has(> body.sponsorBlockPageBody), html:has(#mobile-wrapper)) input:is([type="checkbox"], [type="radio"]):not(.switch > input):disabled {
+    opacity: 0.5 !important;
+    cursor: default !important;
+  }
+  :is(html:has(#toggle-disabled), html:has(#clear_cookies), html:has(> body.sponsorBlockPageBody), html:has(#mobile-wrapper)) input:is([type="checkbox"], [type="radio"]):not(.switch > input):focus-visible {
+    outline: 1px solid var(--oc-focus) !important;
+    outline-offset: 1px !important;
+  }
+}

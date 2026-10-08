@@ -19,6 +19,7 @@
 @import "src/extensions/greasemonkey.css";
 @import "src/extensions/redirector.css";
 @import "src/extensions/bypass-paywalls-clean.css";
+@import "src/extensions/controls.css";
 
 /* Personal overrides; never shipped or maintained here. */
 @import "customContent.css";
