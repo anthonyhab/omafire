@@ -14,6 +14,7 @@
 @import "src/extensions/bitwarden.css";
 @import "src/extensions/sponsorblock.css";
 @import "src/extensions/vimium-c.css";
+@import "src/extensions/1password.css";
 
 /* Personal overrides; never shipped or maintained here. */
 @import "customContent.css";
