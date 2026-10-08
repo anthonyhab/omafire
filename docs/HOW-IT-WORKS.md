@@ -67,8 +67,8 @@ own root-owned files: nothing is loaded from the profile.
   clock (bold, thin or one line), shortcuts from Firefox's top sites (pin
   with +, hide with ×, digits open them), widgets (recently closed, history,
   a bookmarks folder; Hacker News, a subreddit, an RSS feed and the weather if
-  you add them), the theme's colours drifting behind the clock and a pointer
-  glow in the hovered icon's colour, over the Omarchy wallpaper or a picked
+  you add them), each tile lighting from within in its icon's colour as you
+  hover, over the Omarchy wallpaper or a picked
   image, with its own options on `,`. The `new-tab` setting turns it off.
 - **Site colours.** With `site-colors` on, the active tab glows in the
   colour of its site's icon.

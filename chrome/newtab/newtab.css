@@ -112,89 +112,6 @@ main {
   }
 }
 
-/* ---- aurora and glow ------------------------------------------------
- * Aurora: the theme's blue, magenta and cyan as three soft lights behind
- * the clock, drifting slowly. Glow: one light that follows the pointer in
- * the hovered icon's colour (newtab.js moves it with a transform). Both
- * sit behind the glass tiles and never above anything frosted. */
-
-#aurora {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-#aurora i {
-  position: absolute;
-  width: 46vw;
-  height: 46vw;
-  border-radius: 50%;
-  filter: blur(90px);
-  opacity: 0.45;
-  will-change: transform;
-}
-
-#aurora i:nth-child(1) {
-  left: 20%;
-  top: -10%;
-  background: var(--omarchy-blue, var(--accent));
-  animation: drift-a 38s ease-in-out infinite alternate;
-}
-
-#aurora i:nth-child(2) {
-  left: 50%;
-  top: 0;
-  background: var(--omarchy-magenta, var(--accent));
-  animation: drift-b 47s ease-in-out infinite alternate;
-}
-
-#aurora i:nth-child(3) {
-  left: 10%;
-  top: 20%;
-  width: 36vw;
-  height: 36vw;
-  background: var(--omarchy-cyan, var(--accent));
-  animation: drift-c 55s ease-in-out infinite alternate;
-}
-
-@keyframes drift-a {
-  to { transform: translate(18vw, 12vh); }
-}
-
-@keyframes drift-b {
-  to { transform: translate(-16vw, 18vh); }
-}
-
-@keyframes drift-c {
-  to { transform: translate(22vw, -8vh); }
-}
-
-:root[data-aurora="false"] #aurora {
-  display: none;
-}
-
-#glow {
-  --glow: var(--accent);
-  position: fixed;
-  left: 0;
-  top: 0;
-  z-index: -1;
-  width: 520px;
-  height: 520px;
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--glow), transparent 60%);
-  filter: blur(70px);
-  opacity: 0.45;
-  pointer-events: none;
-  will-change: transform;
-}
-
-:root[data-glow="false"] #glow {
-  display: none;
-}
-
 /* ---- clock ---------------------------------------------------------- */
 
 header {
@@ -292,6 +209,7 @@ header:has(> #time[hidden]):has(#date[hidden]) {
 
 #clock {
   display: block;
+  overflow: hidden;
   color: var(--strong);
   font-size: clamp(56px, 10vw, 128px);
   font-weight: 700;
@@ -299,6 +217,22 @@ header:has(> #time[hidden]):has(#date[hidden]) {
   letter-spacing: -0.04em;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+/* A changed glyph rolls up into its place. */
+.glyph {
+  display: inline-block;
+}
+
+.glyph.roll {
+  animation: roll-up 360ms var(--ease);
+}
+
+@keyframes roll-up {
+  from {
+    translate: 0 0.5em;
+    opacity: 0;
+  }
 }
 
 #time:has(#clock[hidden]) #greeting {
@@ -330,8 +264,61 @@ header:has(> #time[hidden]):has(#date[hidden]) {
 
 .site {
   position: relative;
+  overflow: hidden;
   background: var(--tile);
   outline: 1px solid var(--line);
+  animation: settle 400ms var(--ease) both;
+  animation-delay: calc(var(--i, 0) * 24ms);
+}
+
+@keyframes settle {
+  from {
+    translate: 0 calc(var(--u) / 2);
+    opacity: 0;
+  }
+}
+
+/* The light: under the pointer, in the icon's colour, inside the tile. */
+.site::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%),
+    color-mix(in srgb, var(--icon, var(--accent)) 28%, transparent),
+    transparent 55%);
+  opacity: 0;
+}
+
+.site:hover::after {
+  opacity: 1;
+}
+
+.site > a {
+  position: relative;
+  z-index: 1;
+}
+
+/* A group label across the grid, when pinned tiles lead. */
+.group-label {
+  grid-column: 1 / -1;
+  padding: calc(var(--u) * 1.5) 0 calc(var(--u) / 2);
+  color: var(--dim-text);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.group-label:first-child {
+  padding-top: 0;
+}
+
+.pinned-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(min(var(--pinned, 1), var(--fit, 4)), minmax(0, 1fr));
+  gap: 1px;
 }
 
 .site > a {
@@ -346,24 +333,37 @@ header:has(> #time[hidden]):has(#date[hidden]) {
 }
 
 .site:hover {
-  background: var(--hover);
-}
-
-:root[data-glow="true"] .site:hover {
   z-index: 1;
-  outline-color: color-mix(in srgb, var(--icon, var(--accent)) 70%, transparent);
-  box-shadow: 0 0 24px -6px var(--icon, var(--accent));
+  background: var(--hover);
+  outline-color: color-mix(in srgb, var(--icon, var(--accent)) 60%, var(--line));
 }
 
-/* Pinned: a short accent tick on the tile's top edge. */
+/* The icon lifts a touch; the host brightens. */
+.site:hover .icon {
+  translate: 0 -1px;
+  scale: 1.08;
+}
+
+.site:hover .host {
+  color: var(--fg);
+}
+
+/* Pinned: a short accent tick on the tile's top edge, drawn when pinned. */
 .site.pinned::before {
   content: "";
   position: absolute;
   left: 0;
   top: 0;
+  z-index: 1;
   width: calc(var(--u) * 2);
   height: 2px;
   background: var(--accent);
+  transform-origin: left;
+  animation: draw 300ms var(--ease);
+}
+
+@keyframes draw {
+  from { scale: 0 1; }
 }
 
 /* Reordering: the tile in hand fades, the drop spot takes the accent edge. */
@@ -431,6 +431,7 @@ header:has(> #time[hidden]):has(#date[hidden]) {
  * shown with the pointer or keyboard focus inside the tile. */
 .pin {
   position: absolute;
+  z-index: 2;
   top: calc(var(--u) * 1.5);
   right: calc(var(--u) * 5);
   width: calc(var(--u) * 3);
@@ -451,6 +452,7 @@ header:has(> #time[hidden]):has(#date[hidden]) {
 
 .hide {
   position: absolute;
+  z-index: 2;
   top: calc(var(--u) * 1.5);
   right: calc(var(--u) * 1.5);
   width: calc(var(--u) * 3);
@@ -467,6 +469,12 @@ header:has(> #time[hidden]):has(#date[hidden]) {
 
 .site:is(:hover, :focus-within) :is(.hide, .pin) {
   opacity: 1;
+  translate: 0 0;
+}
+
+.pin,
+.hide {
+  translate: 0 calc(var(--u) / -2);
 }
 
 /* The button sits on the index; a glass tile would show it through. */
@@ -580,17 +588,25 @@ header:has(> #time[hidden]):has(#date[hidden]) {
   min-width: 0;
   background: var(--tile);
   outline: 1px solid var(--line);
+  animation: settle 400ms var(--ease) both;
 }
 
-/* The source's own hue along the top edge, hairline and glow in one. */
+/* The source's own hue along the top edge: a hairline at rest, lit while
+ * the pointer is in the block. */
 .widget::before {
   content: "";
   position: absolute;
   left: 0;
   right: 0;
   top: 0;
+  z-index: 1;
   height: 1px;
   background: var(--hue);
+  opacity: 0.6;
+}
+
+.widget:hover::before {
+  opacity: 1;
   box-shadow: 0 0 12px var(--hue);
 }
 
@@ -630,7 +646,7 @@ header:has(> #time[hidden]):has(#date[hidden]) {
 .item {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: baseline;
   column-gap: calc(var(--u) * 2);
   width: 100%;
@@ -653,6 +669,44 @@ header:has(> #time[hidden]):has(#date[hidden]) {
 
 .item:hover {
   background: var(--hover);
+}
+
+/* The row's key, dim until the pointer is on it; then the source's hue. */
+.item .key {
+  width: calc(var(--u) * 1.5);
+  color: var(--dim-text);
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.widget:not(:first-child) .key {
+  display: none;
+}
+
+.item:hover .key {
+  color: var(--hue, var(--accent));
+  opacity: 1;
+}
+
+/* A bar in the source's hue grows from the row's left edge on hover. */
+.item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--hue, var(--accent));
+  scale: 1 0;
+  transform-origin: top;
+}
+
+.item:hover::before {
+  scale: 1 1;
+}
+
+.item:hover .item-title {
+  translate: calc(var(--u) / 2) 0;
 }
 
 .item:focus-visible,
@@ -690,10 +744,15 @@ a.item-title::before {
   display: none;
 }
 
+/* On hover the host takes the counts' place, so the title keeps its room. */
 .item:hover .aside-host,
 .item-aside:focus-visible .aside-host {
   display: inline;
   margin-right: calc(var(--u) / 2);
+}
+
+.item:has(.aside-host):hover .counts {
+  display: none;
 }
 
 .item-title {
@@ -1067,9 +1126,25 @@ output {
 
 @media (prefers-reduced-motion: no-preference) {
   .site,
-  .hide,
   .item {
-    transition: background-color 120ms, opacity 120ms;
+    transition: background-color 120ms, outline-color 200ms;
+  }
+  .site::after,
+  .widget::before,
+  .item .key {
+    transition: opacity 200ms var(--ease), box-shadow 200ms;
+  }
+  .icon,
+  .item-title,
+  .pin,
+  .hide {
+    transition: translate 200ms var(--ease), scale 200ms var(--ease), opacity 160ms;
+  }
+  .item::before {
+    transition: scale 200ms var(--ease);
+  }
+  .host {
+    transition: color 160ms;
   }
   #backdrop {
     transition: opacity 300ms var(--ease);
@@ -1083,7 +1158,10 @@ output {
   #settings {
     animation: none;
   }
-  #aurora i {
+  .site,
+  .widget,
+  .glyph.roll,
+  .site.pinned::before {
     animation: none;
   }
 }

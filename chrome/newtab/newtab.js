@@ -48,8 +48,6 @@
     widgetPlace: "below", // below | beside
     tempUnit: "c", // c | f
     weatherHeader: true, // the weather widget reads as a line under the clock
-    aurora: true, // the theme's blue, magenta and cyan drifting behind the clock
-    glow: true, // a pointer glow in the hovered shortcut's icon colour
     custom: [], // [{ url, title }]
     pinned: [], // [{ url, title }], dragged into place; they lead the grid
     hidden: [] // urls
@@ -61,6 +59,13 @@
   if (glass) DEFAULTS.background = "desktop";
 
   let settings = { ...DEFAULTS };
+
+  function el(tag, className, text) {
+    const node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
 
   /* ---- palette ------------------------------------------------------
    * The colours come from the generated palette's --omarchy-* (newtab.css);
@@ -138,8 +143,6 @@
     d.widgetPlace = settings.widgetPlace;
     d.clockStyle = settings.clockStyle;
     d.weatherHeader = settings.weatherHeader;
-    d.aurora = settings.aurora;
-    d.glow = settings.glow;
     root.style.setProperty("--blur", `${settings.blur}px`);
     root.style.setProperty("--dim", `${settings.background === "desktop" ? settings.tint : settings.dim}%`);
     document.querySelector("#time").hidden = !settings.clock && !settings.greeting;
@@ -174,15 +177,31 @@
   const greeting = document.querySelector("#greeting");
   let tickTimer = null;
 
+  /* Each glyph is its own span; a changed one rolls up into place. */
+  function rollClock(text) {
+    const glyphs = [...text];
+    const old = [...clock.children];
+    if (old.length !== glyphs.length) {
+      clock.replaceChildren(...glyphs.map((glyph) => el("span", "glyph", glyph)));
+      return;
+    }
+    glyphs.forEach((glyph, i) => {
+      if (old[i].textContent === glyph) return;
+      const fresh = el("span", "glyph roll", glyph);
+      old[i].replaceWith(fresh);
+      fresh.addEventListener("animationend", () => fresh.classList.remove("roll"), { once: true });
+    });
+  }
+
   function tick() {
     clearTimeout(tickTimer);
     const now = new Date();
-    clock.textContent = now.toLocaleTimeString([], {
+    rollClock(now.toLocaleTimeString([], {
       hour: settings.hour12 ? "numeric" : "2-digit",
       minute: "2-digit",
       second: settings.seconds ? "2-digit" : undefined,
       hourCycle: settings.hour12 ? "h12" : "h23"
-    });
+    }));
     clock.dateTime = now.toISOString();
     date.textContent = settings.clockStyle === "thin"
       ? now.toLocaleDateString([], { weekday: "long", day: "numeric", month: "long" }).replace(/,/g, " ·")
@@ -247,6 +266,7 @@
   /* ---- shortcuts ---------------------------------------------------- */
 
   const sites = document.querySelector("#sites");
+  const tileList = () => [...sites.querySelectorAll(".site")];
 
   function hostOf(url) {
     try {
@@ -319,6 +339,7 @@
     });
 
     item.append(link, pin, hide);
+    item.style.setProperty("--i", String(index));
     item.dataset.url = site.url;
     if (site.favicon) void iconColor(site.favicon).then((color) => {
       if (color) item.style.setProperty("--icon", color);
@@ -370,12 +391,27 @@
 
   function showSites(list) {
     const focused = sites.contains(document.activeElement)
-      ? [...sites.children].findIndex((item) => item.contains(document.activeElement))
+      ? tileList().findIndex((item) => item.contains(document.activeElement))
       : -1;
     shownSites = list;
-    sites.replaceChildren(...list.map(tile));
+    const tiles = list.map(tile);
+    /* Pinned tiles lead under their own label, the rest under "Frequent",
+     * when both kinds are there. */
+    const pinnedCount = tiles.filter((t) => t.classList.contains("pinned")).length;
+    const nodes = [];
+    if (pinnedCount && pinnedCount < tiles.length) {
+      /* Pinned tiles share a row of their own and stretch across it. */
+      const pinnedRow = el("div", "pinned-row");
+      pinnedRow.append(...tiles.slice(0, pinnedCount));
+      pinnedRow.style.setProperty("--pinned", String(pinnedCount));
+      nodes.push(el("div", "group-label", "Pinned"), pinnedRow,
+        el("div", "group-label", "Frequent"), ...tiles.slice(pinnedCount));
+    } else {
+      nodes.push(...tiles);
+    }
+    sites.replaceChildren(...nodes);
     fitGrid();
-    sites.children[focused]?.querySelector("a")?.focus();
+    tileList()[focused]?.querySelector("a")?.focus();
   }
 
   /* Tiles fill whole rows: as few rows as the width allows, then as few
@@ -383,7 +419,7 @@
    * sit as 6 + 6. Icons keep their fixed square. */
   const TILE_MIN = { tiles: 22, list: 44, icons: 10 }; // in --u
   function fitGrid() {
-    const count = sites.children.length;
+    const count = tileList().length;
     if (!count) return;
     const unit = parseFloat(getComputedStyle(root).getPropertyValue("--u")) || 8;
     const min = TILE_MIN[settings.siteStyle] * unit;
@@ -391,6 +427,7 @@
     const rows = Math.ceil(count / fit);
     const columns = Math.ceil(count / rows);
     sites.style.setProperty("--columns", String(columns));
+    sites.style.setProperty("--fit", String(fit));
   }
   new ResizeObserver(fitGrid).observe(sites);
 
@@ -427,7 +464,7 @@
     const target = event.target.closest?.(".site");
     if (!dragged || !target) return;
     event.preventDefault();
-    const items = [...sites.children];
+    const items = tileList();
     const from = items.indexOf(dragged);
     const to = items.indexOf(target);
     if (from < 0 || to < 0 || from === to) return;
@@ -445,13 +482,12 @@
     for (const item of sites.querySelectorAll(".drop-target")) item.classList.remove("drop-target");
   });
 
-  /* ---- glow -----------------------------------------------------------
-   * A soft radial light behind the grid that follows the pointer and takes
-   * the colour of the shortcut icon under it (the theme accent elsewhere).
-   * It drifts on its own while the pointer is away. Transform only, so the
-   * compositor moves it. */
+  /* ---- light ----------------------------------------------------------
+   * The hovered tile lights from within: a radial light under the pointer,
+   * in the icon's own colour (the theme accent for an icon without one),
+   * that never leaves the tile. --mx/--my are the pointer inside the tile;
+   * newtab.css draws the light. */
 
-  const glow = document.querySelector("#glow");
   const iconColors = new Map();
 
   /* The icon's dominant colour: the mean of its saturated pixels. */
@@ -487,56 +523,13 @@
     return job;
   }
 
-  const pointer = { x: innerWidth / 2, y: innerHeight * 0.4, inside: false };
-  const light = { x: pointer.x, y: pointer.y };
-  let drift = 0;
-  let glowFrame = null;
-  const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
-
-  function moveGlow() {
-    glowFrame = null;
-    if (!settings.glow) return;
-    let tx = pointer.x, ty = pointer.y;
-    if (!pointer.inside) {
-      /* Away: wander on a slow Lissajous figure around the page centre. */
-      drift += 0.004;
-      tx = innerWidth * (0.5 + 0.3 * Math.sin(drift));
-      ty = innerHeight * (0.45 + 0.25 * Math.sin(drift * 0.7 + 1));
-    }
-    light.x += (tx - light.x) * 0.08;
-    light.y += (ty - light.y) * 0.08;
-    glow.style.transform = `translate(${light.x}px, ${light.y}px) translate(-50%, -50%)`;
-    const still = pointer.inside && Math.abs(tx - light.x) < 0.3 && Math.abs(ty - light.y) < 0.3;
-    if (!still && !reducedMotion.matches) glowFrame = requestAnimationFrame(moveGlow);
-  }
-
-  function wakeGlow() {
-    if (glowFrame === null) glowFrame = requestAnimationFrame(moveGlow);
-  }
-
-  document.addEventListener("mousemove", (event) => {
-    pointer.x = event.clientX;
-    pointer.y = event.clientY;
-    pointer.inside = true;
-    wakeGlow();
-  });
-  document.addEventListener("mouseleave", () => {
-    pointer.inside = false;
-    wakeGlow();
-  });
-  sites.addEventListener("mouseover", (event) => {
+  sites.addEventListener("mousemove", (event) => {
     const tile = event.target.closest?.(".site");
-    glow.style.setProperty("--glow", tile?.style.getPropertyValue("--icon") || "var(--accent)");
+    if (!tile) return;
+    const rect = tile.getBoundingClientRect();
+    tile.style.setProperty("--mx", `${((event.clientX - rect.left) / rect.width * 100).toFixed(1)}%`);
+    tile.style.setProperty("--my", `${((event.clientY - rect.top) / rect.height * 100).toFixed(1)}%`);
   });
-  sites.addEventListener("mouseleave", () => glow.style.setProperty("--glow", "var(--accent)"));
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") wakeGlow();
-    else if (glowFrame !== null) {
-      cancelAnimationFrame(glowFrame);
-      glowFrame = null;
-    }
-  });
-  wakeGlow();
 
   /* ---- widgets --------------------------------------------------------
    * Blocks under (or beside) the shortcuts, each a list on the same
@@ -569,13 +562,6 @@
 
   const compact = (n) => (n >= 1000 ? `${(n / 1000).toFixed(n < 10000 ? 1 : 0)}k` : String(n ?? 0));
 
-  function el(tag, className, text) {
-    const node = document.createElement(tag);
-    if (className) node.className = className;
-    if (text !== undefined) node.textContent = text;
-    return node;
-  }
-
   /* One row: title left, meta right. The title is the row's link (its
    * hit area is the whole row); `aside` is a second link in the meta, as
    * the article beside a Hacker News discussion. A row with onClick is a
@@ -605,7 +591,7 @@
         second.append(el("span", "aside-host", aside.text), "↗");
         metaNode.append(second, " ");
       }
-      metaNode.append(meta || "");
+      metaNode.append(el("span", "counts", meta || ""));
       node.append(metaNode);
     }
     return node;
@@ -613,7 +599,13 @@
 
   function list(items, empty) {
     if (!items.length) return [el("p", "empty", empty)];
-    return items.map(item);
+    return items.map((entry, index) => {
+      const node = item(entry);
+      /* Keys drive the first block (newtab.css shows them there only). */
+      if (index < 10) node.prepend(el("span", "key", String.fromCharCode(97 + index)));
+      node.style.setProperty("--i", String(index));
+      return node;
+    });
   }
 
   async function fetchJson(url) {
@@ -992,9 +984,7 @@
         when: (s) => s.background === "desktop" && !glass },
       { type: "note", label: "", text: "No wallpaper from Omarchy yet",
         when: (s) => s.background === "wallpaper" && root.dataset.backdrop !== "true" },
-      { key: "glass", type: "toggle", label: "Glass", when: (s) => s.background !== "solid" },
-      { key: "aurora", type: "toggle", label: "Aurora" },
-      { key: "glow", type: "toggle", label: "Glow" }
+      { key: "glass", type: "toggle", label: "Glass", when: (s) => s.background !== "solid" }
     ]],
     ["Clock", [
       { key: "clock", type: "toggle", label: "Clock" },
@@ -1272,9 +1262,9 @@
     }
     /* Arrows walk the grid; from nowhere they start at the first tile. */
     const step = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: "up", ArrowDown: "down" }[event.key];
-    if (step !== undefined && settings.sites && sites.children.length
+    if (step !== undefined && settings.sites && tileList().length
         && !panel.contains(event.target)) {
-      const items = [...sites.children];
+      const items = tileList();
       const current = items.findIndex((item) => item.contains(document.activeElement));
       const columns = Number(sites.style.getPropertyValue("--columns")) || 1;
       const delta = step === "up" ? -columns : step === "down" ? columns : step;
@@ -1287,7 +1277,14 @@
     }
     /* Digits open the matching shortcut while the page has focus. */
     if (/^[1-9]$/.test(event.key)) {
-      sites.children[Number(event.key) - 1]?.querySelector("a")?.click();
+      tileList()[Number(event.key) - 1]?.querySelector("a")?.click();
+      return;
+    }
+    /* Letters open the first feed's rows. */
+    if (/^[a-j]$/.test(event.key)) {
+      const rows = widgetsBox.querySelector(".widget")?.querySelectorAll(".item");
+      const row = rows?.[event.key.charCodeAt(0) - 97];
+      (row?.querySelector("a.item-title") ?? row)?.click();
     }
   });
 
