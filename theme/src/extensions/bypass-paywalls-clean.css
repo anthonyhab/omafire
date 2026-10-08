@@ -60,3 +60,75 @@
     outline-offset: -1px !important;
   }
 }
+
+/* Its options pages (sites, custom sites, excluded sites): already on the palette through
+ * Firefox's colour override, but in the default serif with native buttons and fields and
+ * visited-purple links. The theme's font, fields and links. Scoped by each page's own ids:
+ * options/options.html is SponsorBlock's path too. */
+@-moz-document regexp("moz-extension://[^/]+/options/(options|options_custom|options_excluded)\\.html.*") {
+  html:is(:has(#save_top), :has(#custom-enabled), :has(#sort)) {
+    color-scheme: dark light !important;
+  }
+  html:is(:has(#save_top), :has(#custom-enabled), :has(#sort)) body {
+    font: var(--oc-label-size) / 1.6 var(--oc-font) !important;
+  }
+  html:is(:has(#save_top), :has(#custom-enabled), :has(#sort)) :is(h1, h2, h3) {
+    font-family: var(--oc-font) !important;
+  }
+  html:is(:has(#save_top), :has(#custom-enabled), :has(#sort)) a:is(:link, :visited):not(button a) {
+    color: var(--oc-accent-mark) !important;
+    text-decoration: none !important;
+  }
+  /* A link inside a button is its label: no grey block of its own (its dark mode). */
+  html:is(:has(#save_top), :has(#custom-enabled), :has(#sort)) button a {
+    background-color: transparent !important;
+  }
+  html:is(:has(#save_top), :has(#custom-enabled), :has(#sort)) a:hover:not(button a) {
+    color: var(--oc-text) !important;
+    text-decoration: underline !important;
+  }
+  html:is(:has(#save_top), :has(#custom-enabled), :has(#sort)) :is(button, input[type="button"], input[type="submit"]) {
+    appearance: none !important;
+    background-color: var(--oc-field-rest) !important;
+    color: var(--oc-text) !important;
+    border: 1px solid var(--oc-line) !important;
+    border-radius: var(--oc-radius-small) !important;
+    font: inherit !important;
+    padding: 2px 8px !important;
+    forced-color-adjust: none !important;
+  }
+  html:is(:has(#save_top), :has(#custom-enabled), :has(#sort)) :is(button, input[type="button"], input[type="submit"]):hover {
+    background-color: var(--oc-field-hover) !important;
+    border-color: var(--oc-line-strong) !important;
+  }
+  html:is(:has(#save_top), :has(#custom-enabled), :has(#sort)) :is(input:is([type="text"], [type="search"], :not([type])), textarea, select) {
+    appearance: none !important;
+    background-color: var(--oc-field-rest) !important;
+    color: var(--oc-text) !important;
+    border: 1px solid var(--oc-line) !important;
+    border-radius: var(--oc-radius-small) !important;
+    font: inherit !important;
+    padding: 2px 6px !important;
+    forced-color-adjust: none !important;
+  }
+  html:is(:has(#save_top), :has(#custom-enabled), :has(#sort)) select {
+    padding-inline-end: 18px !important;
+    background-image: linear-gradient(45deg, transparent 50%, var(--oc-text-dim) 50%),
+      linear-gradient(-45deg, transparent 50%, var(--oc-text-dim) 50%) !important;
+    background-position: right 9px center, right 5px center !important;
+    background-size: 4px 4px !important;
+    background-repeat: no-repeat !important;
+  }
+  html:is(:has(#save_top), :has(#custom-enabled), :has(#sort)) option {
+    background-color: var(--oc-panel) !important;
+    color: var(--oc-text) !important;
+  }
+  html:is(:has(#save_top), :has(#custom-enabled), :has(#sort)) hr {
+    border: none !important;
+    border-top: 1px solid var(--oc-line) !important;
+  }
+  html:is(:has(#save_top), :has(#custom-enabled), :has(#sort)) :focus-visible {
+    outline: 1px solid var(--oc-focus) !important;
+    outline-offset: -1px !important;
+  }
+}
