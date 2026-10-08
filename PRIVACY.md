@@ -45,8 +45,12 @@ private window's new tab shows no history.
 
 ## Network
 
-Omafire's own code opens no network connection. Installing a release from the
-release page is a download you make yourself.
+Omafire's own code opens no network connection, with one exception you make
+yourself: a feed widget on the new tab (Hacker News, a subreddit, an RSS feed,
+the weather) fetches from the site it names, and only while it is in your widget
+list. None is there by default. The last answer is kept in the profile's prefs
+so the page paints at once. Installing a release from the release page is a
+download you make yourself.
 
 Omafire does not include Cinder or any other add-on that talks to a service;
 such an add-on has its own statement.

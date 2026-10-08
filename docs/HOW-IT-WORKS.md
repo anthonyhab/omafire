@@ -64,9 +64,10 @@ own root-owned files: nothing is loaded from the profile.
 - **Live palette.** A theme change reaches the whole chrome, window
   rounding and Firefox's own pages (settings, add-ons) without a restart.
 - **New tab.** `chrome://omafire/content/newtab.html` (`chrome/newtab/`):
-  clock, shortcuts from Firefox's top sites, and the Omarchy wallpaper or a
-  picked image, with its own options on `,`. The `new-tab` setting turns it
-  off.
+  clock, shortcuts from Firefox's top sites, widgets (calendar, recently
+  closed, history, a bookmarks folder; Hacker News, a subreddit, an RSS feed
+  and the weather if you add them), and the Omarchy wallpaper or a picked
+  image, with its own options on `,`. The `new-tab` setting turns it off.
 - **Site colours.** With `site-colors` on, the active tab glows in the
   colour of its site's icon.
 - **Old add-on.** Removes the WebExtension releases before 0.7 installed,

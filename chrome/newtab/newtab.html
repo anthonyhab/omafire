@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="color-scheme" content="dark light">
-  <meta http-equiv="Content-Security-Policy" content="default-src chrome:; img-src chrome: data: file: page-icon: moz-icon:; style-src chrome:">
+  <meta http-equiv="Content-Security-Policy" content="default-src chrome:; img-src chrome: data: file: page-icon: moz-icon:; style-src chrome:; connect-src https:">
   <title>New Tab</title>
   <link rel="icon" href="icon.svg">
   <link rel="stylesheet" href="newtab.css">
@@ -20,6 +20,7 @@
       <p id="date"></p>
     </header>
     <nav id="sites" aria-label="Shortcuts"></nav>
+    <section id="widgets" aria-label="Widgets"></section>
   </main>
 
   <button id="settings-toggle" type="button" aria-controls="settings" aria-expanded="false"

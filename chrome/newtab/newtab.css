@@ -341,6 +341,233 @@ header:has(> #time[hidden]):has(> #date[hidden]) {
   }
 }
 
+/* ---- widgets --------------------------------------------------------
+ * Blocks on the shortcut grid's hairlines, poured into whole rows
+ * (newtab.js sets --wcolumns); beside, one column down the right. */
+
+#widgets {
+  display: grid;
+  grid-template-columns: repeat(var(--wcolumns, 2), minmax(0, 1fr));
+  align-items: start;
+  gap: 1px;
+  padding: 1px;
+  margin-top: calc(var(--u) * 3);
+}
+
+#widgets:empty {
+  display: none;
+}
+
+#sites:empty + #widgets {
+  margin-top: 0;
+}
+
+.widget {
+  min-width: 0;
+  background: var(--tile);
+  outline: 1px solid var(--line);
+}
+
+.widget-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: calc(var(--u) * 2);
+  min-height: calc(var(--u) * 4);
+  padding: var(--u) calc(var(--u) * 2);
+  border-bottom: 1px solid var(--line);
+  color: var(--dim-text);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.widget-head .name {
+  color: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.widget-head a.name:is(:hover, :focus-visible) {
+  color: var(--accent);
+  outline: none;
+}
+
+.widget-head .meta {
+  overflow: hidden;
+  letter-spacing: 0.08em;
+  text-overflow: ellipsis;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  column-gap: calc(var(--u) * 2);
+  width: 100%;
+  min-height: calc(var(--u) * 4);
+  padding: var(--u) calc(var(--u) * 2);
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.widget-body > .item:first-child,
+.group + .item {
+  border-top: 0;
+}
+
+.item:hover {
+  background: var(--hover);
+}
+
+.item:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.item-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-meta,
+.empty {
+  color: var(--dim-text);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.item.day {
+  cursor: default;
+}
+
+.item.day:hover {
+  background: none;
+}
+
+.empty {
+  padding: var(--u) calc(var(--u) * 2);
+  white-space: normal;
+}
+
+.group {
+  padding: calc(var(--u) * 1.5) calc(var(--u) * 2) calc(var(--u) / 2);
+  border-top: 1px solid var(--line);
+  color: var(--dim-text);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+
+.group:first-child {
+  border-top: 0;
+}
+
+/* Calendar: seven columns, today filled in the accent. */
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: var(--u) calc(var(--u) * 1.5) calc(var(--u) * 1.5);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.calendar .dow {
+  color: var(--dim-text);
+  font-size: 11px;
+  line-height: calc(var(--u) * 3);
+}
+
+.calendar .day {
+  line-height: calc(var(--u) * 3.5);
+}
+
+.calendar .pad {
+  color: var(--dim-text);
+  opacity: 0.4;
+}
+
+.calendar .today {
+  background: var(--accent);
+  color: var(--bg);
+  font-weight: 700;
+}
+
+/* Weather: the temperature leads, the sky and the air beside it. */
+.weather-now {
+  display: flex;
+  align-items: last baseline;
+  gap: calc(var(--u) * 2);
+  padding: calc(var(--u) * 2);
+}
+
+.weather-now .temp {
+  color: var(--strong);
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 0.9;
+  font-variant-numeric: tabular-nums;
+}
+
+.weather-text {
+  display: grid;
+  min-width: 0;
+}
+
+.weather-text .item-meta {
+  color: var(--dim-text);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+/* Beside: the clock across, shortcuts left, the widgets in a column. */
+:root[data-widget-place="beside"] main:has(#widgets:not(:empty)) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) calc(var(--u) * 40);
+  column-gap: calc(var(--u) * 3);
+
+  & > header {
+    grid-column: 1 / -1;
+  }
+  & > #widgets {
+    margin-top: 0;
+  }
+}
+
+/* Settings: a widget row's small square buttons, and the add select. */
+#settings .icon-button {
+  width: calc(var(--u) * 3.5);
+  padding: 0;
+  flex: 0 0 auto;
+}
+
+#settings select {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: calc(var(--u) * 3.5);
+  padding: 0 var(--u);
+  border: 1px solid var(--line-strong);
+  border-radius: 0;
+  background: var(--surface);
+  color: var(--fg);
+  font: inherit;
+}
+
+#settings select:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: -1px;
+}
+
 /* ---- customize ------------------------------------------------------ */
 
 /* Mirrors the sidebar's tool buttons across the window: a 28px square one
@@ -607,7 +834,8 @@ output {
 
 @media (prefers-reduced-motion: no-preference) {
   .site,
-  .hide {
+  .hide,
+  .item {
     transition: background-color 120ms, opacity 120ms;
   }
   #backdrop {
