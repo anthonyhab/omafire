@@ -9,22 +9,18 @@ export GOFLAGS
 FIREFOX_DIR ?= $(PREFIX)/lib/firefox
 
 CLI := $(BUILD_DIR)/omafire
-NATIVE_HOST := $(BUILD_DIR)/omafire-native-host
 PAYLOAD := $(BUILD_DIR)/firefox/chrome
 
 # The one version source: VERSION (the release tag is v$(VERSION)).
 VERSION := $(shell cat "$(dir $(lastword $(MAKEFILE_LIST)))VERSION")
 
 # Go decides what to rebuild from its own cache, so these always run.
-.PHONY: all clean install payload $(CLI) $(NATIVE_HOST)
+.PHONY: all clean install payload $(CLI)
 
-all: $(CLI) $(NATIVE_HOST) payload
+all: $(CLI) payload
 
 $(CLI): | $(BUILD_DIR)
 	$(GO) build -ldflags "-X main.version=$(VERSION)" -o $@ ./cmd/omafire
-
-$(NATIVE_HOST): | $(BUILD_DIR)
-	$(GO) build -o $@ ./cmd/omafire-native-host
 
 $(BUILD_DIR):
 	mkdir -p $@
@@ -32,8 +28,6 @@ $(BUILD_DIR):
 install: all
 	install -Dm755 $(CLI) "$(DESTDIR)$(PREFIX)/bin/omafire"
 	install -Dm755 packaging/omafox-shim "$(DESTDIR)$(PREFIX)/bin/omafox"
-	install -Dm755 $(NATIVE_HOST) "$(DESTDIR)$(PREFIX)/lib/omafire/omafire-native-host"
-	install -Dm644 packaging/org.omarchy.omafox.json "$(DESTDIR)$(PREFIX)/lib/mozilla/native-messaging-hosts/org.omarchy.omafox.json"
 	install -Dm755 packaging/omafire-hook "$(DESTDIR)$(PREFIX)/share/omafire/hooks/omafire"
 	mkdir -p "$(DESTDIR)$(PREFIX)/share/omafire/firefox"
 	rm -rf "$(DESTDIR)$(PREFIX)/share/omafire/firefox/chrome"
@@ -46,7 +40,6 @@ install: all
 	install -Dm644 chrome/chrome.manifest "$(DESTDIR)$(FIREFOX_DIR)/omafire/chrome.manifest"
 	install -Dm644 -t "$(DESTDIR)$(FIREFOX_DIR)/omafire/newtab" chrome/newtab/*
 	install -Dm644 config/schema.json "$(DESTDIR)$(FIREFOX_DIR)/omafire/config-schema.json"
-	install -Dm644 packaging/extension/omafire.xpi "$(DESTDIR)$(FIREFOX_DIR)/omafire/omafire.xpi"
 	install -Dm644 -t "$(DESTDIR)$(PREFIX)/share/omafire/shell/omafire" shell/omafire/manifest.json shell/omafire/*.qml shell/omafire/*.js
 	install -Dm644 README.md "$(DESTDIR)$(PREFIX)/share/doc/omafire/README.md"
 	install -Dm644 LICENSE "$(DESTDIR)$(PREFIX)/share/licenses/omafire/LICENSE"

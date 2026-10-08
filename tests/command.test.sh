@@ -32,7 +32,7 @@ export OMAFIRE_THEME_NAME_FILE="$THEME_DIR/theme.name"
 
 [[ $("$OMAFIRE_BIN" version) == "$(cat "$TEST_DIR/../VERSION")" ]]
 help_output=$("$OMAFIRE_BIN" help)
-expected_commands=$'Commands:\n  sync     Queue the current palette for connected browsers\n  payload  Print the current JSON protocol message\n  status   Show the current theme and integration state (--json for scripts)\n  setup    Enable the packaged Omafire integration for this user\n  remove   Remove this user\'s Omafire hook and theme state\n  restore  Put back the files a setup or remove changed, unless edited since: restore [<set>]\n  get      Print the settings, or one: get [--json | <setting>]\n  set      Change settings: set <setting> <value> [<setting> <value>]...\n  reset    Return settings to their defaults: reset <setting>...\n  watch    Print the settings as a JSON line now and after every change\n  version  Print the Omafire version\n  help     Show this help'
+expected_commands=$'Commands:\n  sync     Apply the current palette to Firefox\n  payload  Print the theme state sync records (theme.json)\n  status   Show the current theme and integration state (--json for scripts)\n  setup    Enable the packaged Omafire integration for this user\n  remove   Remove this user\'s Omafire hook and theme state\n  restore  Put back the files a setup or remove changed, unless edited since: restore [<set>]\n  get      Print the settings, or one: get [--json | <setting>]\n  set      Change settings: set <setting> <value> [<setting> <value>]...\n  reset    Return settings to their defaults: reset <setting>...\n  watch    Print the settings as a JSON line now and after every change\n  version  Print the Omafire version\n  help     Show this help'
 [[ $help_output == *"$expected_commands"* ]]
 
 if unknown_error=$("$OMAFIRE_BIN" unknown-command 2>&1); then
@@ -59,8 +59,8 @@ python3 - "$("$OMAFIRE_BIN" status --json)" "$HOME" <<'PY'
 import json, sys
 r = json.loads(sys.argv[1])
 home = sys.argv[2]
-assert set(r) == {"version", "theme", "palette", "hook", "themeState", "nativeHost",
-                  "nativeManifest", "settings", "shellPlugin", "firefox", "keyConflicts"}, r
+assert set(r) == {"version", "theme", "palette", "hook", "themeState",
+                  "settings", "shellPlugin", "firefox", "keyConflicts"}, r
 assert r["keyConflicts"] == {}
 assert r["theme"] == "osaka-jade"
 assert r["hook"] == {"path": home + "/.config/omarchy/hooks/theme-set.d/omafire", "present": False}
@@ -176,14 +176,12 @@ assert message["theme"] == "osaka-jade"
 assert message["palette"]["mode"] == "light"
 PY
 
-export OMAFIRE_NATIVE_HOST_PATH="$TEST_ROOT/missing/omafire-native-host"
-export OMAFIRE_NATIVE_MANIFEST_PATH="$TEST_ROOT/missing/org.omarchy.omafox.json"
 export OMAFIRE_HOOK_SOURCE="$TEST_ROOT/missing/omafire-hook"
 if setup_error=$("$OMAFIRE_BIN" setup 2>&1); then
   echo "setup without packaged files unexpectedly succeeded" >&2
   exit 1
 fi
-[[ $setup_error == *"packaged native host not found"* ]]
+[[ $setup_error == *"packaged Omarchy hook not found"* ]]
 
 "$OMAFIRE_BIN" remove >/dev/null
 [[ ! -e $STATE_FILE ]]

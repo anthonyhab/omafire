@@ -48,8 +48,6 @@ printf '%s\n' 'osaka-jade' > "$THEME_DIR/theme.name"
 
 # The package as omafire ships it.
 install -m 755 "$PROJECT_DIR/packaging/omafire-hook" "$TEST_ROOT/package/omafire"
-install -m 755 /dev/null "$TEST_ROOT/package/omafire-native-host"
-install -m 644 "$PROJECT_DIR/packaging/org.omarchy.omafox.json" "$TEST_ROOT/package/manifest.json"
 printf '%s\n%s\n' '/* OMAFIRE FIREFOX BRIDGE MANAGED FILE */' '@import "src/a.css";' \
   > "$PAYLOAD/userChrome.css"
 printf '/* content */\n' > "$PAYLOAD/userContent.css"
@@ -161,8 +159,6 @@ export OMAFIRE_SHELL_PLUGIN_SOURCE="$HOME/no-shell-plugin"
 export PATH="$MOCK_BIN:$PATH"
 export OMAFIRE_THEME_DIR="$THEME_DIR"
 export OMAFIRE_THEME_NAME_FILE="$THEME_DIR/theme.name"
-export OMAFIRE_NATIVE_HOST_PATH="$TEST_ROOT/package/omafire-native-host"
-export OMAFIRE_NATIVE_MANIFEST_PATH="$TEST_ROOT/package/manifest.json"
 export OMAFIRE_HOOK_SOURCE="$TEST_ROOT/package/omafire"
 export OMAFIRE_FIREFOX_ROOT="$FF_ROOT"
 export OMAFIRE_FIREFOX_PAYLOAD_SOURCE="$PAYLOAD"

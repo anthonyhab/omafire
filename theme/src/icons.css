@@ -32,9 +32,6 @@
          [data-extensionid="darkreader@alexhulbert.com"]) {
       list-style-image: url("icons/extensions/darkreader.svg") !important;
     }
-    &[data-extensionid="omarchy-ff-sync@bb.hab.rip"] {
-      list-style-image: url("icons/extensions/ff-sync.svg") !important;
-    }
     &[data-extensionid="@testpilot-containers"] {
       list-style-image: url("icons/extensions/containers.svg") !important;
     }

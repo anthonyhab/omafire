@@ -67,9 +67,9 @@ page](https://git.hab.rip/habibe/omafire/releases).
    backups and theme hook to omafire's names. Until you run it, `omafox`
    still works: it forwards to `omafire`.
 
-For Firefox that is all: the package carries the Mozilla-signed Omafire
-extension, and the first browser window of each set-up profile installs it.
-Do not also install upstream's `@omafox` from AMO in Firefox.
+For Firefox that is all: no add-on is needed. If you used upstream omafox,
+remove its `@omafox` add-on in `about:addons`; Omafire removes its own older
+add-on by itself.
 
 To build it yourself instead: `makepkg -si` with this repository's
 `PKGBUILD` (it builds the Forgejo tag), or `make && sudo make install` for
@@ -189,14 +189,12 @@ sudo pacman -Rns omafire
 
 `omafire remove` also deletes the preferences that mark a Firefox profile as
 Omafire's from `prefs.js` (`omafire.managed`, the forced page colours,
-`omafire.extension.offered`, the accent colours): Firefox copies `user.js`
+the accent colours): Firefox copies `user.js`
 values there, and the loader keeps running while `omafire.managed` is set.
 It only edits `prefs.js` while Firefox is closed, because a running Firefox
 rewrites the file on exit; if Firefox is running it says so, and you run
 `omafire remove` again after closing it. Feature toggles from the block
 (Nova, Wayland, drag delay) stay.
-
-Then remove the Omafire extension from Firefox's `about:addons` page.
 
 A theme checkout used as `chrome/` keeps its own files: remove deletes only the
 generated `omafire-*.css` beside them. If `remove` reports Firefox running, the

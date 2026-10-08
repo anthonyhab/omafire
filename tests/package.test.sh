@@ -11,8 +11,6 @@ MOCK_BIN="$TEST_ROOT/bin"
 THEME_DIR="$TEST_ROOT/theme"
 BUILD_DIR="$TEST_ROOT/build"
 SYSTEM_COMMAND="$PACKAGE_ROOT/usr/bin/omafire"
-SYSTEM_HOST="$PACKAGE_ROOT/usr/lib/omafire/omafire-native-host"
-SYSTEM_MANIFEST="$PACKAGE_ROOT/usr/lib/mozilla/native-messaging-hosts/org.omarchy.omafox.json"
 SYSTEM_HOOK_SOURCE="$PACKAGE_ROOT/usr/share/omafire/hooks/omafire"
 
 cleanup() {
@@ -33,9 +31,11 @@ make -C "$PROJECT_DIR" \
   install >/dev/null
 
 [[ -x $SYSTEM_COMMAND ]]
-[[ -x $SYSTEM_HOST ]]
-[[ -f $SYSTEM_MANIFEST ]]
 [[ -x $SYSTEM_HOOK_SOURCE ]]
+# No add-on, native host or messaging manifest: the chrome scripts do it all.
+[[ ! -e "$PACKAGE_ROOT/usr/lib/omafire" ]]
+[[ ! -e "$PACKAGE_ROOT/usr/lib/mozilla" ]]
+[[ -z $(find "$PACKAGE_ROOT" -name '*.xpi') ]]
 [[ ! -e "$PACKAGE_ROOT/usr/share/omafire/zen" ]]
 [[ -f "$PACKAGE_ROOT/usr/share/omafire/firefox/chrome/userChrome.css" ]]
 [[ -f "$PACKAGE_ROOT/usr/share/doc/omafire/README.md" ]]
@@ -46,7 +46,7 @@ make -C "$PROJECT_DIR" \
 grep -Fqx 'exec /usr/bin/omafire "$@"' "$PACKAGE_ROOT/usr/bin/omafox"
 
 # The chrome script loader: autoconfig names omafire.cfg, whose first line
-# Firefox skips, and every script it lists ships beside the signed XPI.
+# Firefox skips, and every script it lists ships beside it.
 FIREFOX_DIR="$PACKAGE_ROOT/usr/lib/firefox"
 grep -Fqx 'pref("general.config.filename", "omafire.cfg");' \
   "$FIREFOX_DIR/defaults/pref/omafire-prefs.js"
@@ -57,7 +57,6 @@ for name in "${scripts[@]}"; do
   [[ -f "$FIREFOX_DIR/omafire/$name.uc.js" ]]
 done
 [[ $(find "$FIREFOX_DIR/omafire" -name '*.uc.js' | wc -l) -eq ${#scripts[@]} ]]
-cmp "$PROJECT_DIR/packaging/extension/omafire.xpi" "$FIREFOX_DIR/omafire/omafire.xpi"
 # The Omarchy shell plugin, byte for byte.
 diff -r "$PROJECT_DIR/shell/omafire" "$PACKAGE_ROOT/usr/share/omafire/shell/omafire"
 
@@ -70,27 +69,12 @@ cmp "$PROJECT_DIR/chrome/chrome.manifest" "$FIREFOX_DIR/omafire/chrome.manifest"
 diff -r "$PROJECT_DIR/chrome/newtab" "$FIREFOX_DIR/omafire/newtab"
 cmp "$PROJECT_DIR/config/schema.json" "$FIREFOX_DIR/omafire/config-schema.json"
 
-python3 - "$SYSTEM_MANIFEST" <<'PY'
-import json
-import sys
-
-with open(sys.argv[1], encoding="utf-8") as source:
-    manifest = json.load(source)
-
-assert manifest["name"] == "org.omarchy.omafox"
-assert manifest["path"] == "/usr/lib/omafire/omafire-native-host"
-assert manifest["type"] == "stdio"
-assert manifest["allowed_extensions"] == ["omarchy-ff-sync@bb.hab.rip", "@omafox"]
-PY
-
 export HOME="$TEST_HOME"
 # Settings follow XDG_CONFIG_HOME; never the caller's.
 unset XDG_CONFIG_HOME OMAFIRE_CONFIG
 # Nor the host's installed shell plugin.
 export OMAFIRE_SHELL_PLUGIN_SOURCE="$HOME/no-shell-plugin"
 export PATH="$MOCK_BIN:$PATH"
-export OMAFIRE_NATIVE_HOST_PATH="$SYSTEM_HOST"
-export OMAFIRE_NATIVE_MANIFEST_PATH="$SYSTEM_MANIFEST"
 export OMAFIRE_HOOK_SOURCE="$SYSTEM_HOOK_SOURCE"
 export OMAFIRE_THEME_DIR="$THEME_DIR"
 export OMAFIRE_THEME_NAME_FILE="$THEME_DIR/theme.name"
@@ -125,7 +109,7 @@ assert message["theme"] == "osaka-jade"
 assert message["palette"]["mode"] == "dark"
 PY
 status_output=$("$SYSTEM_COMMAND" status)
-[[ $status_output == *"Native host: $SYSTEM_HOST (installed)"* ]]
+[[ $status_output != *"Native host"* ]]
 [[ $status_output != *Zen* ]]
 
 "$SYSTEM_COMMAND" remove >/dev/null
@@ -134,7 +118,5 @@ status_output=$("$SYSTEM_COMMAND" status)
 [[ -z $(ls -A "$ZEN_PROFILE") ]]
 [[ ! -d "$TEST_HOME/.local/state/omafire" ]]
 [[ -x $SYSTEM_COMMAND ]]
-[[ -x $SYSTEM_HOST ]]
-[[ -f $SYSTEM_MANIFEST ]]
 
 echo "package.test.sh: ok"

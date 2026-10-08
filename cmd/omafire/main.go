@@ -1,9 +1,8 @@
 // omafire: Omarchy → Firefox theme sync command.
 //
-// Speaks the omafox v1 protocol so both the upstream-signed @omafox
-// WebExtension and the Omafire extension work unmodified: `sync` normalizes
-// the current Quattro palette into ~/.local/state/omafire/theme.json and the
-// native host pushes it to connected browsers over inotify.
+// `sync` writes the current Quattro palette into every managed Firefox
+// profile, then records it in ~/.local/state/omafire/theme.json (the omafox
+// v1 message format), which `omafire watch` reports to running Firefoxes.
 //
 // Firefox profiles get managed blocks:
 //
@@ -29,18 +28,16 @@ var version = "unknown"
 
 // Resolved paths, set once by initPaths.
 var (
-	themeDir           string
-	themeNameFile      string
-	backgroundLink     string
-	hookPath           string
-	stateDir           string
-	stateFile          string
-	nativeHostPath     string
-	nativeManifestPath string
-	hookSource         string
-	ffRoot             string
-	ffProfilesFile     string
-	ffPayloadSource    string
+	themeDir        string
+	themeNameFile   string
+	backgroundLink  string
+	hookPath        string
+	stateDir        string
+	stateFile       string
+	hookSource      string
+	ffRoot          string
+	ffProfilesFile  string
+	ffPayloadSource string
 )
 
 func fail(format string, args ...any) {
@@ -99,9 +96,6 @@ func initPaths() {
 	hookPath = home + "/.config/omarchy/hooks/theme-set.d/omafire"
 	stateDir = home + "/.local/state/omafire"
 	stateFile = stateDir + "/theme.json"
-	nativeHostPath = envOr("OMAFIRE_NATIVE_HOST_PATH", "/usr/lib/omafire/omafire-native-host")
-	nativeManifestPath = envOr("OMAFIRE_NATIVE_MANIFEST_PATH",
-		"/usr/lib/mozilla/native-messaging-hosts/org.omarchy.omafox.json")
 	hookSource = envOr("OMAFIRE_HOOK_SOURCE", "/usr/share/omafire/hooks/omafire")
 	ffRoot = envOr("OMAFIRE_FIREFOX_ROOT", home+"/.mozilla/firefox")
 	ffProfilesFile = envOr("OMAFIRE_FIREFOX_PROFILES_FILE", ffRoot+"/profiles.ini")
@@ -117,8 +111,8 @@ func cmdSync() {
 	p := readPalette()
 	payload := formatPayload(p, jsonEscape(currentThemeName()))
 	// Profile files first: the same palette for the first painted frame, and
-	// ready before theme.json below wakes the extension, whose repaint is
-	// what tells the live-palette chrome script to reread them.
+	// ready before theme.json below, whose change `omafire watch` reports
+	// to running Firefoxes, which then reread them.
 	skipped := refreshFFProfilesColors(p)
 	storeThemePayload(payload)
 	sweepLeftoverTemps()
@@ -133,12 +127,6 @@ func cmdSync() {
 func cmdSetup() {
 	requireQuattro()
 	readPalette() // refuses an unusable palette before anything is changed
-	if unix.Access(nativeHostPath, unix.X_OK) != nil {
-		fail("packaged native host not found: %s", nativeHostPath)
-	}
-	if !isRegularFile(nativeManifestPath) {
-		fail("packaged native manifest not found: %s", nativeManifestPath)
-	}
 	if unix.Access(hookSource, unix.X_OK) != nil {
 		fail("packaged Omarchy hook not found: %s", hookSource)
 	}
@@ -148,14 +136,13 @@ func cmdSetup() {
 	}
 	fmt.Printf("Enabled user hook: %s\n", hookPath)
 	removeLegacyHooks()
-	fmt.Printf("Using packaged native host: %s\n", nativeHostPath)
 
 	backupCommand = "setup"
 	ffConfigured := setupFFProfiles()
 	setupShellPlugin()
 	backupCommand = "" // the palette refresh below changes no user file
 	cmdSync()
-	fmt.Println("Queued the current Omarchy palette for connected browsers.")
+	fmt.Println("Applied the current Omarchy palette.")
 	if ffConfigured > 0 {
 		fmt.Println("Restart Firefox once to load the Omafire bridge.")
 	}
@@ -200,8 +187,8 @@ Keep Firefox in sync with the current Omarchy Quattro palette.
 Settings live in ~/.config/omafire/config.json; Firefox follows them live.
 
 Commands:
-  sync     Queue the current palette for connected browsers
-  payload  Print the current JSON protocol message
+  sync     Apply the current palette to Firefox
+  payload  Print the theme state sync records (theme.json)
   status   Show the current theme and integration state (--json for scripts)
   setup    Enable the packaged Omafire integration for this user
   remove   Remove this user's Omafire hook and theme state

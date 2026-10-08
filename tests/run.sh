@@ -23,7 +23,6 @@ bash -n \
 shellcheck \
   "$PROJECT_DIR/packaging/omafire-hook" \
   "$PROJECT_DIR/scripts/build-payload.sh" \
-  "$PROJECT_DIR/scripts/check-xpi.sh" \
   "$SCRIPT_DIR/run.sh" \
   "$SCRIPT_DIR/command.test.sh" \
   "$SCRIPT_DIR/package.test.sh" \
@@ -37,19 +36,11 @@ shellcheck \
 
 # Harness and release scripts that run outside this gate: warnings only.
 shellcheck -S warning \
-  "$PROJECT_DIR/extension/sign.sh" \
   "$PROJECT_DIR/scripts/ci-status" \
   "$PROJECT_DIR/scripts/ci-wait" \
   "$SCRIPT_DIR/launcher/sweep.sh" \
   "$SCRIPT_DIR"/lifecycle/*.sh
 
-node --check "$PROJECT_DIR/extension/theme.js"
-node --check "$PROJECT_DIR/extension/background.js"
-node --check "$PROJECT_DIR/extension/tabglow.js"
-node --check "$PROJECT_DIR/extension/wallpaper.js"
-node --check "$PROJECT_DIR/extension/popup/popup.js"
-node --check "$PROJECT_DIR/extension/newtab/newtab.js"
-node --check "$SCRIPT_DIR/native-host.test.js"
 node --check "$PROJECT_DIR/shell/omafire/Model.js"
 node --check "$PROJECT_DIR/chrome/omafire-prefs.js"
 node --check - < "$PROJECT_DIR/chrome/omafire.cfg"
@@ -89,17 +80,10 @@ done
 # The theme's own rules: !important everywhere, colours only in token files.
 node "$PROJECT_DIR/theme/scripts/lint.mjs"
 
-# The packaged XPI is the signed build of extension/ as committed.
-"$PROJECT_DIR/scripts/check-xpi.sh"
-
 node "$SCRIPT_DIR/theme.test.js"
 node "$SCRIPT_DIR/tab-numbers.test.js"
-node "$SCRIPT_DIR/background.test.js"
 node "$SCRIPT_DIR/site-colors.test.js"
-node "$SCRIPT_DIR/tabglow-race.test.js"
 node "$SCRIPT_DIR/config-bridge.test.js"
-node "$SCRIPT_DIR/wallpaper.test.js"
-node "$SCRIPT_DIR/native-host.test.js"
 node "$SCRIPT_DIR/shell-plugin.test.js"
 "$SCRIPT_DIR/command.test.sh"
 "$SCRIPT_DIR/firefox-integration.test.sh"

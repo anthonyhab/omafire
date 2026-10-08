@@ -14,8 +14,6 @@ RELATIVE_PROFILE="$FF_ROOT/profiles/default-release"
 ABSOLUTE_PROFILE="$TEST_ROOT/external Firefox profile"
 MISSING_PROFILE="$FF_ROOT/profiles/missing"
 CHECKOUT_PROFILE="$FF_ROOT/profiles/checkout"
-NATIVE_HOST="$TEST_ROOT/package/omafire-native-host"
-NATIVE_MANIFEST="$TEST_ROOT/package/org.omarchy.omafox.json"
 HOOK_SOURCE="$TEST_ROOT/package/omafire-hook"
 FF_PAYLOAD_SOURCE="$TEST_ROOT/package/firefox-chrome"
 FF_BRIDGE_MARKER='/* OMAFIRE FIREFOX BRIDGE MANAGED FILE */'
@@ -39,7 +37,7 @@ assert_not_contains() {
 
 mkdir -p \
   "$TEST_HOME" "$MOCK_BIN" "$THEME_DIR" "$FF_ROOT/profiles" \
-  "$RELATIVE_PROFILE/chrome" "$ABSOLUTE_PROFILE" "$(dirname "$NATIVE_HOST")"
+  "$RELATIVE_PROFILE/chrome" "$ABSOLUTE_PROFILE" "$(dirname "$HOOK_SOURCE")"
 install -m 755 "$TEST_DIR/fixtures/bin/omarchy" "$MOCK_BIN/omarchy"
 # Hermetic Hyprland: sync reads decoration:rounding for the radius file.
 cat > "$MOCK_BIN/hyprctl" <<'EOF'
@@ -54,8 +52,6 @@ esac
 EOF
 chmod 755 "$MOCK_BIN/hyprctl"
 install -m 755 "$PROJECT_DIR/packaging/omafire-hook" "$HOOK_SOURCE"
-install -m 755 /dev/null "$NATIVE_HOST"
-install -m 644 "$PROJECT_DIR/packaging/org.omarchy.omafox.json" "$NATIVE_MANIFEST"
 cp "$TEST_DIR/fixtures/colors.toml" "$THEME_DIR/colors.toml"
 printf '%s\n' 'osaka-jade' > "$THEME_DIR/theme.name"
 
@@ -122,8 +118,6 @@ export OMAFIRE_SHELL_PLUGIN_SOURCE="$HOME/no-shell-plugin"
 export PATH="$MOCK_BIN:$PATH"
 export OMAFIRE_THEME_DIR="$THEME_DIR"
 export OMAFIRE_THEME_NAME_FILE="$THEME_DIR/theme.name"
-export OMAFIRE_NATIVE_HOST_PATH="$NATIVE_HOST"
-export OMAFIRE_NATIVE_MANIFEST_PATH="$NATIVE_MANIFEST"
 export OMAFIRE_HOOK_SOURCE="$HOOK_SOURCE"
 export OMAFIRE_FIREFOX_ROOT="$FF_ROOT"
 export OMAFIRE_FIREFOX_PAYLOAD_SOURCE="$FF_PAYLOAD_SOURCE"

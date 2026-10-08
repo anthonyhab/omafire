@@ -6,54 +6,41 @@ Notes for people reading or changing Omafire. For installing and using it, see t
 
 Omafire is made up of a few small parts:
 
-- An Omarchy theme-change hook reads the current `colors.toml` palette and
-  writes a normalized theme message to `~/.local/state/omafire/theme.json`.
-- The native messaging host watches that file with Linux `inotify` and sends
-  updates to connected browser extensions. It sleeps between changes, so no
-  persistent polling or background service is needed.
-- The same host also watches the current Omarchy wallpaper
-  (`~/.local/state/omarchy/current/background`, falling back to
-  `~/.config/omarchy/current/background`) and streams it to the extension for
-  the new-tab page. JPEG, PNG, and WebP images up to 32 MiB are sent as
-  `{"protocol":"omafox","version":1,"action":"wallpaper","id":…,"mime":…,"size":…,"index":…,"count":…,"data":…}`
-  messages: `count` consecutive base64 chunks of 512 KiB raw bytes each, so
-  every message stays under the browser's 1 MB native-messaging limit. The
-  `id` changes whenever the linked file or its content changes, and an
-  unchanged wallpaper is not resent. When no usable wallpaper exists, the host
-  sends a single message with an empty `id` and `"count":0`.
-- The extension validates the message, maps the Omarchy colors to standard
-  Firefox theme properties, and saves the result in the browser's local
-  extension storage.
-- For Firefox profiles, `omafire setup` installs the packaged theme payload to
-  `chrome/omafire/`, adds managed imports to `chrome/userChrome.css`
-  and `chrome/userContent.css`, and adds the required preferences to a
-  managed block in `user.js`. On every `omafire sync` it also regenerates
-  `chrome/omafire-palette.css`, a `:root:not([lwtheme])` fallback holding the
-  *current* palette, `chrome/omafire-radius.css` from Hyprland's
-  rounding, border width, and border colors (left alone when `hyprctl` is
-  unavailable), plus
-  the mode-matched `layout.css.prefers-color-scheme.content-override` and
-  `browser.display` canvas prefs — so the first painted frame, restored
-  pages, and pages with native dark-mode CSS all start on the real palette
-  instead of an approximation. The fallback self-disables the moment the
-  extension's theme lands. Setup refuses to overwrite an unrelated
-  `chrome/omafire/` directory.
+- An Omarchy theme-change hook runs `omafire sync`, which reads the current
+  `colors.toml` palette and writes it into each Firefox profile `omafire
+  setup` manages: `chrome/omafire-palette.css` (the palette as
+  `--omarchy-*`, and Firefox's own theme variables with readable text and
+  fills picked from it), the content palette for Firefox's own pages,
+  `chrome/omafire-radius.css` from Hyprland's rounding, border width and
+  border colours (left alone when `hyprctl` is unavailable), and the
+  palette prefs in the managed `user.js` block (the page canvas, link and
+  selection colours, and `layout.css.prefers-color-scheme.content-override`),
+  so the first painted frame and pages with native dark-mode CSS start on the
+  real palette. It writes `~/.local/state/omafire/theme.json` last.
+- Setup also installs the packaged theme to `chrome/omafire/` and adds
+  managed imports to `chrome/userChrome.css` and `chrome/userContent.css`.
+  It refuses to overwrite an unrelated `chrome/omafire/` directory.
+- In each running Firefox, the settings module (`config.sys.mjs`) keeps
+  `omafire watch` as a child process. It reports a changed `config.json`,
+  a new `theme.json` (a sync) and a new Omarchy wallpaper
+  (`~/.local/state/omarchy/current/background`), each on inotify, so it
+  sleeps between changes. The chrome scripts then reread the palette files
+  and repaint without a restart.
 
 The flow is:
 
 ```text
 Omarchy theme change
         ↓
-Theme hook (omafire sync) → local state file → native messaging host → browser extension
-        ↓                                                          ↓
-  generated palette CSS →                     Firefox theme properties
-  Firefox profile first paint                          ↓
-                                              Firefox UI
+Theme hook (omafire sync) → profile palette files → theme.json
+                                                        ↓
+                          omafire watch (in each running Firefox)
+                                                        ↓
+                          live-palette.uc.js rereads the files → Firefox UI
 ```
 
-When a supported browser starts, the extension restores its saved theme and
-the native host sends the latest Omarchy palette again. Everything stays
-local to the machine; there is no web service or always-running daemon.
+Everything stays local to the machine; there is no web service or
+always-running daemon.
 
 
 ## Firefox chrome scripts
@@ -67,17 +54,23 @@ own root-owned files: nothing is loaded from the profile.
 
 - **Settings panel.** *Omafire* in the app menu (or Ctrl+Alt+O):
   toolbar and tab layout, sidebar side, launcher, density, zen mode,
-  compact sidebar, floating page, glass and its opacity, tab numbers and
-  extension glyphs. Layout changes apply without a restart.
+  compact sidebar, floating page, glass and its opacity, tab numbers, the
+  new tab, site colours and extension glyphs. Layout changes apply without a restart.
 - **Keybindings.** Ctrl+Alt+H hides the chrome (zen mode; compact in the
   sidebar layout), Ctrl+Alt+S switches the toolbar, Ctrl+Alt+G toggles
   glass. Rebind with `omafire.keys.<zen|layout|glass|settings>` in
   `about:config` (a chord like `Ctrl+Alt+J`; empty to unbind). A chord
   Firefox already uses is left to Firefox.
-- **Live palette.** A theme change reaches the tab-group colours, window
+- **Live palette.** A theme change reaches the whole chrome, window
   rounding and Firefox's own pages (settings, add-ons) without a restart.
-- **Extension.** Installs or updates the bundled signed extension. Remove
-  it in `about:addons` and it stays removed until a newer version ships.
+- **New tab.** `chrome://omafire/content/newtab.html` (`chrome/newtab/`):
+  clock, shortcuts from Firefox's top sites, and the Omarchy wallpaper or a
+  picked image, with its own options on `,`. The `new-tab` setting turns it
+  off.
+- **Site colours.** With `site-colors` on, the active tab glows in the
+  colour of its site's icon.
+- **Old add-on.** Removes the WebExtension releases before 0.7 installed,
+  after the new tab has copied its settings.
 - **Compact sidebar.** Keeps the hidden column out while a menu it opened
   (a tab's or the toolbar's context menu, the new-tab container menu,
   Back's history) is open, or while the keyboard is on a sidebar tool.
@@ -100,17 +93,9 @@ commit, builds the package with makepkg, and publishes a Forgejo release
 with the package, PKGBUILD and checksums. Local `makepkg` builds are for
 development only.
 
-The CLI and the native host are Go (`cmd/omafire`,
-`cmd/omafire-native-host`; standard library plus `golang.org/x/sys`), built
-by `make`. The theme lives in `theme/` (its own [README](../theme/README.md) covers its code and
+The CLI is Go (`cmd/omafire`; standard library plus `golang.org/x/sys`),
+built by `make`. The theme lives in `theme/` (its own [README](../theme/README.md) covers its code and
 design language). The Firefox payload the package installs is built from it on
 every `make` (`scripts/build-payload.sh`, into `build/firefox/chrome/`), so
-the theme, CLI, chrome scripts and extension of a release all come from
-one commit. Its entrypoints carry a stamp naming the version and commit.
-
-The Firefox extension ships signed in the package
-(`packaging/extension/omafire.xpi`). To change it: bump `extension/manifest.json`,
-run `extension/sign.sh` (AMO, unlisted), commit the new
-`extension/.amo-upload-uuid` receipt, and copy the signed XPI from
-`extension/dist/` over the packaged one. `scripts/check-xpi.sh` fails the
-gate if the packaged XPI is unsigned or differs from `extension/`.
+the theme, CLI and chrome scripts of a release all come from one commit.
+Its entrypoints carry a stamp naming the version and commit.

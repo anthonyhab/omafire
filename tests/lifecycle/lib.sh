@@ -32,14 +32,19 @@ sandbox() {
       --ro-bind "$pkg/usr/lib/firefox/defaults/pref/omafire-prefs.js"
         /usr/lib/firefox/defaults/pref/omafire-prefs.js)
   fi
+  # Releases before 0.7 ship the native host; setup refuses without it.
+  local host=usr/lib/mozilla/native-messaging-hosts/org.omarchy.omafox.json
+  if [[ -e $pkg/usr/lib/omafire ]]; then
+    extra+=(--ro-bind "$pkg/usr/lib/omafire" /usr/lib/omafire)
+  fi
+  if [[ -e $pkg/$host ]]; then
+    extra+=(--ro-bind "$pkg/$host" "/$host")
+  fi
   bwrap --ro-bind / / --dev /dev --proc /proc \
     --tmpfs /run/user --tmpfs /home \
     --bind "$SCR" "$SCR" \
     --ro-bind "$pkg/usr/bin/omafire" /usr/bin/omafire \
     --ro-bind "$pkg/usr/share/omafire" /usr/share/omafire \
-    --ro-bind "$pkg/usr/lib/omafire" /usr/lib/omafire \
-    --ro-bind "$pkg/usr/lib/mozilla/native-messaging-hosts/org.omarchy.omafox.json" \
-      /usr/lib/mozilla/native-messaging-hosts/org.omarchy.omafox.json \
     --clearenv --setenv HOME "$SB_HOME" --setenv USER "$USER" \
     --setenv PATH "$MOCK:/usr/bin" --setenv LANG C.UTF-8 \
     --setenv XDG_RUNTIME_DIR /run/user/nobody --setenv TMPDIR "$SCR/tmp" \

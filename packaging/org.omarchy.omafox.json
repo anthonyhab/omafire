@@ -1,7 +1,0 @@
-{
-  "name": "org.omarchy.omafox",
-  "description": "Delivers Omarchy theme changes to the Omafire extension",
-  "path": "/usr/lib/omafire/omafire-native-host",
-  "type": "stdio",
-  "allowed_extensions": ["omarchy-ff-sync@bb.hab.rip", "@omafox"]
-}

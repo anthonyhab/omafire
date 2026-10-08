@@ -62,10 +62,9 @@ not appear, check the version in `about:support` first.
 If a browser does not update after a theme change:
 
 1. Confirm that the `omafire` package is installed.
-2. Run `omafire status` and check that the theme state, native host, and native
-   manifest are present, and that each Firefox profile says `configured`.
+2. Run `omafire status` and check that the theme state is present and that
+   each Firefox profile says `configured`.
 3. Run `omafire setup`, followed by `omafire sync`, and restart Firefox.
-4. Open the Omafire popup to check its connection status or reapply the theme.
 
 If that does not fix it, see [Getting help](#getting-help).
 
@@ -94,8 +93,8 @@ not touched. Each case below says what you see and what to do.
   `BEGIN`/`END OMAFIRE FIREFOX BRIDGE` lines in that file are not one ordered
   pair. Nothing was changed. Delete the stray marker lines, or the whole
   block between them, and run setup again. Until you do, every theme
-  change's sync also stops at that profile: profiles after it and the
-  browser extension keep the old palette.
+  change's sync also stops at that profile: profiles after it keep the old
+  palette.
 - **`refusing to replace symlinked …`, `… is not a regular file` or
   `could not read … larger than 4 MB`.** omafire will not write through a
   symlink, or rewrite a file it cannot read whole. Nothing was changed.
@@ -156,7 +155,7 @@ and only inside their own marked blocks and the `omafire/` payload.
   `prefs.js` only while the profile is closed (see Uninstallation).
 - **One bad profile does not stop the others.** `omafire sync` skips a
   profile it refuses (malformed Omafire markers, a symlinked file), names it on
-  stderr, updates the rest and the extension's `theme.json`, and exits 1 at the
+  stderr, updates the rest and `theme.json`, and exits 1 at the
   end. Fix the profile and sync again.
 
 

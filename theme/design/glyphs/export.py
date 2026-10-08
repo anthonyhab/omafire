@@ -23,7 +23,6 @@ TITLE = {
     "vimium": "Vimium C: Vim's serifed V (drawn)",
     "greasemonkey": "Greasemonkey: its monkey (traced from the add-on's icon)",
     "darkreader": "Dark Reader: its face (Simple Icons)",
-    "ff-sync": "Omafire: the omafox mark (the add-on's icon)",
     "containers": "Multi-Account Containers: the add-on's own glyph",
     "sponsorblock": "SponsorBlock: shield with play (traced from the add-on's icon)",
     "dearrow": "DeArrow: its eye (traced from the add-on's icon)",

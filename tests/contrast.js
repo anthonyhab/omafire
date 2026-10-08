@@ -1,9 +1,9 @@
 "use strict";
 
 // sRGB contrast (WCAG 2) of the theme's derived colour tokens over Omarchy
-// palettes, read from the token files as written. Each palette goes through
-// the extension's own lightweight-theme mapping, so chrome text is the
-// toolbar_text it picks; the about: pages read the raw palette
+// palettes, read from the token files as written. Chrome text is the
+// toolbar text omafire sync picks for each palette; the about: pages read
+// the raw palette
 // (tokens-content.css). Text and marks are composited over every surface
 // they sit on, and over that surface hovered, and the worst ratio counts.
 // Glass is left out: its alpha never drops below the theme's glass floor
@@ -11,7 +11,9 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
-const { toFirefoxTheme } = require("../extension/theme.js");
+// The Firefox theme variables omafire sync writes, per palette
+// (cmd/omafire/firefoxtheme_test.go keeps them equal to the CLI).
+const firefoxTheme = require("../cmd/omafire/testdata/firefox-theme.json");
 
 const THEME = process.env.CONTRAST_TOKENS_DIR || path.join(__dirname, "..", "theme", "src");
 
@@ -91,10 +93,10 @@ function measure(palettes) {
   };
   const rows = [];
   for (const [theme, p] of Object.entries(palettes).sort()) {
-    const lwt = toFirefoxTheme({ schemaVersion: 1, palette: p }).colors;
+    const toolbarText = firefoxTheme[theme]["--toolbar-text-color"];
     const light = p.mode === "light";
     for (const [doc, defs] of Object.entries(files)) {
-      const text = rgb(doc === "chrome" ? lwt.toolbar_text : p.foreground);
+      const text = rgb(doc === "chrome" ? toolbarText : p.foreground);
       const frame = rgb(p.dark_background);
       const surfaces = doc === "chrome"
         ? [frame, mix(frame, text, 0.05)]                 // window, --oc-panel

@@ -6,8 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-
-	"golang.org/x/sys/unix"
 )
 
 type profileState struct {
@@ -28,16 +26,14 @@ type fileState struct {
 }
 
 type statusReport struct {
-	Version        string       `json:"version"`
-	Theme          string       `json:"theme"`
-	Palette        string       `json:"palette"`
-	Hook           fileState    `json:"hook"`
-	ThemeState     fileState    `json:"themeState"`
-	NativeHost     fileState    `json:"nativeHost"`
-	NativeManifest fileState    `json:"nativeManifest"`
-	Settings       settingsInfo `json:"settings"`
-	ShellPlugin    fileState    `json:"shellPlugin"`
-	Firefox        browserState `json:"firefox"`
+	Version     string       `json:"version"`
+	Theme       string       `json:"theme"`
+	Palette     string       `json:"palette"`
+	Hook        fileState    `json:"hook"`
+	ThemeState  fileState    `json:"themeState"`
+	Settings    settingsInfo `json:"settings"`
+	ShellPlugin fileState    `json:"shellPlugin"`
+	Firefox     browserState `json:"firefox"`
 	// Chords the browser already uses, as keys.uc.js last reported them from a
 	// running window: setting name ("key-glass") -> chord and owner.
 	KeyConflicts map[string]keyConflict `json:"keyConflicts"`
@@ -104,17 +100,15 @@ func collectStatus() statusReport {
 	}
 	ff := browserStatus(ffProfilesFile, ffRoot, ffProfileStatus)
 	return statusReport{
-		Version:        version,
-		Theme:          name,
-		Palette:        themeDir + "/colors.toml",
-		Hook:           fileState{hookPath, pathExists(hookPath)},
-		ThemeState:     fileState{stateFile, isRegularFile(stateFile)},
-		NativeHost:     fileState{nativeHostPath, unix.Access(nativeHostPath, unix.X_OK) == nil},
-		NativeManifest: fileState{nativeManifestPath, isRegularFile(nativeManifestPath)},
-		Settings:       settingsInfo{configFile, configStatus()},
-		ShellPlugin:    fileState{shellPluginLink, shellPluginLinked()},
-		Firefox:        ff,
-		KeyConflicts:   keyConflicts(ff),
+		Version:      version,
+		Theme:        name,
+		Palette:      themeDir + "/colors.toml",
+		Hook:         fileState{hookPath, pathExists(hookPath)},
+		ThemeState:   fileState{stateFile, isRegularFile(stateFile)},
+		Settings:     settingsInfo{configFile, configStatus()},
+		ShellPlugin:  fileState{shellPluginLink, shellPluginLinked()},
+		Firefox:      ff,
+		KeyConflicts: keyConflicts(ff),
 	}
 }
 
@@ -142,14 +136,11 @@ func showStatus(args []string) {
 		return
 	}
 	ready := map[bool]string{true: "ready", false: "missing"}
-	installed := map[bool]string{true: "installed", false: "missing"}
 	fmt.Printf("Omafire version: %s\n", r.Version)
 	fmt.Printf("Theme: %s\n", r.Theme)
 	fmt.Printf("Palette: %s\n", r.Palette)
 	fmt.Printf("Hook: %s\n", r.Hook.Path)
 	fmt.Printf("Theme state: %s (%s)\n", r.ThemeState.Path, ready[r.ThemeState.Present])
-	fmt.Printf("Native host: %s (%s)\n", r.NativeHost.Path, installed[r.NativeHost.Present])
-	fmt.Printf("Native manifest: %s (%s)\n", r.NativeManifest.Path, installed[r.NativeManifest.Present])
 	fmt.Printf("Settings: %s (%s)\n", r.Settings.Path, r.Settings.Status)
 	fmt.Printf("Shell plugin: %s (%s)\n", r.ShellPlugin.Path, map[bool]string{true: "linked", false: "not linked"}[r.ShellPlugin.Present])
 	printBrowserStatus("Firefox", r.Firefox)

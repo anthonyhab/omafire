@@ -18,7 +18,7 @@ jobs:
     steps:
       - name: Install toolchain
         run: |
-          pacman -Syu --noconfirm --needed git go nodejs python shellcheck unzip openssh
+          pacman -Syu --noconfirm --needed git go nodejs python shellcheck openssh
           node -e 'const m = +process.versions.node.split(".")[0]; if (m !== 26) { console.error(`Node ${process.version}; expected 26`); process.exit(1) }'
       - name: Checkout
         uses: https://code.forgejo.org/actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
@@ -56,7 +56,7 @@ jobs:
         run: |
           set -euo pipefail
           notes="Omafire $TAG, built by Forgejo CI from $SHA.
-          Firefox theme, CLI, chrome scripts and extension all from this commit.
+          Firefox theme, CLI and chrome scripts all from this commit.
           Pre-1.0: interfaces and packaging may still change."
           body="$(python3 -c 'import json,sys; print(json.dumps({"tag_name": sys.argv[1], "name": "Omafire " + sys.argv[1], "body": sys.argv[2], "prerelease": True}))' "$TAG" "$notes")"
           id="$(curl -fsS -X POST -H "Authorization: token $TOKEN" -H 'Content-Type: application/json' \

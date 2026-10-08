@@ -17,7 +17,7 @@ nothing in it sends data to any server.
 
 It does not read browsing history, bookmarks, cookies, passwords, page
 contents or any other browser data. The new-tab page lists your most visited
-sites through Firefox's own `topSites` API; that list stays in the browser and
+sites from Firefox's own top sites; that list stays in the browser and
 is not stored or sent anywhere by Omafire.
 
 ## What Omafire writes, and where
@@ -29,26 +29,24 @@ is not stored or sent anywhere by Omafire.
 - Your settings, in `~/.config/omafire/config.json`, and the current theme
   state, in `~/.local/state/omafire/`.
 - The Omarchy shell plugin link in `~/.config/omarchy/plugins/omafire`.
-- In the browser's extension storage: the theme the extension applied.
+- In each managed profile's prefs: the new tab's options and its last
+  shortcut list, and, if you pick one, a copy of the new tab's image.
 
 All of it stays on your device, and `omafire remove` takes it out.
 
-## Data in the browser extension
+## Data in the browser
 
-The Firefox extension receives the current theme name, colour palette and
-wallpaper from the locally installed Omafire native messaging host over
-Firefox's native-messaging channel, which is local to your machine. It uses
+Omafire's chrome scripts run inside Firefox, from files the package
+installs. They read the palette and wallpaper files on your machine and use
 them only to theme the browser and Omafire's new-tab page. To colour a tab's
-glow it reads the icon Firefox already shows for that tab; the colour is
-computed in the browser and kept in memory. Its permissions are
-`nativeMessaging`, `storage`, `theme` and `topSites`, with no access to
-websites, and it declares that it collects no data.
+glow (the `site-colors` setting) they read the icon Firefox already shows for
+that tab; the colour is computed in the browser and kept in memory. A
+private window's new tab shows no history.
 
 ## Network
 
 Omafire's own code opens no network connection. Installing a release from the
-release page, or a browser extension from addons.mozilla.org, is a download you
-make yourself.
+release page is a download you make yourself.
 
 Omafire does not include Cinder or any other add-on that talks to a service;
 such an add-on has its own statement.

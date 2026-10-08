@@ -8,12 +8,6 @@ following.
 Omafire grew out of [omafox](https://github.com/cover/omafox) by its
 contributors, MIT licensed. The upstream copyright notice is kept in LICENSE.
 
-## Omarchy icon
-
-The extension and bar icons are derived from the Omarchy icon, MIT licensed:
-Copyright (c) David Heinemeier Hansson. The full notice is in
-[extension/THIRD_PARTY_NOTICES.md](extension/THIRD_PARTY_NOTICES.md).
-
 ## Layout ideas
 
 The sidebar layout and compact column owe a lot to
@@ -22,7 +16,7 @@ The sidebar layout and compact column owe a lot to
 under glass was learned from Zia. They are credited for the ideas; the theme is written
 here.
 
-## Go modules (linked into the `omafire` and `omafire-native-host` binaries)
+## Go modules (linked into the `omafire` binary)
 
 `golang.org/x/sys` and `golang.org/x/image`, BSD 3-Clause:
 

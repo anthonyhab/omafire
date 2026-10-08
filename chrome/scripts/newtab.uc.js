@@ -4,7 +4,7 @@
 // The page's files sit beside this script, registered as chrome://omafire/
 // by the chrome.manifest there. Settings made on the old add-on's new tab
 // (its storage, and a picked image) are copied once into the page's pref
-// and the profile while that add-on is still enabled.
+// and the profile before old-addon.uc.js removes it.
 // Loaded into each browser window by omafire.cfg: the first window of a
 // session registers and copies; every window keeps the page in place.
 (function () {
@@ -51,14 +51,17 @@
 
   // The old add-on kept the page's settings in its storage.local
   // ("newtab") and a picked image in its IndexedDB ("omafox", "files",
-  // "custom-wallpaper"); both are readable only while it is enabled.
+  // "custom-wallpaper"); both are readable only while it runs. Resolves
+  // false while it is enabled but not yet running: its removal waits.
   async function migrate() {
     if (Services.prefs.prefHasUserValue(SETTINGS)) {
-      return;
+      return true;
     }
     const policy = WebExtensionPolicy.getByID(OLD_ADDON);
     if (!policy?.extension) {
-      return;
+      const {AddonManager} = ChromeUtils.importESModule(
+        "resource://gre/modules/AddonManager.sys.mjs");
+      return !(await AddonManager.getAddonByID(OLD_ADDON))?.isActive;
     }
     const {ExtensionStorageIDB} = ChromeUtils.importESModule(
       "resource://gre/modules/ExtensionStorageIDB.sys.mjs");
@@ -91,6 +94,7 @@
     if (newtab && typeof newtab === "object") {
       Services.prefs.setStringPref(SETTINGS, JSON.stringify(newtab));
     }
+    return true;
   }
 
   if (!defaults.getBoolPref(SESSION, false)) {
@@ -103,7 +107,10 @@
       return;
     }
     defaults.setBoolPref(SESSION, true);
-    migrate().catch(log);
+    window.OmafireNewTab.migrated = migrate().catch(e => {
+      log(e);
+      return false;
+    });
   }
   follow();
   // The old add-on sets its own page as it starts, which may be after
