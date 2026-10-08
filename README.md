@@ -145,6 +145,7 @@ omafire watch                # a JSON line now and after every change
 | `floating-page` | `true`, `false` | `false` |
 | `glass` | `true`, `false` | `false` |
 | `opacity` | `0.5` to `1` | `0.85` |
+| `glass-pages` | `true`, `false` (with `glass` and Cinder) | `false` |
 | `tab-numbers` | `true`, `false` | `false` |
 | `tab-numbers-hold` | `true`, `false` (with `tab-numbers`) | `false` |
 | `extension-glyphs` | `true`, `false` | `true` |
@@ -156,8 +157,8 @@ omafire watch                # a JSON line now and after every change
 The first Firefox to start without a file creates it from that profile's
 settings. A value the file gets wrong is reported and its default used; a
 file that is not JSON is left alone, and Firefox keeps its current settings
-until it parses again. Keybindings (`omafire.keys.*`) and the extension's
-site-coloured tab are not in the file yet.
+until it parses again. The extension's site-coloured tab is not in the file
+yet.
 
 ### In the Omarchy bar
 

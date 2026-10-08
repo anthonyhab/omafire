@@ -188,11 +188,9 @@ func readOwnDir(dir string) ([]os.DirEntry, error) {
 
 // ------------------------------------------------------------- run safety
 
-// The lock descriptor stays open, and the lock held, until exit.
-var lockFD = -1
-
 // acquireLock allows one omafire at a time per user: the theme hook's sync
-// can fire while a setup or remove is rewriting the same profile files.
+// can fire while a setup or remove is rewriting the same profile files. The
+// descriptor is never closed, so the lock is held until exit.
 func acquireLock() {
 	mkdirP700(stateDir)
 	lock := stateDir + "/lock"
@@ -209,7 +207,6 @@ func acquireLock() {
 			fail("could not lock %s", lock)
 		}
 	}
-	lockFD = fd
 }
 
 // Backups: setup and remove copy each user-owned file (user.js,

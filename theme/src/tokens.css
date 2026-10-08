@@ -189,8 +189,6 @@
   --oc-rule: 2px;
   /* Fill for alpha masks (tab-number notches): only its opacity counts. */
   --oc-mask: #000;
-  /* Dims the window behind the urlbar launcher. */
-  --oc-scrim: rgb(0 0 0 / 0.28);
 
   /* ---- motion ------------------------------------------------------ */
 

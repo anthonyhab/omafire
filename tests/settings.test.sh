@@ -147,4 +147,16 @@ for s in json.load(open(root / "config/schema.json"))["settings"]:
         assert f'"{pref["name"]}"' in text, f'{s["key"]}: {pref["name"]} is read nowhere'
 PY
 
+# The README's settings table lists exactly the schema's settings, in order,
+# with their defaults.
+python3 - "$PROJECT_DIR" <<'PY'
+import json, pathlib, re, sys
+root = pathlib.Path(sys.argv[1])
+rows = re.findall(r"^\| `([a-z-]+)` \|.*\| `([^`]*)` \|$", (root / "README.md").read_text(), re.M)
+def shown(v):
+    return str(v).lower() if isinstance(v, bool) else str(v)
+want = [(s["key"], shown(s["default"])) for s in json.load(open(root / "config/schema.json"))["settings"]]
+assert rows == want, f"README settings table {rows} != schema {want}"
+PY
+
 echo "settings.test.sh: ok"
