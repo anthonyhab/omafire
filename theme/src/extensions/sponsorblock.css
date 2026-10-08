@@ -36,6 +36,9 @@
     --selector-red: var(--oc-accent-fill) !important;
     --selector-red-hover: var(--oc-accent-fill-hover) !important;
     font-family: var(--oc-font) !important;
+    /* Firefox's colour override repaints its div buttons to the canvas and its
+     * hairlines to full text; every colour here is already a token. */
+    forced-color-adjust: none !important;
   }
   html#sponsorBlockPopupHTML body,
   body.sponsorBlockPageBody {
@@ -108,6 +111,12 @@
   }
   body.sponsorBlockPageBody #keybind-dialog .dialog {
     border-width: 1px !important;
+  }
+  body.sponsorBlockPageBody .key {
+    border-color: var(--oc-line-strong) !important;
+  }
+  body.sponsorBlockPageBody .option-button {
+    color: var(--oc-text) !important;
   }
   body.sponsorBlockPageBody .blocker {
     background-color: transparent !important;

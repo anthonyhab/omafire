@@ -57,6 +57,9 @@
     --fontInterMedium: var(--oc-font) !important;
     --fontMetropolis: var(--oc-font) !important;
     --fontMetropolisLight: var(--oc-font) !important;
+    /* Firefox's colour override would repaint its div fills to the canvas;
+     * every colour here is a token. */
+    forced-color-adjust: none !important;
   }
   html:has(#container-panel) :is(button, input, select, .button) {
     border-radius: var(--oc-radius-small) !important;

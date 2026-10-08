@@ -14,6 +14,9 @@
     --focus-color: var(--oc-hover) !important;
     --font-family: var(--oc-font) !important;
     color-scheme: dark light !important;
+    /* Firefox's colour override would repaint its div fills to the canvas;
+     * every colour here is a token. */
+    forced-color-adjust: none !important;
   }
   body {
     background-color: var(--oc-canvas) !important;

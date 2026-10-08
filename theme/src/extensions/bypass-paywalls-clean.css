@@ -5,6 +5,9 @@
   html:has(#clear_cookies) {
     background-color: var(--oc-canvas) !important;
     color-scheme: dark light !important;
+    /* Firefox's colour override would repaint its div fills to the canvas;
+     * every colour here is a token. */
+    forced-color-adjust: none !important;
   }
   body:has(#clear_cookies) {
     /* Its 285px fits the serif; the theme's monospace needs a little more. */
