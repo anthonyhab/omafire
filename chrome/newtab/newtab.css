@@ -23,6 +23,10 @@
   --dim-text: color-mix(in srgb, var(--fg) 55%, transparent);
   --line: color-mix(in srgb, var(--fg) 12%, transparent);
   --line-strong: color-mix(in srgb, var(--fg) 22%, transparent);
+  /* The grid's shared edge. Neighbours draw it into the same 1px gap, so
+   * it is opaque: two translucent lines there would stack to twice the
+   * outer edge's value. */
+  --edge: color-mix(in srgb, var(--fg) 12%, var(--bg));
   --hover: color-mix(in srgb, var(--fg) 6%, var(--bg));
   --active: color-mix(in srgb, var(--fg) 11%, var(--bg));
   /* Tile surface: the page itself, or glass over a backdrop. */
@@ -264,9 +268,11 @@ header:has(> #time[hidden]):has(#date[hidden]) {
 
 .site {
   position: relative;
-  overflow: hidden;
+  /* Clipped to the edge, so the light stays in and the pin tick sits on it. */
+  overflow: clip;
+  overflow-clip-margin: 1px;
   background: var(--tile);
-  outline: 1px solid var(--line);
+  outline: 1px solid var(--edge);
   animation: settle 400ms var(--ease) both;
   animation-delay: calc(var(--i, 0) * 24ms);
 }
@@ -335,7 +341,7 @@ header:has(> #time[hidden]):has(#date[hidden]) {
 .site:hover {
   z-index: 1;
   background: var(--hover);
-  outline-color: color-mix(in srgb, var(--icon, var(--accent)) 60%, var(--line));
+  outline-color: color-mix(in srgb, var(--icon, var(--accent)) 60%, var(--edge));
 }
 
 /* The icon lifts a touch; the host brightens. */
@@ -348,12 +354,13 @@ header:has(> #time[hidden]):has(#date[hidden]) {
   color: var(--fg);
 }
 
-/* Pinned: a short accent tick on the tile's top edge, drawn when pinned. */
+/* Pinned: a short accent tick on the tile's top edge, drawn when pinned.
+ * It lies on the edge, over the hairline, not under it. */
 .site.pinned::before {
   content: "";
   position: absolute;
-  left: 0;
-  top: 0;
+  left: -1px;
+  top: -1px;
   z-index: 1;
   width: calc(var(--u) * 2);
   height: 2px;
@@ -587,18 +594,19 @@ header:has(> #time[hidden]):has(#date[hidden]) {
   position: relative;
   min-width: 0;
   background: var(--tile);
-  outline: 1px solid var(--line);
+  outline: 1px solid var(--edge);
   animation: settle 400ms var(--ease) both;
 }
 
 /* The source's own hue along the top edge: a hairline at rest, lit while
- * the pointer is in the block. */
+ * the pointer is in the block. It replaces the edge there, corner to
+ * corner, rather than running under it. */
 .widget::before {
   content: "";
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
+  left: -1px;
+  right: -1px;
+  top: -1px;
   z-index: 1;
   height: 1px;
   background: var(--hue);
