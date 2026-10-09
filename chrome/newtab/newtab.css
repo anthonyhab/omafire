@@ -11,7 +11,12 @@
  * fill is interaction, the accent marks what is active or focused.
  *
  * Settings (newtab.js) land as data-* attributes on the root and the
- * --blur / --dim custom properties. */
+ * --blur / --dim custom properties.
+ *
+ * Every size is a token below: change the system there, not per rule.
+ * Spacing follows a newspaper page: one gap before every section (the
+ * clock's rule, Pinned, Frequent, the widgets), a label one unit above
+ * its block, the same inset inside every box. */
 
 :root {
   --u: 8px;
@@ -35,10 +40,30 @@
   --dim: 55%;
   --ease: cubic-bezier(0.23, 1, 0.32, 1);
 
+  /* Space. */
+  --gap-section: calc(var(--u) * 4); /* before every section */
+  --gap-label: var(--u); /* a section label to its block */
+  --inset: calc(var(--u) * 2); /* inside tiles, rows, heads, panel sections */
+  --page-width: calc(var(--u) * 112);
+  --page-width-wide: calc(var(--u) * 160);
+
+  /* Lines and marks. */
+  --hair: 1px; /* every edge and rule */
+  --mark: 2px; /* what is chosen or pinned: an accent bar */
+  --rule: var(--hair) solid var(--line);
+
+  /* Type: body, the small meta size, and the two trackings (labels in
+   * capitals, meta in lower case). */
+  --text-body: 13px;
+  --text-meta: 11px;
+  --line-unit: calc(var(--u) * 2); /* one line of meta or label */
+  --track-label: 0.16em;
+  --track-meta: 0.08em;
+
   color-scheme: var(--omarchy-color-scheme, dark);
   background: var(--bg);
   color: var(--fg);
-  font: 13px/1.5 monospace;
+  font: var(--text-body)/1.5 monospace;
 }
 
 :root:is([data-backdrop="true"], [data-background="desktop"])[data-glass="true"] {
@@ -58,22 +83,26 @@
 body {
   min-height: 100vh;
   display: grid;
-  place-items: start center;
+  place-items: start;
   padding: calc(var(--u) * 20) calc(var(--u) * 4) calc(var(--u) * 6);
 }
 
 :root[data-align="center"] body {
-  place-items: center;
+  align-items: center;
   padding-block: calc(var(--u) * 6);
 }
 
+/* Centred by a margin rounded to a whole pixel: an odd leftover would put
+ * every hairline on a half pixel. */
 main {
+  --width: min(100%, var(--page-width));
   position: relative;
-  width: min(100%, calc(var(--u) * 112));
+  width: var(--width);
+  margin-left: max(0px, round(down, (100% - var(--width)) / 2, 1px));
 }
 
 :root[data-width="wide"] main {
-  width: min(100%, calc(var(--u) * 160));
+  --width: min(100%, var(--page-width-wide));
 }
 
 /* ---- backdrop -------------------------------------------------------
@@ -124,8 +153,8 @@ header {
   align-items: last baseline;
   gap: calc(var(--u) * 3);
   padding-bottom: calc(var(--u) * 3);
-  margin-bottom: calc(var(--u) * 3);
-  border-bottom: 1px solid var(--line);
+  margin-bottom: var(--gap-section);
+  border-bottom: var(--rule);
 }
 
 header:has(> #time[hidden]):has(#date[hidden]) {
@@ -140,7 +169,7 @@ header:has(> #time[hidden]):has(#date[hidden]) {
 
 #weather {
   color: var(--fg);
-  letter-spacing: 0.16em;
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -162,9 +191,6 @@ header:has(> #time[hidden]):has(#date[hidden]) {
     align-items: center;
     gap: calc(var(--u) * 2);
     text-align: center;
-    border-bottom: 0;
-    padding-bottom: 0;
-    margin-bottom: calc(var(--u) * 6);
   }
   & #clock {
     font-size: clamp(72px, 14vw, 176px);
@@ -179,10 +205,10 @@ header:has(> #time[hidden]):has(#date[hidden]) {
     letter-spacing: 0.24em;
   }
   & #weather {
-    padding: var(--u) calc(var(--u) * 2);
+    padding: var(--u) var(--inset);
     background: var(--tile);
-    outline: 1px solid var(--line);
-    letter-spacing: 0.08em;
+    outline: var(--rule);
+    letter-spacing: var(--track-meta);
     text-transform: none;
   }
 }
@@ -193,7 +219,6 @@ header:has(> #time[hidden]):has(#date[hidden]) {
     align-items: baseline;
     gap: calc(var(--u) * 4);
     padding-bottom: calc(var(--u) * 2);
-    margin-bottom: calc(var(--u) * 4);
   }
   & #clock {
     font-size: 48px;
@@ -207,7 +232,7 @@ header:has(> #time[hidden]):has(#date[hidden]) {
 
 #greeting {
   color: var(--dim-text);
-  letter-spacing: 0.08em;
+  letter-spacing: var(--track-meta);
   margin-bottom: var(--u);
 }
 
@@ -247,7 +272,7 @@ header:has(> #time[hidden]):has(#date[hidden]) {
 
 #date {
   color: var(--dim-text);
-  letter-spacing: 0.16em;
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -258,8 +283,8 @@ header:has(> #time[hidden]):has(#date[hidden]) {
 #sites {
   display: grid;
   grid-template-columns: repeat(var(--columns, 4), minmax(0, 1fr));
-  gap: 1px;
-  padding: 1px;
+  gap: var(--hair);
+  padding: var(--hair);
 }
 
 #sites:empty {
@@ -270,9 +295,9 @@ header:has(> #time[hidden]):has(#date[hidden]) {
   position: relative;
   /* Clipped to the edge, so the light stays in and the pin tick sits on it. */
   overflow: clip;
-  overflow-clip-margin: 1px;
+  overflow-clip-margin: var(--hair);
   background: var(--tile);
-  outline: 1px solid var(--edge);
+  outline: var(--hair) solid var(--edge);
 }
 
 /* A short last row: its last tile stretches to the grid's edge, so the
@@ -314,11 +339,11 @@ header:has(> #time[hidden]):has(#date[hidden]) {
 /* A group label across the grid, when pinned tiles lead. */
 .group-label {
   grid-column: 1 / -1;
-  padding: calc(var(--u) * 2) 0 var(--u);
+  padding: var(--gap-section) 0 var(--gap-label);
   color: var(--dim-text);
-  font-size: 11px;
-  line-height: calc(var(--u) * 2);
-  letter-spacing: 0.16em;
+  font-size: var(--text-meta);
+  line-height: var(--line-unit);
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
 }
 
@@ -332,11 +357,11 @@ header:has(> #time[hidden]):has(#date[hidden]) {
   grid-column: 1 / -1;
   display: flex;
   flex-wrap: wrap;
-  gap: 1px;
+  gap: var(--hair);
 
   & > .site {
     --across: min(var(--pinned, 1), var(--fit, 4));
-    flex: 1 1 calc((100% - (var(--across) - 1) * 1px) / var(--across));
+    flex: 1 1 calc((100% - (var(--across) - 1) * var(--hair)) / var(--across));
   }
 }
 
@@ -347,7 +372,7 @@ header:has(> #time[hidden]):has(#date[hidden]) {
   grid-template: "icon" auto "gap" 1fr "title" auto "host" auto / minmax(0, 1fr);
   height: 100%;
   min-height: calc(var(--u) * 14);
-  padding: calc(var(--u) * 2);
+  padding: var(--inset);
   color: inherit;
   text-decoration: none;
   outline: none;
@@ -374,11 +399,11 @@ header:has(> #time[hidden]):has(#date[hidden]) {
 .site.pinned::before {
   content: "";
   position: absolute;
-  left: -1px;
-  top: -1px;
+  left: calc(-1 * var(--hair));
+  top: calc(-1 * var(--hair));
   z-index: 1;
   width: calc(var(--u) * 2);
-  height: 2px;
+  height: var(--mark);
   background: var(--accent);
   transform-origin: left;
   animation: draw 300ms var(--ease);
@@ -399,11 +424,11 @@ header:has(> #time[hidden]):has(#date[hidden]) {
 }
 
 .site.drop-target {
-  box-shadow: inset 0 0 0 1px var(--accent);
+  box-shadow: inset 0 0 0 var(--hair) var(--accent);
 }
 
 .site:has(> a:focus-visible) {
-  box-shadow: inset 0 0 0 1px var(--accent);
+  box-shadow: inset 0 0 0 var(--hair) var(--accent);
 }
 
 .icon {
@@ -425,7 +450,7 @@ header:has(> #time[hidden]):has(#date[hidden]) {
 
 /* A Simple Icons mark; newtab.js sets its fill. */
 .icon.brand {
-  padding: 1px;
+  padding: var(--hair);
 }
 
 .title {
@@ -439,7 +464,7 @@ header:has(> #time[hidden]):has(#date[hidden]) {
   grid-area: host;
   overflow: hidden;
   color: var(--dim-text);
-  font-size: 11px;
+  font-size: var(--text-meta);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -453,11 +478,11 @@ header:has(> #time[hidden]):has(#date[hidden]) {
 :is(.edit, .pin, .hide) {
   position: absolute;
   z-index: 2;
-  top: calc(var(--u) * 2);
+  top: var(--inset);
   width: calc(var(--u) * 3);
   height: calc(var(--u) * 3);
   padding: 0;
-  border: 1px solid var(--line-strong);
+  border: var(--hair) solid var(--line-strong);
   background: var(--tile);
   color: var(--dim-text);
   font: inherit;
@@ -469,15 +494,15 @@ header:has(> #time[hidden]):has(#date[hidden]) {
 
 /* On the content inset, half a unit apart. */
 .hide {
-  right: calc(var(--u) * 2);
+  right: var(--inset);
 }
 
 .pin {
-  right: calc(var(--u) * 5.5);
+  right: calc(var(--inset) + var(--u) * 3.5);
 }
 
 .edit {
-  right: calc(var(--u) * 9);
+  right: calc(var(--inset) + var(--u) * 7);
 }
 
 .site.pinned .pin {
@@ -495,8 +520,8 @@ header:has(> #time[hidden]):has(#date[hidden]) {
 }
 
 :is(.edit, .pin, .hide):focus-visible {
-  outline: 1px solid var(--accent);
-  outline-offset: -1px;
+  outline: var(--hair) solid var(--accent);
+  outline-offset: calc(-1 * var(--hair));
 }
 
 /* List: one row per shortcut, on the tile grid's hairlines. */
@@ -506,7 +531,7 @@ header:has(> #time[hidden]):has(#date[hidden]) {
     align-items: center;
     column-gap: calc(var(--u) * 2);
     min-height: calc(var(--u) * 6);
-    padding: var(--u) calc(var(--u) * 2);
+    padding: var(--u) var(--inset);
   }
   & .icon {
     width: calc(var(--u) * 2);
@@ -518,15 +543,30 @@ header:has(> #time[hidden]):has(#date[hidden]) {
   }
 }
 
-/* Icons: a dock of square tiles; the link's title is the tooltip. */
+/* Icons: a dock of square tiles across the page's full width, so its
+ * edges meet the clock's rule and the widgets; a short last row (and the
+ * pinned row) is centred, as a keyboard's bottom row. Every square is one
+ * size: the width over the grid's columns (fitGrid). The link's title is
+ * the tooltip. */
 :root[data-site-style="icons"] {
   & #sites {
-    grid-template-columns: repeat(var(--columns, 8), calc(var(--u) * 10));
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  & :is(.group-label, .pinned-row) {
+    flex: 0 0 100%;
+  }
+  & .pinned-row {
+    justify-content: center;
+  }
+  & :is(#sites, .pinned-row) > .site {
+    flex: 0 0 calc((100% - (var(--columns, 8) - 1) * var(--hair)) / var(--columns, 8));
+    aspect-ratio: 1;
   }
   & .site > a {
     grid-template: "icon" 1fr / 1fr;
     place-items: center;
-    min-height: calc(var(--u) * 10);
     padding: 0;
   }
   & .icon {
@@ -551,9 +591,6 @@ header:has(> #time[hidden]):has(#date[hidden]) {
   & .pin {
     right: calc(var(--u) * 3.5);
   }
-  & .pinned-row > .site {
-    flex: 0 0 calc(var(--u) * 10);
-  }
 }
 
 /* ---- widgets --------------------------------------------------------
@@ -563,9 +600,9 @@ header:has(> #time[hidden]):has(#date[hidden]) {
 #widgets {
   display: grid;
   grid-template-columns: repeat(var(--wcolumns, 2), minmax(0, 1fr));
-  gap: 1px;
-  padding: 1px;
-  margin-top: calc(var(--u) * 3);
+  gap: var(--hair);
+  padding: var(--hair);
+  margin-top: var(--gap-section);
 }
 
 #widgets:empty {
@@ -580,7 +617,7 @@ header:has(> #time[hidden]):has(#date[hidden]) {
   position: relative;
   min-width: 0;
   background: var(--tile);
-  outline: 1px solid var(--edge);
+  outline: var(--hair) solid var(--edge);
 }
 
 /* The source's own hue along the top edge: a hairline at rest, lit while
@@ -589,11 +626,11 @@ header:has(> #time[hidden]):has(#date[hidden]) {
 .widget::before {
   content: "";
   position: absolute;
-  left: -1px;
-  right: -1px;
-  top: -1px;
+  left: calc(-1 * var(--hair));
+  right: calc(-1 * var(--hair));
+  top: calc(-1 * var(--hair));
   z-index: 1;
-  height: 1px;
+  height: var(--hair);
   background: var(--hue);
   opacity: 0.6;
 }
@@ -609,13 +646,13 @@ header:has(> #time[hidden]):has(#date[hidden]) {
   justify-content: space-between;
   gap: calc(var(--u) * 2);
   min-height: calc(var(--u) * 4);
-  padding: var(--u) calc(var(--u) * 2);
-  border-bottom: 1px solid var(--line);
+  padding: var(--u) var(--inset);
+  border-bottom: var(--rule);
   /* Whole-pixel rows: a unit's padding either side of two units of line. */
-  line-height: calc(var(--u) * 2);
+  line-height: var(--line-unit);
   color: var(--dim-text);
-  font-size: 11px;
-  letter-spacing: 0.16em;
+  font-size: var(--text-meta);
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
 }
 
@@ -632,7 +669,7 @@ header:has(> #time[hidden]):has(#date[hidden]) {
 
 .widget-head .meta {
   overflow: hidden;
-  letter-spacing: 0.08em;
+  letter-spacing: var(--track-meta);
   text-overflow: ellipsis;
   text-transform: none;
   white-space: nowrap;
@@ -647,11 +684,11 @@ header:has(> #time[hidden]):has(#date[hidden]) {
   width: 100%;
   /* A fixed row: the 13px title and 11px meta share a baseline, which
    * would otherwise add a fractional pixel or two. */
-  line-height: calc(var(--u) * 2);
-  height: calc(var(--u) * 4 + 1px);
-  padding: var(--u) calc(var(--u) * 2);
+  line-height: var(--line-unit);
+  height: calc(var(--u) * 4 + var(--hair));
+  padding: var(--u) var(--inset);
   border: 0;
-  border-top: 1px solid var(--line);
+  border-top: var(--rule);
   background: none;
   color: inherit;
   font: inherit;
@@ -692,8 +729,8 @@ header:has(> #time[hidden]):has(#date[hidden]) {
 
 .item:focus-visible,
 .item:has(> .item-title:focus-visible) {
-  outline: 1px solid var(--accent);
-  outline-offset: -1px;
+  outline: var(--hair) solid var(--accent);
+  outline-offset: calc(-1 * var(--hair));
 }
 
 /* The title link's hit area is the row; the aside link sits above it. */
@@ -744,7 +781,7 @@ a.item-title::before {
 
 .item-meta {
   color: var(--dim-text);
-  font-size: 11px;
+  font-size: var(--text-meta);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -758,17 +795,17 @@ a.item-title::before {
 }
 
 .empty {
-  padding: var(--u) calc(var(--u) * 2);
+  padding: var(--u) var(--inset);
   color: var(--dim-text);
-  font-size: 11px;
+  font-size: var(--text-meta);
 }
 
 .group {
   padding: calc(var(--u) * 1.5) calc(var(--u) * 2) calc(var(--u) / 2);
-  border-top: 1px solid var(--line);
+  border-top: var(--rule);
   color: var(--dim-text);
-  font-size: 11px;
-  letter-spacing: 0.08em;
+  font-size: var(--text-meta);
+  letter-spacing: var(--track-meta);
 }
 
 .group:first-child {
@@ -780,7 +817,7 @@ a.item-title::before {
   display: flex;
   align-items: last baseline;
   gap: calc(var(--u) * 2);
-  padding: calc(var(--u) * 2);
+  padding: var(--inset);
 }
 
 .weather-now .temp {
@@ -803,7 +840,7 @@ a.item-title::before {
 :root[data-widget-place="beside"] main:has(#widgets:not(:empty)) {
   display: grid;
   grid-template-columns: minmax(0, 1fr) calc(var(--u) * 40);
-  column-gap: calc(var(--u) * 3);
+  column-gap: var(--gap-section);
 
   & > header {
     grid-column: 1 / -1;
@@ -826,7 +863,7 @@ a.item-title::before {
   min-width: 0;
   height: calc(var(--u) * 3.5);
   padding: 0 var(--u);
-  border: 1px solid var(--line-strong);
+  border: var(--hair) solid var(--line-strong);
   border-radius: 0;
   background: var(--surface);
   color: var(--fg);
@@ -834,8 +871,8 @@ a.item-title::before {
 }
 
 #settings select:focus-visible {
-  outline: 1px solid var(--accent);
-  outline-offset: -1px;
+  outline: var(--hair) solid var(--accent);
+  outline-offset: calc(-1 * var(--hair));
 }
 
 /* ---- hints ----------------------------------------------------------
@@ -854,11 +891,11 @@ a.item-title::before {
   padding: 0 calc(var(--u) / 2);
   background: var(--accent);
   color: var(--bg);
-  font-size: 11px;
+  font-size: var(--text-meta);
   font-weight: 700;
-  line-height: calc(var(--u) * 2);
+  line-height: var(--line-unit);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: var(--track-meta);
 }
 
 .hint b {
@@ -871,7 +908,7 @@ a.item-title::before {
 #settings .preview {
   display: grid;
   margin-bottom: calc(var(--u) * 2);
-  padding: 1px;
+  padding: var(--hair);
 }
 
 #settings .swatches button {
@@ -892,8 +929,8 @@ a.item-title::before {
  * whole. */
 #settings .swatches button[title][aria-checked="true"] {
   box-shadow: inset 0 0 0 2px var(--bg);
-  outline: 1px solid var(--strong);
-  outline-offset: -1px;
+  outline: var(--hair) solid var(--strong);
+  outline-offset: calc(-1 * var(--hair));
 }
 
 /* A picked hex shows as a swatch edge on its field. */
@@ -904,14 +941,14 @@ a.item-title::before {
 .brand-results {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 1px;
-  padding: 1px;
+  gap: var(--hair);
+  padding: var(--hair);
   margin-top: var(--u);
 }
 
 #settings .brand-results button {
   height: calc(var(--u) * 5);
-  outline: 1px solid var(--edge);
+  outline: var(--hair) solid var(--edge);
   border: 0;
   display: grid;
   place-items: center;
@@ -923,7 +960,7 @@ a.item-title::before {
 }
 
 #settings .brand-results button[aria-checked="true"] {
-  box-shadow: inset 0 -2px 0 var(--accent);
+  box-shadow: inset 0 calc(-1 * var(--mark)) 0 var(--accent);
   background: var(--active);
 }
 
@@ -941,7 +978,7 @@ a.item-title::before {
   gap: var(--u);
   height: 28px;
   padding: 0 5px;
-  border: 1px solid transparent;
+  border: var(--hair) solid transparent;
   background: transparent;
   color: var(--dim-text);
   font: inherit;
@@ -970,8 +1007,8 @@ a.item-title::before {
 }
 
 #settings-toggle:focus-visible {
-  outline: 1px solid var(--accent);
-  outline-offset: -1px;
+  outline: var(--hair) solid var(--accent);
+  outline-offset: calc(-1 * var(--hair));
 }
 
 #settings-toggle:is(:hover, :focus-visible) .label {
@@ -988,7 +1025,7 @@ a.item-title::before {
   width: min(100vw, calc(var(--u) * 44));
   overflow-y: auto;
   background: var(--bg);
-  border-left: 1px solid var(--line-strong);
+  border-left: var(--hair) solid var(--line-strong);
   animation: slide-in 300ms var(--ease);
 }
 
@@ -1003,32 +1040,32 @@ a.item-title::before {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: calc(var(--u) * 2);
+  padding: var(--inset);
   background: var(--bg);
-  border-bottom: 2px solid var(--accent);
+  border-bottom: var(--rule);
 }
 
 .settings-head h1 {
-  line-height: calc(var(--u) * 2);
+  line-height: var(--line-unit);
   color: var(--strong);
-  font-size: 13px;
+  font-size: var(--text-body);
   font-weight: 700;
-  letter-spacing: 0.16em;
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
 }
 
 #settings section {
-  padding: calc(var(--u) * 2);
-  border-bottom: 1px solid var(--line);
+  padding: var(--inset);
+  border-bottom: var(--rule);
 }
 
 #settings h2 {
   margin-bottom: var(--u);
-  line-height: calc(var(--u) * 2);
+  line-height: var(--line-unit);
   color: var(--dim-text);
-  font-size: 11px;
+  font-size: var(--text-meta);
   font-weight: 400;
-  letter-spacing: 0.16em;
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
 }
 
@@ -1081,7 +1118,7 @@ a.item-title::before {
 #settings input[type="text"] {
   height: calc(var(--u) * 3.5);
   padding: 0 var(--u);
-  border: 1px solid var(--line-strong);
+  border: var(--hair) solid var(--line-strong);
   border-radius: 0;
   background: transparent;
   color: var(--fg);
@@ -1103,8 +1140,8 @@ a.item-title::before {
 }
 
 #settings :is(button, input):focus-visible {
-  outline: 1px solid var(--accent);
-  outline-offset: -1px;
+  outline: var(--hair) solid var(--accent);
+  outline-offset: calc(-1 * var(--hair));
 }
 
 .choice {
@@ -1112,13 +1149,13 @@ a.item-title::before {
 }
 
 .choice button + button {
-  margin-left: -1px;
+  margin-left: calc(-1 * var(--hair));
 }
 
 .choice button[aria-checked="true"] {
   background: var(--active);
   color: var(--strong);
-  box-shadow: inset 0 -2px 0 var(--accent);
+  box-shadow: inset 0 calc(-1 * var(--mark)) 0 var(--accent);
 }
 
 input.switch {
@@ -1127,7 +1164,7 @@ input.switch {
   width: calc(var(--u) * 5);
   height: calc(var(--u) * 2.5);
   margin: 0;
-  border: 1px solid var(--line-strong);
+  border: var(--hair) solid var(--line-strong);
   background: var(--surface);
   cursor: pointer;
 }
@@ -1163,7 +1200,7 @@ input[type="range"] {
 }
 
 input[type="range"]::-moz-range-track {
-  height: 1px;
+  height: var(--hair);
   background: var(--line-strong);
 }
 
@@ -1175,7 +1212,7 @@ input[type="range"]::-moz-range-progress {
 input[type="range"]::-moz-range-thumb {
   width: calc(var(--u) * 1.5);
   height: calc(var(--u) * 1.5);
-  border: 1px solid var(--accent);
+  border: var(--hair) solid var(--accent);
   border-radius: 0;
   background: var(--bg);
 }
@@ -1194,7 +1231,7 @@ input[type="range"]:focus-visible::-moz-range-thumb {
 
 .note {
   color: var(--dim-text);
-  font-size: 11px;
+  font-size: var(--text-meta);
   text-align: right;
 }
 
