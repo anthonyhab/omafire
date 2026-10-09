@@ -278,6 +278,32 @@
     }
   }
 
+  /* A tile's name: the page title without its unread count or bidi marks,
+   * and of a title in parts ("Inbox (19) - me - Gmail", "OpenCode Go |
+   * Low-cost…") the part that names the site, if one does. The tooltip
+   * keeps the whole title. */
+  function siteName(title, host) {
+    const clean = title.replace(/[\u200e\u200f\u202a-\u202e\u2066-\u2069]/g, "")
+      .replace(/^\(\d+\+?\)\s*/, "").replace(/\s*\(\d+\+?\)/g, "").trim();
+    /* The host's names, the registrable one first: mail.google.com is
+     * "google", then "mail" (which Gmail contains). */
+    let labels = host.split(".");
+    try {
+      const suffix = Services.eTLD.getPublicSuffixFromHost(host);
+      labels = host.slice(0, host.length - suffix.length - 1).split(".").reverse();
+    } catch {}
+    const squash = (text) => text.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const names = labels.map(squash).filter((label) => label.length >= 3 && label !== "www");
+    const parts = clean.split(/\s+[|\-\u2013\u2014\u00b7:]\s+|\.\s+/);
+    if (parts.length > 1) {
+      for (const name of names) {
+        const named = parts.find((part) => squash(part).includes(name));
+        if (named) return named;
+      }
+    }
+    return clean;
+  }
+
   function tile(site, index) {
     const item = document.createElement("div");
     item.className = "site";
@@ -306,7 +332,7 @@
 
     const title = document.createElement("span");
     title.className = "title";
-    title.textContent = site.title || host;
+    title.textContent = siteName(site.title || "", host) || host;
 
     const hostLabel = document.createElement("span");
     hostLabel.className = "host";

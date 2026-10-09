@@ -338,10 +338,10 @@ header:has(> #time[hidden]):has(#date[hidden]) {
   outline-color: color-mix(in srgb, var(--icon, var(--accent)) 60%, var(--edge));
 }
 
-/* The icon lifts a touch; the host brightens. */
+/* The icon lifts a touch (no scale: a resampled favicon blurs); the host
+ * brightens. */
 .site:hover .icon {
   translate: 0 -1px;
-  scale: 1.08;
 }
 
 .site:hover .host {
@@ -361,6 +361,11 @@ header:has(> #time[hidden]):has(#date[hidden]) {
   background: var(--accent);
   transform-origin: left;
   animation: draw 300ms var(--ease);
+}
+
+/* Under the "Pinned" label the tick would say it twice. */
+.pinned-row .site.pinned::before {
+  display: none;
 }
 
 @keyframes draw {
