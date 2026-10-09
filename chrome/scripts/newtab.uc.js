@@ -19,7 +19,7 @@
 
   const PREF = "omafire.newtab";
   const SETTINGS = "omafire.newtab.settings";
-  const URL = "chrome://omafire/content/newtab.html";
+  const NEWTAB_URL = "chrome://omafire/content/newtab.html";
   const OLD_ADDON = "omarchy-ff-sync@bb.hab.rip";
   const log = e => console.error("[omafire:newtab]", e);
 
@@ -41,10 +41,10 @@
 
   function follow() {
     if (Services.prefs.getBoolPref(PREF, true)) {
-      if (AboutNewTab.newTabURL !== URL) {
-        AboutNewTab.newTabURL = URL;
+      if (AboutNewTab.newTabURL !== NEWTAB_URL) {
+        AboutNewTab.newTabURL = NEWTAB_URL;
       }
-    } else if (AboutNewTab.newTabURL === URL) {
+    } else if (AboutNewTab.newTabURL === NEWTAB_URL) {
       AboutNewTab.resetNewTabURL();
     }
   }

@@ -273,8 +273,24 @@ header:has(> #time[hidden]):has(#date[hidden]) {
   overflow-clip-margin: 1px;
   background: var(--tile);
   outline: 1px solid var(--edge);
+}
+
+/* A short last row: its last tile stretches to the grid's edge, so the
+ * block closes without a hole (fitGrid fills whole rows when it can and
+ * sets --tail). */
+:root:not([data-site-style="icons"]) #sites > .site:last-child {
+  grid-column: span var(--tail, 1);
+}
+
+/* Tiles and blocks settle in on the page's first paint only; newtab.js
+ * sets data-settled after it, so rebuilds (an edit, a pin) don't replay. */
+:root:not([data-settled]) .site {
   animation: settle 400ms var(--ease) both;
   animation-delay: calc(var(--i, 0) * 24ms);
+}
+
+:root:not([data-settled]) .widget {
+  animation: settle 400ms var(--ease) both;
 }
 
 @keyframes settle {
@@ -295,17 +311,13 @@ header:has(> #time[hidden]):has(#date[hidden]) {
   pointer-events: none;
 }
 
-.site > a {
-  position: relative;
-  z-index: 1;
-}
-
 /* A group label across the grid, when pinned tiles lead. */
 .group-label {
   grid-column: 1 / -1;
-  padding: calc(var(--u) * 1.5) 0 calc(var(--u) / 2);
+  padding: calc(var(--u) * 2) 0 var(--u);
   color: var(--dim-text);
   font-size: 11px;
+  line-height: calc(var(--u) * 2);
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
@@ -314,14 +326,23 @@ header:has(> #time[hidden]):has(#date[hidden]) {
   padding-top: 0;
 }
 
+/* Pinned tiles in rows of as many as fit; a short last row stretches, so
+ * the block has no hole in its edge. */
 .pinned-row {
   grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: repeat(min(var(--pinned, 1), var(--fit, 4)), minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 1px;
+
+  & > .site {
+    --across: min(var(--pinned, 1), var(--fit, 4));
+    flex: 1 1 calc((100% - (var(--across) - 1) * 1px) / var(--across));
+  }
 }
 
 .site > a {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template: "icon" auto "gap" 1fr "title" auto "host" auto / minmax(0, 1fr);
   height: 100%;
@@ -432,7 +453,7 @@ header:has(> #time[hidden]):has(#date[hidden]) {
 :is(.edit, .pin, .hide) {
   position: absolute;
   z-index: 2;
-  top: calc(var(--u) * 1.5);
+  top: calc(var(--u) * 2);
   width: calc(var(--u) * 3);
   height: calc(var(--u) * 3);
   padding: 0;
@@ -446,16 +467,17 @@ header:has(> #time[hidden]):has(#date[hidden]) {
   translate: 0 calc(var(--u) / -2);
 }
 
+/* On the content inset, half a unit apart. */
 .hide {
-  right: calc(var(--u) * 1.5);
+  right: calc(var(--u) * 2);
 }
 
 .pin {
-  right: calc(var(--u) * 5);
+  right: calc(var(--u) * 5.5);
 }
 
 .edit {
-  right: calc(var(--u) * 8.5);
+  right: calc(var(--u) * 9);
 }
 
 .site.pinned .pin {
@@ -496,7 +518,7 @@ header:has(> #time[hidden]):has(#date[hidden]) {
   }
 }
 
-/* Icons: a dock of square tiles; the title is the tooltip. */
+/* Icons: a dock of square tiles; the link's title is the tooltip. */
 :root[data-site-style="icons"] {
   & #sites {
     grid-template-columns: repeat(var(--columns, 8), calc(var(--u) * 10));
@@ -529,19 +551,8 @@ header:has(> #time[hidden]):has(#date[hidden]) {
   & .pin {
     right: calc(var(--u) * 3.5);
   }
-  /* The title under the hovered icon, in place of a tooltip. */
-  & .site:hover .title {
-    display: block;
-    position: absolute;
-    left: 50%;
-    top: calc(100% + var(--u));
-    z-index: 2;
-    translate: -50% 0;
-    padding: calc(var(--u) / 2) var(--u);
-    background: var(--surface);
-    outline: 1px solid var(--line-strong);
-    font-size: 11px;
-    white-space: nowrap;
+  & .pinned-row > .site {
+    flex: 0 0 calc(var(--u) * 10);
   }
 }
 
@@ -552,7 +563,6 @@ header:has(> #time[hidden]):has(#date[hidden]) {
 #widgets {
   display: grid;
   grid-template-columns: repeat(var(--wcolumns, 2), minmax(0, 1fr));
-  align-items: start;
   gap: 1px;
   padding: 1px;
   margin-top: calc(var(--u) * 3);
@@ -571,7 +581,6 @@ header:has(> #time[hidden]):has(#date[hidden]) {
   min-width: 0;
   background: var(--tile);
   outline: 1px solid var(--edge);
-  animation: settle 400ms var(--ease) both;
 }
 
 /* The source's own hue along the top edge: a hairline at rest, lit while
@@ -602,6 +611,8 @@ header:has(> #time[hidden]):has(#date[hidden]) {
   min-height: calc(var(--u) * 4);
   padding: var(--u) calc(var(--u) * 2);
   border-bottom: 1px solid var(--line);
+  /* Whole-pixel rows: a unit's padding either side of two units of line. */
+  line-height: calc(var(--u) * 2);
   color: var(--dim-text);
   font-size: 11px;
   letter-spacing: 0.16em;
@@ -634,7 +645,10 @@ header:has(> #time[hidden]):has(#date[hidden]) {
   align-items: baseline;
   column-gap: calc(var(--u) * 2);
   width: 100%;
-  min-height: calc(var(--u) * 4);
+  /* A fixed row: the 13px title and 11px meta share a baseline, which
+   * would otherwise add a fractional pixel or two. */
+  line-height: calc(var(--u) * 2);
+  height: calc(var(--u) * 4 + 1px);
   padding: var(--u) calc(var(--u) * 2);
   border: 0;
   border-top: 1px solid var(--line);
@@ -728,8 +742,7 @@ a.item-title::before {
   white-space: nowrap;
 }
 
-.item-meta,
-.empty {
+.item-meta {
   color: var(--dim-text);
   font-size: 11px;
   font-variant-numeric: tabular-nums;
@@ -746,7 +759,8 @@ a.item-title::before {
 
 .empty {
   padding: var(--u) calc(var(--u) * 2);
-  white-space: normal;
+  color: var(--dim-text);
+  font-size: 11px;
 }
 
 .group {
@@ -783,13 +797,9 @@ a.item-title::before {
   min-width: 0;
 }
 
-.weather-text .item-meta {
-  color: var(--dim-text);
-  font-size: 11px;
-  white-space: nowrap;
-}
-
-/* Beside: the clock across, shortcuts left, the widgets in a column. */
+/* Beside: the clock across, shortcuts left, the widgets in a column; in a
+ * narrow window they go below, where there is room. */
+@media (min-width: 900px) {
 :root[data-widget-place="beside"] main:has(#widgets:not(:empty)) {
   display: grid;
   grid-template-columns: minmax(0, 1fr) calc(var(--u) * 40);
@@ -801,6 +811,7 @@ a.item-title::before {
   & > #widgets {
     margin-top: 0;
   }
+}
 }
 
 /* Settings: a widget row's small square buttons, and the add select. */
@@ -958,6 +969,11 @@ a.item-title::before {
   outline: none;
 }
 
+#settings-toggle:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: -1px;
+}
+
 #settings-toggle:is(:hover, :focus-visible) .label {
   display: inline;
 }
@@ -993,6 +1009,7 @@ a.item-title::before {
 }
 
 .settings-head h1 {
+  line-height: calc(var(--u) * 2);
   color: var(--strong);
   font-size: 13px;
   font-weight: 700;
@@ -1007,6 +1024,7 @@ a.item-title::before {
 
 #settings h2 {
   margin-bottom: var(--u);
+  line-height: calc(var(--u) * 2);
   color: var(--dim-text);
   font-size: 11px;
   font-weight: 400;
@@ -1030,6 +1048,13 @@ a.item-title::before {
  * already names it (the background source's four options). */
 .row.wide {
   grid-template-columns: minmax(0, 1fr);
+
+  & .row-body {
+    justify-content: flex-start;
+  }
+  & .note {
+    text-align: left;
+  }
 
   & .row-label {
     display: none;

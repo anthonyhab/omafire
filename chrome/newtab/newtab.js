@@ -60,6 +60,7 @@
   if (glass) DEFAULTS.background = "desktop";
 
   let settings = { ...DEFAULTS };
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
 
   function el(tag, className, text) {
     const node = document.createElement(tag);
@@ -118,26 +119,47 @@
 
   /* ---- settings ----------------------------------------------------- */
 
+  /* Settings that take one of a few values; anything else falls back. */
+  const CHOICES = {
+    background: ["solid", "wallpaper", "custom", "desktop"],
+    clockStyle: ["bold", "thin", "line"],
+    siteStyle: ["tiles", "list", "icons"],
+    hover: ["halftone", "scan", "ascii"],
+    align: ["top", "center"],
+    width: ["normal", "wide"],
+    widgetPlace: ["below", "beside"],
+    tempUnit: ["c", "f"]
+  };
+  const hasUrl = (entry) => typeof entry?.url === "string";
+
   function normalize(stored) {
     const next = { ...DEFAULTS };
     for (const [key, fallback] of Object.entries(DEFAULTS)) {
       const value = stored?.[key];
-      if (Array.isArray(fallback) ? Array.isArray(value) : typeof value === typeof fallback) {
+      if (CHOICES[key] ? CHOICES[key].includes(value)
+        : Array.isArray(fallback) ? Array.isArray(value) : typeof value === typeof fallback && value !== null) {
         next[key] = value;
       }
     }
+    next.pinned = next.pinned.filter(hasUrl);
+    next.custom = next.custom.filter(hasUrl);
     next.widgets = next.widgets
       .filter((w) => w && typeof w === "object" && Object.hasOwn(WIDGETS, w.type))
       .map((w) => ({ type: w.type, option: typeof w.option === "string" ? w.option : "" }));
-    if (!next.edits || Array.isArray(next.edits)) next.edits = {};
+    if (Array.isArray(next.edits)) next.edits = {};
     return next;
   }
 
-  function applySettings() {
+  /* Keys whose change needs the shortcuts or the widgets rebuilt; the
+   * rest is styling (root data attributes) and the form. */
+  const SITE_KEYS = ["sites", "siteCount", "hidden", "custom", "pinned", "edits"];
+  const WIDGET_KEYS = ["widgets", "tempUnit"];
+
+  function applySettings(changed = null) {
+    const touches = (keys) => !changed || keys.some((key) => changed.includes(key));
     const d = root.dataset;
     d.background = settings.background;
     d.siteStyle = settings.siteStyle;
-    d.hover = settings.hover;
     d.align = settings.align;
     d.width = settings.width;
     d.glass = settings.glass;
@@ -153,9 +175,11 @@
     date.hidden = !settings.date;
     sites.hidden = !settings.sites;
     tick();
-    void loadBackdrop();
-    void loadSites();
-    loadWidgets();
+    if (touches(["background"])) void loadBackdrop();
+    if (touches(SITE_KEYS)) void loadSites();
+    else fitGrid();
+    if (touches(WIDGET_KEYS)) loadWidgets();
+    else fitWidgets();
     renderForm();
   }
 
@@ -169,7 +193,7 @@
     } finally {
       saving = false;
     }
-    applySettings();
+    applySettings(Object.keys(patch));
   }
 
   /* ---- clock -------------------------------------------------------- */
@@ -189,6 +213,10 @@
     }
     glyphs.forEach((glyph, i) => {
       if (old[i].textContent === glyph) return;
+      if (reduceMotion.matches) {
+        old[i].textContent = glyph;
+        return;
+      }
       const fresh = el("span", "glyph roll", glyph);
       old[i].replaceWith(fresh);
       fresh.addEventListener("animationend", () => fresh.classList.remove("roll"), { once: true });
@@ -414,9 +442,8 @@
       sites.replaceChildren();
       return;
     }
-    /* newtab: true is Firefox's own shortcut list (pinned first); it is
-     * empty while Firefox's shortcuts feed is off, so fall back to
-     * frecency. Ask for extra so hidden ones leave no gaps. */
+    /* Firefox's top sites (its pinned first, then frecency). Ask for extra
+     * so hidden ones leave no gaps. */
     const limit = settings.siteCount + settings.hidden.length + settings.custom.length
       + settings.pinned.length;
     let list = [];
@@ -470,6 +497,8 @@
     }
     sites.replaceChildren(...nodes);
     fitGrid();
+    /* Tiles settle in on the page's first paint only, not on every rebuild. */
+    if (!("settled" in root.dataset)) setTimeout(() => root.dataset.settled = "", 800);
     tileList()[focused]?.querySelector("a")?.focus();
   }
 
@@ -478,7 +507,8 @@
    * sit as 6 + 6. Icons keep their fixed square. */
   const TILE_MIN = { tiles: 22, list: 44, icons: 10 }; // in --u
   function fitGrid() {
-    const count = tileList().length;
+    /* The grid's own tiles: pinned ones sit in their row (newtab.css). */
+    const count = sites.querySelectorAll(":scope > .site").length;
     if (!count) return;
     const unit = parseFloat(getComputedStyle(root).getPropertyValue("--u")) || 8;
     const min = TILE_MIN[settings.siteStyle] * unit;
@@ -487,6 +517,8 @@
     const columns = Math.ceil(count / rows);
     sites.style.setProperty("--columns", String(columns));
     sites.style.setProperty("--fit", String(fit));
+    /* What the last tile spans to close a short last row. */
+    sites.style.setProperty("--tail", String(columns - ((count - 1) % columns)));
   }
   new ResizeObserver(fitGrid).observe(sites);
 
@@ -583,7 +615,6 @@
     return job;
   }
 
-  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
   const lights = new WeakMap(); // tile -> its light's state
   const lit = new Set(); // tiles drawing now, lit or fading out
   let pointed = null; // the tile under the pointer
@@ -626,7 +657,7 @@
 
   function drawLights(now) {
     lightFrame = 0;
-    const dt = Math.min(64, now - lastFrame);
+    const dt = Math.max(0, Math.min(64, now - lastFrame));
     lastFrame = now;
     const still = reduceMotion.matches;
     let moving = false;
@@ -635,7 +666,7 @@
       const target = tile.isConnected && isOn(tile) ? 1 : 0;
       state.level = still ? target
         : state.level + Math.sign(target - state.level) * Math.min(Math.abs(target - state.level), dt / 180);
-      fit(tile, state);
+      sizeCanvas(tile, state);
       const ctx = state.canvas.getContext("2d");
       ctx.clearRect(0, 0, state.w, state.h);
       if (state.level <= 0) {
@@ -643,15 +674,15 @@
         continue;
       }
       LIGHTS[settings.hover]?.(ctx, state, still ? 0 : now);
-      /* A fade, the rolling band and the shimmer need the next frame. */
-      if (!still && (state.level !== target || target === 1)) moving = true;
+      /* A fade needs the next frame; so do the rolling band and shimmer. */
+      if (!still && (state.level !== target || (target === 1 && LIVE_LIGHTS.has(settings.hover)))) moving = true;
     }
     if (moving) lightFrame = requestAnimationFrame(drawLights);
   }
 
   /* The canvas at device pixels, so cells stay square and sharp at a
    * fractional devicePixelRatio. */
-  function fit(tile, state) {
+  function sizeCanvas(tile, state) {
     const dpr = window.devicePixelRatio || 1;
     const w = Math.round(tile.clientWidth * dpr), h = Math.round(tile.clientHeight * dpr);
     if (w !== state.w || h !== state.h) {
@@ -668,6 +699,7 @@
     return (1 - smooth(d / reach)) * state.level;
   }
 
+  const LIVE_LIGHTS = new Set(["scan", "ascii"]); // animate while lit
   const LIGHTS = {
     halftone(ctx, state) {
       const pitch = 2 * Math.max(2, Math.round(3 * state.dpr));
@@ -845,6 +877,9 @@
     return response.text();
   }
 
+  /* "r/linux", "/r/linux" or "linux" to "linux"; empty is popular. */
+  const subreddit = (option) => (option.trim() || "popular").replace(/^\/?r\//, "").replace(/[^\w+]/g, "") || "popular";
+
   /* RSS or Atom text to { title, items: [{ title, url, at, tag }] }. */
   function parseFeed(text) {
     const doc = new DOMParser().parseFromString(text, "text/xml");
@@ -996,12 +1031,11 @@
       label: "Reddit",
       hue: "#ff4500",
       option: { label: "Subreddit", placeholder: "linux" },
-      link: (option) => `https://www.reddit.com/r/${encodeURIComponent(option.trim() || "popular")}/`,
+      link: (option) => `https://www.reddit.com/r/${subreddit(option)}/`,
       /* Reddit answers its JSON with a 403 to anything but a signed-in
        * browser; the Atom feed is open. */
       async load(option) {
-        const sub = (option.trim() || "popular").replace(/^\/?r\//, "").replace(/[^\w+]/g, "");
-        return parseFeed(await fetchText(`https://www.reddit.com/r/${sub}/hot.rss?limit=${FEED_LIMIT}`)).items;
+        return parseFeed(await fetchText(`https://www.reddit.com/r/${subreddit(option)}/hot.rss?limit=${FEED_LIMIT}`)).items;
       },
       render: (posts, option) => list(posts.map((post) => ({
         url: post.url, title: post.title,
@@ -1119,10 +1153,14 @@
 
   let widgetsRequest = 0;
   let widgetTimer = null;
+  let waitingForCache = false;
   function loadWidgets() {
     /* The first run waits for the cache so feeds paint from it. */
     if (!cacheReady) {
-      void cacheLoaded.then(loadWidgets);
+      if (!waitingForCache) {
+        waitingForCache = true;
+        void cacheLoaded.then(loadWidgets);
+      }
       return;
     }
     const request = ++widgetsRequest;
@@ -1174,7 +1212,7 @@
   /* As the shortcut grid: whole rows, as many columns as the width holds. */
   const WIDGET_MIN = 36; // in --u
   function fitWidgets() {
-    const count = widgetsBox.children.length;
+    const count = [...widgetsBox.children].filter((block) => block.checkVisibility()).length;
     if (!count) return;
     if (settings.widgetPlace === "beside") {
       widgetsBox.style.setProperty("--wcolumns", "1");
@@ -1231,9 +1269,9 @@
         options: [["halftone", "Dots"], ["scan", "Lines"], ["ascii", "ASCII"]], when: (s) => s.sites },
       { key: "siteCount", type: "range", label: "Count", min: 4, max: 24, unit: "", when: (s) => s.sites },
       { key: "hosts", type: "toggle", label: "Addresses", when: (s) => s.sites && s.siteStyle !== "icons" },
-      { type: "add-site", label: "Add", when: (s) => s.sites },
+      { type: "add-site", label: "Add site", when: (s) => s.sites },
       { type: "restore", label: "Hidden", when: (s) => s.sites && s.hidden.length > 0 },
-      { type: "unpin", label: "Order", when: (s) => s.sites && s.pinned.length > 0 }
+      { type: "unpin", label: "Pinned", when: (s) => s.sites && s.pinned.length > 0 }
     ]],
     ["Widgets", [
       { type: "widgets", label: "Widgets" },
@@ -1241,7 +1279,7 @@
         when: (s) => s.widgets.length > 0 },
       { key: "tempUnit", type: "choice", label: "Degrees", options: [["c", "°C"], ["f", "°F"]],
         when: (s) => s.widgets.some((w) => w.type === "weather") },
-      { key: "weatherHeader", type: "toggle", label: "By the clock",
+      { key: "weatherHeader", type: "toggle", label: "In header",
         when: (s) => s.widgets.some((w) => w.type === "weather") },
       { type: "note", label: "", text: "Feeds and weather fetch from the sites they name",
         when: (s) => s.widgets.some((w) => !WIDGETS[w.type].local) }
@@ -1331,6 +1369,7 @@
       input.hidden = true;
       input.addEventListener("change", async () => {
         const file = input.files?.[0];
+        input.value = ""; // so picking the same file again still changes
         if (!file) return;
         await IOUtils.write(CUSTOM_FILE, new Uint8Array(await file.arrayBuffer()), { tmpPath: `${CUSTOM_FILE}.tmp` });
         backdropKey = null;
@@ -1391,8 +1430,14 @@
           order.splice(to, 0, moved);
           save({ widgets: order });
         };
-        if (index > 0) controls.push(button("↑", () => move(index - 1), "icon-button"));
-        controls.push(button("×", () => save({ widgets: settings.widgets.filter((_, i) => i !== index) }), "icon-button"));
+        if (index > 0) {
+          const up = button("↑", () => move(index - 1), "icon-button");
+          up.title = `Move ${def.label} up`;
+          controls.push(up);
+        }
+        const remove = button("×", () => save({ widgets: settings.widgets.filter((_, i) => i !== index) }), "icon-button");
+        remove.title = `Remove ${def.label}`;
+        controls.push(remove);
         nodes.append(row(def.short || def.label, ...controls));
       });
       const select = document.createElement("select");
@@ -1403,7 +1448,7 @@
         option.textContent = def.label;
         select.append(option);
       }
-      nodes.append(row("Add", select, button("Add", () => save({
+      nodes.append(row("Add widget", select, button("Add", () => save({
         widgets: [...settings.widgets, { type: select.value, option: "" }]
       }))));
       return nodes;
@@ -1421,10 +1466,26 @@
       return row(field.label, button(`Restore ${count}`, () => save({ hidden: [] })));
     },
     unpin(field) {
-      return row(field.label, button("Unpin", () => save({ pinned: [] })));
+      return row(field.label, button("Unpin all", () => save({ pinned: [] })));
     },
     reset(field) {
-      return row(field.label, button("Defaults", () => save({ ...DEFAULTS })));
+      /* The look goes back to defaults; the shortcuts (pinned, hidden,
+       * added, edited) and the widget list stay. Two clicks. */
+      const keep = ["pinned", "hidden", "custom", "edits", "widgets"];
+      const reset = button("Defaults", () => {
+        if (reset.dataset.armed !== "true") {
+          reset.dataset.armed = "true";
+          reset.textContent = "Confirm";
+          setTimeout(() => {
+            reset.dataset.armed = "false";
+            reset.textContent = "Defaults";
+          }, 3000);
+          return;
+        }
+        const defaults = Object.fromEntries(Object.entries(DEFAULTS).filter(([key]) => !keep.includes(key)));
+        save(defaults);
+      });
+      return row(field.label, reset);
     }
   };
 
@@ -1459,13 +1520,13 @@
   const squash = (text) => text.toLowerCase().replace(/[^a-z0-9]/g, "");
 
   async function searchIcons(query) {
+    const q = squash(query);
+    if (!q) return [];
     iconIndex ??= fetchJson(`${SIMPLE_ICONS}data/simple-icons.json`, "default").catch((error) => {
       iconIndex = null;
       throw error;
     });
     const list = await iconIndex;
-    const q = squash(query);
-    if (!q) return [];
     const rank = (icon) => {
       const names = [icon.title, ...(icon.aliases?.aka ?? [])].map(squash);
       if (icon.slug === q) return 0;
@@ -1483,7 +1544,12 @@
     if (!iconPaths.has(slug)) {
       iconPaths.set(slug, fetchText(`${SIMPLE_ICONS}icons/${slug}.svg`, "default")
         .then((svg) => /\sd="([^"]+)"/.exec(svg)?.[1] ?? null)
-        .catch(() => null));
+        .catch(() => null)
+        .then((path) => {
+          /* A failed fetch is tried again next time. */
+          if (!path) iconPaths.delete(slug);
+          return path;
+        }));
     }
     return iconPaths.get(slug);
   }
@@ -1636,9 +1702,9 @@
     heading.textContent = editing ? "Shortcut" : "New tab";
     form.replaceChildren(...editing ? editorSections() : SCHEMA.map(([title, fields]) => {
       const section = document.createElement("section");
-      const heading = document.createElement("h2");
-      heading.textContent = title;
-      section.append(heading, ...fields
+      const sectionHeading = document.createElement("h2");
+      sectionHeading.textContent = title;
+      section.append(sectionHeading, ...fields
         .filter((field) => !field.when || field.when(settings))
         .map((field) => builders[field.type](field)));
       return section;
@@ -1657,6 +1723,9 @@
   function setPanel(open) {
     if (!open) editing = null;
     panel.hidden = !open;
+    /* The page stays in view but out of reach: Tab and hints stay in the
+     * panel. */
+    document.querySelector("main").inert = open;
     toggleButton.setAttribute("aria-expanded", String(open));
     root.dataset.settings = open;
     if (open) {
@@ -1701,6 +1770,7 @@
     const selector = "#sites .site > a, #widgets a, #widgets button.item, #settings-toggle,"
       + " #settings button, #settings input:not([type=file]), #settings select";
     return [...document.querySelectorAll(selector)].filter((node) => {
+      if (node.closest("[inert]")) return false;
       if (!node.checkVisibility({ opacityProperty: true, visibilityProperty: true })) return false;
       const rect = node.getBoundingClientRect();
       if (!rect.width || rect.bottom <= 0 || rect.top >= innerHeight) return false;
@@ -1732,6 +1802,7 @@
   }
 
   function hintKey(event) {
+    if (event.ctrlKey || event.altKey || event.metaKey) return hideHints();
     event.preventDefault();
     event.stopPropagation();
     if (event.key === "Backspace" && typed) typed = typed.slice(0, -1);
@@ -1770,7 +1841,7 @@
       setPanel(false);
       return;
     }
-    if (event.target.closest?.("input, textarea")) return;
+    if (event.target.closest?.("input, textarea, select")) return;
     if (event.key === ",") {
       event.preventDefault();
       setPanel(panel.hidden);
@@ -1781,6 +1852,8 @@
       showHints();
       return;
     }
+    /* The rest act on the page, not through the panel. */
+    if (!panel.hidden) return;
     /* e edits the focused shortcut. */
     const focusedTile = event.target.closest?.(".site");
     if (event.key === "e" && focusedTile) {
@@ -1791,8 +1864,7 @@
     }
     /* Arrows walk the grid; from nowhere they start at the first tile. */
     const step = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: "up", ArrowDown: "down" }[event.key];
-    if (step !== undefined && settings.sites && tileList().length
-        && !panel.contains(event.target)) {
+    if (step !== undefined && settings.sites && tileList().length) {
       const items = tileList();
       const current = items.findIndex((item) => item.contains(document.activeElement));
       const columns = Number(sites.style.getPropertyValue("--columns")) || 1;
