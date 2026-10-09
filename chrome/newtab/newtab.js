@@ -39,6 +39,7 @@
     name: "",
     sites: true,
     siteStyle: "tiles", // tiles | list | icons
+    hover: "halftone", // halftone | scan | ascii: the light in a hovered tile
     siteCount: 12,
     numbers: true,
     hosts: true,
@@ -135,6 +136,7 @@
     const d = root.dataset;
     d.background = settings.background;
     d.siteStyle = settings.siteStyle;
+    d.hover = settings.hover;
     d.align = settings.align;
     d.width = settings.width;
     d.glass = settings.glass;
@@ -483,11 +485,12 @@
   });
 
   /* ---- light ----------------------------------------------------------
-   * The hovered tile lights from within: a radial light under the pointer,
-   * in the icon's own colour (the theme accent for an icon without one),
-   * that never leaves the tile. --mx/--my are the pointer inside the tile;
-   * newtab.css draws the light. */
-
+   * The hovered tile lights from within, in the icon's own colour (the
+   * theme accent for an icon without one), drawn 1-bit on a canvas under
+   * the tile's content: halftone dots that swell under the pointer, phosphor
+   * scanlines with a band rolling down, or ASCII by brightness. The tile with
+   * keyboard focus lights from its centre. One animation loop serves the
+   * page and runs only while a tile is lit or fading. */
   const iconColors = new Map();
 
   /* The icon's dominant colour: the mean of its saturated pixels. */
@@ -523,12 +526,179 @@
     return job;
   }
 
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
+  const lights = new WeakMap(); // tile -> its light's state
+  const lit = new Set(); // tiles drawing now, lit or fading out
+  let pointed = null; // the tile under the pointer
+  let lightFrame = 0;
+  let lastFrame = 0;
+
+  const smooth = (x) => {
+    const t = Math.min(1, Math.max(0, x));
+    return t * t * (3 - 2 * t);
+  };
+
+  function light(tile) {
+    let state = lights.get(tile);
+    if (!state) {
+      const canvas = el("canvas", "light");
+      canvas.setAttribute("aria-hidden", "true");
+      tile.prepend(canvas);
+      state = { canvas, level: 0, x: 0.5, y: 0.5, w: 0, h: 0 };
+      lights.set(tile, state);
+    }
+    return state;
+  }
+
+  /* A tile is on while the pointer is in it or it has keyboard focus. */
+  function isOn(tile) {
+    return tile === pointed || tile.querySelector(":scope > a:focus-visible") !== null;
+  }
+
+  function wake(tile) {
+    if (!tile?.isConnected) return;
+    const state = light(tile);
+    state.color = getComputedStyle(tile).getPropertyValue("--icon").trim()
+      || getComputedStyle(root).getPropertyValue("--accent").trim();
+    lit.add(tile);
+    if (!lightFrame) {
+      lastFrame = performance.now();
+      lightFrame = requestAnimationFrame(drawLights);
+    }
+  }
+
+  function drawLights(now) {
+    lightFrame = 0;
+    const dt = Math.min(64, now - lastFrame);
+    lastFrame = now;
+    const still = reduceMotion.matches;
+    let moving = false;
+    for (const tile of lit) {
+      const state = lights.get(tile);
+      const target = tile.isConnected && isOn(tile) ? 1 : 0;
+      state.level = still ? target
+        : state.level + Math.sign(target - state.level) * Math.min(Math.abs(target - state.level), dt / 180);
+      fit(tile, state);
+      const ctx = state.canvas.getContext("2d");
+      ctx.clearRect(0, 0, state.w, state.h);
+      if (state.level <= 0) {
+        lit.delete(tile);
+        continue;
+      }
+      LIGHTS[settings.hover]?.(ctx, state, still ? 0 : now);
+      /* A fade, the rolling band and the shimmer need the next frame. */
+      if (!still && (state.level !== target || target === 1)) moving = true;
+    }
+    if (moving) lightFrame = requestAnimationFrame(drawLights);
+  }
+
+  /* The canvas at device pixels, so cells stay square and sharp at a
+   * fractional devicePixelRatio. */
+  function fit(tile, state) {
+    const dpr = window.devicePixelRatio || 1;
+    const w = Math.round(tile.clientWidth * dpr), h = Math.round(tile.clientHeight * dpr);
+    if (w !== state.w || h !== state.h) {
+      state.canvas.width = state.w = w;
+      state.canvas.height = state.h = h;
+    }
+    state.dpr = dpr;
+  }
+
+  /* Brightness at (fx, fy), 0..1 of the tile: full under the light's
+   * centre, nothing at `reach` (a fraction of the tile's width). */
+  function falloff(state, fx, fy, reach) {
+    const d = Math.hypot(fx - state.x, (fy - state.y) * state.h / state.w);
+    return (1 - smooth(d / reach)) * state.level;
+  }
+
+  const LIGHTS = {
+    halftone(ctx, state) {
+      const pitch = 2 * Math.max(2, Math.round(3 * state.dpr));
+      const cols = Math.ceil(state.w / pitch), rows = Math.ceil(state.h / pitch);
+      ctx.fillStyle = state.color;
+      ctx.globalAlpha = 0.55;
+      ctx.beginPath();
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          const r = falloff(state, (x + 0.5) / cols, (y + 0.5) / rows, 0.6) * pitch * 0.55;
+          if (r < 0.6) continue;
+          const cx = x * pitch + pitch / 2, cy = y * pitch + pitch / 2;
+          ctx.moveTo(cx + r, cy);
+          ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        }
+      }
+      ctx.fill();
+    },
+    scan(ctx, state, now) {
+      const cell = Math.max(2, Math.round(3 * state.dpr));
+      const line = Math.max(1, Math.round(state.dpr));
+      const cols = Math.ceil(state.w / cell), rows = Math.ceil(state.h / cell);
+      const band = now ? (now / 2400) % 1.4 - 0.2 : -1;
+      ctx.fillStyle = state.color;
+      for (let y = 0; y < rows; y++) {
+        const fy = (y + 0.5) / rows;
+        const roll = 0.18 * Math.max(0, 1 - Math.abs(fy - band) / 0.12) * state.level;
+        for (let x = 0; x < cols; x++) {
+          const v = Math.min(1, 0.85 * falloff(state, (x + 0.5) / cols, fy, 0.7) + roll);
+          if (v < 0.03) continue;
+          ctx.globalAlpha = v * 0.7;
+          ctx.fillRect(x * cell, y * cell, cell, line);
+        }
+      }
+    },
+    ascii(ctx, state, now) {
+      const ramp = " .:-=+*#%@";
+      const cw = Math.round(7 * state.dpr), ch = Math.round(12 * state.dpr);
+      const cols = Math.ceil(state.w / cw), rows = Math.ceil(state.h / ch);
+      const tick = Math.floor(now / 90);
+      ctx.font = `${Math.round(10 * state.dpr)}px monospace`;
+      ctx.textBaseline = "top";
+      ctx.fillStyle = state.color;
+      ctx.globalAlpha = 0.6;
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          const v = falloff(state, (x + 0.5) / cols, (y + 0.5) / rows, 0.65);
+          /* A few cells step up one level each tick: the shimmer. */
+          const shimmer = now && v > 0.08 && ((x * 73856093 ^ y * 19349663 ^ tick * 83492791) >>> 0) % 7 === 0;
+          const k = Math.min(ramp.length - 1, Math.floor(v * ramp.length * 0.95) + (shimmer ? 1 : 0));
+          if (k > 0) ctx.fillText(ramp[k], x * cw, y * ch);
+        }
+      }
+    }
+  };
+
   sites.addEventListener("mousemove", (event) => {
     const tile = event.target.closest?.(".site");
+    if (tile !== pointed) {
+      const was = pointed;
+      pointed = tile;
+      wake(was);
+    }
     if (!tile) return;
     const rect = tile.getBoundingClientRect();
-    tile.style.setProperty("--mx", `${((event.clientX - rect.left) / rect.width * 100).toFixed(1)}%`);
-    tile.style.setProperty("--my", `${((event.clientY - rect.top) / rect.height * 100).toFixed(1)}%`);
+    const state = light(tile);
+    state.x = (event.clientX - rect.left) / rect.width;
+    state.y = (event.clientY - rect.top) / rect.height;
+    wake(tile);
+  });
+
+  sites.addEventListener("mouseleave", () => {
+    const was = pointed;
+    pointed = null;
+    wake(was);
+  });
+
+  /* Keyboard focus lights the tile from its centre; the pointer, if it is
+   * in the tile, keeps its own spot. */
+  sites.addEventListener("focusin", (event) => {
+    const tile = event.target.closest?.(".site");
+    if (!tile || !event.target.matches(":focus-visible")) return;
+    if (tile !== pointed) Object.assign(light(tile), { x: 0.5, y: 0.5 });
+    wake(tile);
+  });
+
+  sites.addEventListener("focusout", (event) => {
+    wake(event.target.closest?.(".site"));
   });
 
   /* ---- widgets --------------------------------------------------------
@@ -1001,6 +1171,8 @@
       { key: "sites", type: "toggle", label: "Shortcuts" },
       { key: "siteStyle", type: "choice", label: "Style",
         options: [["tiles", "Tiles"], ["list", "List"], ["icons", "Icons"]], when: (s) => s.sites },
+      { key: "hover", type: "choice", label: "Light",
+        options: [["halftone", "Dots"], ["scan", "Lines"], ["ascii", "ASCII"]], when: (s) => s.sites },
       { key: "siteCount", type: "range", label: "Count", min: 4, max: 24, unit: "", when: (s) => s.sites },
       { key: "numbers", type: "toggle", label: "Numbers", when: (s) => s.sites },
       { key: "hosts", type: "toggle", label: "Addresses", when: (s) => s.sites && s.siteStyle !== "icons" },

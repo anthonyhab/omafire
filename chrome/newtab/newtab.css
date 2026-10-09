@@ -284,21 +284,15 @@ header:has(> #time[hidden]):has(#date[hidden]) {
   }
 }
 
-/* The light: under the pointer, in the icon's colour, inside the tile. */
-.site::after {
-  content: "";
+/* The light: newtab.js draws it on a canvas under the tile's content, in
+ * the icon's colour (halftone, scanlines or ASCII, the "Light" setting). */
+.site > canvas.light {
   position: absolute;
   inset: 0;
   z-index: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
-  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%),
-    color-mix(in srgb, var(--icon, var(--accent)) 28%, transparent),
-    transparent 55%);
-  opacity: 0;
-}
-
-.site:hover::after {
-  opacity: 1;
 }
 
 .site > a {
@@ -1137,7 +1131,6 @@ output {
   .item {
     transition: background-color 120ms, outline-color 200ms;
   }
-  .site::after,
   .widget::before,
   .item .key {
     transition: opacity 200ms var(--ease), box-shadow 200ms;
