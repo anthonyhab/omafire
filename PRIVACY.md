@@ -45,11 +45,14 @@ private window's new tab shows no history.
 
 ## Network
 
-Omafire's own code opens no network connection, with one exception you make
-yourself: a feed widget on the new tab (Hacker News, a subreddit, an RSS feed,
+Omafire's own code opens no network connection, with two exceptions you make
+yourself. A feed widget on the new tab (Hacker News, a subreddit, an RSS feed,
 the weather) fetches from the site it names, and only while it is in your widget
-list. None is there by default. The last answer is kept in the profile's prefs
-so the page paints at once. Installing a release from the release page is a
+list. None is there by default. The last answer is kept in the profile so the
+page paints at once. And searching for a brand icon in the shortcut editor
+fetches Simple Icons' list and the marks it shows from jsDelivr
+(cdn.jsdelivr.net), only while you search; the mark you pick is stored in your
+settings, so tiles never fetch it. Installing a release from the release page is a
 download you make yourself.
 
 Omafire does not include Cinder or any other add-on that talks to a service;

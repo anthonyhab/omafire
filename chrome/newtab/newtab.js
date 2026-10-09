@@ -41,7 +41,6 @@
     siteStyle: "tiles", // tiles | list | icons
     hover: "halftone", // halftone | scan | ascii: the light in a hovered tile
     siteCount: 12,
-    numbers: true,
     hosts: true,
     align: "top", // top | center
     width: "normal", // normal | wide
@@ -51,6 +50,7 @@
     weatherHeader: true, // the weather widget reads as a line under the clock
     custom: [], // [{ url, title }]
     pinned: [], // [{ url, title }], dragged into place; they lead the grid
+    edits: {}, // url -> { title, color, icon }: a shortcut's own name, colour and icon
     hidden: [] // urls
   };
 
@@ -129,6 +129,7 @@
     next.widgets = next.widgets
       .filter((w) => w && typeof w === "object" && Object.hasOwn(WIDGETS, w.type))
       .map((w) => ({ type: w.type, option: typeof w.option === "string" ? w.option : "" }));
+    if (!next.edits || Array.isArray(next.edits)) next.edits = {};
     return next;
   }
 
@@ -140,7 +141,6 @@
     d.align = settings.align;
     d.width = settings.width;
     d.glass = settings.glass;
-    d.numbers = settings.numbers;
     d.hosts = settings.hosts;
     d.widgetPlace = settings.widgetPlace;
     d.clockStyle = settings.clockStyle;
@@ -304,6 +304,40 @@
     return clean;
   }
 
+  /* A picked colour: a palette name ("blue"), which follows the theme, or
+   * a hex. */
+  function paletteColor(name) {
+    if (!name) return "";
+    if (name.startsWith("#")) return name;
+    return getComputedStyle(root).getPropertyValue(`--omarchy-${name}`).trim();
+  }
+
+  /* The tile's icon: a Simple Icons brand mark, the site's favicon, or the
+   * host's first letter. */
+  function siteIcon(site, edit, host) {
+    if (edit.icon?.path) {
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("viewBox", "0 0 24 24");
+      svg.setAttribute("aria-hidden", "true");
+      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("d", edit.icon.path);
+      svg.append(path);
+      svg.classList.add("brand");
+      /* A brand mark too dark (or light) for the page takes the text colour. */
+      const background = getComputedStyle(root).getPropertyValue("--omarchy-background").trim() || "#121212";
+      const fill = paletteColor(edit.color) || `#${edit.icon.hex}`;
+      svg.style.fill = contrast(background, fill) >= 2 ? fill : "var(--fg)";
+      return svg;
+    }
+    if (site.favicon && edit.icon !== "letter") {
+      const image = document.createElement("img");
+      image.src = site.favicon;
+      image.alt = "";
+      return image;
+    }
+    return el("span", "letter", (edit.title || host).charAt(0));
+  }
+
   function tile(site, index) {
     const item = document.createElement("div");
     item.className = "site";
@@ -313,32 +347,19 @@
     const host = hostOf(site.url);
     link.title = `${site.title || host}\n${site.url}`;
 
-    let icon;
-    if (site.favicon) {
-      icon = document.createElement("img");
-      icon.src = site.favicon;
-      icon.alt = "";
-    } else {
-      icon = document.createElement("span");
-      icon.textContent = host.charAt(0);
-      icon.classList.add("letter");
-    }
+    const edit = settings.edits[site.url] ?? {};
+    const icon = siteIcon(site, edit, host);
     icon.classList.add("icon");
-
-    /* Only the tiles a digit key opens are numbered. */
-    const number = document.createElement("span");
-    number.className = "index";
-    if (index < 9) number.textContent = String(index + 1).padStart(2, "0");
 
     const title = document.createElement("span");
     title.className = "title";
-    title.textContent = siteName(site.title || "", host) || host;
+    title.textContent = edit.title || siteName(site.title || "", host) || host;
 
     const hostLabel = document.createElement("span");
     hostLabel.className = "host";
     hostLabel.textContent = host;
 
-    link.append(icon, number, title, hostLabel);
+    link.append(icon, title, hostLabel);
 
     const pinnedHere = settings.pinned.some((entry) => entry.url === site.url);
     item.classList.toggle("pinned", pinnedHere);
@@ -366,12 +387,22 @@
       }
     });
 
-    item.append(link, pin, hide);
+    const editButton = button("✎", () => openEditor(site), "edit");
+    editButton.title = "Edit shortcut (e)";
+
+    item.append(link, editButton, pin, hide);
     item.style.setProperty("--i", String(index));
     item.dataset.url = site.url;
-    if (site.favicon) void iconColor(site.favicon).then((color) => {
-      if (color) item.style.setProperty("--icon", color);
-    });
+    /* The light's colour: the picked one, else the brand icon's, else the
+     * favicon's own. */
+    const color = paletteColor(edit.color) || (edit.icon?.hex && `#${edit.icon.hex}`);
+    if (color) {
+      item.style.setProperty("--icon", color);
+    } else if (site.favicon && !edit.icon) {
+      void iconColor(site.favicon).then((found) => {
+        if (found) item.style.setProperty("--icon", found);
+      });
+    }
     item.draggable = true;
     return item;
   }
@@ -797,21 +828,19 @@
     if (!items.length) return [el("p", "empty", empty)];
     return items.map((entry, index) => {
       const node = item(entry);
-      /* Keys drive the first block (newtab.css shows them there only). */
-      if (index < 10) node.prepend(el("span", "key", String.fromCharCode(97 + index)));
       node.style.setProperty("--i", String(index));
       return node;
     });
   }
 
-  async function fetchJson(url) {
-    const response = await fetch(url, { credentials: "omit", cache: "no-store" });
+  async function fetchJson(url, cache = "no-store") {
+    const response = await fetch(url, { credentials: "omit", cache });
     if (!response.ok) throw new Error(`${response.status} ${url}`);
     return response.json();
   }
 
-  async function fetchText(url) {
-    const response = await fetch(url, { credentials: "omit", cache: "no-store" });
+  async function fetchText(url, cache = "no-store") {
+    const response = await fetch(url, { credentials: "omit", cache });
     if (!response.ok) throw new Error(`${response.status} ${url}`);
     return response.text();
   }
@@ -1162,6 +1191,7 @@
   const panel = document.querySelector("#settings");
   const form = document.querySelector("#settings-form");
   const toggleButton = document.querySelector("#settings-toggle");
+  const heading = document.querySelector(".settings-head h1");
 
   /* Every control is a row of this schema; `when` hides rows that don't
    * apply to the current settings. */
@@ -1200,7 +1230,6 @@
       { key: "hover", type: "choice", label: "Light",
         options: [["halftone", "Dots"], ["scan", "Lines"], ["ascii", "ASCII"]], when: (s) => s.sites },
       { key: "siteCount", type: "range", label: "Count", min: 4, max: 24, unit: "", when: (s) => s.sites },
-      { key: "numbers", type: "toggle", label: "Numbers", when: (s) => s.sites },
       { key: "hosts", type: "toggle", label: "Addresses", when: (s) => s.sites && s.siteStyle !== "icons" },
       { type: "add-site", label: "Add", when: (s) => s.sites },
       { type: "restore", label: "Hidden", when: (s) => s.sites && s.hidden.length > 0 },
@@ -1399,6 +1428,202 @@
     }
   };
 
+  /* ---- shortcut editor ----------------------------------------------
+   * The panel in a second mode: one shortcut's name, colour and icon,
+   * kept in settings.edits by address. Brand icons come from Simple Icons
+   * (simpleicons.org) through jsDelivr, fetched only while searching here;
+   * the picked mark's path is stored, so tiles never fetch. */
+
+  const SIMPLE_ICONS = "https://cdn.jsdelivr.net/npm/simple-icons@16/";
+  const SWATCHES = ["accent", "red", "orange", "yellow", "green", "cyan", "blue", "magenta"];
+  let editing = null; // the site being edited, while the panel shows it
+  let iconIndex = null; // Simple Icons' list, once searched
+  const iconPaths = new Map(); // slug -> its path, once fetched
+  let iconSearch = { query: "", results: [] };
+
+  function openEditor(site) {
+    editing = site;
+    iconSearch = { query: "", results: [] };
+    setPanel(true);
+  }
+
+  function saveEdit(patch) {
+    const next = { ...settings.edits[editing.url], ...patch };
+    for (const key of Object.keys(next)) if (!next[key]) delete next[key];
+    const edits = { ...settings.edits };
+    if (Object.keys(next).length) edits[editing.url] = next;
+    else delete edits[editing.url];
+    save({ edits });
+  }
+
+  const squash = (text) => text.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+  async function searchIcons(query) {
+    iconIndex ??= fetchJson(`${SIMPLE_ICONS}data/simple-icons.json`, "default").catch((error) => {
+      iconIndex = null;
+      throw error;
+    });
+    const list = await iconIndex;
+    const q = squash(query);
+    if (!q) return [];
+    const rank = (icon) => {
+      const names = [icon.title, ...(icon.aliases?.aka ?? [])].map(squash);
+      if (icon.slug === q) return 0;
+      if (icon.slug.startsWith(q)) return 1;
+      if (names.some((name) => name.startsWith(q))) return 2;
+      if (names.some((name) => name.includes(q))) return 3;
+      return 4;
+    };
+    return list.map((icon) => [rank(icon), icon]).filter(([r]) => r < 4)
+      .sort((a, b) => a[0] - b[0] || a[1].title.length - b[1].title.length)
+      .slice(0, 12).map(([, icon]) => icon);
+  }
+
+  function iconPath(slug) {
+    if (!iconPaths.has(slug)) {
+      iconPaths.set(slug, fetchText(`${SIMPLE_ICONS}icons/${slug}.svg`, "default")
+        .then((svg) => /\sd="([^"]+)"/.exec(svg)?.[1] ?? null)
+        .catch(() => null));
+    }
+    return iconPaths.get(slug);
+  }
+
+  function editorSections() {
+    const site = editing;
+    const edit = settings.edits[site.url] ?? {};
+    const host = hostOf(site.url);
+    const section = (title, ...nodes) => {
+      const node = el("section");
+      if (title) node.append(el("h2", "", title));
+      node.append(...nodes);
+      return node;
+    };
+
+    /* The tile as it stands, inert. */
+    const preview = el("div", "preview");
+    const shown = tile({ ...site, favicon: site.favicon ?? shownSites.find((s) => s.url === site.url)?.favicon }, 0);
+    shown.inert = true;
+    preview.append(shown);
+
+    const name = document.createElement("input");
+    name.type = "text";
+    name.value = edit.title ?? "";
+    name.placeholder = siteName(site.title || "", host) || host;
+    name.setAttribute("aria-label", "Name");
+    name.addEventListener("input", () => saveEdit({ title: name.value.trim() }));
+
+    const swatches = el("div", "choice swatches");
+    swatches.setAttribute("role", "radiogroup");
+    swatches.setAttribute("aria-label", "Colour");
+    /* A monochrome theme resolves several names to one grey: show it once. */
+    const seen = new Set();
+    for (const value of ["", ...SWATCHES]) {
+      const resolved = paletteColor(value);
+      if (value && (!resolved || seen.has(resolved))) continue;
+      seen.add(resolved);
+      const option = button(value ? "" : "Auto", () => saveEdit({ color: value }));
+      option.setAttribute("role", "radio");
+      option.setAttribute("aria-checked", String((edit.color ?? "") === value));
+      if (value) {
+        option.title = value;
+        option.style.setProperty("--swatch", paletteColor(value));
+      }
+      swatches.append(option);
+    }
+
+    /* Any colour, as a hex. */
+    const hex = document.createElement("input");
+    hex.type = "text";
+    hex.className = "hex";
+    hex.value = edit.color?.startsWith("#") ? edit.color : "";
+    hex.placeholder = "#rrggbb";
+    hex.setAttribute("aria-label", "Colour hex");
+    hex.addEventListener("change", () => {
+      const value = hex.value.trim().replace(/^#?/, "#");
+      if (/^#[0-9a-f]{6}$/i.test(value)) saveEdit({ color: value.toLowerCase() });
+      else if (!hex.value.trim()) saveEdit({ color: "" });
+      else {
+        hex.setCustomValidity("Six hex digits");
+        hex.reportValidity();
+      }
+    });
+    hex.addEventListener("input", () => hex.setCustomValidity(""));
+    if (hex.value) hex.style.setProperty("--swatch", hex.value);
+
+    const iconKind = edit.icon?.path ? "brand" : edit.icon === "letter" ? "letter" : "site";
+    const kinds = el("div", "choice");
+    kinds.setAttribute("role", "radiogroup");
+    kinds.setAttribute("aria-label", "Icon");
+    for (const [value, text] of [["site", "Site"], ["letter", "Letter"], ["brand", "Brand"]]) {
+      const option = button(text, () => {
+        if (value === "brand") {
+          iconSearch.open = true;
+          renderForm();
+          form.querySelector("input.icon-query")?.focus();
+        } else {
+          iconSearch.open = false;
+          saveEdit({ icon: value === "letter" ? "letter" : "" });
+        }
+      });
+      option.setAttribute("role", "radio");
+      option.setAttribute("aria-checked", String(iconSearch.open ? value === "brand" : iconKind === value));
+      kinds.append(option);
+    }
+
+    const iconRows = [row("Icon", kinds)];
+    if (iconSearch.open || iconKind === "brand") {
+      const query = document.createElement("input");
+      query.type = "text";
+      query.className = "icon-query";
+      query.placeholder = edit.icon?.title || "Search Simple Icons";
+      query.value = iconSearch.query;
+      query.setAttribute("aria-label", "Brand icon search");
+      let timer = 0;
+      query.addEventListener("input", () => {
+        clearTimeout(timer);
+        iconSearch.query = query.value;
+        timer = setTimeout(async () => {
+          try {
+            iconSearch.results = await searchIcons(query.value);
+            iconSearch.error = "";
+          } catch {
+            iconSearch.error = "Simple Icons is unreachable";
+          }
+          renderForm();
+        }, 200);
+      });
+      iconRows.push(row("Brand", query));
+      if (iconSearch.error) iconRows.push(row("", el("p", "note", iconSearch.error)));
+      const grid = el("div", "brand-results");
+      for (const icon of iconSearch.results) {
+        const pick = button("", async () => {
+          const path = await iconPath(icon.slug);
+          if (path) {
+            iconSearch.open = false;
+            saveEdit({ icon: { slug: icon.slug, title: icon.title, hex: icon.hex, path } });
+          }
+        });
+        pick.title = icon.title;
+        pick.setAttribute("aria-checked", String(edit.icon?.slug === icon.slug));
+        void iconPath(icon.slug).then((path) => {
+          if (!path) return;
+          const mark = siteIcon(site, { icon: { path, hex: icon.hex } }, host);
+          pick.replaceChildren(mark);
+        });
+        grid.append(pick);
+      }
+      if (iconSearch.results.length) iconRows.push(grid);
+    }
+
+    return [
+      section(host, preview, row("Name", name), row("Colour", swatches), row("", hex), ...iconRows),
+      section("", row("", button("Reset", () => {
+        iconSearch = { query: "", results: [] };
+        saveEdit({ title: "", color: "", icon: "" });
+      }), button("Done", () => setPanel(false))))
+    ];
+  }
+
   function renderForm() {
     if (panel.hidden) return;
     /* Re-rendering replaces the focused control; keep focus on the same
@@ -1408,7 +1633,8 @@
       ? [[...form.querySelectorAll("input, button")].indexOf(focused), focused.type]
       : null;
     const selection = focused?.selectionStart;
-    form.replaceChildren(...SCHEMA.map(([title, fields]) => {
+    heading.textContent = editing ? "Shortcut" : "New tab";
+    form.replaceChildren(...editing ? editorSections() : SCHEMA.map(([title, fields]) => {
       const section = document.createElement("section");
       const heading = document.createElement("h2");
       heading.textContent = title;
@@ -1429,6 +1655,7 @@
   }
 
   function setPanel(open) {
+    if (!open) editing = null;
     panel.hidden = !open;
     toggleButton.setAttribute("aria-expanded", String(open));
     root.dataset.settings = open;
@@ -1440,9 +1667,100 @@
     }
   }
 
-  toggleButton.addEventListener("click", () => setPanel(panel.hidden));
+  toggleButton.addEventListener("click", () => {
+    if (editing) editing = null;
+    else if (!panel.hidden) return setPanel(false);
+    setPanel(true);
+  });
   document.querySelector("#settings-close").addEventListener("click", () => setPanel(false));
   form.addEventListener("submit", (event) => event.preventDefault());
+
+  /* ---- hints ---------------------------------------------------------
+   * f labels everything clickable with home-row letters, as Vimium does
+   * (it can't reach this page); typing a label clicks it, or focuses a
+   * field. Esc, Backspace past the start, or any other key leaves. */
+
+  const HINT_KEYS = "sadfjklewcmpgh";
+  const hintLayer = document.querySelector("#hints");
+  let hints = null; // [{ label, target, node }] while shown
+  let typed = "";
+
+  /* Prefix-free labels, as short as the count allows (Vimium's scheme). */
+  function hintLabels(count) {
+    const labels = [""];
+    let offset = 0;
+    while (labels.length - offset < count || labels.length === 1) {
+      const base = labels[offset++];
+      for (const key of HINT_KEYS) labels.push(key + base);
+    }
+    return labels.slice(offset, offset + count).sort().map((label) => [...label].reverse().join(""));
+  }
+
+  function hintTargets() {
+    /* Covered targets (under the panel) drop out at the hit test. */
+    const selector = "#sites .site > a, #widgets a, #widgets button.item, #settings-toggle,"
+      + " #settings button, #settings input:not([type=file]), #settings select";
+    return [...document.querySelectorAll(selector)].filter((node) => {
+      if (!node.checkVisibility({ opacityProperty: true, visibilityProperty: true })) return false;
+      const rect = node.getBoundingClientRect();
+      if (!rect.width || rect.bottom <= 0 || rect.top >= innerHeight) return false;
+      const hit = document.elementFromPoint(rect.left + rect.width / 2, Math.max(1, rect.top + rect.height / 2));
+      return node.contains(hit) || hit === null;
+    });
+  }
+
+  function showHints() {
+    const targets = hintTargets();
+    if (!targets.length) return;
+    const labels = hintLabels(targets.length);
+    hints = targets.map((target, i) => {
+      const rect = target.getBoundingClientRect();
+      const node = el("span", "hint", labels[i]);
+      node.style.left = `${Math.max(0, rect.left - 1)}px`;
+      node.style.top = `${Math.max(0, rect.top - 1)}px`;
+      return { label: labels[i], target, node };
+    });
+    typed = "";
+    hintLayer.replaceChildren(...hints.map((hint) => hint.node));
+    hintLayer.hidden = false;
+  }
+
+  function hideHints() {
+    hints = null;
+    hintLayer.hidden = true;
+    hintLayer.replaceChildren();
+  }
+
+  function hintKey(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.key === "Backspace" && typed) typed = typed.slice(0, -1);
+    else if (event.key.length === 1 && HINT_KEYS.includes(event.key.toLowerCase())) typed += event.key.toLowerCase();
+    else return hideHints();
+    const left = hints.filter((hint) => hint.label.startsWith(typed));
+    if (!left.length) return hideHints();
+    if (left.length === 1 && left[0].label === typed) {
+      const { target } = left[0];
+      hideHints();
+      if (target.matches("input, select")) target.focus();
+      else target.click();
+      return;
+    }
+    for (const hint of hints) {
+      const match = hint.label.startsWith(typed);
+      hint.node.hidden = !match;
+      if (match) {
+        const done = el("b", "", typed);
+        hint.node.replaceChildren(done, hint.label.slice(typed.length));
+      }
+    }
+  }
+
+  document.addEventListener("keydown", (event) => {
+    if (hints) hintKey(event);
+  }, true);
+  addEventListener("scroll", () => hints && hideHints(), { passive: true });
+  addEventListener("resize", () => hints && hideHints());
 
   /* ---- keys --------------------------------------------------------- */
 
@@ -1456,6 +1774,19 @@
     if (event.key === ",") {
       event.preventDefault();
       setPanel(panel.hidden);
+      return;
+    }
+    if (event.key === "f") {
+      event.preventDefault();
+      showHints();
+      return;
+    }
+    /* e edits the focused shortcut. */
+    const focusedTile = event.target.closest?.(".site");
+    if (event.key === "e" && focusedTile) {
+      event.preventDefault();
+      const site = shownSites.find((entry) => entry.url === focusedTile.dataset.url);
+      if (site) openEditor(site);
       return;
     }
     /* Arrows walk the grid; from nowhere they start at the first tile. */
@@ -1476,13 +1807,6 @@
     /* Digits open the matching shortcut while the page has focus. */
     if (/^[1-9]$/.test(event.key)) {
       tileList()[Number(event.key) - 1]?.querySelector("a")?.click();
-      return;
-    }
-    /* Letters open the first feed's rows. */
-    if (/^[a-j]$/.test(event.key)) {
-      const rows = widgetsBox.querySelector(".widget")?.querySelectorAll(".item");
-      const row = rows?.[event.key.charCodeAt(0) - 97];
-      (row?.querySelector("a.item-title") ?? row)?.click();
     }
   });
 
