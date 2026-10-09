@@ -336,35 +336,6 @@ header:has(> #time[hidden]):has(#date[hidden]) {
   pointer-events: none;
 }
 
-/* A group label across the grid, when pinned tiles lead. */
-.group-label {
-  grid-column: 1 / -1;
-  padding: var(--gap-section) 0 var(--gap-label);
-  color: var(--dim-text);
-  font-size: var(--text-meta);
-  line-height: var(--line-unit);
-  letter-spacing: var(--track-label);
-  text-transform: uppercase;
-}
-
-.group-label:first-child {
-  padding-top: 0;
-}
-
-/* Pinned tiles in rows of as many as fit; a short last row stretches, so
- * the block has no hole in its edge. */
-.pinned-row {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--hair);
-
-  & > .site {
-    --across: min(var(--pinned, 1), var(--fit, 4));
-    flex: 1 1 calc((100% - (var(--across) - 1) * var(--hair)) / var(--across));
-  }
-}
-
 .site > a {
   position: relative;
   z-index: 1;
@@ -394,28 +365,31 @@ header:has(> #time[hidden]):has(#date[hidden]) {
   color: var(--fg);
 }
 
-/* Pinned: a short accent tick on the tile's top edge, drawn when pinned.
- * It lies on the edge, over the hairline, not under it. */
-.site.pinned::before {
-  content: "";
+/* Pinned: the pin in the tile's corner, in the accent (it marks a state),
+ * where the hide button comes on hover; the pin button is the same icon. */
+.pin-mark {
   position: absolute;
-  left: calc(-1 * var(--hair));
-  top: calc(-1 * var(--hair));
-  z-index: 1;
-  width: calc(var(--u) * 2);
-  height: var(--mark);
-  background: var(--accent);
-  transform-origin: left;
-  animation: draw 300ms var(--ease);
+  z-index: 2;
+  top: var(--inset);
+  right: var(--inset);
+  display: grid;
+  place-items: center;
+  width: calc(var(--u) * 3);
+  height: calc(var(--u) * 3);
+  color: var(--accent);
+  pointer-events: none;
 }
 
-/* Under the "Pinned" label the tick would say it twice. */
-.pinned-row .site.pinned::before {
-  display: none;
+.site:is(:hover, :focus-within) .pin-mark {
+  opacity: 0;
 }
 
-@keyframes draw {
-  from { scale: 0 1; }
+:is(.pin-mark, .pin) svg {
+  display: block;
+  margin: auto;
+  width: calc(var(--u) * 1.5);
+  height: calc(var(--u) * 1.5);
+  fill: currentColor;
 }
 
 /* Reordering: the tile in hand fades, the drop spot takes the accent edge. */
@@ -537,7 +511,7 @@ header:has(> #time[hidden]):has(#date[hidden]) {
     width: calc(var(--u) * 2);
     height: calc(var(--u) * 2);
   }
-  & :is(.edit, .pin, .hide) {
+  & :is(.edit, .pin, .hide, .pin-mark) {
     top: 50%;
     translate: 0 -50%;
   }
@@ -554,13 +528,7 @@ header:has(> #time[hidden]):has(#date[hidden]) {
     flex-wrap: wrap;
     justify-content: center;
   }
-  & :is(.group-label, .pinned-row) {
-    flex: 0 0 100%;
-  }
-  & .pinned-row {
-    justify-content: center;
-  }
-  & :is(#sites, .pinned-row) > .site {
+  & #sites > .site {
     flex: 0 0 calc((100% - (var(--columns, 8) - 1) * var(--hair)) / var(--columns, 8));
     aspect-ratio: 1;
   }
@@ -580,12 +548,12 @@ header:has(> #time[hidden]):has(#date[hidden]) {
   & .edit {
     display: none;
   }
-  & :is(.pin, .hide) {
+  & :is(.pin, .hide, .pin-mark) {
     top: calc(var(--u) / 2);
     width: calc(var(--u) * 2.5);
     height: calc(var(--u) * 2.5);
   }
-  & .hide {
+  & :is(.hide, .pin-mark) {
     right: calc(var(--u) / 2);
   }
   & .pin {
@@ -1277,8 +1245,7 @@ output {
   }
   .site,
   .widget,
-  .glyph.roll,
-  .site.pinned::before {
+  .glyph.roll {
     animation: none;
   }
 }

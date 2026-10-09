@@ -332,6 +332,17 @@
     return clean;
   }
 
+  /* A push pin, 16 units: the head, then the needle. */
+  function pinIcon() {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 16 16");
+    svg.setAttribute("aria-hidden", "true");
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", "M5 1h6v1.5l-1 1v3.5l2 2.5v1H4V9l2-2.5V3.5l-1-1zM7.25 10h1.5v5h-1.5z");
+    svg.append(path);
+    return svg;
+  }
+
   /* A picked colour: a palette name ("blue"), which follows the theme, or
    * a hex. */
   function paletteColor(name) {
@@ -394,8 +405,9 @@
     const pin = document.createElement("button");
     pin.type = "button";
     pin.className = "pin";
-    pin.title = pinnedHere ? "Unpin" : "Pin to the front";
-    pin.textContent = pinnedHere ? "−" : "+";
+    pin.title = pinnedHere ? "Unpin" : "Pin";
+    pin.setAttribute("aria-pressed", String(pinnedHere));
+    pin.append(pinIcon());
     pin.addEventListener("click", () => {
       const pinned = settings.pinned.filter((entry) => entry.url !== site.url);
       save({ pinned: pinnedHere ? pinned : [...pinned, { url: site.url, title: site.title }] });
@@ -419,6 +431,13 @@
     editButton.title = "Edit shortcut (e)";
 
     item.append(link, editButton, pin, hide);
+    /* A pinned tile wears the pin, as a pinned tab does: in the corner at
+     * rest, where the buttons come on hover. */
+    if (pinnedHere) {
+      const mark = el("span", "pin-mark");
+      mark.append(pinIcon());
+      item.append(mark);
+    }
     item.style.setProperty("--i", String(index));
     item.dataset.url = site.url;
     /* The light's colour: the picked one, else the brand icon's, else the
@@ -480,22 +499,8 @@
       ? tileList().findIndex((item) => item.contains(document.activeElement))
       : -1;
     shownSites = list;
-    const tiles = list.map(tile);
-    /* Pinned tiles lead under their own label, the rest under "Frequent",
-     * when both kinds are there. */
-    const pinnedCount = tiles.filter((t) => t.classList.contains("pinned")).length;
-    const nodes = [];
-    if (pinnedCount && pinnedCount < tiles.length) {
-      /* Pinned tiles share a row of their own and stretch across it. */
-      const pinnedRow = el("div", "pinned-row");
-      pinnedRow.append(...tiles.slice(0, pinnedCount));
-      pinnedRow.style.setProperty("--pinned", String(pinnedCount));
-      nodes.push(el("div", "group-label", "Pinned"), pinnedRow,
-        el("div", "group-label", "Frequent"), ...tiles.slice(pinnedCount));
-    } else {
-      nodes.push(...tiles);
-    }
-    sites.replaceChildren(...nodes);
+    /* One grid; pinned tiles lead it (loadSites puts them first). */
+    sites.replaceChildren(...list.map(tile));
     fitGrid();
     /* Tiles settle in on the page's first paint only, not on every rebuild. */
     if (!("settled" in root.dataset)) setTimeout(() => root.dataset.settled = "", 800);
@@ -507,8 +512,7 @@
    * sit as 6 + 6. Icons keep their fixed square. */
   const TILE_MIN = { tiles: 22, list: 44, icons: 10 }; // in --u
   function fitGrid() {
-    /* The grid's own tiles: pinned ones sit in their row (newtab.css). */
-    const count = sites.querySelectorAll(":scope > .site").length;
+    const count = tileList().length;
     if (!count) return;
     const unit = parseFloat(getComputedStyle(root).getPropertyValue("--u")) || 8;
     const min = TILE_MIN[settings.siteStyle] * unit;
