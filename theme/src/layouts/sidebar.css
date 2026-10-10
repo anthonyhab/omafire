@@ -141,15 +141,22 @@
  * mode keeps the stock single row so drag-and-drop targets stay intact. */
 @media -moz-pref("omafire.layout", "sidebar") and -moz-pref("sidebar.verticalTabs") {
   :root:not([customizing], [popup-window], [taskbartab], [chromehidden~="toolbar"]):has(sidebar-main[expanded]) {
-    /* Buttons, field and tab rows are blocks one unit apart, like the
-     * rest of the column; the field sits one inset clear of the first tab,
-     * as the rule under pinned tiles does (the tab's half-unit margin
-     * makes up the rest). */
+    /* The head is two bars on the column's grid (DEC-104): the button row
+     * and the field are rows one step apart with half a step above and
+     * below, so the first tab lands on the third pitch. */
     & #nav-bar {
       flex-wrap: wrap !important;
       align-items: center !important;
-      row-gap: var(--oc-u) !important;
-      padding: var(--oc-inset) var(--oc-inset) calc(var(--oc-inset) - var(--oc-u) / 2) !important;
+      row-gap: var(--oc-step) !important;
+      padding: calc(var(--oc-step) / 2) calc(var(--oc-inset) - var(--oc-step) / 2) !important;
+    }
+
+    & #nav-bar .toolbarbutton-1 {
+      height: var(--oc-row) !important;
+    }
+
+    & #urlbar {
+      --urlbar-height: var(--oc-row) !important;
     }
 
     & #nav-bar-customization-target {
@@ -164,8 +171,16 @@
       min-height: var(--oc-row) !important;
       min-width: 0 !important;
       max-width: none !important;
-      margin: 0 !important;
+      /* On the tiles' axis: the row's padding stops half a step short. */
+      margin: 0 calc(var(--oc-step) / 2) !important;
       padding: 0 !important;
+    }
+
+    /* A bar-wide button row holds about nine buttons in the column; the
+     * pinned extensions stay one click away in the extensions panel (the
+     * puzzle), which lists every extension, as Zen and Arc keep them. */
+    & #nav-bar :is(.unified-extensions-item, .webextension-browser-action) {
+      display: none !important;
     }
 
     /* Springs (Nova's #vertical-spacer by default) split the button row:

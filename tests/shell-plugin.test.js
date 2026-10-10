@@ -40,12 +40,12 @@ for (const s of schema) {
 const defaults = Object.fromEntries(schema.map(s => [s.key, s.default]));
 const keys = config => Model.visibleRows(config).map(r => r.key);
 assert.deepEqual(keys(defaults),
-  ["toolbar", "tabs", "density", "zen-mode", "floating-page", "glass", "tab-numbers", "new-tab", "site-colors", "extension-glyphs",
+  ["toolbar", "tabs", "density", "floating-page", "glass", "tab-numbers", "new-tab", "site-colors", "extension-glyphs",
    "key-zen", "key-layout", "key-glass", "key-settings"]);
 const sidebar = keys({ ...defaults, toolbar: "sidebar", tabs: "vertical", glass: true });
 for (const k of ["side", "launcher", "compact-sidebar", "opacity"]) assert.ok(sidebar.includes(k), k);
-for (const k of ["zen-mode", "floating-page"]) assert.ok(!sidebar.includes(k), k);
-assert.ok(keys({ ...defaults, "zen-mode": true }).includes("launcher"));
+assert.ok(!sidebar.includes("floating-page"));
+assert.ok(!keys(defaults).includes("launcher"));
 
 // Stepping.
 const opacity = Model.ROWS.find(r => r.key === "opacity");

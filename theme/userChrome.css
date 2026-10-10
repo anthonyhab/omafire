@@ -26,13 +26,16 @@
 /* Extension glyphs; off with omafire.extension-glyphs = false. */
 @import "src/icons.css";
 
-/* Layouts. The default is the top toolbar; each alternative is a module
- * gated on omafire.layout, so adding one never touches the others. */
+/* Layouts (DEC-104). Vertical tabs dock the navigation row over the page;
+ * the sidebar layout puts everything in the column (with compact, zen);
+ * each is a module gated on its prefs, so adding one never touches the
+ * others. The docked row comes after the launcher, whose console look it
+ * builds on. */
 @import "src/layouts/sidebar.css";
 @import "src/launcher.css";
+@import "src/layouts/docked.css";
 
 /* Modes: optional behaviour on top of a layout, each gated on its pref. */
-@import "src/modes/zen.css";
 @import "src/modes/compact.css";
 @import "src/modes/gap.css";
 @import "src/modes/translucency.css";

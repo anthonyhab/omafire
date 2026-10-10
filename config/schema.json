@@ -1,5 +1,6 @@
 {
   "comment": "The settings in ~/.config/omafire/config.json. The omafire CLI embeds this file and Firefox reads it from the package, so both agree on keys, types and defaults. Each setting drives the prefs listed with it: a pref takes the setting's value, the value from map, or a constant; format fixed2 writes a number as a string with two decimals.",
+  "retired": ["zen-mode"],
   "settings": [
     {
       "key": "toolbar",
@@ -27,7 +28,7 @@
     },
     {
       "key": "launcher",
-      "about": "The address launcher in the sidebar layout and zen mode: dropped from the top, or centred.",
+      "about": "The address launcher in the sidebar layout: dropped from the top, or centred.",
       "type": "enum",
       "values": ["drop", "center"],
       "default": "drop",
@@ -42,15 +43,8 @@
       "prefs": [{ "name": "browser.uidensity", "map": { "normal": 0, "compact": 1 } }]
     },
     {
-      "key": "zen-mode",
-      "about": "Hide the toolbar until the pointer or a key asks for it (top toolbar layout).",
-      "type": "bool",
-      "default": false,
-      "prefs": [{ "name": "omafire.zen-mode", "const": true }, { "name": "omafire.zen-mode-active" }]
-    },
-    {
       "key": "compact-sidebar",
-      "about": "Collapse the sidebar to icons (sidebar layout).",
+      "about": "Zen: the sidebar, which holds the toolbar and the tabs, disappears until the pointer reaches the window edge or a key asks for it (sidebar layout).",
       "type": "bool",
       "default": false,
       "prefs": [{ "name": "omafire.compact" }]
@@ -122,7 +116,7 @@
     },
     {
       "key": "key-zen",
-      "about": "Shortcut: Hide the chrome (the compact sidebar's toggle on the sidebar layout). Modifiers plus one key, like Ctrl+Alt+Z; empty turns it off.",
+      "about": "Shortcut: Zen, the sidebar layout with the sidebar hidden until you reach for it, and back. Modifiers plus one key, like Ctrl+Alt+Z; empty turns it off.",
       "type": "chord",
       "default": "Ctrl+Alt+H",
       "prefs": [{ "name": "omafire.keys.zen" }]

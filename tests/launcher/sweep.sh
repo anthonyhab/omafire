@@ -55,17 +55,16 @@ if (( open < 12 )); then
 fi
 
 failed=0
-cell() { # name layout vertical zen launcher [extra prefs js]
+cell() { # name layout vertical launcher [extra prefs js]
   local name=$1
   F js - >/dev/null <<JS
 gURLBar.view.close(); gURLBar.handleRevert(); gBrowser.selectedBrowser.focus();
 gBrowser.selectedTab = gBrowser.tabs.at(-1);
 const P = Services.prefs;
 P.setStringPref("omafire.layout", "$2"); P.setBoolPref("sidebar.verticalTabs", $3);
-P.setBoolPref("omafire.zen-mode", $4); P.setBoolPref("omafire.zen-mode-active", $4);
 P.setBoolPref("omafire.compact", false); P.setBoolPref("sidebar.position_start", true);
-${6:-}
-if ("$5") P.setStringPref("omafire.launcher", "$5"); else P.clearUserPref("omafire.launcher");
+${5:-}
+if ("$4") P.setStringPref("omafire.launcher", "$4"); else P.clearUserPref("omafire.launcher");
 JS
   F hover 450,"$(F eval 'innerHeight - 10')" >/dev/null 2>&1
   F settle 700 >/dev/null
@@ -111,18 +110,15 @@ PY
 for density in 0 1; do
   F eval "Services.prefs.setIntPref('browser.uidensity', $density)" >/dev/null
   OUT_BASE=$OUT; OUT=$OUT_BASE/d$density; mkdir -p "$OUT"
-  cell top              top     false false ""
-  cell top-vertical     top     true  false ""
-  cell sidebar-drop     sidebar true  false ""
-  cell sidebar-center   sidebar true  false center
-  cell zen-drop         top     true  true  ""
-  cell zen-center       top     true  true  center
-  cell zen-drop-tabbar  top     false true  ""
-  cell compact-drop     sidebar true  false ""     'P.setBoolPref("omafire.compact", true);'
-  cell compact-center   sidebar true  false center 'P.setBoolPref("omafire.compact", true);'
-  cell end-drop         sidebar true  false ""     'P.setBoolPref("sidebar.position_start", false);'
-  cell end-center       sidebar true  false center 'P.setBoolPref("sidebar.position_start", false);'
-  cell end-compact-drop sidebar true  false ""     'P.setBoolPref("sidebar.position_start", false); P.setBoolPref("omafire.compact", true);'
+  cell top              top     false ""
+  cell top-vertical     top     true  ""
+  cell sidebar-drop     sidebar true  ""
+  cell sidebar-center   sidebar true  center
+  cell compact-drop     sidebar true  ""     'P.setBoolPref("omafire.compact", true);'
+  cell compact-center   sidebar true  center 'P.setBoolPref("omafire.compact", true);'
+  cell end-drop         sidebar true  ""     'P.setBoolPref("sidebar.position_start", false);'
+  cell end-center       sidebar true  center 'P.setBoolPref("sidebar.position_start", false);'
+  cell end-compact-drop sidebar true  ""     'P.setBoolPref("sidebar.position_start", false); P.setBoolPref("omafire.compact", true);'
   OUT=$OUT_BASE
 done
 exit $failed

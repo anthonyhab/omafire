@@ -1,14 +1,13 @@
 /* Omafire — urlbar launcher (Zen's command bar) and the console
- * look it shares with zen mode's inline field.
+ * look it shares with the docked row's field.
  *
  * The launcher is used where the resting urlbar is narrow: the single
- * sidebar, and zen mode's "center" shape. Two shapes, picked by
- * omafire.launcher:
+ * sidebar (and so zen). Two shapes, picked by omafire.launcher:
  *   (unset) / "drop"  a quake console over the page, sliding down out of
  *                     the page's top edge; the tab column stays in view.
  *   "center"          a floating card in the middle of the window
- * Zen mode's default keeps the field inline in its navigation row
- * (zen.css) and only borrows the console look from here.
+ * The docked row (layouts/docked.css) keeps the field inline and only
+ * borrows the console look from here.
  *
  * Since Firefox 157 only the results view is a top-layer popover, anchored
  * to the field (.urlbar-input-container); the field stays in its toolbar.
@@ -42,11 +41,10 @@
  * Brutalist, on the theme's one edge rule: the card is a solid slab with
  * a hairline edge (no shadow, no scrim); hover and selection are fills;
  * the single accent is the focus rule under the field. Shared by the drop
- * launcher and zen mode's inline field. */
+ * launcher and the docked row's inline field. */
 
 @media -moz-pref("omafire.layout", "sidebar") and (not -moz-pref("omafire.launcher", "center")),
-       -moz-pref("omafire.zen-mode") and -moz-pref("omafire.zen-mode-active") and (not -moz-pref("omafire.launcher", "center")),
-       -moz-pref("sidebar.verticalTabs") and (not -moz-pref("omafire.launcher", "center")) {
+       -moz-pref("sidebar.verticalTabs") and (not -moz-pref("omafire.layout", "sidebar")) {
   #main-window:not([customizing]) #urlbar:is([popover-open], [focused]) {
     & > .urlbar-background,
     & > .urlbarView > .urlbarView-background {
@@ -89,7 +87,7 @@
  * own rule in the accent, one pixel, just under the field (the field ends
  * a pixel above the band's last one); results hang from that line, which
  * is also their top edge. Like a terminal's prompt line. */
-@media -moz-pref("sidebar.verticalTabs") and (not -moz-pref("omafire.launcher", "center")) and (not -moz-pref("omafire.layout", "sidebar")) {
+@media -moz-pref("sidebar.verticalTabs") and (not -moz-pref("omafire.layout", "sidebar")) {
   #main-window:not([customizing]) #urlbar:is([popover-open], [focused]) {
     & > .urlbar-background {
       border: none !important;
@@ -97,7 +95,7 @@
     }
 
     /* The line is a 1px box's inset shadow on the band's last pixel, as
-     * the row's own rule is (zen.css), so the two rasterise identically at
+     * the row's own rule is (docked.css), so the two rasterise identically at
      * any scale. */
     & > .urlbar-background::after {
       content: "" !important;
@@ -133,8 +131,7 @@
 
 /* ---- launcher -------------------------------------------------------- */
 
-@media -moz-pref("omafire.layout", "sidebar"),
-       -moz-pref("omafire.zen-mode") and -moz-pref("omafire.zen-mode-active") and -moz-pref("omafire.launcher", "center") {
+@media -moz-pref("omafire.layout", "sidebar") {
   /* The fixed field paints in the toolbox's stacking context: lift it over
    * the page and the tab column. */
   #main-window:not([customizing]):has(#urlbar:is([popover-open], [focused])) #navigator-toolbox {

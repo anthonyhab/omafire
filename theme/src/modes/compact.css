@@ -62,7 +62,9 @@
       z-index: 3 !important;
       margin-inline-start: var(--oc-gap) !important;
       background-color: var(--oc-frame) !important;
-      box-shadow: var(--oc-shadow-float) !important;
+      /* Over the page the card is held by its own hairline, never a
+       * shadow (the design language's one edge rule). */
+      box-shadow: 0 0 0 1px var(--oc-line-strong) !important;
       opacity: var(--oc-reveal) !important;
       translate: calc((1 - var(--oc-reveal)) * (-100% - var(--oc-gap) + var(--oc-trigger))) 0 !important;
       transition:
@@ -71,8 +73,8 @@
       transition-delay: calc((1 - var(--oc-reveal)) * 180ms) !important;
     }
 
-    /* The edge and the column it reveals are one continuous :hover, as in
-     * zen mode: the column comes out a gap in from the edge, so without
+    /* The edge and the column it reveals are one continuous :hover: the
+     * column comes out a gap in from the edge, so without
      * this strip the pointer that touched the edge was left in the gap,
      * the column parked again under it and flickered. The strip fills the
      * gap; the column's clip lets it through. */

@@ -65,9 +65,9 @@
    * its rule is the band's last pixel. */
   --oc-head: var(--oc-bar);
   /* Invisible strip at a window edge that reveals hidden chrome
-   * (compact's column, zen's navigation row). */
+   * (compact's column). */
   --oc-trigger: 6px;
-  /* Zen mode's inline address field, centred in its row. */
+  /* The docked row's inline address field, centred on the page. */
   --oc-field-width: 640px;
   --oc-launcher-width: min(720px, 80vw);
   --oc-launcher-top: 16vh;
@@ -186,7 +186,7 @@
   --oc-panel: color-mix(in srgb, var(--oc-frame), var(--oc-text) 5%);
   --oc-shadow: 0 1px 2px rgb(0 0 0 / 0.14), 0 0 0 1px var(--oc-line);
   --oc-shadow-float: 0 12px 40px rgb(0 0 0 / 0.36), 0 0 0 1px var(--oc-line);
-  /* The quake console (launcher.css, zen.css): a slab held by hard rules,
+  /* The quake console (launcher.css, docked.css): a slab held by hard rules,
    * never shadows. On glass it is B, the panels' material, frosting the
    * page under it (translucency.css). */
   --oc-console: color-mix(in srgb, var(--oc-frame), var(--oc-text) 5%);

@@ -1,0 +1,118 @@
+/* Omafire — docked layout (vertical tabs, omafire.layout = "top"; DEC-104).
+ *
+ * The tab column runs the window's full height, and the navigation row is
+ * one bar over the page beside it, like another bar of the desktop:
+ * navigation at its start, actions at its end, the field centred on the
+ * page as VS Code's command centre; results drop beneath the field. It is
+ * the window's head band (tokens.css): the field sits on the column's
+ * first tile and the row's rule is the band's last pixel.
+ *
+ * The row is placed with position: fixed and anchored to the page, so it
+ * spans the page only; the page gives up the row's height in layout. It
+ * is placed with insets, never transforms: a transformed ancestor would
+ * become the containing block for toolbar popups. Horizontal tabs keep
+ * Firefox's own toolbar rows. */
+
+/* The results unroll out of the field's bottom edge. */
+@keyframes oc-unroll {
+  from { clip-path: inset(0 0 100% 0); }
+  to { clip-path: inset(0); }
+}
+
+@media -moz-pref("sidebar.verticalTabs") and (not -moz-pref("omafire.layout", "sidebar")) {
+  :root:not([customizing], [popup-window], [taskbartab], [chromehidden~="toolbar"], [inDOMFullscreen]) {
+    /* The row hangs out of the toolbox's zero-height box. Firefox clips
+     * the toolbox (overflow: clip), and as a flex item its z-index: 0 is a
+     * stacking context under the tabbox (z-index: 2), so lift it. */
+    & #navigator-toolbox {
+      overflow: visible !important;
+      z-index: 3 !important;
+    }
+
+    & #tabbrowser-tabbox {
+      anchor-name: --oc-page !important;
+    }
+
+    /* The page starts under the row. */
+    & #tabbrowser-tabpanels {
+      margin-top: var(--oc-head) !important;
+    }
+
+    /* One bar, the field half a step from its top and bottom, a hairline
+     * under it (its last pixel), painted inside the box so buttons and
+     * field centre on the same line. */
+    & #nav-bar {
+      position: fixed !important;
+      z-index: 10 !important;
+      top: anchor(--oc-page top, 0px) !important;
+      bottom: auto !important;
+      left: anchor(--oc-page left, 0px) !important;
+      right: anchor(--oc-page right, 0px) !important;
+      width: auto !important;
+      height: var(--oc-head) !important;
+      min-height: var(--oc-head) !important;
+      margin: 0 !important;
+      padding-block: calc(var(--oc-step) / 2) !important;
+      align-items: center !important;
+      background-color: transparent !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: inset 0 -1px 0 var(--oc-line-strong) !important;
+    }
+
+    & #nav-bar-customization-target {
+      display: contents !important;
+    }
+
+    /* The field's auto margins split the row: navigation at its start,
+     * actions at its end, springs or not. */
+    & #nav-bar toolbarspring {
+      flex: 0 0 0 !important;
+      min-width: 0 !important;
+    }
+
+    & #urlbar-container {
+      flex: 0 1 min(var(--oc-field-width), 50%) !important;
+      min-width: 0 !important;
+      max-width: none !important;
+      margin: 0 auto !important;
+    }
+
+    /* Fixed, not absolute in the row: only a viewport-placed box may
+     * anchor to the page (the tabbox follows the row in tree order). */
+    & #urlbar {
+      position: fixed !important;
+      top: calc(anchor(--oc-page top, 0px) + var(--oc-step) / 2) !important;
+      --urlbar-height: var(--oc-row) !important;
+      /* Centred on the page, snapped to whole pixels: an odd page width
+       * would otherwise leave both edges on a half pixel. */
+      --oc-dock-field: round(down, min(var(--oc-field-width), calc(anchor-size(--oc-page width, 100vw) / 2)), 2px);
+      left: round(down, calc(anchor(--oc-page center, 50vw) - var(--oc-dock-field) / 2), 1px) !important;
+      width: var(--oc-dock-field) !important;
+      margin: 0 !important;
+      translate: none !important;
+      /* Open, the results hang from the field as one card its width. */
+      --urlbar-background-overhang-open: 0px !important;
+      --oc-urlbar-card-top: 0px;
+
+      /* Open on a narrow page the field grows, as Firefox's own does, and
+       * the results hang from it: one card, one edge. It keeps 80px clear
+       * either side for the navigation and the actions, and stops at
+       * 440px. Closed, it is back to half the page. */
+      &[popover-open] {
+        --oc-dock-field: round(down, min(var(--oc-field-width), max(calc(anchor-size(--oc-page width, 100vw) / 2),
+          min(calc(anchor-size(--oc-page width, 100vw) - 160px), 440px))), 2px);
+      }
+    }
+
+    & #urlbar > .urlbar-background,
+    & #urlbar > .urlbarView > .urlbarView-background {
+      border-radius: 0 !important;
+    }
+
+    & #urlbar[popover-open] > .urlbarView {
+      box-sizing: border-box !important;
+      animation: oc-unroll var(--oc-console-in) var(--oc-ease-enter) !important;
+    }
+  }
+}

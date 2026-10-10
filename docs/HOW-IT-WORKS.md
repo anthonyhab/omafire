@@ -53,11 +53,11 @@ The package installs a chrome script loader beside Firefox
 own root-owned files: nothing is loaded from the profile.
 
 - **Settings panel.** *Omafire* in the app menu (or Ctrl+Alt+O):
-  toolbar and tab layout, sidebar side, launcher, density, zen mode,
-  compact sidebar, floating page, glass and its opacity, tab numbers, the
-  new tab, site colours and extension glyphs. Layout changes apply without a restart.
-- **Keybindings.** Ctrl+Alt+H hides the chrome (zen mode; compact in the
-  sidebar layout), Ctrl+Alt+S switches the toolbar, Ctrl+Alt+G toggles
+  toolbar and tab layout, sidebar side, launcher, density, zen, floating
+  page, glass and its opacity, tab numbers, the new tab, site colours and
+  extension glyphs. Layout changes apply without a restart.
+- **Keybindings.** Ctrl+Alt+H toggles zen (the sidebar layout with
+  the sidebar hidden), Ctrl+Alt+S switches the toolbar, Ctrl+Alt+G toggles
   glass. Rebind with `omafire.keys.<zen|layout|glass|settings>` in
   `about:config` (a chord like `Ctrl+Alt+J`; empty to unbind). A chord
   Firefox already uses is left to Firefox.

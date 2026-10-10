@@ -16,16 +16,17 @@
 
   const ACTIONS = [
     {
-      name: "zen", pref: "omafire.keys.zen", chord: "Ctrl+Alt+H", label: "Hide the chrome",
+      name: "zen", pref: "omafire.keys.zen", chord: "Ctrl+Alt+H", label: "Zen",
       run() {
-        // Top layout only; the sidebar layout's counterpart is compact.
-        if (prefs.getStringPref("omafire.layout", "top") === "sidebar") {
-          prefs.setBoolPref("omafire.compact", !bool("omafire.compact", false));
-          return;
+        // Zen (DEC-104): everything in the sidebar, which disappears until
+        // reached for. Pressed again, back to the docked top layout.
+        const zen = prefs.getStringPref("omafire.layout", "top") === "sidebar"
+          && bool("omafire.compact", false);
+        if (!zen) {
+          prefs.setBoolPref("sidebar.verticalTabs", true);
         }
-        const on = bool("omafire.zen-mode", false) && bool("omafire.zen-mode-active", false);
-        prefs.setBoolPref("omafire.zen-mode", true);
-        prefs.setBoolPref("omafire.zen-mode-active", !on);
+        prefs.setStringPref("omafire.layout", zen ? "top" : "sidebar");
+        prefs.setBoolPref("omafire.compact", !zen);
       },
     },
     {

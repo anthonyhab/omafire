@@ -30,15 +30,21 @@ type Setting struct {
 	Default any      `json:"default"`
 }
 
-var Settings = func() []Setting {
-	var schema struct {
-		Settings []Setting `json:"settings"`
-	}
+var schema = func() (schema struct {
+	Retired  []string  `json:"retired"`
+	Settings []Setting `json:"settings"`
+}) {
 	if err := json.Unmarshal(SchemaJSON, &schema); err != nil {
 		panic("config: schema.json: " + err.Error())
 	}
-	return schema.Settings
+	return schema
 }()
+
+var Settings = schema.Settings
+
+// Retired settings were removed on purpose (zen-mode, DEC-104): a file that
+// still has one loads without a warning, and the next write drops it.
+var Retired = schema.Retired
 
 // Lookup returns the setting named key.
 func Lookup(key string) (Setting, bool) {
@@ -127,6 +133,10 @@ func Decode(data []byte) (File, []string, error) {
 	}
 	var warnings []string
 	for key, v := range file {
+		if slices.Contains(Retired, key) {
+			delete(file, key)
+			continue
+		}
 		s, ok := Lookup(key)
 		if !ok {
 			warnings = append(warnings, fmt.Sprintf("unknown setting %q, ignored", key))

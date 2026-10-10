@@ -27,7 +27,6 @@ const res = {
   vw, vh, dpr: devicePixelRatio,
   textScale: P.getIntPref("ui.textScaleFactor", 100), density: P.getIntPref("browser.uidensity", 0),
   layout: P.getStringPref("omafire.layout", "top"), launcher: P.getStringPref("omafire.launcher", ""),
-  zen: P.getBoolPref("omafire.zen-mode", false) && P.getBoolPref("omafire.zen-mode-active", false),
   compact: P.getBoolPref("omafire.compact", false), start: P.getBoolPref("sidebar.position_start", true),
   vertical: P.getBoolPref("sidebar.verticalTabs", false),
   open, focused: ub.hasAttribute("focused"),
@@ -45,8 +44,7 @@ const aux = [...ub.querySelectorAll(".urlbar-input-container > *, #page-action-b
 for (const e of aux) if (out(r(e))) fail.push(`aux out: ${e.id || e.className} ${r(e)}`);
 for (const k of ["urlbar", "card", "field", "view", "viewBg"]) if (out(res[k])) fail.push(`${k} out of viewport ${res[k]}`);
 
-// AC1: off the column (the sidebar layout's launchers keep clear of it;
-// zen's centre card floats over the dimmed window by design).
+// AC1: off the column (the sidebar layout's launchers keep clear of it).
 if (res.column && res.layout == "sidebar")
   for (const k of ["card", "viewBg"]) if (meets(res[k], res.column)) fail.push(`${k} overlaps column ${res.column}`);
 

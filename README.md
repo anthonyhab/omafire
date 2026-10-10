@@ -22,8 +22,10 @@ carried its name until 0.3.0.
   pages, dark or light, including themes with partial palettes. The first
   painted frame of a restart already uses the current palette.
 - **Layouts.** Toolbar on top or in a Zen-style sidebar, horizontal or
-  vertical tabs, sidebar on either side, a drop or centred launcher, a compact
-  sidebar that slides in on demand, zen mode, a floating page and split view.
+  vertical tabs, sidebar on either side, a drop or centred launcher, zen (the
+  sidebar disappears until you reach for it), a floating page and split view.
+  Rows, tabs and the rail are the Omarchy bar's size, so the chrome scales with
+  it.
 - **Glass.** Optional translucent chrome over the desktop, blurred where your
   compositor blurs, with a readability floor measured against your wallpapers.
 - **Settings everywhere.** One file, `~/.config/omafire/config.json`, driven
@@ -106,8 +108,8 @@ omafire get/set   # Read and change settings (see Settings)
 omafire version   # Show the installed version
 ```
 
-Keybindings: Ctrl+Alt+H hides the chrome (zen mode; compact in the sidebar
-layout), Ctrl+Alt+S switches the toolbar, Ctrl+Alt+G toggles glass. They can
+Keybindings: Ctrl+Alt+H toggles zen (the sidebar layout with the sidebar
+hidden), Ctrl+Alt+S switches the toolbar, Ctrl+Alt+G toggles glass. They can
 be rebound; see [docs/HOW-IT-WORKS.md](docs/HOW-IT-WORKS.md#firefox-chrome-scripts).
 
 ## Settings
@@ -132,10 +134,9 @@ omafire watch                # a JSON line now and after every change
 | `toolbar` | `top`, `sidebar` | `top` |
 | `tabs` | `horizontal`, `vertical` | `horizontal` |
 | `side` | `left`, `right` (vertical tabs) | `left` |
-| `launcher` | `drop`, `center` (sidebar layout and zen mode) | `drop` |
+| `launcher` | `drop`, `center` (sidebar layout) | `drop` |
 | `density` | `normal`, `compact` | `normal` |
-| `zen-mode` | `true`, `false` (top toolbar) | `false` |
-| `compact-sidebar` | `true`, `false` (sidebar layout) | `false` |
+| `compact-sidebar` | `true`, `false` (zen, in the sidebar layout) | `false` |
 | `floating-page` | `true`, `false` | `false` |
 | `glass` | `true`, `false` | `false` |
 | `opacity` | `0.5` to `1` | `0.85` |

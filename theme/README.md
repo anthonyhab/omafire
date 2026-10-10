@@ -4,9 +4,9 @@ A Firefox userChrome theme for [Omarchy](https://omarchy.org/): flat, square
 chrome in the shell's monospace, one quiet visual language shared by the
 chrome and Firefox's own pages, and the page flush against a single top
 toolbar and a column of vertical tabs.
-Optional modes add Zen-style touches: a hidden toolbar with a centred
-launcher, glass chrome, a floating content card, or a single-sidebar
-layout. Colors follow the current Omarchy theme live through
+Optional modes add Zen-style touches: a single-sidebar layout that can
+disappear entirely, a centred launcher, glass chrome or a floating content
+card. Colors follow the current Omarchy theme live through
 [Omafire](https://github.com/cover/omafox).
 
 Requires **Firefox 156 or newer with Nova** (`browser.nova.enabled`, the
@@ -39,9 +39,8 @@ Optional, all applied live without a restart:
 | Preference | Value | Effect |
 |---|---|---|
 | `omafire.layout` | `"sidebar"` | Zen's single sidebar: toolbar and urlbar at the top of the tab column, floating page, centred launcher. Unset (or `"top"`) is the default top toolbar. |
-| `omafire.zen-mode` + `omafire.zen-mode-active` | `true` + `true` | Top layout: hide the toolbar. Ctrl+L opens a centred launcher with the navigation row docked above it. |
-| `omafire.launcher` | `"center"` | Launcher shape (sidebar layout and zen mode). Unset (or `"drop"`) is a quake console: with horizontal tabs it slides full width down from the window's top edge, with vertical tabs it slides out of the tab column over the page, leaving the tabs in view. `"center"` floats it as a card. |
-| `omafire.compact` | `true` | Sidebar layout with the sidebar expanded: hide the column until the pointer reaches the edge. The collapsed icon rail stays visible. |
+| `omafire.launcher` | `"center"` | Launcher shape (sidebar layout). Unset (or `"drop"`) is a quake console: with horizontal tabs it slides full width down from the window's top edge, with vertical tabs it slides out of the tab column over the page, leaving the tabs in view. `"center"` floats it as a card. |
+| `omafire.compact` | `true` | Zen: in the sidebar layout, hide the column until the pointer reaches the edge or Ctrl+L opens the field. With the sidebar collapsed the icon rail stays visible. |
 | `omafire.chrome-gap` | `true` | Float the page as a card with a gap, Hyprland rounding and a hairline shadow. |
 | `omafire.translucency` | `true` | Glass chrome (frosted with a Hyprland blur rule for Firefox). |
 | `omafire.transparency` | `"0.50"`–`"1.00"` | Glass opacity in 0.01 steps (default 0.85); glass pages share it. Never below the theme's glass floor (`--omafire-glass-floor`): the lowest opacity at which text still reads over the theme's wallpapers, measured by `omafire sync`. |
@@ -66,10 +65,10 @@ src/sidebar.css         sidebar rail, tools, and panel
 src/tabs.css            vertical tabs, pinned tiles, tab groups
 src/popups.css          menus, panels, notification bars, findbar
 src/icons.css           extension id → glyph (src/icons/extensions/*.svg)
-src/launcher.css        urlbar launcher: quake drop or centred card (sidebar layout, zen mode)
+src/launcher.css        urlbar launcher: quake drop or centred card (sidebar layout)
 src/motion.css          sidebar expand/collapse and resize motion
 src/layouts/sidebar.css omafire.layout = "sidebar"
-src/modes/zen.css       omafire.zen-mode
+src/layouts/docked.css  vertical tabs in the top layout: the docked bar row
 src/modes/compact.css   omafire.compact
 src/modes/gap.css       omafire.chrome-gap
 src/modes/translucency.css  omafire.translucency
@@ -121,12 +120,13 @@ Notes on the non-obvious parts:
   ancestor, including transforms, so the launcher is positioned against the
   viewport, and compact mode moves it with `--toolbar-shift-translate`
   instead of the toolbox's `translate`.
-- Zen mode parks the nav-bar with `position: fixed` rather than hiding it,
-  so Ctrl+L can still focus the urlbar inside it. The toolbox is a flex
-  item with `z-index: 0` (a stacking context) and `overflow: clip`; zen
-  mode lifts and unclips it or the row paints under the page. With
-  vertical tabs the same row is docked (DEC-104): one bar tall over the
-  page, always open, zen mode or not.
+- With vertical tabs in the top layout the nav-bar is docked (DEC-104):
+  `position: fixed`, one bar tall over the page, anchored to the tabbox.
+  The toolbox is a flex item with `z-index: 0` (a stacking context) and
+  `overflow: clip`; the docked layout lifts and unclips it or the row
+  paints under the page, and the page gives up the row's height with a
+  margin, never a transform (a transformed ancestor would contain the
+  toolbar popups).
 - Rows, the rail and the docked row are the Omarchy bar's size
   (`--oc-bar` from `--omarchy-bar-size`, which `omafire sync` writes into
   `omafire-radius.css`): bar ÷ GTK text scale, so it lands on the bar's

@@ -22,3 +22,17 @@ func TestChordCheck(t *testing.T) {
 		t.Errorf("Parse = %v, %v", v, err)
 	}
 }
+
+// A retired setting loads quietly and is gone from the next write.
+func TestRetired(t *testing.T) {
+	file, warnings, err := Decode([]byte(`{"zen-mode": true, "glass": true}`))
+	if err != nil || len(warnings) != 0 {
+		t.Fatalf("Decode: %v %v", warnings, err)
+	}
+	if _, ok := file["zen-mode"]; ok {
+		t.Error("zen-mode kept")
+	}
+	if string(file.Encode()) == "" || file["glass"] != true {
+		t.Errorf("glass lost: %s", file.Encode())
+	}
+}

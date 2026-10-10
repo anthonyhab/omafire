@@ -141,7 +141,7 @@ function prefValue(pref, v) {
 
 // The setting as the prefs hold it, or undefined when they hold nothing
 // valid for it. A constant pref that does not hold its constant means the
-// setting is off (zen mode's feature switch).
+// setting is off.
 function fromPrefs(setting) {
   let value;
   for (const pref of setting.prefs) {

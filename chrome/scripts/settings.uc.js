@@ -36,7 +36,6 @@
 
   const layout = () => get("omafire.layout", "top") === "sidebar" ? "sidebar" : "top";
   const vertical = () => get("sidebar.verticalTabs", false);
-  const zen = () => get("omafire.zen-mode", false) && get("omafire.zen-mode-active", false);
   // The theme's glass floor (written by omafire sync): below it
   // text stops reading, so the theme ignores lower values and the slider
   // stops there.
@@ -76,8 +75,8 @@
       options: [["drop", "Drop"], ["center", "Centred"]],
       read: () => get("omafire.launcher", "drop") === "center" ? "center" : "drop",
       write: v => set("omafire.launcher", v),
-      when: () => layout() === "sidebar" || zen(),
-      hint: "In the sidebar layout and zen mode.",
+      when: () => layout() === "sidebar",
+      hint: "In the sidebar layout.",
     },
     {
       label: "Density", kind: "choice", prefs: ["browser.uidensity"],
@@ -87,22 +86,11 @@
     },
     {heading: "Behaviour"},
     {
-      label: "Zen mode", kind: "toggle",
-      prefs: ["omafire.zen-mode", "omafire.zen-mode-active"],
-      read: zen,
-      write: v => {
-        set("omafire.zen-mode", true);
-        set("omafire.zen-mode-active", v);
-      },
-      when: () => layout() === "top",
-      hint: "In the top toolbar layout.",
-    },
-    {
-      label: "Compact sidebar", kind: "toggle", prefs: ["omafire.compact"],
+      label: "Zen", kind: "toggle", prefs: ["omafire.compact"],
       read: () => get("omafire.compact", false),
       write: v => set("omafire.compact", v),
       when: () => layout() === "sidebar",
-      hint: "In the sidebar layout.",
+      hint: "The sidebar disappears until you reach for it. In the sidebar layout.",
     },
     {
       label: "Floating page", kind: "toggle", prefs: ["omafire.chrome-gap"],

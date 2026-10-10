@@ -24,7 +24,7 @@ other:
 - **Toolbar:** top, or sidebar (with horizontal or vertical tabs).
 - **Launcher:** drop, or centred.
 - **Sidebar side:** left or right.
-- **Zen mode** (top toolbar) and **compact sidebar** (sidebar layout).
+- **Zen** (the sidebar layout with the sidebar hidden until reached for).
 - **Floating page** (a gap around the page) or flush.
 - **Glass** with any opacity, and **split view**, in floating and flush modes.
 

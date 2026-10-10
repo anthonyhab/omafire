@@ -88,9 +88,8 @@
 
   /* Where the console moved (zen's inline field, the sidebar's drop), it
    * unrolls down out of the field. */
-  @media -moz-pref("omafire.zen-mode") and -moz-pref("omafire.zen-mode-active") and (not -moz-pref("omafire.launcher", "center")),
-         -moz-pref("omafire.layout", "sidebar") and (not -moz-pref("omafire.launcher", "center")),
-         -moz-pref("sidebar.verticalTabs") and (not -moz-pref("omafire.launcher", "center")) {
+  @media -moz-pref("omafire.layout", "sidebar") and (not -moz-pref("omafire.launcher", "center")),
+         -moz-pref("sidebar.verticalTabs") and (not -moz-pref("omafire.layout", "sidebar")) {
     #main-window:not([customizing]) #urlbar[popover-open] > .urlbarView {
       & > .urlbarView-background {
         animation: oc-glass-unroll var(--oc-console-in) var(--oc-ease-enter) !important;
@@ -103,8 +102,7 @@
 
   /* The launcher's bare field (focused, nothing listed) is over the page
    * too. */
-  @media -moz-pref("omafire.layout", "sidebar"),
-         -moz-pref("omafire.zen-mode") and -moz-pref("omafire.zen-mode-active") and -moz-pref("omafire.launcher", "center") {
+  @media -moz-pref("omafire.layout", "sidebar") {
     #main-window:not([customizing]):has(#urlbar[focused]) #tabbrowser-tabpanels .browserSidebarContainer {
       will-change: transform !important;
       backface-visibility: hidden !important;
@@ -163,7 +161,7 @@
 
     /* The docked row (vertical tabs) holds its own space inside the page's
      * box (the page slides down under it): it is window, not backdrop. */
-    @media -moz-pref("sidebar.verticalTabs") and (not -moz-pref("omafire.launcher", "center")) and (not -moz-pref("omafire.layout", "sidebar")) {
+    @media -moz-pref("sidebar.verticalTabs") and (not -moz-pref("omafire.layout", "sidebar")) {
       & #nav-bar {
         background-color: var(--oc-surface-rise) !important;
       }
@@ -177,31 +175,9 @@
   }
 }
 
-/* B over the page: the zen row (horizontal tabs: with vertical tabs it
- * holds its own space) and the status label hang over it, so they frost
- * it while shown, with the page layer (glass over the page, above). The row's
- * blur is a layer of its own: a backdrop-filter on #nav-bar would make it
- * the fixed urlbar's containing block and its card's backdrop root. */
+/* B over the page: the status label hangs over it, so it frosts it while
+ * shown, with the page layer (glass over the page, above). */
 @media -moz-pref("omafire.translucency") {
-  @media -moz-pref("omafire.zen-mode") and -moz-pref("omafire.zen-mode-active") and (not -moz-pref("omafire.layout", "sidebar")) and (not -moz-pref("sidebar.verticalTabs")) {
-    #main-window:not([customizing], [inDOMFullscreen]) {
-      &:has(#urlbar:is([popover-open], [focused]), #nav-bar [open], #nav-bar:focus-within, #navigator-toolbox:hover)
-          #tabbrowser-tabpanels .browserSidebarContainer {
-        will-change: transform !important;
-        backface-visibility: hidden !important;
-      }
-
-      & #nav-bar::before {
-        content: "" !important;
-        position: absolute !important;
-        inset: 0 !important;
-        z-index: -1 !important;
-        pointer-events: none !important;
-        backdrop-filter: blur(8px) !important;
-      }
-    }
-  }
-
   #main-window:not([customizing], [inDOMFullscreen]) {
     &:has(#statuspanel:not([inactive])) #tabbrowser-tabpanels .browserSidebarContainer {
       will-change: transform !important;
