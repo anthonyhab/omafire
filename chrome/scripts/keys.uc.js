@@ -140,6 +140,54 @@
   IOUtils.writeJSON(PathUtils.join(PathUtils.profileDir, "omafire-keys.json"), {conflicts})
     .catch(error => console.warn("[omafire:keys] cannot write omafire-keys.json", error));
 
+  // The menu bar on hold. Alt held alone for HOLD_MS shows it until Alt is
+  // released, as the tab numbers do. A bare Alt tap no longer focuses it
+  // (Firefox's default, which left it standing until Escape); the default
+  // branch, so about:config can still turn that back on. Alt+letter still
+  // opens its menu, and F10 still walks the bar from the keyboard. The bar
+  // is never pinned open: a window starts with it hidden.
+  const HOLD_MS = 500;
+  prefs.getDefaultBranch("").setBoolPref("ui.key.menuAccessKeyFocuses", false);
+  const menubar = document.getElementById("toolbar-menubar");
+  if (menubar && menubar.getAttribute("autohide") !== "true") {
+    setToolbarVisibility(menubar, false, true);
+  }
+  let holdTimer = 0;
+  let bare = false;      // Alt is down and nothing else has been pressed
+  let shown = false;     // we showed the bar, so we hide it
+  const menuOpen = () => !!menubar?.querySelector("menu[open]");
+  const release = () => {
+    clearTimeout(holdTimer);
+    bare = false;
+    if (shown && !menuOpen()) {
+      menubar.setAttribute("inactive", "true");
+    }
+    shown = false;
+  };
+  if (menubar) {
+    window.addEventListener("keydown", e => {
+      if (e.key === "Alt" && !e.repeat && !e.ctrlKey && !e.shiftKey && !e.metaKey) {
+        bare = true;
+        clearTimeout(holdTimer);
+        holdTimer = setTimeout(() => {
+          if (bare && menubar.hasAttribute("inactive")) {
+            menubar.removeAttribute("inactive");
+            shown = true;
+          }
+        }, HOLD_MS);
+      } else if (e.key !== "Alt") {
+        bare = false;
+        clearTimeout(holdTimer);
+      }
+    }, true);
+    window.addEventListener("keyup", e => {
+      if (e.key === "Alt") {
+        release();
+      }
+    }, true);
+    window.addEventListener("deactivate", release);
+  }
+
   window.OmafireKeys = {
     describe: () => active.slice(),
     ACTIONS,

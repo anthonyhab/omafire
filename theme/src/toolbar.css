@@ -24,6 +24,31 @@
   padding-inline: 0 !important;
 }
 
+/* ---- menu bar ------------------------------------------------------- */
+
+/* Shown (Alt held, keys.uc.js, or a menu opened with Alt+letter), the menu
+ * bar floats over the head band instead of pushing the window down: one
+ * bar, the chrome's surface, the band's rule. Nothing below it moves. */
+#main-window:not([customizing]) {
+  & #navigator-toolbox:has(> #toolbar-menubar[autohide="true"]:not([inactive])) {
+    z-index: 4 !important;
+  }
+
+  & #toolbar-menubar[autohide="true"]:not([inactive]) {
+    position: fixed !important;
+    z-index: 20 !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: var(--oc-head) !important;
+    min-height: 0 !important;
+    padding-inline: var(--oc-inset) !important;
+    align-items: center !important;
+    background-color: var(--oc-surface) !important;
+    box-shadow: inset 0 -1px 0 var(--oc-line-strong) !important;
+  }
+}
+
 /* ---- buttons -------------------------------------------------------- */
 
 :is(#nav-bar, #TabsToolbar, #PersonalToolbar) .toolbarbutton-1 {

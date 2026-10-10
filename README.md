@@ -112,6 +112,7 @@ omafire version   # Show the installed version
 Keybindings: Ctrl+Alt+H toggles zen (the sidebar layout with the sidebar
 hidden), Ctrl+Alt+S switches the toolbar, Ctrl+Alt+G toggles glass. They can
 be rebound; see [docs/HOW-IT-WORKS.md](docs/HOW-IT-WORKS.md#firefox-chrome-scripts).
+Holding Alt shows the menu bar until you let go.
 
 ## Settings
 

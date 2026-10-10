@@ -78,16 +78,18 @@
       margin: 0 auto !important;
     }
 
-    /* Fixed, not absolute in the row: only a viewport-placed box may
-     * anchor to the page (the tabbox follows the row in tree order). */
+    /* Absolute in the row, which spans the page exactly, so percentages
+     * are the page's. Not anchored to the page itself: Firefox does not
+     * re-place a fixed box nested in another when the anchor moves (the
+     * menu bar or bookmarks showing), and the field stayed behind. */
     & #urlbar {
-      position: fixed !important;
-      top: calc(anchor(--oc-page top, 0px) + var(--oc-step) / 2) !important;
+      position: absolute !important;
+      top: calc(var(--oc-step) / 2) !important;
       --urlbar-height: var(--oc-row) !important;
       /* Centred on the page, snapped to whole pixels: an odd page width
        * would otherwise leave both edges on a half pixel. */
-      --oc-dock-field: round(down, min(var(--oc-field-width), calc(anchor-size(--oc-page width, 100vw) / 2)), 2px);
-      left: round(down, calc(anchor(--oc-page center, 50vw) - var(--oc-dock-field) / 2), 1px) !important;
+      --oc-dock-field: round(down, min(var(--oc-field-width), 50%), 2px);
+      left: round(down, calc(50% - var(--oc-dock-field) / 2), 1px) !important;
       width: var(--oc-dock-field) !important;
       margin: 0 !important;
       translate: none !important;
@@ -100,8 +102,7 @@
        * either side for the navigation and the actions, and stops at
        * 440px. Closed, it is back to half the page. */
       &[popover-open] {
-        --oc-dock-field: round(down, min(var(--oc-field-width), max(calc(anchor-size(--oc-page width, 100vw) / 2),
-          min(calc(anchor-size(--oc-page width, 100vw) - 160px), 440px))), 2px);
+        --oc-dock-field: round(down, min(var(--oc-field-width), max(50%, min(calc(100% - 160px), 440px))), 2px);
       }
     }
 

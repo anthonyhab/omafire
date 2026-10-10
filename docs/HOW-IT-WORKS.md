@@ -60,7 +60,8 @@ own root-owned files: nothing is loaded from the profile.
   the sidebar hidden), Ctrl+Alt+S switches the toolbar, Ctrl+Alt+G toggles
   glass. Rebind with `omafire.keys.<zen|layout|glass|settings>` in
   `about:config` (a chord like `Ctrl+Alt+J`; empty to unbind). A chord
-  Firefox already uses is left to Firefox.
+  Firefox already uses is left to Firefox. Holding Alt shows the menu bar
+  over the head band until Alt is released; a bare tap no longer pins it.
 - **Live palette.** A theme change reaches the whole chrome, window
   rounding and Firefox's own pages (settings, add-ons) without a restart.
 - **New tab.** `chrome://omafire/content/newtab.html` (`chrome/newtab/`):
