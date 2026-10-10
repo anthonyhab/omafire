@@ -54,8 +54,9 @@ assert.equal(Model.stepSlider(opacity, 0.98, 1), 1);
 assert.equal(Model.stepSlider(opacity, 0.52, -1), 0.5);
 const toolbar = Model.ROWS.find(r => r.key === "toolbar");
 assert.equal(Model.stepChoice(toolbar.options, "top", 1, true), "sidebar");
-assert.equal(Model.stepChoice(toolbar.options, "sidebar", 1, true), "top");
-assert.equal(Model.stepChoice(toolbar.options, "sidebar", 1, false), "sidebar");
+assert.equal(Model.stepChoice(toolbar.options, "sidebar", 1, true), "line");
+assert.equal(Model.stepChoice(toolbar.options, "line", 1, true), "top");
+assert.equal(Model.stepChoice(toolbar.options, "line", 1, false), "line");
 
 // Status summary, from `omafire status --json`.
 assert.equal(Model.summary(null).meta, "Reading status…");

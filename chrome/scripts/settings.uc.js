@@ -34,7 +34,10 @@
     }
   };
 
-  const layout = () => get("omafire.layout", "top") === "sidebar" ? "sidebar" : "top";
+  const layout = () => {
+    const v = get("omafire.layout", "top");
+    return v === "sidebar" || v === "line" ? v : "top";
+  };
   const vertical = () => get("sidebar.verticalTabs", false);
   // The theme's glass floor (written by omafire sync): below it
   // text stops reading, so the theme ignores lower values and the slider
@@ -54,8 +57,14 @@
     {heading: "Layout"},
     {
       label: "Toolbar", kind: "choice", prefs: ["omafire.layout"],
-      options: [["top", "Top"], ["sidebar", "Sidebar"]],
-      read: layout, write: v => set("omafire.layout", v), moves: true,
+      options: [["top", "Top"], ["sidebar", "Sidebar"], ["line", "One line"]],
+      // One line holds horizontal tabs; with vertical ones it is the top row.
+      read: layout, write: v => {
+        if (v === "line") {
+          set("sidebar.verticalTabs", false);
+        }
+        set("omafire.layout", v);
+      }, moves: true,
     },
     {
       label: "Tabs", kind: "choice", prefs: ["sidebar.verticalTabs"],

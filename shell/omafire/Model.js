@@ -5,7 +5,8 @@
 
 var ROWS = [
   { key: "toolbar", section: "LAYOUT", label: "Toolbar", type: "choice",
-    options: [{ value: "top", label: "Top" }, { value: "sidebar", label: "Sidebar" }] },
+    options: [{ value: "top", label: "Top" }, { value: "sidebar", label: "Sidebar" },
+      { value: "line", label: "One line" }] },
   { key: "tabs", section: "LAYOUT", label: "Tabs", type: "choice",
     options: [{ value: "horizontal", label: "Horizontal" }, { value: "vertical", label: "Vertical" }] },
   { key: "side", section: "LAYOUT", label: "Side", type: "choice",

@@ -32,11 +32,11 @@
     {
       name: "layout", pref: "omafire.keys.layout", chord: "Ctrl+Alt+S", label: "Switch toolbar",
       run() {
-        const sidebar = prefs.getStringPref("omafire.layout", "top") === "sidebar";
-        if (!sidebar) {
-          prefs.setBoolPref("sidebar.verticalTabs", true);
-        }
-        prefs.setStringPref("omafire.layout", sidebar ? "top" : "sidebar");
+        // Docked top row, then the sidebar, then one line, then back.
+        const NEXT = {top: "sidebar", sidebar: "line", line: "top"};
+        const next = NEXT[prefs.getStringPref("omafire.layout", "top")] ?? "sidebar";
+        prefs.setBoolPref("sidebar.verticalTabs", next !== "line");
+        prefs.setStringPref("omafire.layout", next);
       },
     },
     {

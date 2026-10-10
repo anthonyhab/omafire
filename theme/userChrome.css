@@ -34,6 +34,7 @@
 @import "src/layouts/sidebar.css";
 @import "src/launcher.css";
 @import "src/layouts/docked.css";
+@import "src/layouts/line.css";
 
 /* Modes: optional behaviour on top of a layout, each gated on its pref. */
 @import "src/modes/compact.css";

@@ -4,9 +4,9 @@
   "settings": [
     {
       "key": "toolbar",
-      "about": "Where the toolbar sits: top, or in the sidebar.",
+      "about": "Where the toolbar sits: top, in the sidebar, or one line with the tabs (horizontal tabs).",
       "type": "enum",
-      "values": ["top", "sidebar"],
+      "values": ["top", "sidebar", "line"],
       "default": "top",
       "prefs": [{ "name": "omafire.layout" }]
     },

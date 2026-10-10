@@ -21,9 +21,10 @@ carried its name until 0.3.0.
   moment, tabs, toolbars, menus, sidebars, the new-tab page and Firefox's own
   pages, dark or light, including themes with partial palettes. The first
   painted frame of a restart already uses the current palette.
-- **Layouts.** Toolbar on top or in a Zen-style sidebar, horizontal or
-  vertical tabs, sidebar on either side, a drop or centred launcher, zen (the
-  sidebar disappears until you reach for it), a floating page and split view.
+- **Layouts.** Toolbar on top, in a Zen-style sidebar or in one line with
+  the tabs; horizontal or vertical tabs, sidebar on either side, a drop or
+  centred launcher, zen (the sidebar disappears until you reach for it), a
+  floating page and split view.
   Rows, tabs and the rail are the Omarchy bar's size, so the chrome scales with
   it.
 - **Glass.** Optional translucent chrome over the desktop, blurred where your
@@ -131,7 +132,7 @@ omafire watch                # a JSON line now and after every change
 
 | Setting | Values | Default |
 |---|---|---|
-| `toolbar` | `top`, `sidebar` | `top` |
+| `toolbar` | `top`, `sidebar`, `line` (one row with horizontal tabs) | `top` |
 | `tabs` | `horizontal`, `vertical` | `horizontal` |
 | `side` | `left`, `right` (vertical tabs) | `left` |
 | `launcher` | `drop`, `center` (sidebar layout) | `drop` |

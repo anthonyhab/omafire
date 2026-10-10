@@ -38,7 +38,7 @@ Optional, all applied live without a restart:
 
 | Preference | Value | Effect |
 |---|---|---|
-| `omafire.layout` | `"sidebar"` | Zen's single sidebar: toolbar and urlbar at the top of the tab column, floating page, centred launcher. Unset (or `"top"`) is the default top toolbar. |
+| `omafire.layout` | `"sidebar"` | Zen's single sidebar: toolbar and urlbar at the top of the tab column, floating page, centred launcher. `"line"` (horizontal tabs): one bar-tall row of navigation, a fixed-width field, the tabs and the actions. Unset (or `"top"`) is the default top toolbar. |
 | `omafire.launcher` | `"center"` | Launcher shape (sidebar layout). Unset (or `"drop"`) is a quake console: with horizontal tabs it slides full width down from the window's top edge, with vertical tabs it slides out of the tab column over the page, leaving the tabs in view. `"center"` floats it as a card. |
 | `omafire.compact` | `true` | Zen: in the sidebar layout, hide the column until the pointer reaches the edge or Ctrl+L opens the field. With the sidebar collapsed the icon rail stays visible. |
 | `omafire.chrome-gap` | `true` | Float the page as a card with a gap, Hyprland rounding and a hairline shadow. |
@@ -69,6 +69,7 @@ src/launcher.css        urlbar launcher: quake drop or centred card (sidebar lay
 src/motion.css          sidebar expand/collapse and resize motion
 src/layouts/sidebar.css omafire.layout = "sidebar"
 src/layouts/docked.css  vertical tabs in the top layout: the docked bar row
+src/layouts/line.css    omafire.layout = "line": tabs in the navigation row
 src/modes/compact.css   omafire.compact
 src/modes/gap.css       omafire.chrome-gap
 src/modes/translucency.css  omafire.translucency

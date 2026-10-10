@@ -1,0 +1,108 @@
+/* Omafire — one-line layout (horizontal tabs, omafire.layout = "line";
+ * DEC-104).
+ *
+ * The whole chrome is one bar over the page, like another bar of the
+ * desktop: navigation, the field, the tabs, then the actions. The tab
+ * strip is Firefox's own toolbar, lifted into the navigation row's gap:
+ * the field's slot (#urlbar-container) takes all the free width, the
+ * field keeps a fixed width at its start, and the strip is fixed over the
+ * rest of the slot by anchor. Insets only, never transforms: a transformed
+ * ancestor would become the containing block for toolbar popups.
+ *
+ * Vertical tabs with this value fall back to the docked row. */
+
+@media -moz-pref("omafire.layout", "line") and (not -moz-pref("sidebar.verticalTabs")) {
+  :root:not([customizing], [popup-window], [taskbartab], [chromehidden~="toolbar"], [inDOMFullscreen]) {
+    /* The field's resting width: room for a host and a path, never more
+     * than a third of the window. */
+    --oc-line-field: round(down, min(var(--oc-field-width) * 0.6, 32vw), 2px);
+
+    /* One bar, the field half a step from its top and bottom, the band's
+     * hairline painted inside the box (its last pixel), as docked.css. */
+    & #nav-bar {
+      anchor-name: --oc-line-row !important;
+      height: var(--oc-head) !important;
+      min-height: var(--oc-head) !important;
+      padding-block: calc(var(--oc-step) / 2) !important;
+      align-items: center !important;
+      border: none !important;
+      box-shadow: inset 0 -1px 0 var(--oc-line-strong) !important;
+    }
+
+    & #nav-bar toolbarspring {
+      flex: 0 0 0 !important;
+      min-width: 0 !important;
+    }
+
+    & #urlbar-container {
+      anchor-name: --oc-line-slot !important;
+      flex: 1 1 auto !important;
+      min-width: var(--oc-line-field) !important;
+      max-width: none !important;
+      height: var(--oc-row) !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    & #urlbar {
+      --urlbar-height: var(--oc-row) !important;
+      flex: 0 0 auto !important;
+      width: var(--oc-line-field) !important;
+      /* Open, the field grows over the tabs as Firefox's own does, and
+       * the results hang from it as one card its width. */
+      --urlbar-background-overhang-open: 0px !important;
+      --oc-urlbar-card-top: 0px;
+
+      &[popover-open] {
+        width: round(down, max(var(--oc-line-field),
+          min(anchor-size(--oc-line-slot width, 100%), var(--oc-field-width))), 2px) !important;
+      }
+    }
+
+    & #urlbar > .urlbar-background,
+    & #urlbar > .urlbarView > .urlbarView-background {
+      border-radius: 0 !important;
+    }
+
+    /* The strip: over the slot after the field, the row's full height. */
+    & #TabsToolbar {
+      position: fixed !important;
+      z-index: 2 !important;
+      top: anchor(--oc-line-row top, 0px) !important;
+      height: var(--oc-head) !important;
+      min-height: 0 !important;
+      left: calc(anchor(--oc-line-slot left, 0px) + var(--oc-line-field) + var(--oc-pad)) !important;
+      right: anchor(--oc-line-slot right, 0px) !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: transparent !important;
+    }
+
+    & #TabsToolbar-customization-target {
+      min-height: 0 !important;
+    }
+
+    /* Tabs are the field's height on the same line: a row each, half a
+     * step from the band's top and bottom. */
+    & #tabbrowser-tabs {
+      --tab-min-height: var(--oc-row) !important;
+      --tab-margin-block: calc(var(--oc-step) / 2) !important;
+      min-height: var(--oc-head) !important;
+    }
+
+    /* Its buttons are the row's: --oc-button squares, a step apart. */
+    & #TabsToolbar {
+      --toolbarbutton-padding-inner: var(--oc-icon-pad) !important;
+      --toolbarbutton-padding-outer: calc(var(--oc-step) / 2) !important;
+    }
+
+    & #TabsToolbar .toolbarbutton-1 {
+      padding-inline: var(--toolbarbutton-padding-outer) !important;
+    }
+
+    /* Open, the field covers the tabs it grows over. */
+    & #urlbar[popover-open] {
+      z-index: 3 !important;
+    }
+  }
+}

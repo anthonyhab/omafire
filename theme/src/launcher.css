@@ -44,7 +44,8 @@
  * launcher and the docked row's inline field. */
 
 @media -moz-pref("omafire.layout", "sidebar") and (not -moz-pref("omafire.launcher", "center")),
-       -moz-pref("sidebar.verticalTabs") and (not -moz-pref("omafire.layout", "sidebar")) {
+       -moz-pref("sidebar.verticalTabs") and (not -moz-pref("omafire.layout", "sidebar")),
+       -moz-pref("omafire.layout", "line") and (not -moz-pref("sidebar.verticalTabs")) {
   #main-window:not([customizing]) #urlbar:is([popover-open], [focused]) {
     & > .urlbar-background,
     & > .urlbarView > .urlbarView-background {
@@ -83,11 +84,12 @@
   }
 }
 
-/* Docked row (vertical tabs): no box and no bar. Focus lights the row's
+/* Docked row (vertical tabs) and the one line: no box and no bar. Focus lights the row's
  * own rule in the accent, one pixel, just under the field (the field ends
  * a pixel above the band's last one); results hang from that line, which
  * is also their top edge. Like a terminal's prompt line. */
-@media -moz-pref("sidebar.verticalTabs") and (not -moz-pref("omafire.layout", "sidebar")) {
+@media -moz-pref("sidebar.verticalTabs") and (not -moz-pref("omafire.layout", "sidebar")),
+       -moz-pref("omafire.layout", "line") and (not -moz-pref("sidebar.verticalTabs")) {
   #main-window:not([customizing]) #urlbar:is([popover-open], [focused]) {
     & > .urlbar-background {
       border: none !important;

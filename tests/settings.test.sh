@@ -46,7 +46,7 @@ fails() {
 [[ $(stat -c %a "$HOME/.config/omafire") == 700 ]]
 fails "opacity must be a number from 0.5 to 1" set glass off opacity 0.2
 [[ $("$OMAFIRE_BIN" get glass) == true ]]
-fails "toolbar must be one of top, sidebar" set toolbar bottom
+fails "toolbar must be one of top, sidebar, line" set toolbar bottom
 fails "unknown setting: nope" set nope 1
 fails "usage: omafire set" set glass
 [[ $("$OMAFIRE_BIN" status) == *"Settings: $CONFIG (3 set)"* ]]
