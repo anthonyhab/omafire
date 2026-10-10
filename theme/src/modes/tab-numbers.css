@@ -7,19 +7,16 @@
  * increments a counter, so a plain CSS counter gives the same numbers.
  * Alt+9 (the last tab) has no marker: Firefox exposes none to CSS.
  *
- * Vertical tabs label boxes and rows differently, as btop does: a box
- * (pinned tile, collapsed-rail tile, split pair) gets a legend cut into
- * its leading edge, centred on the edge with the edge and fill notched
- * out behind it by a mask (not a plate, which would double the alpha on
- * glass chrome). A row has no edge to cut, and a notch there would part
- * the active tab's lit edge, so its digit stands in the gutter left of
- * the row instead, centred between the column edge (or its group's line)
- * and the row. Either way the digits run down one column and a label
- * keeps its full width. The digit is dim at rest and takes the tab's
- * full text colour when hovered or selected.
+ * Held (omafire.tab-numbers-hold, the live default): while Alt is down
+ * every vertical tab's digit takes its favicon's place, in the rail and in
+ * the rows alike, like the new tab's hints (DEC-101): the digit sits on
+ * the icon axis, so nothing moves and no gutter is needed. The bar grid
+ * (DEC-104) leaves no gutter or edge wide enough for a legend beside the
+ * icon. Always on, expanded rows carry the digit at their trailing end, as
+ * horizontal tabs do; the rail stays clean.
  *
- * Horizontal tabs have no leading gutter: there the digit sits at the
- * trailing end, before the close button, as dim text. */
+ * Horizontal tabs: the digit sits at the trailing end, before the close
+ * button, as dim text. */
 
 @counter-style oc-alt-key {
   system: fixed;
@@ -33,17 +30,12 @@
   symbols: " ";
 }
 
-/* Tiles notch their edge for the legend whatever the number, so past
- * eight the notch holds a dot: no key, rather than a broken edge. */
-@counter-style oc-alt-key-tile {
+/* Held, digits typed in a row reach past eight (tab-numbers.uc.js): Alt, 1,
+ * 2 is tab 12. Alt+9 alone is the last tab, so the ninth has no key: a dot. */
+@counter-style oc-held-key {
   system: fixed;
-  symbols: "1" "2" "3" "4" "5" "6" "7" "8";
-  fallback: oc-alt-key-dot;
-}
-
-@counter-style oc-alt-key-dot {
-  system: cyclic;
-  symbols: "\00B7";
+  symbols: "1" "2" "3" "4" "5" "6" "7" "8" "\00B7";
+  fallback: decimal;
 }
 
 @media -moz-pref("omafire.tab-numbers") {
@@ -55,13 +47,15 @@
     counter-increment: oc-tab !important;
   }
 
-  /* Horizontal rows: before the close button, in the strip's dim text. */
-  #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab:not([pinned]) {
+  /* Rows: before the close button, in the strip's dim text. Vertical rows
+   * only while the numbers are always on; held, they go on the icon. */
+  #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab:not([pinned]),
+  :root:not([omafire-tab-numbers-hold]) #tabbrowser-tabs[orient="vertical"][expanded] .tabbrowser-tab:not([pinned]) {
     & .tab-content::after {
       content: counter(oc-tab, oc-alt-key) !important;
       order: 1 !important;
       flex: none !important;
-      margin-inline: var(--oc-inset) var(--oc-u) !important;
+      margin-inline: var(--oc-pad) var(--oc-u) !important;
       font-size: var(--oc-font-size) !important;
       color: var(--oc-text-dim) !important;
       font-variant-numeric: tabular-nums !important;
@@ -72,114 +66,26 @@
     }
   }
 
-  /* Legends. --oc-num-x is where the digit is centred inside
-   * .tab-content: for a box, its leading edge. In the rail any tab (pinned
-   * too) lays its content over the whole column, its tile one inset in;
-   * expanded pinned tiles and split halves are their content box. */
-  #tabbrowser-tabs[orient="vertical"] .tabbrowser-tab {
-    --oc-num-x: 0px;
+  /* Held: the digit in the favicon's place, the icon hidden under it. */
+  :root[omafire-numbers-held] #tabbrowser-tabs[orient="vertical"] .tabbrowser-tab {
+    & .tab-icon-stack {
+      visibility: hidden !important;
+    }
 
     & .tab-content::after {
-      content: counter(oc-tab, oc-alt-key-tile) !important;
+      content: counter(oc-tab, oc-held-key) !important;
       position: absolute !important;
-      inset-inline-start: var(--oc-num-x) !important;
+      inset-inline-start: calc(var(--oc-icon-axis) + var(--oc-icon) / 2) !important;
       top: 50% !important;
-      /* Centred on its x, whatever the glyph's width. */
+      /* Centred on the icon's centre, whatever the glyph's width. */
       translate: -50% -50% !important;
       font-family: var(--oc-font) !important;
       font-variant-numeric: tabular-nums !important;
-      font-size: 8px !important;
+      font-size: var(--oc-label-size) !important;
       font-weight: 700 !important;
       line-height: 1 !important;
-      color: var(--oc-text-dim) !important;
+      color: var(--oc-text) !important;
       pointer-events: none !important;
-    }
-
-    & .tab-background {
-      mask: linear-gradient(var(--oc-mask) 0 0),
-        linear-gradient(var(--oc-mask) 0 0) 0 50% / 3px 9px no-repeat !important;
-      mask-composite: exclude !important;
-      /* The group line hangs outside the tile; leave it unmasked. */
-      mask-clip: no-clip !important;
-    }
-  }
-
-  /* A secondary glyph: dim at rest, the row's full text when it is
-   * hovered or selected. */
-  #tabbrowser-tabs[orient="vertical"] .tabbrowser-tab:is([selected], [multiselected], :hover) .tab-content::after {
-    color: inherit !important;
-  }
-
-  #tabbrowser-tabs[orient="vertical"]:not([expanded]) :not(tab-split-view-wrapper) > .tabbrowser-tab {
-    --oc-num-x: var(--oc-inset);
-  }
-
-  /* Expanded rows: the digit stands in the gutter, unnotched. Past eight
-   * there is no key and nothing to hold an edge together, so nothing. */
-  #tabbrowser-tabs[orient="vertical"][expanded] :not(tab-split-view-wrapper) > .tabbrowser-tab:not([pinned]) {
-    /* Centred in the gutter: the column edge to the row. */
-    --oc-num-x: calc(var(--oc-inset) / 2);
-
-    & .tab-content::after {
-      content: counter(oc-tab, oc-alt-key) !important;
-    }
-
-    & .tab-background {
-      mask: none !important;
-    }
-  }
-
-  /* A grouped row is indented by an inset, its group's 2px line on the
-   * gutter's leading edge: centre on what the line leaves clear. */
-  #tabbrowser-tabs[orient="vertical"][expanded] tab-group > .tabbrowser-tab:not([pinned]) {
-    --oc-num-x: calc(var(--oc-inset) / 2 + 1px);
-  }
-
-  /* A split pair is outlined by its wrapper, which also holds the digits,
-   * so the outline moves to a layer of its own and that layer is notched:
-   * in the rail once per stacked half; expanded, where the halves sit side
-   * by side, once on the pair's leading edge (the second half's legend
-   * notches the divider, its own background edge). */
-  #tabbrowser-tabs[orient="vertical"] tab-split-view-wrapper {
-    --oc-pair-line: var(--oc-line);
-    box-shadow: none !important;
-
-    &[hasactivetab] {
-      --oc-pair-line: var(--oc-line-strong);
-    }
-
-    &::before {
-      content: "" !important;
-      position: absolute !important;
-      inset: 0 !important;
-      border-radius: inherit !important;
-      box-shadow: inset 0 0 0 1px var(--oc-pair-line) !important;
-      pointer-events: none !important;
-      mask: linear-gradient(var(--oc-mask) 0 0),
-        linear-gradient(var(--oc-mask) 0 0) 0 50% / 3px 9px no-repeat !important;
-      mask-composite: exclude !important;
-    }
-  }
-
-  #tabbrowser-tabs[orient="vertical"]:not([expanded]) tab-split-view-wrapper::before {
-    mask: linear-gradient(var(--oc-mask) 0 0),
-      linear-gradient(var(--oc-mask) 0 0) 0 calc(var(--oc-row) / 2 - 4.5px) / 3px 9px no-repeat,
-      linear-gradient(var(--oc-mask) 0 0) 0 calc(var(--oc-row) * 1.5 + var(--oc-u) - 4.5px) / 3px 9px no-repeat !important;
-  }
-
-  /* On hold (omafire.tab-numbers-hold, tab-numbers.uc.js): the numbers show
-   * only while Alt is down. Everything above stays; this takes the legends
-   * and their notches back out, at a weight that outranks every rule above: the id is
-   * doubled, since the expanded rows' rule carries one more type selector than this
-   * would without it. */
-  :root[omafire-tab-numbers-hold]:not([omafire-numbers-held]) {
-    & #tabbrowser-tabs#tabbrowser-tabs .tabbrowser-tab .tab-content::after {
-      content: none !important;
-    }
-
-    & #tabbrowser-tabs#tabbrowser-tabs .tabbrowser-tab .tab-background,
-    & #tabbrowser-tabs#tabbrowser-tabs tab-split-view-wrapper::before {
-      mask: none !important;
     }
   }
 

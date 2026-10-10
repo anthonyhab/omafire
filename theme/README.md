@@ -124,7 +124,13 @@ Notes on the non-obvious parts:
 - Zen mode parks the nav-bar with `position: fixed` rather than hiding it,
   so Ctrl+L can still focus the urlbar inside it. The toolbox is a flex
   item with `z-index: 0` (a stacking context) and `overflow: clip`; zen
-  mode lifts and unclips it or the row paints under the page.
+  mode lifts and unclips it or the row paints under the page. With
+  vertical tabs the same row is docked (DEC-104): one bar tall over the
+  page, always open, zen mode or not.
+- Rows, the rail and the docked row are the Omarchy bar's size
+  (`--oc-bar` from `--omarchy-bar-size`, which `omafire sync` writes into
+  `omafire-radius.css`): bar ÷ GTK text scale, so it lands on the bar's
+  own device pixels at any monitor scale. Density no longer sizes rows.
 
 ## Design language
 
@@ -137,9 +143,9 @@ pages, which lint keeps in step).
 | Box | A thing's own edge is a 1px hairline (`--oc-line`, 11%), stronger when selected (`--oc-line-strong`, 22%). | Controls (buttons, chips, fields) keep an edge in `--k-line`/`-line-2`; content surfaces don't, until hovered. Author borders are removed: forced colours would paint them full text. |
 | Surface | One material ladder, named by total opacity over the desktop, each layer painting only the step from what is under it: window (the glass alpha), B (`--oc-panel`: frame + 5% text at max(alpha, 0.8)) for every panel and console, frosting the page where it hangs over it. | Stacked: page (the window's alpha; around a main container, the thinner backdrop, alpha − 0.22) → main container (`@main`, `--k-main`: B) → region (`--k-region`: a grid, a list, a description; 30% canvas on glass) → card (`--k-card`, 45%). Off glass, the container is clear and region and card 3% and 5% of the text. Alpha over the window's blur only: no `backdrop-filter`. Menus and flyouts `--k-raised` (= panel) on a `--k-line-2` edge. |
 | Interaction | Fill: hover (`--oc-hover`, 8%), pressed (`--oc-active`, 18%), selected (`--oc-selected`, 9%). Nothing else paints a fill. | The same fills (`--k-hover`, `--k-press`, `--k-sel`). A hovered card lifts one fill (`--k-card-hover`) and brings its hairline in (`--k-line-2`). |
-| Active / current | Hairline and glow in one hue: light falling off from one edge, the hairline lit in the same colour from that edge (`--oc-glow-*`). No extra bar. The active tab, the selected settings section. | The same (`--k-glow` from the lit edge, a 1px `--k-accent` edge there): the current guide entry, the selected chip. |
+| Active / current | Hairline and glow in one hue: light falling off from one edge, the hairline lit in the same colour from that edge and fading out before the far side, so it never closes into a box (`--oc-glow-*`, DEC-104). No extra bar. The active tab, the selected settings section. | The same (`--k-glow` from the lit edge, a 1px `--k-accent` edge there): the current guide entry, the selected chip. |
 | Focus | A 1px ring in the accent (`--oc-focus`), on a field's own hairline. Never a glow. | The same (`--k-accent`); a focused card's edge turns accent. |
-| Field | A quiet box: 5% fill on the hairline at rest, 10% and the strong hairline on hover. | The same (`--k-field`, `--k-field-hover`). |
+| Field | A quiet box: 5% fill at rest, no outline (DEC-104); 10% and the strong hairline on hover. | The same (`--k-field`, `--k-field-hover`). |
 | Text | Labels 80%, secondary glyphs and metadata 62%, active or hovered full. | Titles full (`--k-ink`), labels 80% (`--k-ink-2`), detail at the quietest mix that keeps 4.5:1 on the theme (`--k-ink-3`: 58–86%), since page text is read, not glanced at. The accent only for links in running text. |
 | Destructive | The palette's red, as a tinted tile on hover only. | — |
 | Identity | Firefox's container colour, as a short tick, never a full edge. | — |

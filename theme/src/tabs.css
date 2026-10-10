@@ -35,16 +35,16 @@
    * below owns that rhythm. */
   gap: 0 !important;
   --tab-min-height: var(--oc-row) !important;
-  /* Half a unit above and below: rows repeat every --oc-row + --oc-u, the
+  /* Half a unit above and below: rows repeat every --oc-row + --oc-step, the
    * same pitch as pinned tiles and the new-tab row. Nova raises it to 4px
    * in compact density; this holds it at any density. */
-  --tab-margin-block: calc(var(--oc-u) / 2) !important;
+  --tab-margin-block: calc(var(--oc-step) / 2) !important;
   /* Nova pads each row on top of the background margin; one spacing is
    * enough (row pitch = --oc-row + 4px, as before Nova). */
   --tab-padding-block-start: 0px !important;
   --tab-padding-block-end: 0px !important;
   --tab-inline-padding: var(--oc-inset) !important;
-  --tab-icon-end-margin: var(--oc-inset) !important;
+  --tab-icon-end-margin: var(--oc-pad) !important;
 
   /* ---- rows ------------------------------------------------------ */
 
@@ -238,8 +238,8 @@
      * one unit apart, flush with the --oc-inset axis on both sides. */
     --tab-pinned-min-width-expanded: var(--oc-pinned) !important;
     --tab-pinned-margin-inline-expanded: 0px !important;
-    --tab-pinned-container-margin-inline-expanded: calc(var(--oc-inset) - var(--oc-u) / 2) !important;
-    --tab-height-with-margin-padding: calc(var(--oc-pinned) + var(--oc-u)) !important;
+    --tab-pinned-container-margin-inline-expanded: calc(var(--oc-inset) - var(--oc-step) / 2) !important;
+    --tab-height-with-margin-padding: calc(var(--oc-pinned) + var(--oc-step)) !important;
     padding-block: var(--oc-inset) 0 !important;
     /* Always exactly as tall as its tiles. Firefox applies the height the
      * pinned splitter was last dragged to (per rail state) inline, which
@@ -249,9 +249,9 @@
     max-height: none !important;
 
     & .tabbrowser-tab {
-      padding: 0 calc(var(--oc-u) / 2) !important;
+      padding: 0 calc(var(--oc-step) / 2) !important;
       height: var(--oc-pinned) !important;
-      --oc-tick-end: calc(var(--oc-u) / 2);
+      --oc-tick-end: calc(var(--oc-step) / 2);
     }
 
     & .tab-background {
@@ -280,20 +280,15 @@
     }
   }
 
-  /* Pinned tiles, rule, tabs: the rule sits one inset below the last
-   * tile and one above the first tab's surface, as wide as a tab row.
-   * Above: the grid's pitch leaves one unit under the last tiles, then one
-   * more in here. Below: 1.5 in here, then the first tab's half-unit
-   * margin. */
+  /* Pinned tiles, rule, tabs: the rule is one pixel in the middle of a
+   * step, as wide as a tab row: the grid's pitch leaves half a step under
+   * the last tiles, and the first tab's margin half a step above it. */
   & #vertical-pinned-tabs-splitter {
     border: none !important;
-    /* Hard stops over the full box, not a 1px background tile: a 1px tile
-     * can snap to nothing at fractional display scales. */
-    background: linear-gradient(transparent calc(var(--oc-inset) - var(--oc-u)), var(--oc-line) 0,
-      var(--oc-line) calc(var(--oc-inset) - var(--oc-u) + 1px), transparent 0)
+    background: linear-gradient(var(--oc-line), var(--oc-line))
       center / calc(100% - 2 * var(--oc-inset)) 100% no-repeat !important;
-    min-height: calc(2 * var(--oc-inset) - var(--oc-u) * 1.5 + 1px) !important;
-    height: calc(2 * var(--oc-inset) - var(--oc-u) * 1.5 + 1px) !important;
+    min-height: 1px !important;
+    height: 1px !important;
     margin: 0 !important;
     pointer-events: none !important;
   }
@@ -307,7 +302,7 @@
 
   /* Laid out exactly like a tab row: same axes, height and pitch. */
   & #tabs-newtab-button {
-    margin: calc(var(--oc-u) / 2) var(--oc-inset) !important;
+    margin: calc(var(--oc-step) / 2) var(--oc-inset) !important;
     padding: 0 var(--oc-icon-pad) !important;
     min-height: var(--oc-row) !important;
     gap: var(--oc-inset) !important;
@@ -346,7 +341,7 @@
   --tab-group-label-hover-inset: 0px !important;
 
   & .tab-group-label-container {
-    margin: calc(var(--oc-u) / 2) 0 !important;
+    margin: calc(var(--oc-step) / 2) 0 !important;
     padding: 0 var(--oc-inset) !important;
   }
 
@@ -383,11 +378,11 @@
    * tile of its own: a rail tile's size, on the grouped rows' edge, on the
    * row pitch. Its line joins the active tab's across the margin. */
   & .tab-group-overflow-count-container {
-    margin: calc(var(--oc-u) / 2) 0 !important;
+    margin: calc(var(--oc-step) / 2) 0 !important;
     padding: 0 !important;
 
     &::after {
-      inset-block-start: calc(var(--oc-u) / -2) !important;
+      inset-block-start: calc(var(--oc-step) / -2) !important;
     }
   }
 
@@ -427,10 +422,10 @@
    * pin), the hairline turns solid and the hover fill comes in. Firefox's
    * is a 70px lilac box. Collapsed, it is a pinned tile: the icon alone. */
   & > #pinned-drop-indicator[visible] {
-    height: calc(2 * var(--oc-row) + var(--oc-u)) !important;
+    height: calc(2 * var(--oc-row) + var(--oc-step)) !important;
     width: auto !important;
-    margin: calc(var(--oc-u) / 2) var(--oc-inset) !important;
-    gap: var(--oc-u) !important;
+    margin: calc(var(--oc-step) / 2) var(--oc-inset) !important;
+    gap: var(--oc-step) !important;
     border-radius: 0 !important;
     color: var(--oc-text-label) !important;
     background: transparent !important;
@@ -521,6 +516,16 @@
     justify-content: start !important;
   }
 
+  /* The audio badge (Firefox hangs it 7px off the favicon's corner, past a
+   * bar-wide rail's edge) sits inside the tile, on the hairline. */
+  & .tab-icon-overlay:is([soundplaying], [muted], [activemedia-blocked]) {
+    top: 5px !important;
+    inset-inline-end: -3px !important;
+    padding: 1px !important;
+    border-color: var(--oc-line-strong) !important;
+    box-shadow: none !important;
+  }
+
   /* In the rail every tab is a tile, so the active one glows from its
    * bottom edge like a pinned tile. */
   & .tabbrowser-tab[selected] .tab-background {
@@ -538,7 +543,7 @@
   /* Rail tiles are tab-sized, at the tab pitch, one per row at any column
    * width. */
   & #pinned-tabs-container {
-    --tab-height-with-margin-padding: calc(var(--oc-row) + var(--oc-u)) !important;
+    --tab-height-with-margin-padding: calc(var(--oc-row) + var(--oc-step)) !important;
     --tab-pinned-min-width-expanded: 100% !important;
   }
 
@@ -562,7 +567,7 @@
  * pair spans exactly two rail pitches. Firefox's own pair fill, drag and
  * multiselect outlines stay: our rules only replace the resting surface. */
 #tabbrowser-tabs[orient="vertical"] tab-split-view-wrapper {
-  margin: calc(var(--oc-u) / 2) var(--oc-inset) !important;
+  margin: calc(var(--oc-step) / 2) var(--oc-inset) !important;
   padding: 0 !important;
   gap: 0 !important;
   border-radius: var(--oc-radius-small) !important;
@@ -595,7 +600,7 @@
   /* Its group line runs on the --oc-inset axis with the rows', over the
    * pair's whole pitch cell. */
   & .tab-group-line {
-    inset-block: calc(var(--oc-u) / -2) !important;
+    inset-block: calc(var(--oc-step) / -2) !important;
   }
 }
 
@@ -630,12 +635,12 @@
 #tabbrowser-tabs[orient="vertical"]:not([expanded]) tab-split-view-wrapper {
   width: var(--oc-button) !important;
   grid-template-columns: 1fr !important;
-  row-gap: var(--oc-u) !important;
+  row-gap: var(--oc-step) !important;
 
   /* The divider sits in the unit between the halves. */
   &:not([dragover-groupTarget]) {
-    background: linear-gradient(transparent calc(var(--oc-row) + var(--oc-u) / 2), var(--oc-line) 0,
-      var(--oc-line) calc(var(--oc-row) + var(--oc-u) / 2 + 1px), transparent 0) !important;
+    background: linear-gradient(transparent calc(var(--oc-row) + var(--oc-step) / 2), var(--oc-line) 0,
+      var(--oc-line) calc(var(--oc-row) + var(--oc-step) / 2 + 1px), transparent 0) !important;
   }
 
   & .tabbrowser-tab {
@@ -675,6 +680,6 @@
 
   /* The label's line reaches across its margin to the first tab's. */
   & tab-group > .tab-group-label-container::after {
-    inset-block-end: calc(var(--oc-u) / -2) !important;
+    inset-block-end: calc(var(--oc-step) / -2) !important;
   }
 }

@@ -19,10 +19,11 @@
 
   /* Spacing. Everything sits on a 4px grid, and the chrome shares two
    * vertical axes: blocks (buttons, tab rows, tiles) start --oc-inset from
-   * the window edge, and their icons --oc-inset further in, so toolbar,
-   * pinned tiles, tabs and the new-tab row line up like one column. */
+   * the window edge, and their icons --oc-icon-pad further in, so toolbar,
+   * pinned tiles, tabs and the new-tab row line up like one column.
+   * Panels and popups pad their contents by --oc-pad. */
   --oc-u: 4px;
-  --oc-inset: calc(var(--oc-u) * 2);
+  --oc-pad: calc(var(--oc-u) * 2);
   --oc-gap: calc(var(--oc-u) * 2);
   /* Space around the content area. 0 = page flush against the chrome;
    * omafire.chrome-gap turns it into a floating card (modes/gap.css). */
@@ -32,13 +33,24 @@
   /* Corners follow Hyprland's decoration:rounding (omafire-radius.css). */
   --oc-radius: var(--omafire-radius-container, 10px);
   --oc-radius-small: clamp(0px, calc(var(--oc-radius) - 3px), 8px);
-  --oc-toolbar: 40px;       /* top toolbar row */
-  --oc-row: 32px;           /* vertical tab row */
-  --oc-button: 32px;        /* toolbar button tile */
-  /* One block size: pinned tiles, tab rows, buttons and the address
-   * field in the navigation row are all --oc-row tall, one unit apart. */
+  /* The chrome is the Omarchy bar's size (DEC-104): the navigation row,
+   * the collapsed tab rail and the tab rows' pitch are all one bar, so
+   * the window's chrome reads as another bar of the desktop, at any font
+   * size and display scale. omafire sync writes --omarchy-bar-size in CSS
+   * pixels (omafire-radius.css); 26px is the shell's default bar. */
+  --oc-bar: var(--omarchy-bar-size, 26px);
+  --oc-toolbar: var(--oc-bar);  /* top toolbar row */
+  /* Blocks are one step apart and one step shy of the bar; the column's
+   * blocks sit --oc-inset from its edges, so a rail tile is the bar's
+   * width less an inset either side. */
+  --oc-step: 2px;
+  --oc-inset: 2px;
+  --oc-row: calc(var(--oc-bar) - var(--oc-step));      /* vertical tab row */
+  --oc-button: calc(var(--oc-bar) - 2 * var(--oc-inset)); /* toolbar button tile */
+  /* One block size: pinned tiles, tab rows and the address field in the
+   * navigation row are all --oc-row tall, one step apart. */
   --oc-pinned: var(--oc-row); /* pinned tab tile height */
-  /* The column's default width: three pinned slabs one unit apart. */
+  /* The column's default width. */
   --oc-column: 264px;
   --oc-icon: 16px;          /* every chrome glyph and favicon */
   /* Where icons sit: centred in a --oc-button square that starts on the
@@ -47,13 +59,11 @@
    * any density (compact shrinks the button, so the axis moves with it). */
   --oc-icon-pad: calc((var(--oc-button) - var(--oc-icon)) / 2);
   --oc-icon-axis: calc(var(--oc-inset) + var(--oc-icon-pad));
-  /* The window's head band: the first block of the tab column with an
-   * inset on either side, then one pixel of rule. The navigation row (zen
-   * mode) is this band: its buttons and field sit exactly on the column's
-   * first tile [--oc-inset, --oc-inset + --oc-row], and its rule, the
-   * band's last pixel, continues the rule under the pinned tiles
-   * (tabs.css) across the seam as one line. */
-  --oc-head: calc(2 * var(--oc-inset) + var(--oc-row) + 1px);
+  /* The window's head band: one bar, the pitch of the tab column's first
+   * block. The docked navigation row is this band: its field sits on the
+   * column's first tile [--oc-step / 2, --oc-step / 2 + --oc-row], and
+   * its rule is the band's last pixel. */
+  --oc-head: var(--oc-bar);
   /* Invisible strip at a window edge that reveals hidden chrome
    * (compact's column, zen's navigation row). */
   --oc-trigger: 6px;
@@ -64,10 +74,9 @@
   /* How far the open urlbar card extends past the field (urlbar.css). */
   --oc-launcher-bleed: 8px;
 
+  /* Density no longer sizes rows (the bar does); compact keeps the
+   * narrower column. */
   &[uidensity="compact"] {
-    --oc-toolbar: 34px;
-    --oc-row: 28px;
-    --oc-button: 28px;
     --oc-column: 240px;
   }
 
@@ -76,7 +85,7 @@
   /* The shell's fontconfig monospace, like every other Omarchy app. */
   --oc-font: monospace;
   --oc-font-size: 12px;     /* buttons, menus */
-  --oc-label-size: 13px;    /* tab labels, urlbar */
+  --oc-label-size: 12px;    /* tab labels, urlbar */
 
   /* ---- color: from the generated palette -------------------------- */
 
@@ -148,8 +157,9 @@
   --oc-glow-hint:
     color-mix(in srgb, var(--oc-glow) 8%, transparent), transparent 60%;
   /* The active tab's hairline carries the same light: the glow colour at
-   * the edge the light comes from, settling into the ordinary strong
-   * hairline across the tab. Same direction as --oc-glow-falloff. */
+   * the edge the light comes from, fading out across the tab: no edge
+   * closes the box, so nothing at rest reads as an outline (DEC-104).
+   * Same direction as --oc-glow-falloff. */
   /* Its lit end is a state mark, held to 3:1. Dark
    * palettes' glow clears that at 85% (3.2:1 at worst); a light
    * palette's accent, or a site colour, can sit at 2.2:1 even solid, so
@@ -160,8 +170,8 @@
     color-mix(in srgb, var(--oc-glow) 85%, transparent));
   --oc-glow-edge:
     var(--oc-glow-lead),
-    color-mix(in srgb, var(--oc-glow) 40%, transparent) 40%,
-    var(--oc-line-strong) 85%;
+    color-mix(in srgb, var(--oc-glow) 35%, transparent) 35%,
+    transparent 80%;
   /* Destructive actions (a tab's close button) warn in the palette's red.
    * Firefox has no red theme variable, so like the tab-group swatches it
    * reads the palette directly. */

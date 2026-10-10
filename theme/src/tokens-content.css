@@ -71,8 +71,8 @@
       color-mix(in srgb, var(--oc-glow) 85%, transparent));
     --oc-glow-edge:
       var(--oc-glow-lead),
-      color-mix(in srgb, var(--oc-glow) 40%, transparent) 40%,
-      var(--oc-line-strong) 85%;
+      color-mix(in srgb, var(--oc-glow) 35%, transparent) 35%,
+      transparent 80%;
 
   }
 }

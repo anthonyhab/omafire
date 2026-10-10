@@ -51,6 +51,9 @@ case $2 in
 esac
 EOF
 chmod 755 "$MOCK_BIN/hyprctl"
+# Hermetic GTK text scale: the bar size is divided by it.
+printf '%s\n' '#!/bin/sh' 'echo 0.9091' > "$MOCK_BIN/gsettings"
+chmod 755 "$MOCK_BIN/gsettings"
 install -m 755 "$PROJECT_DIR/packaging/omafire-hook" "$HOOK_SOURCE"
 cp "$TEST_DIR/fixtures/colors.toml" "$THEME_DIR/colors.toml"
 printf '%s\n' 'osaka-jade' > "$THEME_DIR/theme.name"
@@ -176,6 +179,8 @@ for profile in "$RELATIVE_PROFILE" "$ABSOLUTE_PROFILE"; do
   grep -Fqx '  --omarchy-border-width: 2px;' "$profile/chrome/omafire-radius.css"
   grep -Fqx '  --omarchy-border-active-color: #e68e0dff;' "$profile/chrome/omafire-radius.css"
   grep -Fqx '  --omarchy-border-inactive-color: #595959aa;' "$profile/chrome/omafire-radius.css"
+  # No shell.toml in the test home: the default 26px bar.
+  grep -Fqx '  --omarchy-bar-size: 28.6px;' "$profile/chrome/omafire-radius.css"
   # Native widgets (checkboxes, GTK focus rings) follow Hyprland's border.
   grep -Fqx 'user_pref("ui.accentcolor", "#e68e0d");' "$profile/user.js"
   grep -Fq 'user_pref("ui.accentcolortext", "#' "$profile/user.js"

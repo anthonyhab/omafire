@@ -9,6 +9,10 @@
   --urlbar-background-color-focus: var(--oc-panel) !important;
   --urlbar-border-radius: var(--oc-radius-small) !important;
   --urlbar-background-border-radius: var(--oc-radius-small) !important;  /* Nova: a 24px pill */
+  /* Firefox sizes the field's buttons (the engine switcher) on :root, from
+   * its own field height; derive it again here, so a field a layout makes
+   * shorter (the docked row) is not propped open by them. */
+  --urlbar-basic-component-size: calc(var(--urlbar-height) - 2 * var(--urlbar-input-container-padding)) !important;
   /* Open, the card is two halves (Firefox 157): the field's
    * .urlbar-background and the results' .urlbarView-background, clipped to
    * meet at the field's bottom edge. Both frame field and results by one
@@ -40,11 +44,8 @@
   outline: none !important;
 }
 
-/* At rest the field is a box like a pinned tile: its hairline edge over a
- * faint fill. Hovered, the fill deepens and the edge firms up. */
-#urlbar:not([focused], [popover-open]) > .urlbar-background {
-  box-shadow: inset 0 0 0 1px var(--oc-line) !important;
-}
+/* At rest the field is only its faint fill: no outline competes with the
+ * page (DEC-104). Hovered, the fill deepens and the hairline comes in. */
 
 #urlbar:not([focused]):hover > .urlbar-background {
   background-color: var(--oc-field-hover) !important;
@@ -97,7 +98,7 @@
 
 .urlbarView-row {
   --urlbarView-icon-margin-start: 0px !important;
-  --urlbarView-icon-margin-end-base: var(--oc-inset) !important;
+  --urlbarView-icon-margin-end-base: var(--oc-pad) !important;
   min-height: var(--oc-row) !important;
   /* Block flow collapses adjacent margins: one unit between rows, the
    * same pitch as tab rows. */

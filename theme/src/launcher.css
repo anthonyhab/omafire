@@ -45,7 +45,8 @@
  * launcher and zen mode's inline field. */
 
 @media -moz-pref("omafire.layout", "sidebar") and (not -moz-pref("omafire.launcher", "center")),
-       -moz-pref("omafire.zen-mode") and -moz-pref("omafire.zen-mode-active") and (not -moz-pref("omafire.launcher", "center")) {
+       -moz-pref("omafire.zen-mode") and -moz-pref("omafire.zen-mode-active") and (not -moz-pref("omafire.launcher", "center")),
+       -moz-pref("sidebar.verticalTabs") and (not -moz-pref("omafire.launcher", "center")) {
   #main-window:not([customizing]) #urlbar:is([popover-open], [focused]) {
     & > .urlbar-background,
     & > .urlbarView > .urlbarView-background {
@@ -142,10 +143,10 @@
 
       & #urlbar:is([popover-open], [focused]) {
         top: anchor(--oc-page top, 0px) !important;
-        left: calc(anchor(--oc-page left, 0px) + var(--oc-inset)) !important;
-        right: calc(anchor(--oc-page right, 0px) + var(--oc-inset)) !important;
+        left: calc(anchor(--oc-page left, 0px) + var(--oc-pad)) !important;
+        right: calc(anchor(--oc-page right, 0px) + var(--oc-pad)) !important;
         width: auto !important;
-        --urlbar-background-overhang-open: var(--oc-inset) !important;
+        --urlbar-background-overhang-open: var(--oc-pad) !important;
         --urlbarView-joint-background-outset-block: var(--oc-launcher-bleed) !important;
         --oc-urlbar-card-top: 0px;
         animation: oc-drop var(--oc-console-in) var(--oc-ease-enter) !important;
@@ -156,12 +157,12 @@
      * the urlbar is focused: start past the column instead. */
     @media -moz-pref("omafire.compact") and -moz-pref("omafire.layout", "sidebar") {
       #main-window:not([customizing]):has(sidebar-main[expanded]) #urlbar:is([popover-open], [focused]) {
-        left: calc(anchor(--oc-column right, 0px) + var(--oc-gap) + var(--oc-inset)) !important;
+        left: calc(anchor(--oc-column right, 0px) + var(--oc-gap) + var(--oc-pad)) !important;
 
         /* Column on the right: end before it instead. */
         @media not -moz-pref("sidebar.position_start") {
-          left: calc(anchor(--oc-page left, 0px) + var(--oc-inset)) !important;
-          right: calc(anchor(--oc-column left, 0px) + var(--oc-gap) + var(--oc-inset)) !important;
+          left: calc(anchor(--oc-page left, 0px) + var(--oc-pad)) !important;
+          right: calc(anchor(--oc-column left, 0px) + var(--oc-gap) + var(--oc-pad)) !important;
         }
       }
     }

@@ -17,6 +17,9 @@ sidebar-main {
   /* Tool buttons sit on the --oc-inset axis like every other rail item;
    * in the collapsed rail this also sets the rail's width. */
   --sidebar-launcher-button-padding-inline: var(--oc-inset) !important;
+  /* ...and are --oc-button tiles, like the rail's tabs. */
+  --button-size-icon: var(--oc-button) !important;
+  --button-min-height: var(--oc-button) !important;
   /* The expanded tools strip pads itself with --space-medium. */
   --space-medium: var(--oc-inset) !important;
   /* ...and sits --space-small (Nova: 0.5rem, 6.67px) off the window's
@@ -41,7 +44,7 @@ sidebar-main[expanded] {
 /* In the rail the tools are a column padded --space-xxsmall (0.125rem)
  * above and below each: half a unit instead, the tab rows' pitch. */
 sidebar-main:not([expanded]) {
-  --space-xxsmall: calc(var(--oc-u) / 2) !important;
+  --space-xxsmall: calc(var(--oc-step) / 2) !important;
 }
 
 /* The open panel's tool (History while its panel shows) is current, so it

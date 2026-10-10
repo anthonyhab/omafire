@@ -33,7 +33,7 @@ panel[type="arrow"] {
 menupopup > menuitem,
 menupopup > menu {
   min-height: calc(var(--oc-u) * 7) !important;
-  padding-inline: var(--oc-inset) !important;
+  padding-inline: var(--oc-pad) !important;
   border-radius: var(--oc-radius-small) !important;
   margin-inline: var(--oc-u) !important;
 }
@@ -105,7 +105,7 @@ tooltip {
   color: var(--oc-text) !important;
   border: 1px solid var(--oc-line) !important;
   border-radius: var(--oc-radius-small) !important;
-  padding: var(--oc-u) var(--oc-inset) !important;
+  padding: var(--oc-u) var(--oc-pad) !important;
   font-family: var(--oc-font) !important;
   font-size: var(--oc-font-size) !important;
   font-weight: normal !important;
@@ -128,7 +128,7 @@ split-view-footer {
   font-family: var(--oc-font) !important;
   font-size: var(--oc-font-size) !important;
   padding-block: var(--oc-u) !important;
-  padding-inline: var(--oc-inset) !important;
+  padding-inline: var(--oc-pad) !important;
   /* Only the corner facing into the page rounds; the other sits on the
    * content edge. The label moves to the right edge (mirror) when the
    * pointer nears it. */

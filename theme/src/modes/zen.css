@@ -16,7 +16,12 @@
  * The row is parked above the top edge with position: fixed rather than
  * hidden, so Ctrl+L can still focus the urlbar inside it. It is placed
  * with insets, never transforms: a transformed ancestor would become the
- * containing block for toolbar popups and pin them to the moving row. */
+ * containing block for toolbar popups and pin them to the moving row.
+ *
+ * Docked (DEC-104): with vertical tabs the row is this file's head band
+ * whether or not zen mode is on, and it stays open: one bar over the page,
+ * beside the tab column, like another bar of the desktop. Only the drop
+ * launcher docks; the center launcher keeps its float. */
 
 /* The drop's results unroll out of the field's bottom edge. */
 @keyframes oc-unroll {
@@ -24,7 +29,9 @@
   to { clip-path: inset(0); }
 }
 
-@media -moz-pref("omafire.zen-mode") and -moz-pref("omafire.zen-mode-active") and (not -moz-pref("omafire.layout", "sidebar")) {
+@media ((-moz-pref("omafire.zen-mode") and -moz-pref("omafire.zen-mode-active"))
+        or (-moz-pref("sidebar.verticalTabs") and (not -moz-pref("omafire.launcher", "center"))))
+       and (not -moz-pref("omafire.layout", "sidebar")) {
   :root:not([customizing], [popup-window], [taskbartab], [chromehidden~="toolbar"], [inDOMFullscreen]) {
     --oc-zen-open: 0;
     /* The row's own transition, chosen by direction: the console's exit
@@ -203,8 +210,13 @@
         --oc-zen-top: calc(anchor(--oc-page top, 0px) * var(--oc-zen-open)
                            + (var(--oc-zen-open) - 1) * (var(--oc-zen-row) + var(--oc-gap)));
         --oc-zen-row: var(--oc-head);
-        --oc-zen-pad-start: var(--oc-inset);
-        --oc-zen-pad-end: calc(var(--oc-inset) + 1px);
+        /* Docked: always open, nothing to slide or reveal. */
+        --oc-zen-open: 1;
+        --oc-zen-motion: 0s;
+        /* The field on the column's first tile: half a step above it,
+         * half a step below, the rule in the band's last pixel. */
+        --oc-zen-pad-start: calc(var(--oc-step) / 2);
+        --oc-zen-pad-end: calc(var(--oc-step) / 2);
 
         & #urlbar {
           --urlbar-height: var(--oc-row) !important;
@@ -222,11 +234,9 @@
           transition: translate var(--oc-zen-motion) !important;
         }
 
-        /* The trigger spans the page, not the tab column. */
+        /* Docked, so no reveal strip. */
         & #navigator-toolbox::before {
-          top: anchor(--oc-page top, 0px) !important;
-          left: anchor(--oc-page left, 0px) !important;
-          right: anchor(--oc-page right, 0px) !important;
+          display: none !important;
         }
       }
     }

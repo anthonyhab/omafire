@@ -141,10 +141,10 @@ func textOn(p *palette, hex string) string {
 	return p.get("background")
 }
 
-// writeRadiusCSS writes Hyprland's window geometry for the theme: the chrome
-// rounds its cards like the desktop rounds windows. Left untouched when
-// hyprctl is unavailable, so a sync outside Hyprland keeps the last good
-// values.
+// writeRadiusCSS writes the desktop geometry the theme follows: the chrome
+// rounds its cards like Hyprland rounds windows and sizes its rows like the
+// Omarchy bar. Left untouched when hyprctl is unavailable, so a sync
+// outside Hyprland keeps the last good values.
 func writeRadiusCSS(path string) {
 	rounding, ok := hyprInt("decoration:rounding", 64)
 	if !ok {
@@ -160,8 +160,11 @@ func writeRadiusCSS(path string) {
 			}
 		}
 	}
-	css := fmt.Sprintf("%s\n:root {\n  --omafire-radius-container: %dpx;\n%s}\n",
-		ffRadiusMarker, rounding, borders)
+	// The bar's size rides along: it is the chrome's row and rail (DEC-104).
+	bar := barSize(shellValues(themeDir+"/shell.toml", homeDir()+"/.config/omarchy/shell.toml"),
+		barVertical(homeDir()+"/.config/omarchy/shell.json"))
+	css := fmt.Sprintf("%s\n:root {\n  --omafire-radius-container: %dpx;\n%s  --omarchy-bar-size: %s;\n}\n",
+		ffRadiusMarker, rounding, borders, barCSS(bar, textScale()))
 	atomicWrite(path, css, 0o600, false)
 }
 
