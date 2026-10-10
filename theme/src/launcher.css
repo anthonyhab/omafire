@@ -85,6 +85,52 @@
   }
 }
 
+/* Docked row (vertical tabs): no box and no bar. Focus lights the row's
+ * own rule in the accent, one pixel, just under the field (the field ends
+ * a pixel above the band's last one); results hang from that line, which
+ * is also their top edge. Like a terminal's prompt line. */
+@media -moz-pref("sidebar.verticalTabs") and (not -moz-pref("omafire.launcher", "center")) and (not -moz-pref("omafire.layout", "sidebar")) {
+  #main-window:not([customizing]) #urlbar:is([popover-open], [focused]) {
+    & > .urlbar-background {
+      border: none !important;
+      box-shadow: none !important;
+    }
+
+    /* The line is a 1px box's inset shadow on the band's last pixel, as
+     * the row's own rule is (zen.css), so the two rasterise identically at
+     * any scale. */
+    & > .urlbar-background::after {
+      content: "" !important;
+      position: absolute !important;
+      inset-inline: 0 !important;
+      top: var(--urlbar-height) !important;
+      height: 1px !important;
+      box-shadow: inset 0 -1px 0 var(--oc-focus) !important;
+      z-index: 2 !important;
+    }
+
+    & > .urlbarView > .urlbarView-background {
+      border-top: none !important;
+    }
+
+    & .urlbarView {
+      border-top: none !important;
+    }
+
+    /* Open, the results card paints over the field's line: it carries the
+     * same line on its top edge, which is the same pixel. */
+    & .urlbarView::before {
+      content: "" !important;
+      position: absolute !important;
+      inset-inline: 0 !important;
+      top: 0 !important;
+      height: 1px !important;
+      box-shadow: inset 0 -1px 0 var(--oc-focus) !important;
+      z-index: 2 !important;
+    }
+  }
+}
+
 /* ---- launcher -------------------------------------------------------- */
 
 @media -moz-pref("omafire.layout", "sidebar"),
