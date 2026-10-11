@@ -64,6 +64,7 @@ diff -r "$PROJECT_DIR/shell/omafire" "$PACKAGE_ROOT/usr/share/omafire/shell/omaf
 grep -Fq 'resource://omafire/config.sys.mjs' "$FIREFOX_DIR/omafire.cfg"
 cmp "$PROJECT_DIR/chrome/config.sys.mjs" "$FIREFOX_DIR/omafire/config.sys.mjs"
 cmp "$PROJECT_DIR/chrome/pseudo-state.sys.mjs" "$FIREFOX_DIR/omafire/pseudo-state.sys.mjs"
+cmp "$PROJECT_DIR/chrome/site-scheme.sys.mjs" "$FIREFOX_DIR/omafire/site-scheme.sys.mjs"
 # The new tab page, served as chrome://omafire/ by the manifest beside it.
 cmp "$PROJECT_DIR/chrome/chrome.manifest" "$FIREFOX_DIR/omafire/chrome.manifest"
 diff -r "$PROJECT_DIR/chrome/newtab" "$FIREFOX_DIR/omafire/newtab"

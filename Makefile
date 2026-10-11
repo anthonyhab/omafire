@@ -37,6 +37,7 @@ install: all
 	install -Dm644 -t "$(DESTDIR)$(FIREFOX_DIR)/omafire" chrome/scripts/*.uc.js
 	install -Dm644 chrome/config.sys.mjs "$(DESTDIR)$(FIREFOX_DIR)/omafire/config.sys.mjs"
 	install -Dm644 chrome/pseudo-state.sys.mjs "$(DESTDIR)$(FIREFOX_DIR)/omafire/pseudo-state.sys.mjs"
+	install -Dm644 chrome/site-scheme.sys.mjs "$(DESTDIR)$(FIREFOX_DIR)/omafire/site-scheme.sys.mjs"
 	install -Dm644 chrome/chrome.manifest "$(DESTDIR)$(FIREFOX_DIR)/omafire/chrome.manifest"
 	install -Dm644 -t "$(DESTDIR)$(FIREFOX_DIR)/omafire/newtab" chrome/newtab/*
 	install -Dm644 config/schema.json "$(DESTDIR)$(FIREFOX_DIR)/omafire/config-schema.json"
