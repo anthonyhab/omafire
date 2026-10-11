@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "omafire",
   "name": "Omafire",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "author": "habibe",
   "license": "MIT",
   "description": "Firefox's Omafire settings and the state of each browser profile, from ~/.config/omafire/config.json. Installed and enabled by `omafire setup`.",
