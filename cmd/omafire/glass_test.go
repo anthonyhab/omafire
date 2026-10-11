@@ -45,8 +45,8 @@ func TestGlassFloorWallpapers(t *testing.T) {
 	// No Hyprland, so blur reads false even inside a session.
 	t.Setenv("HYPRLAND_INSTANCE_SIGNATURE", "")
 	t.Setenv("PATH", t.TempDir())
-	hyprReplies = map[string]hyprReply{}
-	t.Cleanup(func() { hyprReplies = map[string]hyprReply{} })
+	hyprReset()
+	t.Cleanup(hyprReset)
 	writePNG := func(name string, c color.Color) {
 		img := image.NewRGBA(image.Rect(0, 0, 64, 36))
 		for y := range 36 {

@@ -2,11 +2,8 @@ package main
 
 import (
 	"fmt"
-	"io"
-	"net"
 	"os"
 	"strings"
-	"time"
 )
 
 // rawPaletteVars renders every palette color as --omarchy-<key>. The theme
@@ -45,59 +42,6 @@ func writeContentPaletteCSS(p *palette, path string) {
 		":root {\n  --omarchy-color-scheme: " + p.mode + ";\n}\n\n" +
 		rawPaletteVars(p) + highlightVars(p)
 	atomicWrite(path, css, 0o600, false)
-}
-
-// hyprOption is a `hyprctl getoption -j` reply; ok is false without
-// Hyprland (a TTY, a test sandbox). Each option is asked once per run: a
-// sync reads the active border four times.
-//
-// It asks Hyprland's socket itself, as hyprctl does. A sync runs while a
-// theme switch starts every app's retint at once, and there one hyprctl
-// start (twenty shared libraries) took 385 ms of the ~450 ms Firefox
-// waited for its palette.
-func hyprOption(option string) (string, bool) {
-	if reply, ok := hyprReplies[option]; ok {
-		return reply.out, reply.ok
-	}
-	out, ok := hyprSocketRequest("j/getoption " + option)
-	if !ok {
-		status, reply := runCommand([]string{"hyprctl", "getoption", option, "-j"}, true)
-		out, ok = reply, status == 0
-	}
-	hyprReplies[option] = hyprReply{out, ok}
-	return out, ok
-}
-
-type hyprReply struct {
-	out string
-	ok  bool
-}
-
-var hyprReplies = map[string]hyprReply{}
-
-// hyprSocketRequest sends one request to the running Hyprland's control
-// socket and returns the reply; ok is false without one, or on an error
-// reply, so the caller falls back to hyprctl.
-func hyprSocketRequest(request string) (string, bool) {
-	signature := os.Getenv("HYPRLAND_INSTANCE_SIGNATURE")
-	runtime := os.Getenv("XDG_RUNTIME_DIR")
-	if signature == "" || runtime == "" || strings.Contains(signature, "/") {
-		return "", false
-	}
-	conn, err := net.DialTimeout("unix", runtime+"/hypr/"+signature+"/.socket.sock", time.Second)
-	if err != nil {
-		return "", false
-	}
-	defer conn.Close()
-	_ = conn.SetDeadline(time.Now().Add(2 * time.Second))
-	if _, err := io.WriteString(conn, request); err != nil {
-		return "", false
-	}
-	reply, err := io.ReadAll(conn)
-	if err != nil || len(reply) == 0 || !strings.HasPrefix(strings.TrimSpace(string(reply)), "{") {
-		return "", false
-	}
-	return string(reply), true
 }
 
 // hyprInt is the reply's "int" field, within [0, max].
