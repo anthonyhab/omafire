@@ -6,8 +6,16 @@
 // own pages (settings, add-ons) are painted from. A sync rewrites them, then
 // theme.json, which `omafire watch` reports (config.sys.mjs passes it on as
 // omafire-palette-changed); this rereads them and lays their values over
-// the startup copies as one user sheet, which reaches chrome and content
-// documents alike.
+// the startup copies.
+//
+// In two steps, since anything every document sees (a user sheet from the
+// style sheet service, a page colour pref) restyles every open page at
+// once: ~250 ms of the main thread with a dozen tabs open, longer the more
+// and heavier they are. First this window's own sheet, which restyles only
+// the window: the toolbars change on the next frame. Then, once that frame
+// is painted, the rest together, in one restyle: the user sheet that
+// reaches every chrome and about: document (the new tab page, sidebars,
+// settings) and the page palette.
 // Loaded into each browser window by omafire.cfg.
 (function () {
   "use strict";
@@ -27,33 +35,49 @@
   const chromeDir = Services.dirsvc.get("UChrm", Ci.nsIFile).path;
   const file = name => PathUtils.join(chromeDir, name);
 
-  async function vars(name) {
-    try {
-      const text = await IOUtils.readUTF8(file(name));
-      // Every plain variable: the glass floor and the content palette's
-      // highlight colours are --omafire-*, the Firefox theme values
-      // --omafire-ff-*. The Firefox variables that read those (!important
-      // in the file) stay as they are.
-      return [...text.matchAll(/^\s*(--[\w-]+)\s*:\s*([^;!]+?)\s*;/gm)]
-        .map(([, prop, value]) => `${prop}: ${value} !important;`);
-    } catch {
-      return [];
-    }
-  }
+  // Every plain variable: the glass floor and the content palette's
+  // highlight colours are --omafire-*, the Firefox theme values
+  // --omafire-ff-*. The Firefox variables that read those (!important in
+  // the file) stay as they are.
+  const vars = text => [...text.matchAll(/^\s*(--[\w-]+)\s*:\s*([^;!]+?)\s*;/gm)]
+    .map(([, prop, value]) => `${prop}: ${value} !important;`);
 
   async function build() {
-    const [chrome, content, geometry] = await Promise.all([
-      vars("omafire-palette.css"),
-      vars("omafire-content-palette.css"),
-      vars("omafire-radius.css"),
-    ]);
+    const [chromeText, contentText, geometryText] = await Promise.all(
+      ["omafire-palette.css", "omafire-content-palette.css", "omafire-radius.css"]
+        .map(name => IOUtils.readUTF8(file(name)).catch(() => "")));
+    const [chrome, content, geometry] = [chromeText, contentText, geometryText].map(vars);
     if (!chrome.length && !content.length && !geometry.length) {
       return null;
     }
-    const block = decls => `:root { ${decls.join(" ")} }`;
-    return `@-moz-document url-prefix("chrome:") { ${block([...chrome, ...geometry])} }\n`
-      + `@-moz-document url-prefix("about:") { ${block([...content, ...geometry])} }\n`;
+    const decls = [...chrome, ...geometry].join(" ");
+    return {
+      // more specific than the user sheet's :root, so it wins over that
+      // sheet's previous palette until the second step replaces it
+      window: `:root:not(#omafire-live-palette) { ${decls} }`,
+      everywhere: `@-moz-document url-prefix("chrome:") { :root { ${decls} } }\n`
+        + `@-moz-document url-prefix("about:") { :root { ${[...content, ...geometry].join(" ")} } }\n`,
+      contentText,
+    };
   }
+
+  // This window's sheet: a data: URI, replaced on each switch.
+  let windowSheet = "";
+  function swapWindowSheet(css) {
+    const uri = "data:text/css;charset=utf-8," + encodeURIComponent(css);
+    if (uri === windowSheet) {
+      return;
+    }
+    const utils = window.windowUtils;
+    utils.loadSheetUsingURIString(uri, utils.USER_SHEET);
+    if (windowSheet) {
+      utils.removeSheetUsingURIString(windowSheet, utils.USER_SHEET);
+    }
+    windowSheet = uri;
+  }
+
+  const painted = () => new Promise(resolve =>
+    window.requestAnimationFrame(() => setTimeout(resolve, 0)));
 
   // The page palette Firefox's forced colours paint from (the colour
   // override, and Cinder on top of it): omafire sync writes it to user.js,
@@ -68,8 +92,7 @@
     "ui.mark": "--omafire-mark",
     "ui.marktext": "--omafire-mark-text",
   };
-  async function pagePalette() {
-    const text = await IOUtils.readUTF8(file("omafire-content-palette.css")).catch(() => "");
+  function pagePalette(text) {
     // the scheme sites see: dark or light, as the theme is (sync's user.js
     // content-override, which is read at startup)
     const scheme = text.match(/--omarchy-color-scheme\s*:\s*(dark|light)/);
@@ -123,9 +146,14 @@
       do {
         again = false;
         const css = await build();
-        if (css && swap(CURRENT, css)) {
-          // the new tab page reads its text colours from the sheet
-          Services.obs.notifyObservers(null, APPLIED);
+        if (css) {
+          swapWindowSheet(css.window);
+          await painted();
+          pagePalette(css.contentText);
+          if (swap(CURRENT, css.everywhere)) {
+            // the new tab page reads its text colours from the sheet
+            Services.obs.notifyObservers(null, APPLIED);
+          }
         }
         // a light palette wants a deeper site colour
         window.OmafireSiteColors?.paint();
@@ -148,7 +176,6 @@
 
   const observer = {
     observe() {
-      pagePalette().catch(e => console.error("[omafire:live-palette]", e));
       refresh().catch(e => console.error("[omafire:live-palette]", e));
     },
   };
