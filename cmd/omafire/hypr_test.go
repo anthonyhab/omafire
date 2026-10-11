@@ -10,8 +10,8 @@ import (
 )
 
 // fakeHyprland serves Hyprland's control socket under a fresh runtime dir,
-// answering each getoption from replies, and points themeDir at an empty
-// theme. It returns the request counter.
+// answering each getoption from replies, with no OMAFIRE_HYPR_THEME. It
+// returns the request counter.
 func fakeHyprland(t *testing.T, replies map[string]string) *atomic.Int32 {
 	t.Helper()
 	runtime, err := os.MkdirTemp("/tmp", "omafire-hypr-")
@@ -33,9 +33,7 @@ func fakeHyprland(t *testing.T, replies map[string]string) *atomic.Int32 {
 	// No hyprctl: a request that misses the socket must fail, not reach
 	// the real compositor.
 	t.Setenv("PATH", t.TempDir())
-	saved := themeDir
-	themeDir = t.TempDir()
-	t.Cleanup(func() { themeDir = saved })
+	t.Setenv("OMAFIRE_HYPR_THEME", "")
 	hyprReset()
 	t.Cleanup(hyprReset)
 
@@ -90,20 +88,18 @@ func TestHyprOptionErrorReplyIsNotAnOption(t *testing.T) {
 	}
 }
 
-// The theme's hyprland.lua answers what it sets, without asking Hyprland:
-// sync runs while Hyprland is being handed that theme. What it leaves
-// alone still comes from Hyprland.
+// OMAFIRE_HYPR_THEME answers what it sets, without asking Hyprland: sync
+// runs while Hyprland is being handed that theme. What it leaves alone
+// still comes from Hyprland.
 func TestHyprOptionReadsTheThemeFirst(t *testing.T) {
 	requests := fakeHyprland(t, map[string]string{
 		"general:col.active_border":   `{"option":"general:col.active_border","gradient":"ff000000 0deg","set":true}`,
 		"general:col.inactive_border": `{"option":"general:col.inactive_border","gradient":"aa595959 0deg","set":true}`,
 		"decoration:rounding":         `{"option":"decoration:rounding","int":9,"set":true}`,
 	})
-	// Kanagawa's shape: an active border only, and an o.* call.
-	os.WriteFile(themeDir+"/hyprland.lua", []byte(`local active_border_color = "rgb(dcd7ba)"
-hl.config({ general = { col = { active_border = active_border_color } } })
-o.transparent_window({ tag = "terminal" }, "0.99 0.985")
-`), 0o600)
+	theme := filepath.Join(t.TempDir(), "theme.json")
+	os.WriteFile(theme, []byte(`{"general":{"col":{"active_border":"rgb(dcd7ba)"}}}`), 0o600)
+	t.Setenv("OMAFIRE_HYPR_THEME", theme)
 
 	if got, ok := hyprBorderColor("general:col.active_border"); !ok || got != "#dcd7baff" {
 		t.Fatalf("active border = %q, %v; want the theme's", got, ok)
@@ -116,29 +112,21 @@ o.transparent_window({ tag = "terminal" }, "0.99 0.985")
 	}
 }
 
-func TestThemeHyprOptions(t *testing.T) {
-	path := filepath.Join(t.TempDir(), "hyprland.lua")
+func TestHyprThemeOptions(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "theme.json")
 	write := func(source string) map[string]string {
 		os.WriteFile(path, []byte(source), 0o600)
-		return themeHyprOptions(path)
+		return hyprThemeOptions(path)
 	}
 
-	// Omarchy's template, rendered.
-	got := write(`local active_border_color = "#BB9AF7"
-local inactive_border_color = "rgba(595959aa)"
-hl.config({
-  general = { col = { active_border = active_border_color, inactive_border = inactive_border_color } },
-  group = { col = { border_active = active_border_color, border_inactive = inactive_border_color } },
-})`)
+	got := write(`{"general":{"col":{"active_border":"#BB9AF7","inactive_border":"rgba(595959aa)"}}}`)
 	if !strings.Contains(got["general:col.active_border"], `"ffbb9af7 0deg"`) ||
 		!strings.Contains(got["general:col.inactive_border"], `"aa595959 0deg"`) {
-		t.Errorf("template: %v", got)
+		t.Errorf("colours: %v", got)
 	}
 
-	// A gradient, and calls merged over each other.
-	got = write(`local a = { colors = { "rgba(8a8588ee)", "rgba(e2dddcee)" }, angle = 45 }
-hl.config({ general = { col = { active_border = a } } })
-hl.config({ decoration = { rounding = 0, blur = { enabled = false } }, general = { border_size = 3 } })`)
+	got = write(`{"general":{"col":{"active_border":{"colors":["rgba(8a8588ee)","rgba(e2dddcee)"],"angle":45}},"border_size":3},
+		"decoration":{"rounding":0,"blur":{"enabled":false}}}`)
 	want := map[string]string{
 		"general:col.active_border": `"ee8a8588 eee2dddc 45deg"`,
 		"decoration:rounding":       `"int":0`,
@@ -151,19 +139,16 @@ hl.config({ decoration = { rounding = 0, blur = { enabled = false } }, general =
 		}
 	}
 	if _, ok := got["general:col.inactive_border"]; ok {
-		t.Errorf("inactive border answered though the theme doesn't set it")
+		t.Errorf("inactive border answered though the file doesn't set it")
 	}
 
-	// Errors, sandboxed libraries and runaway loops answer nothing.
-	for _, source := range []string{
-		`hl.config({ general = { col = { active_border = "#BB9AF7" } } }) error("x")`,
-		`io.open("/etc/passwd")`,
-		`while true do end`,
-		`hl.config({ general = { col = { active_border = "teal" } } })`,
-	} {
+	for _, source := range []string{`not json`, `{"general":{"col":{"active_border":"teal"}}}`, `{"decoration":{"rounding":1.5}}`} {
 		if got := write(source); len(got) != 0 {
 			t.Errorf("%q answered %v", source, got)
 		}
+	}
+	if got := hyprThemeOptions(""); len(got) != 0 {
+		t.Errorf("no file answered %v", got)
 	}
 }
 

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"math"
@@ -11,8 +11,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	lua "github.com/yuin/gopher-lua"
 )
 
 // The Hyprland options sync reads: the chrome follows the desktop's
@@ -26,15 +24,15 @@ var hyprOptions = []string{
 }
 
 // hyprOption is a `hyprctl getoption -j` reply; ok is false without
-// Hyprland (a TTY, a test sandbox).
+// Hyprland (a TTY, a test sandbox). Hyprland is asked over its socket, as
+// hyprctl does, every option at once when sync starts.
 //
-// An option the theme's hyprland.lua sets is answered from that file:
-// omarchy-theme-set syncs as soon as the theme is swapped in, before
-// Hyprland is handed it, so Hyprland would still report the outgoing
-// theme. An option the theme leaves alone is the same before and after
-// the switch (the theme's settings are applied over the running config),
-// so Hyprland is asked for it, over its socket as hyprctl does, all at
-// once when sync starts.
+// Except, with OMAFIRE_HYPR_THEME, for the options that file sets: the
+// caller is about to hand Hyprland a theme, and the file holds what
+// Hyprland will hold of it once it has (the theme's settings the user's
+// config doesn't override). Sync then needn't wait for the switch, which
+// keeps Hyprland busy for ~50 ms after (each answer waits for a frame);
+// the options the file leaves out are the same before and after it.
 func hyprOption(option string) (string, bool) {
 	hyprOnce.Do(hyprPrefetch)
 	hyprMu.Lock()
@@ -66,10 +64,10 @@ func hyprReset() {
 	hyprReplies = map[string]hyprReply{}
 }
 
-// hyprPrefetch answers every option sync reads: from the theme where it
-// sets one, else from Hyprland, the requests in flight together.
+// hyprPrefetch answers every option sync reads: from OMAFIRE_HYPR_THEME
+// where it sets one, else from Hyprland, the requests in flight together.
 func hyprPrefetch() {
-	theme := themeHyprOptions(themeDir + "/hyprland.lua")
+	theme := hyprThemeOptions(os.Getenv("OMAFIRE_HYPR_THEME"))
 	var asked []string
 	for _, option := range hyprOptions {
 		if out, ok := theme[option]; ok {
@@ -122,80 +120,31 @@ func hyprSocketRequest(request string) (string, bool) {
 	return string(reply), true
 }
 
-// themeHyprOptions runs the theme's hyprland.lua with hl.config captured
-// and answers, in hyprctl's reply format, each option of hyprOptions it
-// sets to a value read here. Omarchy's template and its themes set the
-// borders from locals, some as gradient tables, so the file is run rather
-// than matched. Only the base, table, string and math libraries are open
-// (os.getenv aside), every other hl.* and o.* call is a no-op, and a run
-// gets 100 ms.
-func themeHyprOptions(path string) map[string]string {
+// hyprThemeOptions answers, in hyprctl's reply format, each option of
+// hyprOptions the file at path sets. The file is the theme's hl.config
+// tree as JSON ({"general": {"col": {"active_border": "rgb(dcd7ba)"}}});
+// a border may be a gradient, {"colors": [...], "angle": 45}.
+func hyprThemeOptions(path string) map[string]string {
 	out := map[string]string{}
-	source, err := os.ReadFile(path)
+	if path == "" {
+		return out
+	}
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return out
 	}
-	L := lua.NewState(lua.Options{SkipOpenLibs: true})
-	defer L.Close()
-	for _, lib := range []struct {
-		name string
-		open lua.LGFunction
-	}{{lua.BaseLibName, lua.OpenBase}, {lua.TabLibName, lua.OpenTable},
-		{lua.StringLibName, lua.OpenString}, {lua.MathLibName, lua.OpenMath}} {
-		L.Push(L.NewFunction(lib.open))
-		L.Push(lua.LString(lib.name))
-		L.Call(1, 0)
-	}
-	for _, name := range []string{"dofile", "loadfile", "load", "loadstring", "require", "module"} {
-		L.SetGlobal(name, lua.LNil)
-	}
-	osTable := L.NewTable()
-	osTable.RawSetString("getenv", L.NewFunction(func(L *lua.LState) int {
-		L.Push(lua.LString(os.Getenv(L.CheckString(1))))
-		return 1
-	}))
-	L.SetGlobal("os", osTable)
-
-	config := L.NewTable()
-	noop := L.NewFunction(func(*lua.LState) int { return 0 })
-	stub := func(fields map[string]lua.LValue) *lua.LTable {
-		t := L.NewTable()
-		for k, v := range fields {
-			t.RawSetString(k, v)
-		}
-		meta := L.NewTable()
-		meta.RawSetString("__index", L.NewFunction(func(L *lua.LState) int {
-			L.Push(noop)
-			return 1
-		}))
-		L.SetMetatable(t, meta)
-		return t
-	}
-	L.SetGlobal("hl", stub(map[string]lua.LValue{
-		"config": L.NewFunction(func(L *lua.LState) int {
-			if t, ok := L.Get(1).(*lua.LTable); ok {
-				luaMerge(L, config, t)
-			}
-			return 0
-		}),
-	}))
-	L.SetGlobal("o", stub(nil))
-
-	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
-	defer cancel()
-	L.SetContext(ctx)
-	if err := L.DoString(string(source)); err != nil {
+	var config map[string]any
+	if json.Unmarshal(data, &config) != nil {
 		return out
 	}
-
-	lookup := func(keys ...string) lua.LValue {
-		var v lua.LValue = config
+	lookup := func(keys ...string) any {
+		var v any = config
 		for _, k := range keys {
-			t, ok := v.(*lua.LTable)
+			m, ok := v.(map[string]any)
 			if !ok {
-				return lua.LNil
+				return nil
 			}
-			v = t.RawGetString(k)
+			v = m[k]
 		}
 		return v
 	}
@@ -211,14 +160,14 @@ func themeHyprOptions(path string) map[string]string {
 		"general:border_size": {"general", "border_size"},
 		"decoration:rounding": {"decoration", "rounding"},
 	} {
-		if n, ok := lookup(keys...).(lua.LNumber); ok && float64(n) == math.Trunc(float64(n)) {
+		if n, ok := lookup(keys...).(float64); ok && n == math.Trunc(n) {
 			out[option] = fmt.Sprintf(`{"option":%q,"int":%d,"set":true}`, option, int64(n))
 		}
 	}
 	switch v := lookup("decoration", "blur", "enabled").(type) {
-	case lua.LBool:
-		out["decoration:blur:enabled"] = fmt.Sprintf(`{"option":"decoration:blur:enabled","bool":%t,"set":true}`, bool(v))
-	case lua.LNumber:
+	case bool:
+		out["decoration:blur:enabled"] = fmt.Sprintf(`{"option":"decoration:blur:enabled","bool":%t,"set":true}`, v)
+	case float64:
 		if v == 0 || v == 1 {
 			out["decoration:blur:enabled"] = fmt.Sprintf(`{"option":"decoration:blur:enabled","bool":%t,"set":true}`, v == 1)
 		}
@@ -226,62 +175,37 @@ func themeHyprOptions(path string) map[string]string {
 	return out
 }
 
-// luaMerge copies src into dst, merging nested tables: Hyprland applies
-// each hl.config call over the last.
-func luaMerge(L *lua.LState, dst, src *lua.LTable) {
-	src.ForEach(func(k, v lua.LValue) {
-		if t, ok := v.(*lua.LTable); ok && !luaIsGradient(t) {
-			sub, ok := dst.RawGet(k).(*lua.LTable)
-			if !ok {
-				sub = L.NewTable()
-				dst.RawSet(k, sub)
-			}
-			luaMerge(L, sub, t)
-			return
-		}
-		dst.RawSet(k, v)
-	})
-}
-
-func luaIsGradient(t *lua.LTable) bool {
-	_, ok := t.RawGetString("colors").(*lua.LTable)
-	return ok
-}
-
 // hyprGradient is a border value as Hyprland reports it: "AARRGGBB ...
-// <angle>deg". A string is one colour at 0deg; a table is { colors = {...},
-// angle = n }.
-func hyprGradient(v lua.LValue) (string, bool) {
+// <angle>deg". A string is one colour at 0deg; a gradient is {"colors":
+// [...], "angle": n}.
+func hyprGradient(v any) (string, bool) {
 	var colors []string
 	angle := 0.0
 	switch v := v.(type) {
-	case lua.LString:
-		c, ok := hyprColor(string(v))
+	case string:
+		c, ok := hyprColor(v)
 		if !ok {
 			return "", false
 		}
 		colors = []string{c}
-	case *lua.LTable:
-		list, ok := v.RawGetString("colors").(*lua.LTable)
-		if !ok {
+	case map[string]any:
+		list, ok := v["colors"].([]any)
+		if !ok || len(list) == 0 {
 			return "", false
 		}
-		for i := 1; i <= list.Len(); i++ {
-			s, ok := list.RawGetInt(i).(lua.LString)
+		for _, item := range list {
+			s, ok := item.(string)
 			if !ok {
 				return "", false
 			}
-			c, ok := hyprColor(string(s))
+			c, ok := hyprColor(s)
 			if !ok {
 				return "", false
 			}
 			colors = append(colors, c)
 		}
-		if len(colors) == 0 {
-			return "", false
-		}
-		if a, ok := v.RawGetString("angle").(lua.LNumber); ok {
-			angle = float64(a)
+		if a, ok := v["angle"].(float64); ok {
+			angle = a
 		}
 	default:
 		return "", false
