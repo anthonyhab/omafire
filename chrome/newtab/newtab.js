@@ -1900,15 +1900,11 @@
     settings = normalize(readPref(SETTINGS_PREF));
     applySettings();
   };
-  /* A theme switch: the palette sheet changes first (live-palette.uc.js). */
-  let paletteTimer = null;
-  const onPalette = () => {
-    clearTimeout(paletteTimer);
-    paletteTimer = setTimeout(applyPalette, 300);
-  };
+  /* A theme switch: live-palette.uc.js says once its sheet is in place. */
+  const onPalette = () => applyPalette();
   const onWallpaper = () => void loadBackdrop();
   prefs.addObserver(SETTINGS_PREF, onSettings);
-  Services.obs.addObserver(onPalette, "omafire-palette-changed");
+  Services.obs.addObserver(onPalette, "omafire-palette-applied");
   Services.obs.addObserver(onWallpaper, "omafire-wallpaper-changed");
   /* A preloaded or background tab catches up when shown. */
   document.addEventListener("visibilitychange", () => {
@@ -1920,7 +1916,7 @@
   });
   window.addEventListener("unload", () => {
     prefs.removeObserver(SETTINGS_PREF, onSettings);
-    Services.obs.removeObserver(onPalette, "omafire-palette-changed");
+    Services.obs.removeObserver(onPalette, "omafire-palette-applied");
     Services.obs.removeObserver(onWallpaper, "omafire-wallpaper-changed");
   }, { once: true });
 })();

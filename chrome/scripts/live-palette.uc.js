@@ -16,6 +16,7 @@
   }
 
   const TOPIC = "omafire-palette-changed";
+  const APPLIED = "omafire-palette-applied";
   // Remembers the registered sheet across windows. A default-branch pref
   // is never written to prefs.js, so it lasts exactly one session.
   const CURRENT = "omafire.internal.live-palette-sheet";
@@ -87,12 +88,13 @@
     }
   }
 
-  // Replace the user sheet remembered under `key` with `css`.
+  // Replace the user sheet remembered under `key` with `css`; false when
+  // it is already in place.
   function swap(key, css) {
     const uri = "data:text/css;charset=utf-8," + encodeURIComponent(css);
     const previous = defaults.getStringPref(key, "");
     if (previous === uri) {
-      return;             // another window got there first
+      return false;       // another window got there first
     }
     const next = Services.io.newURI(uri);
     if (!sss.sheetRegistered(next, sss.USER_SHEET)) {
@@ -105,16 +107,31 @@
       }
     }
     defaults.setStringPref(key, uri);
+    return true;
   }
 
-  let timer = null;
+  // One refresh at a time; a sync that lands during one (a quick run of
+  // theme previews) gets one more after it, which reads the latest files.
+  let running = null;
+  let again = false;
   async function refresh() {
-    const css = await build();
-    if (css) {
-      swap(CURRENT, css);
+    if (running) {
+      again = true;
+      return running;
     }
-    // a light palette wants a deeper site colour
-    window.OmafireSiteColors?.paint();
+    running = (async () => {
+      do {
+        again = false;
+        const css = await build();
+        if (css && swap(CURRENT, css)) {
+          // the new tab page reads its text colours from the sheet
+          Services.obs.notifyObservers(null, APPLIED);
+        }
+        // a light palette wants a deeper site colour
+        window.OmafireSiteColors?.paint();
+      } while (again);
+    })().finally(() => { running = null; });
+    return running;
   }
 
   // Glass pages take the chrome's glass alpha (the theme's content.css).
@@ -132,14 +149,11 @@
   const observer = {
     observe() {
       pagePalette().catch(e => console.error("[omafire:live-palette]", e));
-      // A quick run of syncs (theme previews) settles once.
-      clearTimeout(timer);
-      timer = setTimeout(() => refresh().catch(e => console.error("[omafire:live-palette]", e)), 100);
+      refresh().catch(e => console.error("[omafire:live-palette]", e));
     },
   };
   Services.obs.addObserver(observer, TOPIC);
   window.addEventListener("unload", () => {
-    clearTimeout(timer);
     Services.obs.removeObserver(observer, TOPIC);
     Services.prefs.removeObserver(ALPHA, glassAlpha);
   }, {once: true});
