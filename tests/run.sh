@@ -7,6 +7,9 @@ PROJECT_DIR=$(dirname "$SCRIPT_DIR")
 
 make -C "$PROJECT_DIR" all >/dev/null
 export OMAFIRE_BIN="$PROJECT_DIR/build/omafire"
+# sync asks Hyprland's socket before hyprctl; without this a run inside a
+# session would read the live compositor instead of the tests' hyprctl mocks.
+unset HYPRLAND_INSTANCE_SIGNATURE
 
 bash -n \
   "$PROJECT_DIR/packaging/omafire-hook" \

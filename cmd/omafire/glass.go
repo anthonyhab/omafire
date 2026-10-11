@@ -1,11 +1,13 @@
 package main
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
+	"io"
 	"math"
 	"os"
 	"path/filepath"
@@ -221,13 +223,31 @@ func hyprBlur() bool {
 	return ok && value == 1
 }
 
-// glassCacheEntry is one wallpaper's extremes, valid while the file's size
-// and modification time hold: decoding a theme's wallpapers takes seconds,
-// a theme switch shouldn't.
+// glassCacheEntry is one wallpaper's extremes, keyed by blur and the
+// file's SHA-256: decoding a theme's wallpapers takes hundreds of
+// milliseconds, a theme switch shouldn't. Not by path, size and mtime:
+// omarchy-theme-set copies the theme in afresh on every switch, so those
+// never matched and every switch decoded every wallpaper again. Hashing a
+// theme's backgrounds takes a few milliseconds.
 type glassCacheEntry struct {
-	Size    int64         `json:"size"`
-	ModTime int64         `json:"mtime"`
 	Patches [2][3]float64 `json:"patches"`
+}
+
+// glassCacheKeyPrefix marks content keys. A cache from before them, keyed
+// by path, is dropped on the next write.
+const glassCacheKeyPrefix = "sha256:"
+
+func glassCacheKey(blur bool, path string) (string, bool) {
+	f, err := os.Open(path)
+	if err != nil {
+		return "", false
+	}
+	defer f.Close()
+	sum := sha256.New()
+	if _, err := io.Copy(sum, f); err != nil {
+		return "", false
+	}
+	return fmt.Sprintf("%s%x:%t", glassCacheKeyPrefix, sum.Sum(nil), blur), true
 }
 
 // glassFloor measures the palette against the wallpapers. With no still
@@ -245,8 +265,15 @@ func glassFloor(p *palette) float64 {
 	if data, err := os.ReadFile(cachePath); err == nil {
 		json.Unmarshal(data, &cache)
 	}
-	// Measure what the cache lacks, every wallpaper at once: a theme seen
-	// for the first time costs its slowest decode, not their sum.
+	stale := false
+	for key := range cache {
+		if !strings.HasPrefix(key, glassCacheKeyPrefix) {
+			delete(cache, key)
+			stale = true
+		}
+	}
+	// Hash, and measure what the cache lacks, every wallpaper at once: a
+	// theme seen for the first time costs its slowest decode, not their sum.
 	type measured struct {
 		key     string
 		entry   glassCacheEntry
@@ -260,23 +287,26 @@ func glassFloor(p *palette) float64 {
 		if err != nil || !st.Mode().IsRegular() {
 			continue
 		}
-		m := &measured{key: fmt.Sprintf("%t:%s", blur, path)}
+		m := &measured{}
 		found = append(found, m)
-		size, mtime := st.Size(), st.ModTime().UnixNano()
-		if entry, hit := cache[m.key]; hit && entry.Size == size && entry.ModTime == mtime {
-			m.entry, m.ok = entry, true
-			continue
-		}
-		m.pending = true
 		wg.Go(func() {
+			key, ok := glassCacheKey(blur, path)
+			if !ok {
+				return
+			}
+			m.key = key
+			if entry, hit := cache[key]; hit {
+				m.entry, m.ok = entry, true
+				return
+			}
 			if patches, ok := wallpaperExtremes(path, blur); ok {
-				m.entry = glassCacheEntry{size, mtime, [2][3]float64{patches[0], patches[1]}}
-				m.ok = true
+				m.entry = glassCacheEntry{[2][3]float64{patches[0], patches[1]}}
+				m.ok, m.pending = true, true
 			}
 		})
 	}
 	wg.Wait()
-	changed := false
+	changed := stale
 	var backdrops []srgb
 	for _, m := range found {
 		if !m.ok {

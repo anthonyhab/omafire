@@ -42,6 +42,11 @@ func TestGlassFloorWallpapers(t *testing.T) {
 	dir := t.TempDir()
 	themeDir, stateDir, backgroundLink = dir, dir+"/state", dir+"/none"
 	os.Mkdir(dir+"/backgrounds", 0o700)
+	// No Hyprland, so blur reads false even inside a session.
+	t.Setenv("HYPRLAND_INSTANCE_SIGNATURE", "")
+	t.Setenv("PATH", t.TempDir())
+	hyprReplies = map[string]hyprReply{}
+	t.Cleanup(func() { hyprReplies = map[string]hyprReply{} })
 	writePNG := func(name string, c color.Color) {
 		img := image.NewRGBA(image.Rect(0, 0, 64, 36))
 		for y := range 36 {
@@ -67,15 +72,32 @@ func TestGlassFloorWallpapers(t *testing.T) {
 		t.Errorf("white wallpaper: floor %.2f, want 0.88", got)
 	}
 	cache, err := os.ReadFile(stateDir + "/glass-cache.json")
-	if err != nil || !strings.Contains(string(cache), "b.png") {
+	if err != nil || strings.Count(string(cache), glassCacheKeyPrefix) != 2 {
 		t.Fatalf("cache not written: %v %s", err, cache)
 	}
 	if got := glassFloor(p); got != 0.88 {
 		t.Errorf("cached: floor %.2f, want 0.88", got)
 	}
 
-	os.Remove(dir + "/backgrounds/a.png")
+	// omarchy-theme-set copies the theme in afresh on every switch: the
+	// same bytes at a new path and mtime must still hit. Poison b.png's
+	// entry with a's colour; a hit then reads the own-colour floor.
+	data, _ := os.ReadFile(dir + "/backgrounds/b.png")
+	key, _ := glassCacheKey(false, dir+"/backgrounds/b.png")
+	poisoned := strings.Replace(string(cache), `"`+key+`":{"patches":[[1,1,1],[1,1,1]]}`,
+		`"`+key+`":{"patches":[[0.0745,0.0784,0.1098],[0.0745,0.0784,0.1098]]}`, 1)
+	if poisoned == string(cache) {
+		t.Fatalf("b.png's entry not found under %s in %s", key, cache)
+	}
+	os.WriteFile(stateDir+"/glass-cache.json", []byte(poisoned), 0o600)
 	os.Remove(dir + "/backgrounds/b.png")
+	os.WriteFile(dir+"/backgrounds/b-copy.png", data, 0o600)
+	if got := glassFloor(p); got != 0.50 {
+		t.Errorf("copied wallpaper: floor %.2f, want the cached 0.50 (it was decoded again)", got)
+	}
+
+	os.Remove(dir + "/backgrounds/a.png")
+	os.Remove(dir + "/backgrounds/b-copy.png")
 	os.WriteFile(dir+"/backgrounds/clip.mp4", []byte("not an image"), 0o600)
 	if got := glassFloor(p); got != 0.88 {
 		t.Errorf("no still wallpaper: floor %.2f, want the flat 0.88", got)
