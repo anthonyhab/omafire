@@ -188,9 +188,9 @@ func refreshFFProfileColors(profile string, p *palette) {
 		"user_pref(\"toolkit.legacyUserProfileCustomizations.stylesheets\", true);\n" +
 		"user_pref(\"svg.context-properties.content.enabled\", true);\n" +
 		"user_pref(\"browser.theme.dark-private-windows\", false);\n" +
-		// Lets the new tab's Desktop background show the window surface;
-		// pages that paint no background fall back to the theme's canvas,
-		// which matches browser.display.background_color below.
+		// Lets a page be clear: the new tab's Desktop background, and glass
+		// pages under Cinder. Every browser starts transparent;
+		// clear-pages.uc.js gives every other page its own canvas back.
 		"user_pref(\"browser.tabs.allow_transparent_browser\", true);\n" +
 		// Hyprland skips its blur wherever the window claims to be opaque,
 		// and Firefox only refreshes that claim on some repaints: chrome that
