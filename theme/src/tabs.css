@@ -482,10 +482,15 @@
   to { background-size: 100% 100%; }
 }
 
-/* The vertical strip scrolls with the wheel; no arrow buttons. */
-#tabbrowser-arrowscrollbox[orient="vertical"]::part(scrollbutton-up),
-#tabbrowser-arrowscrollbox[orient="vertical"]::part(scrollbutton-down) {
-  display: none !important;
+/* Firefox fades the scrolled-under edge of the tab strip (a 16px gradient
+ * to the toolbox colour in the vertical list, a soft shadow and a white
+ * line beside the horizontal arrows). No shadows: the rows clip flat. A
+ * user sheet's ::part() never matches, but its rules reach the shadow
+ * tree; only the tab strip and the pinned tiles paint these indicators. */
+[part~="overflow-start-indicator"],
+[part~="overflow-end-indicator"] {
+  background-image: none !important;
+  border-color: transparent !important;
 }
 
 /* ---- collapsed rail -------------------------------------------------- *
