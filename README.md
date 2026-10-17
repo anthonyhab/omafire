@@ -79,8 +79,9 @@ To build it yourself instead: `makepkg -si` with this repository's
 the working tree.
 
 Setup registers the Omarchy theme-change hook and immediately sends your
-current palette to every connected browser. For each profile in
-`~/.mozilla/firefox/profiles.ini` it installs the theme, small marked blocks
+current palette to every connected browser. For each profile in Firefox's
+`profiles.ini` (`~/.mozilla/firefox` where that exists, else
+`~/.config/mozilla/firefox`, where Firefox 147 and later create new profiles) it installs the theme, small marked blocks
 in `user.js`, `userChrome.css` and `userContent.css`, and the stylesheets that
 keep the first paint on your palette. Restart Firefox once after setup. Run setup once for each
 desktop user, and rerun it after creating a new browser profile. How each
