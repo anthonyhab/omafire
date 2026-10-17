@@ -16,10 +16,14 @@
  * panel = #sidebar-box (bookmarks, history, …) with its own splitter.
  *
  * Only vertical-tabs browser windows get this; popups, taskbar tabs and
- * horizontal tabs keep the default top layout. */
+ * horizontal tabs keep the default top layout. The root is the browser
+ * window's (:where() keeps the specificity the overrides below expect):
+ * userChrome styles every chrome document, and a sidebar panel's
+ * (history, bookmarks) took this body grid too, which parked its one
+ * element in the last row, at the bottom of the panel. */
 
 @media -moz-pref("omafire.layout", "sidebar") and -moz-pref("sidebar.verticalTabs") {
-  :root:not([popup-window], [taskbartab], [chromehidden~="toolbar"]) {
+  :root:where(#main-window):not([popup-window], [taskbartab], [chromehidden~="toolbar"]) {
     /* Zen's look: the page floats as a card beside the column. */
     --oc-frame-gap: var(--oc-gap);
     --oc-card-radius: var(--oc-radius);
