@@ -14,6 +14,15 @@
  * Firefox's --text-color-disabled, a mix of this text. No shadow: the
  * hairline is the popup's edge, and without a shadow there is nothing for
  * its margin to hold. */
+/* Firefox renders popups in the system's colour scheme (popup.css:
+ * color-scheme: light dark), so every light-dark() in a panel follows GTK,
+ * not the palette: on a light Omarchy theme over a dark GTK one the zoom
+ * row's glyphs came out white. They take the window's, which the palette
+ * sets; a page's <select> dropdown keeps the one Firefox picks from it. */
+:is(menupopup, panel):not(#ContentSelectDropdown > menupopup) {
+  color-scheme: inherit !important;
+}
+
 :is(menupopup, panel) {
   --panel-background-color: var(--oc-panel) !important;
   --panel-text-color: var(--oc-text) !important;
@@ -59,6 +68,37 @@ menuseparator {
 .subviewbutton,
 .PanelUI-subView .toolbarbutton-1 {
   border-radius: var(--oc-radius-small) !important;
+}
+
+/* The app menu's zoom row: its -, +, level and full-screen controls are
+ * buttons in Firefox's --button-* colours (Nova's violet text, a filled
+ * disc at rest). They take the menu's text and, like every other control,
+ * fill only on hover and press, in square tiles: Firefox fills - and +
+ * through the icon's stroke, a circle drawn in the glyph, so theirs is
+ * kept clear and the icon box fills instead. */
+#appMenu-zoom-controls {
+  --button-text-color: var(--oc-text) !important;
+  --button-text-color-hover: var(--oc-text) !important;
+  --button-text-color-active: var(--oc-text) !important;
+  --button-background-color: transparent !important;
+  --button-background-color-hover: var(--oc-hover) !important;
+  --button-background-color-active: var(--oc-active) !important;
+  --border-radius-xsmall: var(--oc-radius-small) !important;
+
+  & > :is(#appMenu-zoomReduce-button2, #appMenu-zoomEnlarge-button2) {
+    & > .toolbarbutton-icon {
+      stroke: transparent !important;
+      border-radius: var(--oc-radius-small) !important;
+    }
+
+    &:not([disabled]):hover > .toolbarbutton-icon {
+      background-color: var(--oc-hover) !important;
+    }
+
+    &:not([disabled]):hover:active > .toolbarbutton-icon {
+      background-color: var(--oc-active) !important;
+    }
+  }
 }
 
 /* Infobars ride inside the content card, flush with its edge. */
