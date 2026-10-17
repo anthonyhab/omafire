@@ -158,9 +158,13 @@ menuseparator {
   border-bottom: 1px solid var(--oc-line) !important;
 }
 
-/* ---- findbar -------------------------------------------------------- */
+/* ---- findbar --------------------------------------------------------
+ * Firefox gives the findbar the system scheme too (findbar.css:
+ * color-scheme: light dark), so its native checkboxes drew GTK's dark box
+ * on a light palette and read as checked. It takes the window's. */
 
 findbar {
+  color-scheme: inherit !important;
   background-color: var(--oc-panel) !important;
   color: var(--oc-text) !important;
   border-top: 1px solid var(--oc-line) !important;
