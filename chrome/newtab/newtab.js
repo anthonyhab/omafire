@@ -298,6 +298,18 @@
   const sites = document.querySelector("#sites");
   const tileList = () => [...sites.querySelectorAll(".site")];
 
+  /* A link from the network as an absolute http(s) URL, else null. This page
+   * is privileged, so a feed must not hand it file:, chrome: or data: links,
+   * and a relative one resolves against the feed, not chrome://omafire/. */
+  function webUrl(url, base) {
+    try {
+      const u = new URL(url, base);
+      return u.protocol === "https:" || u.protocol === "http:" ? u.href : null;
+    } catch {
+      return null;
+    }
+  }
+
   function hostOf(url) {
     try {
       return new URL(url).host.replace(/^www\./, "");
@@ -840,10 +852,14 @@
       return node;
     }
     const node = el("div", "item");
-    const link = el("a", "item-title", title);
-    link.href = url;
-    link.title = url;
-    node.append(link);
+    if (url) {
+      const link = el("a", "item-title", title);
+      link.href = url;
+      link.title = url;
+      node.append(link);
+    } else {
+      node.append(el("span", "item-title", title));
+    }
     if (meta || aside) {
       const metaNode = el("span", "item-meta");
       if (aside) {
@@ -885,7 +901,7 @@
   const subreddit = (option) => (option.trim() || "popular").replace(/^\/?r\//, "").replace(/[^\w+]/g, "") || "popular";
 
   /* RSS or Atom text to { title, items: [{ title, url, at, tag }] }. */
-  function parseFeed(text) {
+  function parseFeed(text, base) {
     const doc = new DOMParser().parseFromString(text, "text/xml");
     if (doc.documentElement.localName === "parsererror") throw new Error("not a feed");
     const read = (node, name) => {
@@ -902,7 +918,7 @@
         const at = Date.parse(read(node, "pubDate") || read(node, "published") || read(node, "updated") || read(node, "date"));
         const category = [...node.children].find((c) => c.localName === "category");
         return {
-          title: read(node, "title"), url: link, at: Number.isNaN(at) ? null : at,
+          title: read(node, "title"), url: webUrl(link, base), at: Number.isNaN(at) ? null : at,
           tag: category?.getAttribute("label") || category?.getAttribute("term") || category?.textContent?.trim() || ""
         };
       });
@@ -1019,7 +1035,7 @@
         return data.hits.map((hit) => ({
           title: hit.title,
           discussion: `https://news.ycombinator.com/item?id=${hit.objectID}`,
-          url: hit.url || null,
+          url: webUrl(hit.url),
           points: hit.points, comments: hit.num_comments, at: hit.created_at_i * 1000
         }));
       },
@@ -1027,7 +1043,7 @@
        * the article. */
       render: (hits) => list(hits.map((hit) => ({
         url: hit.discussion, title: hit.title,
-        aside: hit.url ? { url: hit.url, text: hostOf(hit.url) } : null,
+        aside: webUrl(hit.url) ? { url: webUrl(hit.url), text: hostOf(hit.url) } : null,
         meta: `${compact(hit.comments)} ${ago(hit.at)}`
       })), "Nothing to show")
     },
@@ -1039,10 +1055,11 @@
       /* Reddit answers its JSON with a 403 to anything but a signed-in
        * browser; the Atom feed is open. */
       async load(option) {
-        return parseFeed(await fetchText(`https://www.reddit.com/r/${subreddit(option)}/hot.rss?limit=${FEED_LIMIT}`)).items;
+        const feed = `https://www.reddit.com/r/${subreddit(option)}/hot.rss?limit=${FEED_LIMIT}`;
+        return parseFeed(await fetchText(feed), feed).items;
       },
       render: (posts, option) => list(posts.map((post) => ({
-        url: post.url, title: post.title,
+        url: webUrl(post.url), title: post.title,
         meta: `${/^(popular|all)?$/.test(option.trim()) && post.tag ? `${post.tag} ` : ""}${post.at ? ago(post.at) : ""}`
       })), "Nothing to show")
     },
@@ -1055,10 +1072,10 @@
       async load(option) {
         const url = option.trim();
         if (!url) return { title: "", items: [] };
-        return parseFeed(await fetchText(url));
+        return parseFeed(await fetchText(url), url);
       },
       render: (feed) => list(feed.items.map((entry) => ({
-        url: entry.url, title: entry.title, meta: entry.at ? ago(entry.at) : ""
+        url: webUrl(entry.url), title: entry.title, meta: entry.at ? ago(entry.at) : ""
       })), "No entries"),
       meta: (feed) => feed.title
     },
