@@ -83,9 +83,14 @@
     }
 
     /* Tabs are the field's height on the same line: a row each, half a
-     * step from the band's top and bottom. */
+     * step from the band's top and bottom. Firefox sizes a group's label
+     * from --tab-min-height on :root, so it is set here too: at 32px it
+     * made the strip taller than the band, and every tab but a split
+     * pair's (sized on its wrapper) stretched with it, off the line. */
     & #tabbrowser-tabs {
       --tab-min-height: var(--oc-row) !important;
+      --tab-group-label-size: var(--oc-row) !important;
+      --tab-group-label-container-size: var(--oc-row) !important;
       --tab-margin-block: calc(var(--oc-step) / 2) !important;
       min-height: var(--oc-head) !important;
     }
