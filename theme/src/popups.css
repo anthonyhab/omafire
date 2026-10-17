@@ -81,18 +81,13 @@ menuseparator {
 /* The Firefox Account sign-in promo (the app menu and the account menu,
  * until a profile first signs in): Firefox fills it with its violet promo
  * colour, a violet primary button beside an orange fox. It is a box on the
- * hairline; its button is the pages' primary (content.css), the selection
- * fill lit from its bottom edge in the accent; the illustration, not of the
- * palette and only decoration, goes. */
+ * hairline, the fox kept; its button is the pages' primary (content.css),
+ * the selection fill lit from its bottom edge in the accent. */
 :is(#appMenu-fxa-sign-in-promo, #PanelUI-fxa-menu-sign-in-promo) {
   background-color: transparent !important;
   color: var(--oc-text) !important;
   border: 1px solid var(--oc-line) !important;
   border-radius: var(--oc-radius-small) !important;
-
-  & .fxa-menu-sign-in-promo-image {
-    display: none !important;
-  }
 
   & moz-button[type~="primary"] {
     --button-font-weight: normal !important;
