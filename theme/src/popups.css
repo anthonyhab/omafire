@@ -70,6 +70,46 @@ menuseparator {
   border-radius: var(--oc-radius-small) !important;
 }
 
+/* The Firefox Account sign-in promo (the app menu and the account menu,
+ * until a profile first signs in): Firefox fills it with its violet promo
+ * colour, a violet primary button beside an orange fox. It is a box on the
+ * hairline; its button is the pages' primary (content.css), the selection
+ * fill lit from its bottom edge in the accent; the illustration, not of the
+ * palette and only decoration, goes. */
+:is(#appMenu-fxa-sign-in-promo, #PanelUI-fxa-menu-sign-in-promo) {
+  background-color: transparent !important;
+  color: var(--oc-text) !important;
+  border: 1px solid var(--oc-line) !important;
+  border-radius: var(--oc-radius-small) !important;
+
+  & .fxa-menu-sign-in-promo-image {
+    display: none !important;
+  }
+
+  & moz-button[type~="primary"] {
+    --button-font-weight: normal !important;
+    --button-background-color-primary: var(--oc-selected) !important;
+    --button-background-color-primary-hover: var(--oc-hover) !important;
+    --button-background-color-primary-active: var(--oc-active) !important;
+    --button-text-color-primary: var(--oc-text) !important;
+    --button-text-color-primary-hover: var(--oc-text) !important;
+    --button-text-color-primary-active: var(--oc-text) !important;
+    --button-border-color-primary: transparent !important;
+    --button-border-color-primary-hover: transparent !important;
+    --button-border-color-primary-active: transparent !important;
+    --oc-primary-edge: linear-gradient(0deg, var(--oc-glow-edge));
+    --oc-primary-glow: linear-gradient(0deg, var(--oc-glow-falloff));
+  }
+}
+
+/* (moz-button paints inside its shadow tree: its host carries the layers) */
+.button-background[type~="primary"] {
+  background-image: var(--oc-primary-edge, none), var(--oc-primary-glow, none) !important;
+  background-clip: border-area, padding-box !important;
+  background-origin: border-box !important;
+  background-repeat: no-repeat !important;
+}
+
 /* The app menu's zoom row: its -, +, level and full-screen controls are
  * buttons in Firefox's --button-* colours (Nova's violet text, a filled
  * disc at rest). They take the menu's text and, like every other control,
