@@ -12,7 +12,7 @@
   --tab-border-color-selected-trailing: transparent !important;
   --tab-background-color-selected: var(--oc-selected) !important;
   --tab-box-shadow-selected: none !important;
-  --tab-selected-textcolor: var(--oc-text) !important;
+  --tab-text-color-selected: var(--oc-text) !important;
   --tab-attention-dot-color: var(--oc-accent) !important;
 
   /* The loading throbber follows the accent. */

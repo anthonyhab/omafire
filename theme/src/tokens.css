@@ -185,7 +185,6 @@
   /* Raised surface for panels and the floating launcher. */
   --oc-panel: color-mix(in srgb, var(--oc-frame), var(--oc-text) 5%);
   --oc-shadow: 0 1px 2px rgb(0 0 0 / 0.14), 0 0 0 1px var(--oc-line);
-  --oc-shadow-float: 0 12px 40px rgb(0 0 0 / 0.36), 0 0 0 1px var(--oc-line);
   /* The quake console (launcher.css, docked.css): a slab held by hard rules,
    * never shadows. On glass it is B, the panels' material, frosting the
    * page under it (translucency.css). */
@@ -225,7 +224,6 @@
   --toolbarbutton-background-color-hover: var(--oc-hover) !important;
   --toolbarbutton-background-color-active: var(--oc-active) !important;
   --tab-border-radius: var(--oc-radius-small) !important;
-  --tab-hover-background-color: var(--oc-hover) !important;
   --tab-background-color-hover: var(--oc-hover) !important;
   --focus-outline-color: var(--oc-focus) !important;
   --chrome-content-separator-color: transparent !important;
@@ -235,12 +233,7 @@
   --panel-background-color: var(--oc-panel) !important;
   --panel-border-color: var(--oc-line) !important;
   --panel-border-radius: var(--oc-radius) !important;
-  --arrowpanel-background: var(--oc-panel) !important;
-  --arrowpanel-border-color: var(--oc-line) !important;
-  --arrowpanel-border-radius: var(--oc-radius) !important;
   --menuitem-border-radius: var(--oc-radius-small) !important;
-  --panel-item-hover-bgcolor: var(--oc-hover) !important;
-  --panel-item-active-bgcolor: var(--oc-active) !important;
 
   --urlbarview-background-color-hover: var(--oc-hover) !important;
   --urlbarview-background-color-selected: var(--oc-accent-wash) !important;

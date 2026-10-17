@@ -91,7 +91,8 @@ rounding, border width, and active/inactive border colors).
 
 ## Rules
 
-These keep a small theme small. `node scripts/lint.mjs` checks the first two.
+These keep a small theme small. `node scripts/lint.mjs` checks the first two,
+and that every Firefox variable rule 3 sets exists in the installed Firefox.
 
 1. **Every declaration is `!important`**, except `--oc-*` token definitions.
    userChrome is a user-origin sheet; without `!important` Firefox's own

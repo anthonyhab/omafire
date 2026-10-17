@@ -9,9 +9,14 @@
 //   3. Every var(--oc-*) a sheet reads is defined on its side (chrome or
 //      content), and every extension sheet's pages are in the content
 //      tokens' scope: otherwise the token resolves to nothing, silently.
+//   4. Every Firefox variable the theme sets exists in the installed
+//      Firefox (its omni.ja, from $OMAFIRE_FIREFOX or /usr/lib/firefox): a
+//      renamed one is dropped silently. Skipped where there is no Firefox
+//      (CI); extension sheets set their extensions' own variables.
 // Usage: node scripts/lint.mjs   (exit 1 on any finding)
 
-import { readFileSync, readdirSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join, relative } from "node:path";
 
 const root = join(import.meta.dirname, "..");
@@ -90,6 +95,37 @@ for (const f of imports("userContent.css").filter((f) => f.startsWith("src/exten
     if (!contentScope.includes(m[0]))
       findings.push(`${f}: ${m[0]} is missing from ${TOKEN_FILES[1]}'s scope`);
 
+// Firefox's own sources, where a variable it reads is named.
+const firefox = process.env.OMAFIRE_FIREFOX || "/usr/lib/firefox";
+const omni = [join(firefox, "omni.ja"), join(firefox, "browser", "omni.ja")].filter(existsSync);
+let checkedFirefox = false;
+if (omni.length) {
+  let sources = "";
+  for (const ja of omni) {
+    try {
+      sources += execFileSync("unzip", ["-p", ja, "*.css", "*.js", "*.mjs", "*.xhtml", "*.html"],
+        { maxBuffer: 1 << 30, stdio: ["ignore", "pipe", "ignore"] }).toString();
+    } catch (e) {
+      // (unzip exits 1 on omni.ja's offset warning, with the output intact)
+      if (!e.stdout?.length) throw e;
+      sources += e.stdout.toString();
+    }
+  }
+  const own = /^--(oc|omafire|omarchy)-/;
+  const seen = new Set();
+  for (const file of files.filter((f) => !f.startsWith(join("src", "extensions")))) {
+    const src = stripAtBlocks(stripComments(readFileSync(join(root, file), "utf8")));
+    for (const m of src.matchAll(DECL)) {
+      const prop = m[1];
+      if (!prop.startsWith("--") || own.test(prop) || seen.has(prop)) continue;
+      seen.add(prop);
+      if (!sources.includes(prop))
+        findings.push(`${file}:${src.slice(0, m.index).split("\n").length}: ${prop} is not a Firefox variable (${firefox})`);
+    }
+  }
+  checkedFirefox = true;
+}
+
 for (const f of findings) console.error(f);
 if (findings.length) process.exit(1);
-console.log(`lint: ${files.length} files ok`);
+console.log(`lint: ${files.length} files ok${checkedFirefox ? ", Firefox variables checked" : ""}`);

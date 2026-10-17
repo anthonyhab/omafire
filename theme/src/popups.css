@@ -3,29 +3,25 @@
  * Panel and menu colors come from the native bridge in tokens.css; this
  * file only handles the shape: flat cards, no arrow tips, rounded rows. */
 
-panel[type="arrow"] {
-  --panel-shadow-margin: 12px !important;
-}
-
 .panel-arrowbox {
   display: none !important;
 }
 
-/* 156 paints popups with the --panel-* variables, set on each popup
- * (a menupopup defaults to the system Menu color and a 6px radius), so
- * they are bound here rather than on :root. */
+/* Firefox paints popups with the --panel-* variables, set on each popup
+ * (a menupopup defaults to the system Menu and MenuText colours, which are
+ * GTK's and can be light on a light palette, and a 6px radius), so they
+ * are bound here rather than on :root. Disabled rows and accelerators are
+ * Firefox's --text-color-disabled, a mix of this text. No shadow: the
+ * hairline is the popup's edge, and without a shadow there is nothing for
+ * its margin to hold. */
 :is(menupopup, panel) {
   --panel-background-color: var(--oc-panel) !important;
-  --panel-color: var(--oc-text) !important;
+  --panel-text-color: var(--oc-text) !important;
   --panel-border-color: var(--oc-line) !important;
   --panel-border-radius: var(--oc-radius) !important;
-  --panel-shadow: var(--oc-shadow-float) !important;
+  --panel-box-shadow: none !important;
+  --panel-box-shadow-margin: 0px !important;
   --panel-padding: 4px !important;
-  --menu-background-color: var(--oc-panel) !important;
-  --menu-color: var(--oc-text) !important;
-  --menu-border-color: var(--oc-line) !important;
-  --menuitem-hover-background-color: var(--oc-hover) !important;
-  --menu-disabled-color: var(--oc-text-dim) !important;
 }
 
 /* Menu rows on the 4px grid: 28px tall, one unit in from the popup edge,
