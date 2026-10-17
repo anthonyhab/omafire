@@ -300,12 +300,13 @@
 
   /* ---- new tab row ------------------------------------------------ */
 
-  /* Laid out exactly like a tab row: same axes, height and pitch. */
-  & #tabs-newtab-button {
+  /* Laid out exactly like a tab row: same axes, height and pitch. Once the
+   * list overflows, Firefox swaps in its own button below the scrollbox. */
+  & :is(#tabs-newtab-button, #vertical-tabs-newtab-button) {
     margin: calc(var(--oc-step) / 2) var(--oc-inset) !important;
     padding: 0 var(--oc-icon-pad) !important;
     min-height: var(--oc-row) !important;
-    gap: var(--oc-inset) !important;
+    gap: var(--tab-icon-end-margin) !important;
     border-radius: var(--oc-radius-small) !important;
     color: var(--oc-text-dim) !important;
     fill: var(--oc-text-dim) !important;
