@@ -70,6 +70,14 @@ menuseparator {
   border-radius: var(--oc-radius-small) !important;
 }
 
+/* Firefox sizes the app menu (22.5em) for a proportional face; the
+ * shell's monospace runs wider, and its longest row (Extensions and
+ * Themes, Ctrl+Shift+A) was cut short. */
+#appMenu-popup panelview,
+#report-broken-site-popup-mainView[mainview] {
+  width: 24em !important;
+}
+
 /* The Firefox Account sign-in promo (the app menu and the account menu,
  * until a profile first signs in): Firefox fills it with its violet promo
  * colour, a violet primary button beside an orange fox. It is a box on the
