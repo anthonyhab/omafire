@@ -211,3 +211,10 @@
 #identity-box.extensionPage #identity-icon-label {
   display: none !important;
 }
+
+/* The trust panel's "Not Secure" label is a flex item with a zero basis,
+ * so a narrow urlbar squeezed it to its longest word and it wrapped onto a
+ * second line the field clips. One line: the URL text gives up the room. */
+#trust-label {
+  white-space: nowrap !important;
+}
