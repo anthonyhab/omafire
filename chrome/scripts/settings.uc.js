@@ -187,17 +187,23 @@
       margin: 8px 0 0;
       font-weight: 600;
     }
+    /* Label, then the control at the end. A label keeps its width: where
+     * the font leaves no room beside it (a wide monospace and the
+     * three-way Toolbar choice), the control wraps to a line of its own,
+     * still at the end, instead of running into the label. */
     #${VIEW_ID} .omafire-row {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
+      display: flex;
+      flex-wrap: wrap;
       align-items: center;
       column-gap: 12px;
       min-height: 32px;
     }
+    #${VIEW_ID} .omafire-row > label { flex: 1 0 auto; }
+    #${VIEW_ID} .omafire-row > :nth-child(2) { margin-inline-start: auto; }
     #${VIEW_ID} .omafire-row[disabled] { opacity: 0.45; }
     /* A row's hint says why it is off, so it shows only then. */
     #${VIEW_ID} .omafire-hint {
-      grid-column: 1 / -1;
+      flex-basis: 100%;
       margin-top: -4px;
     }
     #${VIEW_ID} .omafire-row:not([disabled]) > .omafire-hint { display: none; }
