@@ -225,6 +225,18 @@
   --toolbarbutton-background-color-active: var(--oc-active) !important;
   --tab-border-radius: var(--oc-radius-small) !important;
   --tab-background-color-hover: var(--oc-hover) !important;
+  /* Tabs that are not selected took Nova's own text colour (its
+   * --toolbox-text-color, never the palette's), and so did the close
+   * glyph, which reads it through --tab-close-button-text-color. */
+  --tab-text-color: var(--oc-text) !important;
+  --tab-text-color-hover: var(--oc-text) !important;
+  /* Without a lightweight theme Firefox gives the toolbars, the findbar
+   * and the selected tab the system's scheme (light dark), so their
+   * light-dark() colours followed GTK, not the palette: on a light palette
+   * over a dark GTK scheme the selected tab's close glyph came out near
+   * white. They take the palette's. */
+  --toolbar-color-scheme: var(--omafire-ff-color-scheme, light dark) !important;
+  --tab-selected-color-scheme: var(--omafire-ff-color-scheme, light dark) !important;
   --focus-outline-color: var(--oc-focus) !important;
   --chrome-content-separator-color: transparent !important;
   --sidebar-border-color: transparent !important;
