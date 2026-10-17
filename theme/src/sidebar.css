@@ -51,9 +51,10 @@ sidebar-main:not([expanded]) {
  * glows like an active tile: light from its bottom edge, its hairline lit
  * from the same edge, instead of Firefox's accent-tinted tile. The tools
  * are moz-buttons whose pressed fill paints inside their own shadow tree:
- * the tool hosts carry the glow as variables, and the shadow rule reads
- * them, so no other moz-button changes. */
-moz-button.tools-overflow {
+ * the tool hosts (every one names its view; .tools-overflow is only on
+ * those in the vertical tabs' column) carry the glow as variables, and the
+ * shadow rule reads them, so no other moz-button changes. */
+moz-button[view] {
   --button-background-color-selected: var(--oc-selected) !important;
   /* Firefox's own selected edge; the glow's hairline replaces it. */
   --button-border-color-selected: transparent !important;
