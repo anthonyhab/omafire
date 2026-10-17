@@ -89,7 +89,13 @@ printf '%s\n' \
   'IsRelative=1' \
   'Path=Profiles/default-release' > "$TEST_HOME/.config/zen/profiles.ini"
 
-"$SYSTEM_COMMAND" setup >/dev/null
+# No Firefox profile yet: setup still installs the hook, then says so and
+# fails rather than report a theme it never applied.
+if setup_error=$("$SYSTEM_COMMAND" setup 2>&1 >/dev/null); then
+  echo "setup without a Firefox profile unexpectedly succeeded" >&2
+  exit 1
+fi
+[[ $setup_error == *"no Firefox profile found ($TEST_HOME/.config/mozilla/firefox/profiles.ini)"* ]]
 USER_HOOK="$TEST_HOME/.config/omarchy/hooks/theme-set.d/omafire"
 STATE_FILE="$TEST_HOME/.local/state/omafire/theme.json"
 [[ -x $USER_HOOK ]]

@@ -88,6 +88,17 @@ func homeDir() string {
 	return home
 }
 
+// firefoxRoot is where Firefox keeps profiles.ini. Since Firefox 147 a new
+// profile goes under $XDG_CONFIG_HOME/mozilla/firefox, but Firefox stays in
+// ~/.mozilla wherever that already exists or MOZ_LEGACY_HOME is set.
+func firefoxRoot(home string) string {
+	legacy := home + "/.mozilla"
+	if os.Getenv("MOZ_LEGACY_HOME") != "" || pathExists(legacy) {
+		return legacy + "/firefox"
+	}
+	return envOr("XDG_CONFIG_HOME", home+"/.config") + "/mozilla/firefox"
+}
+
 func initPaths() {
 	home := homeDir()
 	themeDir = envOr("OMAFIRE_THEME_DIR", home+"/.local/state/omarchy/current/theme")
@@ -97,7 +108,7 @@ func initPaths() {
 	stateDir = home + "/.local/state/omafire"
 	stateFile = stateDir + "/theme.json"
 	hookSource = envOr("OMAFIRE_HOOK_SOURCE", "/usr/share/omafire/hooks/omafire")
-	ffRoot = envOr("OMAFIRE_FIREFOX_ROOT", home+"/.mozilla/firefox")
+	ffRoot = envOr("OMAFIRE_FIREFOX_ROOT", firefoxRoot(home))
 	ffProfilesFile = envOr("OMAFIRE_FIREFOX_PROFILES_FILE", ffRoot+"/profiles.ini")
 	ffPayloadSource = envOr("OMAFIRE_FIREFOX_PAYLOAD_SOURCE", "/usr/share/omafire/firefox/chrome")
 	initConfigPath(home)
@@ -151,6 +162,9 @@ func cmdSetup() {
 		fmt.Printf("Backed up the files it changed to %s\n", backupDir)
 	}
 	psdResync()
+	if !isRegularFile(ffProfilesFile) {
+		fail("no Firefox profile found (%s): start Firefox once, then run omafire setup again", ffProfilesFile)
+	}
 }
 
 func cmdRemove() {

@@ -270,7 +270,7 @@ func setupFFProfiles() int {
 		return 0
 	}
 	if !ffPayloadOwned(ffPayloadSource) {
-		return 0 // Firefox payload not packaged; palette sync still works.
+		fail("packaged Firefox theme not found: %s (reinstall omafire)", ffPayloadSource)
 	}
 	var profiles []string
 	for _, profile := range listProfiles(ffProfilesFile, ffRoot) {
