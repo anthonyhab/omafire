@@ -41,8 +41,8 @@ fails() {
 [[ $("$OMAFIRE_BIN" status) == *"Settings: $CONFIG (defaults, no file)"* ]]
 
 # set: validated, all or nothing, sparse, schema order.
-"$OMAFIRE_BIN" set opacity 0.7 glass on toolbar sidebar
-[[ $(cat "$CONFIG") == $'{\n  "toolbar": "sidebar",\n  "glass": true,\n  "opacity": 0.7\n}' ]]
+"$OMAFIRE_BIN" set opacity 0.7 glass on toolbar line
+[[ $(cat "$CONFIG") == $'{\n  "toolbar": "line",\n  "glass": true,\n  "opacity": 0.7\n}' ]]
 [[ $(stat -c %a "$HOME/.config/omafire") == 700 ]]
 fails "opacity must be a number from 0.5 to 1" set glass off opacity 0.2
 [[ $("$OMAFIRE_BIN" get glass) == true ]]
@@ -68,6 +68,21 @@ PY
 # reset leaves the file.
 "$OMAFIRE_BIN" reset glass toolbar
 [[ $(cat "$CONFIG") == $'{\n  "opacity": 0.7\n}' ]]
+
+# The toolbar and tabs stay a pair the theme styles: what a set names wins.
+rm -f "$CONFIG"
+"$OMAFIRE_BIN" set toolbar sidebar
+[[ $("$OMAFIRE_BIN" get tabs) == vertical ]]
+"$OMAFIRE_BIN" set tabs horizontal
+[[ $("$OMAFIRE_BIN" get toolbar) == top && $("$OMAFIRE_BIN" get tabs) == horizontal ]]
+"$OMAFIRE_BIN" set toolbar line tabs vertical
+[[ $("$OMAFIRE_BIN" get toolbar) == top && $("$OMAFIRE_BIN" get tabs) == vertical ]]
+"$OMAFIRE_BIN" set toolbar line
+[[ $("$OMAFIRE_BIN" get tabs) == horizontal ]]
+"$OMAFIRE_BIN" set toolbar sidebar
+"$OMAFIRE_BIN" reset tabs
+[[ $("$OMAFIRE_BIN" get toolbar) == top ]]
+rm "$CONFIG"
 
 # Bad values fall back with a warning; unknown keys survive a set.
 printf '{"glass": "yes", "later": 1}\n' > "$CONFIG"

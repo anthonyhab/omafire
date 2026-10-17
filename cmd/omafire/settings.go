@@ -120,7 +120,36 @@ func cmdSet(args []string) {
 	for key, v := range updates {
 		file[key] = v
 	}
+	var names []string
+	for i := 0; i < len(args); i += 2 {
+		names = append(names, args[i])
+	}
+	coupleLayout(file, names)
 	saveConfig(file)
+}
+
+// The sidebar toolbar holds vertical tabs and the one-line toolbar
+// horizontal ones; the theme styles no other pairing. Every writer (the
+// shell panel, Firefox's panel and keys, a script) goes through set, so the
+// pairing is kept here: of the two, the one named last wins and the other
+// follows. Firefox batches its changes in the order they happened.
+func coupleLayout(file config.File, names []string) {
+	eff := file.Effective()
+	want := map[any]string{"sidebar": "vertical", "line": "horizontal"}[eff["toolbar"]]
+	if want == "" || eff["tabs"] == want {
+		return
+	}
+	last := ""
+	for _, name := range names {
+		if name == "toolbar" || name == "tabs" {
+			last = name
+		}
+	}
+	if last == "tabs" {
+		file["toolbar"] = "top"
+	} else {
+		file["tabs"] = want
+	}
 }
 
 // reset <setting>...: back to the default by leaving the file.
@@ -139,6 +168,7 @@ func cmdReset(args []string) {
 	for _, key := range args {
 		delete(file, key)
 	}
+	coupleLayout(file, args)
 	saveConfig(file)
 }
 

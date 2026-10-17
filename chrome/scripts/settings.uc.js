@@ -58,10 +58,11 @@
     {
       label: "Toolbar", kind: "choice", prefs: ["omafire.layout"],
       options: [["top", "Top"], ["sidebar", "Sidebar"], ["line", "One line"]],
-      // One line holds horizontal tabs; with vertical ones it is the top row.
+      // The sidebar holds vertical tabs, one line horizontal ones (omafire
+      // set keeps the pair too; setting both here saves a half-styled frame).
       read: layout, write: v => {
-        if (v === "line") {
-          set("sidebar.verticalTabs", false);
+        if (v !== "top") {
+          set("sidebar.verticalTabs", v === "sidebar");
         }
         set("omafire.layout", v);
       }, moves: true,
@@ -69,7 +70,12 @@
     {
       label: "Tabs", kind: "choice", prefs: ["sidebar.verticalTabs"],
       options: [[true, "Vertical"], [false, "Horizontal"]],
-      read: vertical, write: v => set("sidebar.verticalTabs", v), moves: true,
+      read: vertical, write: v => {
+        if (layout() === (v ? "line" : "sidebar")) {
+          set("omafire.layout", "top");
+        }
+        set("sidebar.verticalTabs", v);
+      }, moves: true,
     },
     {
       label: "Side", kind: "choice", prefs: ["sidebar.position_start"],

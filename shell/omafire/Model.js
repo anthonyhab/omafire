@@ -8,7 +8,9 @@ var ROWS = [
     options: [{ value: "top", label: "Top" }, { value: "sidebar", label: "Sidebar" },
       { value: "line", label: "One line" }] },
   { key: "tabs", section: "LAYOUT", label: "Tabs", type: "choice",
-    options: [{ value: "horizontal", label: "Horizontal" }, { value: "vertical", label: "Vertical" }] },
+    options: [{ value: "horizontal", label: "Horizontal" }, { value: "vertical", label: "Vertical" }],
+    // the sidebar toolbar takes vertical tabs and one line horizontal ones
+    when: function(c) { return c.toolbar === "top" } },
   { key: "side", section: "LAYOUT", label: "Side", type: "choice",
     options: [{ value: "left", label: "Left" }, { value: "right", label: "Right" }],
     when: function(c) { return c.tabs === "vertical" } },

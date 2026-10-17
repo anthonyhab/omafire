@@ -187,8 +187,10 @@ function apply(values, keys = SCHEMA.map(s => s.key)) {
   applying = true;
   try {
     for (const key of keys) {
-      if (pending.has(key)) {
-        continue;         // the user is still changing it here
+      // The user is still changing it here, unless the change is the write
+      // in flight: then the file holds set's answer to it.
+      if (pending.has(key) && pending.get(key) !== batchInFlight.get(key)) {
+        continue;
       }
       const setting = SCHEMA.find(s => s.key === key);
       for (const pref of setting.prefs) {
@@ -283,6 +285,8 @@ const observer = {
         pending.delete(setting.key);
         continue;
       }
+      // last changed last: omafire set lets the later of a coupled pair win
+      pending.delete(setting.key);
       pending.set(setting.key, value);
       schedule();
     }
@@ -322,7 +326,11 @@ async function watch() {
             console.error(LOG, "watch line:", error);
             continue;
           }
-          const changed = SCHEMA.map(s => s.key).filter(k => values[k] !== current[k]);
+          // Against the prefs, not the last line: a set may answer a change
+          // made here with a different value (omafire set couples the
+          // toolbar and the tabs), which the file alone shows as no change.
+          const changed = SCHEMA.filter(s => values[s.key] !== (fromPrefs(s) ?? s.default))
+            .map(s => s.key);
           current = values;
           apply(values, changed);
           delay = 1000;
