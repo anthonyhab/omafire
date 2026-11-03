@@ -88,15 +88,21 @@ func homeDir() string {
 	return home
 }
 
-// firefoxRoot is where Firefox keeps profiles.ini. Since Firefox 147 a new
-// profile goes under $XDG_CONFIG_HOME/mozilla/firefox, but Firefox stays in
-// ~/.mozilla wherever that already exists or MOZ_LEGACY_HOME is set.
+// firefoxRoot preserves explicit legacy selection, then prefers a registered
+// profile root. Other Mozilla applications may create ~/.mozilla without Firefox.
 func firefoxRoot(home string) string {
-	legacy := home + "/.mozilla"
-	if os.Getenv("MOZ_LEGACY_HOME") != "" || pathExists(legacy) {
-		return legacy + "/firefox"
+	legacy := home + "/.mozilla/firefox"
+	xdg := envOr("XDG_CONFIG_HOME", home+"/.config") + "/mozilla/firefox"
+	if os.Getenv("MOZ_LEGACY_HOME") != "" || isRegularFile(legacy+"/profiles.ini") {
+		return legacy
 	}
-	return envOr("XDG_CONFIG_HOME", home+"/.config") + "/mozilla/firefox"
+	if isRegularFile(xdg + "/profiles.ini") {
+		return xdg
+	}
+	if pathExists(home + "/.mozilla") {
+		return legacy
+	}
+	return xdg
 }
 
 func initPaths() {
