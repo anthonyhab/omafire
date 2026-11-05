@@ -15,6 +15,12 @@
 //
 // The Light sites are Cinder's "modes" (host -> mode) in its storage.local,
 // read when Cinder starts and again whenever it writes them.
+//
+// Off and Light sites also get forcedColorsOverride = "inactive" where
+// Firefox knows that value (a patched build, k9b.48): forced colours off for
+// the tab, as the Every site switch turns them off for all (DEC-110). Stock
+// Firefox ignores the value, which reads back as before, so there Cinder's
+// in-page undo is all there is.
 
 const CINDER = "cinder-dark-mode@hab.rip";
 
@@ -25,16 +31,21 @@ ChromeUtils.defineESModuleGetters(lazy, {
 });
 
 let light = new Set();
+let unforced = new Set();     // Off and Light hosts
+let inactive = null;          // does this Firefox take "inactive"? (null: not tried)
 let state = {modes: {}, enabled: true};
 let reading = 0;
 const wants = new Set();      // browserIds whose latest top-level load is a Light site
-const ours = new WeakSet();   // browsing contexts whose override is ours
+const unforce = new Set();    // browserIds whose latest top-level load is an Off or Light site
+const ours = new WeakSet();   // browsing contexts whose scheme override is ours
+const oursForced = new WeakSet();   // and whose forced-colours override is
 
 function follow(next) {
   state = {...state, ...next};
   // (Cinder switched off everywhere hands the colours back to Firefox)
-  light = state.enabled === false ? new Set()
-    : new Set(Object.keys(state.modes || {}).filter((host) => state.modes[host] === "light"));
+  const modes = state.enabled === false ? {} : state.modes || {};
+  light = new Set(Object.keys(modes).filter((host) => modes[host] === "light"));
+  unforced = new Set(Object.keys(modes).filter((host) => modes[host] === "light" || modes[host] === "off"));
 }
 
 async function read() {
@@ -63,6 +74,11 @@ function want(bc, uri) {
   } else {
     wants.delete(bc.browserId);
   }
+  if (unforced.has(host)) {
+    unforce.add(bc.browserId);
+  } else {
+    unforce.delete(bc.browserId);
+  }
   apply(bc);
 }
 
@@ -79,6 +95,19 @@ function apply(bc) {
     ours.delete(bc);
     bc.prefersColorSchemeOverride = "none";
   }
+  if (unforce.has(bc.browserId) && inactive !== false) {
+    if (bc.forcedColorsOverride !== "inactive") {
+      bc.forcedColorsOverride = "inactive";
+      // (an enum value Firefox doesn't know is dropped without an error)
+      inactive = bc.forcedColorsOverride === "inactive";
+    }
+    if (inactive) {
+      oursForced.add(bc);
+    }
+  } else if (oursForced.has(bc)) {
+    oursForced.delete(bc);
+    bc.forcedColorsOverride = "none";
+  }
 }
 
 const requests = {
@@ -92,7 +121,7 @@ const requests = {
 
 const attached = {
   observe(bc) {
-    if (!bc.parent && wants.has(bc.browserId)) {
+    if (!bc.parent && (wants.has(bc.browserId) || unforce.has(bc.browserId))) {
       apply(bc);
     }
   },
