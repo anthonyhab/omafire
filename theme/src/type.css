@@ -11,7 +11,7 @@
   :is(menu, menuitem, toolbarbutton, toolbaritem, label, description, input,
       checkbox, radio, button, moz-button, richlistitem, menulist, select,
       .toolbarbutton-text, .menu-iconic-text, .menu-accel),
-#navigator-toolbox :is(toolbarbutton, toolbaritem, label, .toolbarbutton-text, toolbarbadge),
+#navigator-toolbox :is(toolbarbutton, toolbaritem, label, .toolbarbutton-text):not(.toolbarbutton-badge),
 #sidebar-box :is(label, description, #sidebar-title),
 #tabbrowser-tabs .tab-group-label {
   font-family: var(--oc-font) !important;

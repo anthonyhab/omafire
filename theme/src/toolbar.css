@@ -89,10 +89,16 @@
   }
 }
 
-/* Badges (downloads, extensions) take the palette accent. */
+/* Badges (downloads, extensions) take the palette accent, at Firefox's
+ * badge size: at the chrome's text size a two-digit count covered the top
+ * half of the icon it marks. The count is black or white by the accent's
+ * own lightness, so it reads on a pale accent as on a deep one (the frame
+ * colour vanished on light palettes and pale accents). */
 .toolbarbutton-badge {
+  font-family: var(--oc-font) !important;
+  font-size: var(--toolbarbutton-badge-font-size, 10px) !important;
   background-color: var(--oc-accent) !important;
-  color: var(--oc-frame) !important;
+  color: oklch(from var(--oc-accent) clamp(0, (0.62 - l) * 1000, 1) 0 0) !important;
   box-shadow: none !important;
 }
 
