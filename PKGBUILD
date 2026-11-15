@@ -7,7 +7,7 @@ pkgver=0.7.8
 pkgrel=1
 pkgdesc="The Firefox theme and toolkit for Omarchy: a themed, live-synced Firefox with settings, keys and profile-safe setup"
 arch=('x86_64' 'aarch64')
-url="https://git.hab.rip/habibe/omafire"
+url="https://github.com/anthonyhab/omafire"
 license=('MIT')
 depends=('glibc')
 makedepends=('git' 'go')
@@ -32,11 +32,11 @@ optdepends=(
 # Firefox gets a chrome script loader (autoconfig: omafire.cfg) with the
 # settings panel, keybindings, live palette and new tab, for each profile
 # `omafire setup` marks. setup wires everything else.
-# Releases build the Forgejo tag v$pkgver, which Forgejo CI gated and
-# published (.forgejo/workflows/release.yml). pkgver must equal VERSION
+# Builds the tag v$pkgver from the public GitHub repository; the same tag
+# on Forgejo is what CI gated and published (.forgejo/workflows/release.yml). pkgver must equal VERSION
 # (tests/run.sh checks). For a development build of the working tree, use
 # `make` and `make install`, not this file.
-source=("omafire::git+ssh://git@git.hab.rip/habibe/omafire.git#tag=v${pkgver}")
+source=("omafire::git+https://github.com/anthonyhab/omafire.git#tag=v${pkgver}")
 sha256sums=('SKIP')
 
 prepare() {

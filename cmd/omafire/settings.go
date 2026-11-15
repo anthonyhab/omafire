@@ -12,7 +12,7 @@ import (
 	"slices"
 	"strings"
 
-	"git.hab.rip/habibe/omafire/config"
+	"github.com/anthonyhab/omafire/config"
 	"golang.org/x/sys/unix"
 )
 

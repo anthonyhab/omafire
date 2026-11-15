@@ -166,7 +166,7 @@ and only inside their own marked blocks and the `omafire/` payload.
 
 ## Getting help
 
-Open an issue on this repository's tracker. Include the output of
+Open an issue at [github.com/anthonyhab/omafire/issues](https://github.com/anthonyhab/omafire/issues). Include the output of
 `omafire status` and `omafire version`, your Firefox version (`about:support`),
 the layout and settings (`omafire get`), and what you expected. Omafire does
 not collect logs or report anything by itself, so what you paste is all that

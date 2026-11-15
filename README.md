@@ -51,14 +51,15 @@ What is tested, what is not, and the limits are in [docs/SUPPORT.md](docs/SUPPOR
 
 ## Installation
 
-Omafire is an Arch package, `omafire`. Forgejo CI builds each release from
-its tag and attaches the package to the [release
-page](https://git.hab.rip/habibe/omafire/releases).
+Omafire is an Arch package, `omafire`, built from this repository's
+`PKGBUILD` ([github.com/anthonyhab/omafire](https://github.com/anthonyhab/omafire)).
 
-1. Install the package from the latest release:
+1. Build and install the latest release:
 
    ```bash
-   sudo pacman -U omafire-<version>-1-x86_64.pkg.tar.zst
+   git clone https://github.com/anthonyhab/omafire.git
+   cd omafire
+   makepkg -si
    ```
 
    It replaces the `omarchy-firefox` package, and pacman offers to remove
@@ -81,9 +82,8 @@ For Firefox that is all: no add-on is needed. If you used upstream omafox,
 remove its `@omafox` add-on in `about:addons`; Omafire removes its own older
 add-on by itself.
 
-To build it yourself instead: `makepkg -si` with this repository's
-`PKGBUILD` (it builds the Forgejo tag), or `make && sudo make install` for
-the working tree.
+`makepkg` builds the release tag the `PKGBUILD` names (`v` + `VERSION`),
+not your checkout; for the working tree use `make && sudo make install`.
 
 Setup registers the Omarchy theme-change hook and applies your current
 palette. For each profile in Firefox's `profiles.ini` (`~/.mozilla/firefox`

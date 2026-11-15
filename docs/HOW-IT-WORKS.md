@@ -103,7 +103,8 @@ are unrelated). `VERSION` is the one version source: make links it into the
 CLI, and the PKGBUILD's `pkgver` must match it (`tests/run.sh` checks).
 
 A release is a `v$(cat VERSION)` tag pushed to Forgejo (`git push forgejo
-"v$(cat VERSION)"`, never `--tags`). Forgejo CI re-runs the full gate on the tagged
+"v$(cat VERSION)"`, never `--tags`) and then to the public GitHub repository
+(`git push github main "v$(cat VERSION)"`), whose tag the `PKGBUILD` builds. Forgejo CI re-runs the full gate on the tagged
 commit, builds the package with makepkg, and publishes a Forgejo release
 with the package, PKGBUILD and checksums. Local `makepkg` builds are for
 development only.

@@ -1,4 +1,4 @@
-module git.hab.rip/habibe/omafire
+module github.com/anthonyhab/omafire
 
 go 1.26.0
 
