@@ -184,7 +184,8 @@
   --oc-surface: var(--oc-frame);
   /* Raised surface for panels and the floating launcher. */
   --oc-panel: color-mix(in srgb, var(--oc-frame), var(--oc-text) 5%);
-  --oc-shadow: 0 1px 2px rgb(0 0 0 / 0.14), 0 0 0 1px var(--oc-line);
+  /* A card's edge is its own hairline: no drop shadow (design bar). */
+  --oc-shadow: 0 0 0 1px var(--oc-line);
   /* The quake console (launcher.css, docked.css): a slab held by hard rules,
    * never shadows. On glass it is B, the panels' material, frosting the
    * page under it (translucency.css). */
