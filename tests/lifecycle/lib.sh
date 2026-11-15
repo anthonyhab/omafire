@@ -81,9 +81,10 @@ op() {
   OP_RC=$?
   set -e
   python3 "$REPO/tests/lifecycle/manifest.py" snap "$SB_HOME" "$dir/$n-$label.after.json"
+  # (a violation is a result to record, not a reason to stop the run)
+  OP_PRESERVED=0
   python3 "$REPO/tests/lifecycle/manifest.py" diff "$dir/$n-$label.before.json" "$dir/$n-$label.after.json" \
-    > "$dir/$n-$label.diff" 2>&1
-  OP_PRESERVED=$?
+    > "$dir/$n-$label.diff" 2>&1 || OP_PRESERVED=$?
   OP_DIFF=$dir/$n-$label.diff OP_OUT=$dir/$n-$label.out
   {
     printf '\n### %s %s\n\n' "$n" "$label"

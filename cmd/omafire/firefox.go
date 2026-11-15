@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"slices"
 	"strings"
 
 	"golang.org/x/sys/unix"
@@ -366,6 +367,7 @@ func removeFFProfile(profile string) {
 	if radius := f.chrome + "/" + ffRadiusName; firstLineIs(radius, ffRadiusMarker) {
 		unix.Unlink(radius)
 	}
+	removeFFProfileStores(profile)
 	if configured {
 		fmt.Printf("Removed Firefox profile bridge: %s\n", profile)
 		noteWrittenProfile(profile, "Firefox")
@@ -393,13 +395,41 @@ var ffOwnedPrefs = []string{
 	"layout.css.prefers-color-scheme.content-override",
 }
 
+// ffKeptPrefs are the user's switches for the scripts, the only omafire.*
+// prefs nothing else records; inert once the profile is no longer managed,
+// they outlive a reinstall. Every other omafire.* pref goes: the new tab's
+// options and shortcut list, and the settings, which config.json keeps.
+var ffKeptPrefs = []string{"omafire.scripts", "omafire.scripts.disabled", "omafire.pseudo-state"}
+
 func ownedFFPrefLine(line string) bool {
-	for _, name := range ffOwnedPrefs {
-		if strings.HasPrefix(line, "user_pref(\""+name+"\",") {
-			return true
+	rest, ok := strings.CutPrefix(line, "user_pref(\"")
+	if !ok {
+		return false
+	}
+	name, _, ok := strings.Cut(rest, "\",")
+	if !ok {
+		return false
+	}
+	if strings.HasPrefix(name, "omafire.") {
+		return !slices.Contains(ffKeptPrefs, name)
+	}
+	return slices.Contains(ffOwnedPrefs, name)
+}
+
+// ffProfileStores are the files the chrome scripts write in the profile
+// directory: the new tab's picked image and its widget cache, and the keys'
+// conflict list.
+var ffProfileStores = []string{"omafire-newtab-image", "omafire-newtab-cache.json", "omafire-keys.json"}
+
+// removeFFProfileStores deletes them. Only omafire's scripts write these
+// names, so a profile a previous remove already cleared loses them too;
+// a symlink in their place is left alone.
+func removeFFProfileStores(profile string) {
+	for _, name := range ffProfileStores {
+		if path := profile + "/" + name; isRegularFile(path) && !pathIsSymlink(path) {
+			unix.Unlink(path)
 		}
 	}
-	return false
 }
 
 // clearOwnedFFPrefs drops those preferences from prefs.js, in a profile

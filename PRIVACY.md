@@ -22,8 +22,10 @@ nothing in it sends data to any server.
 
 Apart from those, it does not read browsing history, bookmarks, cookies, passwords, page
 contents or any other browser data. The new-tab page lists your most visited
-sites from Firefox's own top sites; that list stays in the browser and
-is not stored or sent anywhere by Omafire.
+sites from Firefox's own top sites, and its widgets can show recently closed
+tabs, history and a bookmarks folder; none of it is sent anywhere. The
+shortcut list it last showed is kept in the profile (below) so the next new
+tab paints at once.
 
 ## What Omafire writes, and where
 
@@ -34,10 +36,26 @@ is not stored or sent anywhere by Omafire.
 - Your settings, in `~/.config/omafire/config.json`, and the current theme
   state, in `~/.local/state/omafire/`.
 - The Omarchy shell plugin link in `~/.config/omarchy/plugins/omafire`.
-- In each managed profile's prefs: the new tab's options and its last
-  shortcut list, and, if you pick one, a copy of the new tab's image.
+- In each managed profile: the new tab's options (custom shortcuts
+  included) and the shortcut list it last showed, as `omafire.newtab.*`
+  prefs; the feed widgets' last answers (`omafire-newtab-cache.json`); a
+  copy of the new tab's image, if you pick one (`omafire-newtab-image`); and
+  the shortcuts Firefox already uses that the keys gave way to
+  (`omafire-keys.json`).
 
-All of it stays on your device, and `omafire remove` takes it out.
+All of it stays on your device, and `omafire remove` takes it out except
+for three things, so a reinstall picks up where you left off:
+
+- your settings file, `~/.config/omafire/config.json`;
+- the backups in `~/.local/state/omafire/backups/`, which are how a remove
+  is undone;
+- your switches for the scripts (`omafire.scripts`,
+  `omafire.scripts.disabled`, `omafire.pseudo-state`), which do nothing in a
+  profile Omafire no longer manages.
+
+Delete the first two by hand to leave nothing behind. Firefox's "Clear
+history" doesn't clear the new tab's last shortcut list; the next new tab
+replaces it with Firefox's current top sites.
 
 ## Data in the browser
 
@@ -56,9 +74,11 @@ in `about:config`.
 ## Network
 
 Omafire's own code opens no network connection, with two exceptions you make
-yourself. A feed widget on the new tab (Hacker News, a subreddit, an RSS feed,
-the weather) fetches from the site it names, and only while it is in your widget
-list. None is there by default. The last answer is kept in the profile so the
+yourself. A feed widget on the new tab fetches from the site it names, and
+only while it is in your widget list: Hacker News from `hn.algolia.com`, a
+subreddit from `www.reddit.com`, an RSS feed from the address you give, and
+the weather from `geocoding-api.open-meteo.com` (the place you type) and
+`api.open-meteo.com`. None is there by default. The last answer is kept in the profile so the
 page paints at once. And searching for a brand icon in the shortcut editor
 fetches Simple Icons' list and the marks it shows from jsDelivr
 (cdn.jsdelivr.net), only while you search; the mark you pick is stored in your

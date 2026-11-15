@@ -503,7 +503,9 @@
     const known = new Map(list.map((site) => [site.url, site.favicon]));
     for (const site of merged) site.favicon ??= known.get(site.url);
     showSites(merged);
-    prefs.setStringPref(SITES_CACHE_PREF, JSON.stringify(merged.map(({ url, title, custom }) => ({ url, title, custom }))));
+    /* Written only when it changed: every write marks prefs.js for saving. */
+    const cache = JSON.stringify(merged.map(({ url, title, custom }) => ({ url, title, custom })));
+    if (cache !== prefs.getStringPref(SITES_CACHE_PREF, "")) prefs.setStringPref(SITES_CACHE_PREF, cache);
   }
 
   function showSites(list) {

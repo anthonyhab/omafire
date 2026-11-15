@@ -33,6 +33,10 @@ no_owned_files() {   # nothing omafire wrote is left in profile $1
 }
 identical() { cmp -s "$1" "$2"; }
 not() { ! "$@"; }
+no_owned_prefs() {   # prefs.js $1 has no omafire.* pref but the user's switches (ffKeptPrefs)
+  ! grep 'user_pref("omafire\.' "$1" |
+    grep -qv -e '"omafire.scripts"' -e '"omafire.scripts.disabled"' -e '"omafire.pseudo-state"'
+}
 same_tree() { diff -r "$1" "$2" >/dev/null; }
 fresh() {
   ffstart "$1" "$2" "$3" "$SB_HOME/$4"
@@ -233,8 +237,12 @@ s5() {
   instance "$s-no-profiles-ini"; note $s "## no-profiles-ini"
   rm "$FF/profiles.ini"
   op $s no-profiles-ini-setup "$PKG_HEAD" omafire setup
-  expect $s "no-profiles-ini: setup exits 0 and configures no profile" \
-    test "$OP_RC" = 0 -a -z "$(grep 'Configured Firefox' "$OP_OUT")"
+  # (2c7af23: an error naming the profiles.ini it looked for, not a
+  # silent success; the hook stays, so setup after Firefox's first start
+  # finishes the job)
+  expect $s "no-profiles-ini: setup exits 1, names profiles.ini and configures no profile" \
+    test "$OP_RC" = 1 -a -n "$(grep 'no Firefox profile found (.*profiles.ini)' "$OP_OUT")" \
+      -a -z "$(grep 'Configured Firefox' "$OP_OUT")"
   # Usage errors.
   instance "$s-usage"; note $s "## usage"
   op $s usage-extra-arg "$PKG_HEAD" omafire setup now
@@ -337,6 +345,8 @@ s9() {
   note $s "$(printf '```\n'; grep -h -e omafire -e 'browser.display' -e 'ui.accentcolor' -e legacyUserProfile "$SB_HOME/$P_PERS/prefs.js" | head -20; ls "$SB_HOME/$P_PERS/extensions" 2>&1; printf '```')"
   expect $s "prefs.js no longer marks the profile omafire-managed" \
     not grep -q '"omafire.managed", true' "$SB_HOME/$P_PERS/prefs.js"
+  expect $s "prefs.js keeps no omafire.* pref but the scripts switches" \
+    no_owned_prefs "$SB_HOME/$P_PERS/prefs.js"
   op $s remove-again "$PKG_HEAD" omafire remove
   expect $s "second remove exits 0 and changes nothing" \
     test "$OP_RC" = 0 -a -z "$(grep -v -e churn -e PRESERVED "$OP_DIFF")"

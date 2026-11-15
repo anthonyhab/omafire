@@ -17,6 +17,12 @@ user_pref("browser.nova.enabled", true);
 user_pref("omafire.extension.offered", true);
 user_pref("ui.accentcolor", "#8d8d8d");
 user_pref("omafire.scripts", false);
+user_pref("omafire.newtab.settings", "{\"shortcuts\":[\"https://example.org/\"]}");
+user_pref("omafire.newtab.sites-cache", "[{\"url\":\"https://example.org/\"}]");
+user_pref("omafire.layout", "top");
+user_pref("omafire.pseudo-state", true);
+user_pref("omafire.scripts.disabled", "keys");
+user_pref("omafire.scriptsx", 1);
 `
 
 // remove must clear what keeps a profile managed and leave
@@ -31,12 +37,12 @@ func TestClearOwnedFFPrefs(t *testing.T) {
 		t.Fatalf("cleared=%v pending=%v", cleared, pending)
 	}
 	got, _ := os.ReadFile(dir + "/prefs.js")
-	for _, gone := range []string{"omafire.managed", "background_color", "use_system_colors", "extension.offered", "ui.accentcolor"} {
+	for _, gone := range []string{"omafire.managed", "background_color", "use_system_colors", "extension.offered", "ui.accentcolor", "omafire.newtab.", "omafire.layout", "omafire.scriptsx"} {
 		if strings.Contains(string(got), gone) {
 			t.Errorf("%s still in prefs.js:\n%s", gone, got)
 		}
 	}
-	for _, kept := range []string{"browser.startup.homepage", "browser.nova.enabled", "omafire.scripts", "// Mozilla User Preferences"} {
+	for _, kept := range []string{"browser.startup.homepage", "browser.nova.enabled", "\"omafire.scripts\", false", "omafire.scripts.disabled", "omafire.pseudo-state", "// Mozilla User Preferences"} {
 		if !strings.Contains(string(got), kept) {
 			t.Errorf("%s was dropped:\n%s", kept, got)
 		}
@@ -152,5 +158,37 @@ func TestSweepTemps(t *testing.T) {
 		if _, err := os.Lstat(dir + "/" + kept); err != nil {
 			t.Errorf("%s was removed", kept)
 		}
+	}
+}
+
+// What the chrome scripts write beside prefs.js goes with the bridge: the
+// new tab's picked image and widget cache, the keys' conflict list. Only
+// those names, and never through a symlink.
+func TestRemoveFFProfileStores(t *testing.T) {
+	dir := t.TempDir()
+	for _, name := range append(ffProfileStores, "omafire-mine.txt") {
+		if err := os.WriteFile(dir+"/"+name, []byte("x"), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	target := t.TempDir() + "/elsewhere"
+	os.WriteFile(target, []byte("keep"), 0o600)
+	os.Remove(dir + "/omafire-keys.json")
+	if err := os.Symlink(target, dir+"/omafire-keys.json"); err != nil {
+		t.Fatal(err)
+	}
+	removeFFProfileStores(dir)
+	for _, name := range []string{"omafire-newtab-image", "omafire-newtab-cache.json"} {
+		if _, err := os.Lstat(dir + "/" + name); err == nil {
+			t.Errorf("%s left behind", name)
+		}
+	}
+	for _, kept := range []string{"omafire-mine.txt", "omafire-keys.json"} {
+		if _, err := os.Lstat(dir + "/" + kept); err != nil {
+			t.Errorf("%s removed", kept)
+		}
+	}
+	if got, _ := os.ReadFile(target); string(got) != "keep" {
+		t.Error("followed the symlink")
 	}
 }

@@ -17,13 +17,19 @@ import hashlib, json, os, re, stat, sys
 MANAGED = {"user.js", "userChrome.css", "userContent.css"}
 BEGIN = re.compile(r"^(/\* |// )BEGIN OMAF(IRE|OX) FIREFOX BRIDGE( \*/)?$")
 END = re.compile(r"^(/\* |// )END OMAF(IRE|OX) FIREFOX BRIDGE( \*/)?$")
-# prefs.js lines `omafire remove` clears (cmd/omafire/firefox.go ffOwnedPrefs):
-# the rest of prefs.js is the user's and must survive byte for byte.
-OWNED_PREFS = re.compile(
-    r'^user_pref\("(omafire\.managed|omafire\.extension\.offered|'
-    r'browser\.display\.(background_color|foreground_color|use_system_colors|permit_backplate)|'
-    r'browser\.anchor_color|browser\.visited_color|ui\.accentcolor(text)?|'
-    r'layout\.css\.prefers-color-scheme\.content-override)",')
+# prefs.js lines `omafire remove` clears, read from the code that clears
+# them (cmd/omafire/firefox.go: ffOwnedPrefs, and every omafire.* pref but
+# ffKeptPrefs) so the two can't drift; the rest of prefs.js is the user's and
+# must survive byte for byte.
+def go_strings(var):
+    src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../cmd/omafire/firefox.go")).read()
+    body = re.search(r"var " + var + r" = \[\]string\{(.*?)\n?\}", src, re.S).group(1)
+    return re.findall(r'"([^"]+)"', body)
+OWNED, KEPT = set(go_strings("ffOwnedPrefs")), set(go_strings("ffKeptPrefs"))
+PREF_NAME = re.compile(r'^user_pref\("([^"]+)",')
+def owned_pref(line):
+    m = PREF_NAME.match(line)
+    return bool(m) and (m[1] in OWNED or (m[1].startswith("omafire.") and m[1] not in KEPT))
 # omafire's own write temporaries and stages: a copy, never the user's file.
 OMAFIRE_TEMP = re.compile(r"(^|/)\.omafire\.([0-9]+|(new|old)\.[0-9]+)(/|$)")
 # Firefox's own churn on a run; not ours to judge.
@@ -67,7 +73,7 @@ def snap(home):
                     e["sentinel"] = True
                 if name == "prefs.js":
                     keep = [l for l in data.decode("utf-8", "replace").split("\n")
-                            if not OWNED_PREFS.match(l)]
+                            if not owned_pref(l)]
                     e["prefs_user_sha256"] = sha("\n".join(keep).encode())
                 if name in MANAGED:
                     rest, begins = remainder(data.decode("utf-8", "replace"))
