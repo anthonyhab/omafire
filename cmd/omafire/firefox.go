@@ -287,6 +287,15 @@ func setupFFProfiles() int {
 	return len(profiles)
 }
 
+// ffPayloadOutdated: the package ships a payload and this one is another
+// release's. The entry file carries the build's version and commit, so it
+// stands for the tree.
+func ffPayloadOutdated(payload string) bool {
+	packaged, havePackaged := readFile(ffPayloadSource + "/" + ffPayloadEntry)
+	installed, haveInstalled := readFile(payload + "/" + ffPayloadEntry)
+	return havePackaged && !(haveInstalled && installed == packaged)
+}
+
 func ffProfileStatus(profile string) string {
 	f := ffPaths(profile)
 	legacy := ffPayloadOwned(f.chrome + "/" + legacyFFPayloadDirname)
@@ -313,9 +322,7 @@ func ffProfileStatus(profile string) string {
 		managedBlockPresent(f.userChrome, ffCSSBegin, ffCSSEnd) &&
 		managedBlockPresent(f.userContent, ffCSSBegin, ffCSSEnd) &&
 		managedBlockPresent(f.userPrefs, ffPrefsBegin, ffPrefsEnd):
-		packaged, havePackaged := readFile(ffPayloadSource + "/" + ffPayloadEntry)
-		installed, haveInstalled := readFile(f.payload + "/" + ffPayloadEntry)
-		if havePackaged && !(haveInstalled && installed == packaged) {
+		if ffPayloadOutdated(f.payload) {
 			return "outdated"
 		}
 		return "configured"

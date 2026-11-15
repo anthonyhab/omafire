@@ -177,6 +177,16 @@ func refreshFFProfileColors(profile string, p *palette) {
 		return
 	}
 
+	// A package upgrade replaces the chrome scripts in Firefox's directory at
+	// once, and runs no user command: the profile's CSS stays the old
+	// release's until something refreshes it. The theme hook is that
+	// something, for a payload that is ours (never a theme checkout's).
+	if !ffChromeIsCheckout(f.chrome) && ffPayloadOwned(f.payload) && ffPayloadOutdated(f.payload) {
+		validateFFPayload(f.payload)
+		installFFPayload(f.chrome, f.payload)
+		fmt.Printf("Updated the Firefox theme payload: %s\n", profile)
+	}
+
 	// content-override: 0=dark, 1=light: pages with native dark CSS render
 	// correctly before any content-script theme engine wakes up.
 	override := 0

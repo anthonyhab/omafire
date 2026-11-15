@@ -65,8 +65,10 @@ MSG
 post_upgrade() {
   _remove_legacy_loader
   cat <<'MSG'
-==> omafire: restart Firefox to load the new chrome scripts. Run
-    `omafire setup` again to bring profiles up to the new theme payload.
+==> omafire: run `omafire sync` as yourself, then restart Firefox: sync
+    brings each profile's theme up to this release (the next Omarchy theme
+    change does the same), and the restart loads it with the new chrome
+    scripts.
 MSG
 }
 

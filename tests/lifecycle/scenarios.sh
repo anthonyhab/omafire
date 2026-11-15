@@ -124,11 +124,15 @@ s3() {
   expect $s "payload is v0.6.6's" payload_is "$PKG_PREV" "$P_PERS"
   fresh $s personal-v066 "$PKG_PREV" "$P_PERS"
   # pacman -U of the new package runs no user command: the next theme hook
-  # (sync) runs the new binary against the old payload.
+  # (sync) runs the new binary against the old payload, and brings it up to
+  # the package's.
+  op $s status-head-before-sync "$PKG_HEAD" omafire status
+  expect $s "status says outdated after the upgrade" grep -q '(outdated)' "$OP_OUT"
   op $s sync-head-before-setup "$PKG_HEAD" omafire sync
   expect $s "sync after upgrade, before setup: preserved" test "$OP_PRESERVED" = 0
-  op $s status-head-before-setup "$PKG_HEAD" omafire status
-  expect $s "status says outdated until setup runs" grep -q '(outdated)' "$OP_OUT"
+  expect $s "sync after upgrade brings the payload to HEAD's" payload_is "$PKG_HEAD" "$P_PERS"
+  op $s status-head-after-sync "$PKG_HEAD" omafire status
+  expect $s "status no longer says outdated after sync" not grep -q '(outdated)' "$OP_OUT"
   op $s setup-head "$PKG_HEAD" omafire setup
   expect $s "setup after upgrade exits 0" test "$OP_RC" = 0
   expect $s "upgrade preserved sentinels and user-owned content" test "$OP_PRESERVED" = 0

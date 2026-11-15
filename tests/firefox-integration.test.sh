@@ -242,6 +242,18 @@ outdated_status=$("$OMAFIRE_BIN" status)
 "$OMAFIRE_BIN" setup >/dev/null 2>&1
 cmp "$FF_PAYLOAD_SOURCE/userChrome.css" "$RELATIVE_PROFILE/chrome/omafire/userChrome.css"
 
+# A package upgrade runs no user command; the next theme hook (sync) brings
+# an outdated payload up to the package's, so the new chrome scripts never
+# run against the old release's CSS. Once, and never into a theme checkout.
+printf '%s\n' '/* second package update */' >> "$FF_PAYLOAD_SOURCE/userChrome.css"
+sync_out=$("$OMAFIRE_BIN" sync)
+cmp "$FF_PAYLOAD_SOURCE/userChrome.css" "$RELATIVE_PROFILE/chrome/omafire/userChrome.css"
+cmp "$FF_PAYLOAD_SOURCE/userChrome.css" "$ABSOLUTE_PROFILE/chrome/omafire/userChrome.css"
+[[ $sync_out == *"Updated the Firefox theme payload: $RELATIVE_PROFILE"* ]]
+[[ $("$OMAFIRE_BIN" status) == *"Firefox profile: $RELATIVE_PROFILE (configured)"* ]]
+[[ $("$OMAFIRE_BIN" sync) != *"Updated the Firefox theme payload"* ]]
+[[ ! -e "$CHECKOUT_PROFILE/chrome/omafire" ]]
+
 # Removal preflights every profile and refuses to delete an unowned collision.
 rm -rf "$ABSOLUTE_PROFILE/chrome/omafire"
 mkdir -p "$ABSOLUTE_PROFILE/chrome/omafire"
