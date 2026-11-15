@@ -20,11 +20,11 @@
    * view's outsets are the bleed alone. Firefox derives the outsets on
    * :root, so they are restated here, where the inputs change. */
   --urlbar-background-overhang-open: var(--oc-launcher-bleed) !important;
-  --urlbarView-row-gutter: 0px !important;
-  --urlbarView-margin-block: 0px !important;
-  --urlbarView-margin-inline: 0px !important;
-  --urlbarView-joint-background-outset-inline: var(--urlbar-background-overhang-open) !important;
-  --urlbarView-joint-background-outset-block: var(--urlbar-background-overhang-open) !important;
+  --urlbarview-row-gutter: 0px !important;
+  --urlbarview-margin-block: 0px !important;
+  --urlbarview-margin-inline: 0px !important;
+  --urlbarview-joint-background-outset-inline: var(--urlbar-background-overhang-open) !important;
+  --urlbarview-joint-background-outset-block: var(--urlbar-background-overhang-open) !important;
   /* In the toolbar the card's top stops at the toolbar's edge. */
   --oc-urlbar-card-top: calc((var(--oc-button) - var(--oc-toolbar)) / 2);
   --urlbar-box-background-color: transparent !important;
@@ -97,8 +97,8 @@
 }
 
 .urlbarView-row {
-  --urlbarView-icon-margin-start: 0px !important;
-  --urlbarView-icon-margin-end-base: var(--oc-pad) !important;
+  --urlbarview-icon-margin-start: 0px !important;
+  --urlbarview-icon-margin-end-base: var(--oc-pad) !important;
   min-height: var(--oc-row) !important;
   /* Block flow collapses adjacent margins: one unit between rows, the
    * same pitch as tab rows. */

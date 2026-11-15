@@ -162,8 +162,8 @@ button[aria-pressed="true"]:not(:hover) > .button-background {
     --focus-outline: var(--focus-outline-width) solid var(--focus-outline-color) !important;
 
     /* Fields: the quiet box. */
-    --input-text-background-color: var(--oc-field-rest) !important;
-    --input-text-border-color: var(--oc-line) !important;
+    --input-background-color: var(--oc-field-rest) !important;
+    --input-border-color: var(--oc-line) !important;
 
     /* A group's header ("Today") is a heading, not a selection: no fill
      * at rest, the ordinary fills when handled. */

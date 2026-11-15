@@ -163,7 +163,7 @@
       inset-block-start: var(--oc-urlbar-card-top) !important;
     }
     &:not([popover-open]) > .urlbar-background {
-      inset-block-end: calc(-1 * var(--urlbarView-joint-background-outset-block)) !important;
+      inset-block-end: calc(-1 * var(--urlbarview-joint-background-outset-block)) !important;
     }
   }
 
@@ -192,7 +192,7 @@
         right: calc(anchor(--oc-page right, 0px) + var(--oc-pad)) !important;
         width: auto !important;
         --urlbar-background-overhang-open: var(--oc-pad) !important;
-        --urlbarView-joint-background-outset-block: var(--oc-launcher-bleed) !important;
+        --urlbarview-joint-background-outset-block: var(--oc-launcher-bleed) !important;
         --oc-urlbar-card-top: 0px;
         animation: oc-drop var(--oc-console-in) var(--oc-ease-enter) !important;
       }
@@ -220,7 +220,7 @@
       width: var(--oc-launcher-width) !important;
       /* Floating: the card bleeds evenly on every side. */
       --urlbar-background-overhang-open: var(--oc-launcher-bleed) !important;
-      --urlbarView-joint-background-outset-block: var(--oc-launcher-bleed) !important;
+      --urlbarview-joint-background-outset-block: var(--oc-launcher-bleed) !important;
       --oc-urlbar-card-top: calc(-1 * var(--oc-launcher-bleed));
     }
 

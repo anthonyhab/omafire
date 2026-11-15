@@ -111,10 +111,12 @@
     --button-border-color-primary-hover: transparent !important;
     --button-border-color-primary-active: transparent !important;
 
-    /* Fields: the quiet box. */
-    --input-text-background-color: var(--oc-field-rest) !important;
-    --input-text-border-color: var(--oc-line) !important;
-    --input-border-color: var(--oc-line-strong) !important;
+    /* Fields: the quiet box. Firefox 160 gives text fields and selects
+     * one --input-border-color (bug 2045965); selects keep the strong
+     * line through their own token. */
+    --input-background-color: var(--oc-field-rest) !important;
+    --input-border-color: var(--oc-line) !important;
+    --select-border-color: var(--oc-line-strong) !important;
 
     /* Same geometry as the chrome: Hyprland's rounding everywhere, no
      * pills (nav selection, search fields, buttons). --border-radius-circle
@@ -125,7 +127,7 @@
     --border-radius-xlarge: var(--oc-radius) !important;
     --button-border-radius: var(--oc-radius-small) !important;
     --input-search-border-radius: var(--oc-radius-small) !important;
-    --input-text-border-radius: var(--oc-radius-small) !important;
+    --input-border-radius: var(--oc-radius-small) !important;
     --page-nav-button-border-radius: var(--oc-radius-small) !important;
     --page-nav-button-border-radius-focused: var(--oc-radius-small) !important;
   }

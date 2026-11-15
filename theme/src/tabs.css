@@ -16,7 +16,7 @@
   --tab-attention-dot-color: var(--oc-accent) !important;
 
   /* The loading throbber follows the accent. */
-  --tab-loading-fill: var(--oc-accent) !important;
+  --tab-icon-fill-loading: var(--oc-accent) !important;
 
   /* Tab-group swatches follow the Omarchy palette. */
   --tab-group-red: var(--omarchy-red) !important;
@@ -43,8 +43,8 @@
    * enough (row pitch = --oc-row + 4px, as before Nova). */
   --tab-padding-block-start: 0px !important;
   --tab-padding-block-end: 0px !important;
-  --tab-inline-padding: var(--oc-inset) !important;
-  --tab-icon-end-margin: var(--oc-pad) !important;
+  --tab-padding-inline: var(--oc-inset) !important;
+  --tab-icon-margin-inline-end: var(--oc-pad) !important;
 
   /* ---- rows ------------------------------------------------------ */
 
@@ -237,8 +237,8 @@
      * fill the row. So tiles are slabs that fill their cells: equal blocks
      * one unit apart, flush with the --oc-inset axis on both sides. */
     --tab-pinned-min-width-expanded: var(--oc-pinned) !important;
-    --tab-pinned-margin-inline-expanded: 0px !important;
-    --tab-pinned-container-margin-inline-expanded: calc(var(--oc-inset) - var(--oc-step) / 2) !important;
+    --tab-margin-inline-pinned-expanded: 0px !important;
+    --tab-container-margin-inline-pinned-expanded: calc(var(--oc-inset) - var(--oc-step) / 2) !important;
     --tab-height-with-margin-padding: calc(var(--oc-pinned) + var(--oc-step)) !important;
     padding-block: var(--oc-inset) 0 !important;
     /* Always exactly as tall as its tiles. Firefox applies the height the
@@ -306,7 +306,7 @@
     margin: calc(var(--oc-step) / 2) var(--oc-inset) !important;
     padding: 0 var(--oc-icon-pad) !important;
     min-height: var(--oc-row) !important;
-    gap: var(--tab-icon-end-margin) !important;
+    gap: var(--tab-icon-margin-inline-end) !important;
     border-radius: var(--oc-radius-small) !important;
     color: var(--oc-text-dim) !important;
     fill: var(--oc-text-dim) !important;
