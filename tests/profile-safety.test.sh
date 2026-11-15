@@ -228,4 +228,32 @@ cmp "$TEST_ROOT/original-mine-prefs.js" "$MINE/prefs.js"
 after_copies=$(for d in "$FF_ROOT"/*-back*; do tree_hash "$d"; done)
 [[ $before_copies == "$after_copies" ]]
 
+# ---- setup with a profile it must skip: the rest is still finished ------
+# One profile can't take the palette (its palette file is a directory); the
+# other is psd's and holds the user's own userChrome.css. Setup fails at the
+# end, not inside its sync: the set it backed up is restorable, and psd is
+# still asked to resync. (It used to exit before both.)
+SKIP_ROOT="$TEST_ROOT/skip-ff"
+SKIP_TMPFS="$PSD_RUN/user-firefox-mine2.default"
+mkdir -p "$SKIP_ROOT/bad.default/chrome/omafire-palette.css" "$SKIP_TMPFS/chrome"
+ln -s "$SKIP_TMPFS" "$SKIP_ROOT/mine2.default"
+printf '%s\n' '/* my own rule */' > "$SKIP_TMPFS/chrome/userChrome.css"
+cp "$SKIP_TMPFS/chrome/userChrome.css" "$TEST_ROOT/original-mine2-userChrome.css"
+printf '[Profile0]\nName=bad\nIsRelative=1\nPath=bad.default\n\n[Profile1]\nName=mine2\nIsRelative=1\nPath=mine2.default\n' > "$SKIP_ROOT/profiles.ini"
+: > "$TEST_ROOT/systemctl.log"
+rm -rf "$TEST_HOME/.local/state/omafire/backups"
+status=0
+out=$(OMAFIRE_FIREFOX_ROOT="$SKIP_ROOT" "$OMAFIRE_BIN" setup 2>&1) || status=$?
+[[ $status == 1 ]]
+[[ $out == *"Configured Firefox profile: $SKIP_ROOT/mine2.default"* ]]
+[[ $out == *"1 Firefox profile(s) skipped; fix them and run omafire setup again"* ]]
+[[ $out == *"Backed up the files it changed to"* ]]
+[[ $out == *"Asked profile-sync-daemon to write the changes to disk."* ]]
+grep -q 'psd-resync' "$TEST_ROOT/systemctl.log"
+set_dir=$(find "$TEST_HOME/.local/state/omafire/backups" -mindepth 1 -maxdepth 1 -type d -name '*-setup-*')
+[[ -f "$set_dir/.wrote" ]]
+out=$(OMAFIRE_FIREFOX_ROOT="$SKIP_ROOT" "$OMAFIRE_BIN" restore 2>&1)
+[[ $out == *"Restored $SKIP_ROOT/mine2.default/chrome/userChrome.css"* || $out == *"Restored $SKIP_TMPFS/chrome/userChrome.css"* ]]
+cmp "$TEST_ROOT/original-mine2-userChrome.css" "$SKIP_TMPFS/chrome/userChrome.css"
+
 echo "profile-safety.test.sh: ok"

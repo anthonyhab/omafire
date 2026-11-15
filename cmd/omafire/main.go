@@ -124,6 +124,22 @@ func initPaths() {
 // ---------------------------------------------------------------- commands
 
 func cmdSync() {
+	if skipped := syncPalette(); skipped > 0 {
+		failSkipped(skipped, "sync")
+	}
+}
+
+// failSkipped ends a command that left profiles off the theme. The refusals
+// were printed as they happened; the exit status still says that not every
+// profile follows it.
+func failSkipped(skipped int, command string) {
+	fmt.Fprintf(os.Stderr, programName+": %d Firefox profile(s) skipped; fix them and run omafire %s again\n", skipped, command)
+	os.Exit(1)
+}
+
+// syncPalette writes the current palette everywhere and returns how many
+// Firefox profiles it had to skip.
+func syncPalette() int {
 	requireQuattro()
 	p := readPalette()
 	payload := formatPayload(p, jsonEscape(currentThemeName()))
@@ -133,12 +149,7 @@ func cmdSync() {
 	skipped := refreshFFProfilesColors(p)
 	storeThemePayload(payload)
 	sweepLeftoverTemps()
-	if skipped > 0 {
-		// The refusals were printed as they happened; the exit status
-		// still says that not every profile follows the theme.
-		fmt.Fprintf(os.Stderr, programName+": %d Firefox profile(s) skipped; fix them and run omafire sync again\n", skipped)
-		os.Exit(1)
-	}
+	return skipped
 }
 
 func cmdSetup() {
@@ -158,7 +169,9 @@ func cmdSetup() {
 	ffConfigured := setupFFProfiles()
 	setupShellPlugin()
 	backupCommand = "" // the palette refresh below changes no user file
-	cmdSync()
+	// A skipped profile fails setup only at the end: what it did change is
+	// still recorded for restore, and psd still told.
+	skipped := syncPalette()
 	fmt.Println("Applied the current Omarchy palette.")
 	if ffConfigured > 0 {
 		fmt.Println("Restart Firefox once to load the Omafire bridge.")
@@ -170,6 +183,9 @@ func cmdSetup() {
 	psdResync()
 	if !isRegularFile(ffProfilesFile) {
 		fail("no Firefox profile found (%s): start Firefox once, then run omafire setup again", ffProfilesFile)
+	}
+	if skipped > 0 {
+		failSkipped(skipped, "setup")
 	}
 }
 
