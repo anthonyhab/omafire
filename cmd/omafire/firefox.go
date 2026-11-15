@@ -395,9 +395,12 @@ func ownedFFPrefLine(line string) bool {
 	return false
 }
 
-// clearOwnedFFPrefs drops those preferences from prefs.js. A running Firefox
-// rewrites prefs.js from memory when it exits, so the edit waits (pending)
-// until the profile is closed; a rerun of remove then does it.
+// clearOwnedFFPrefs drops those preferences from prefs.js, in a profile
+// Firefox ran with the bridge: omafire.managed has no default, so prefs.js
+// holds it exactly then, and still does on a rerun after a pending clear.
+// Without it, prefs of those names are the user's own and stay. A running
+// Firefox rewrites prefs.js from memory when it exits, so the edit waits
+// (pending) until the profile is closed; a rerun of remove then does it.
 func clearOwnedFFPrefs(profile string) (cleared, pending bool) {
 	path := profile + "/prefs.js"
 	data, ok := readFile(path)
@@ -405,15 +408,15 @@ func clearOwnedFFPrefs(profile string) (cleared, pending bool) {
 		return false, false
 	}
 	var keep []string
-	found := false
+	managed := false
 	for _, line := range lines(data) {
 		if ownedFFPrefLine(line) {
-			found = true
+			managed = managed || strings.HasPrefix(line, "user_pref(\"omafire.managed\",")
 			continue
 		}
 		keep = append(keep, line)
 	}
-	if !found {
+	if !managed {
 		return false, false
 	}
 	if profileRunning(profile) {

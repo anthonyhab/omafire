@@ -206,12 +206,22 @@ if command -v fuse-overlayfs >/dev/null && [[ -w /dev/fuse ]]; then
 fi
 
 # ---- remove: through the same guards; backups outlive it ----------------
+# A profile setup never configured: its prefs.js holds prefs of the names
+# the bridge owns, set by the user, and remove leaves it byte for byte.
+MINE="$FF_ROOT/mine.default"
+mkdir -p "$MINE"
+printf '%s\n' '// Mozilla User Preferences' 'user_pref("browser.anchor_color", "#ff8800");' \
+  'user_pref("layout.css.prefers-color-scheme.content-override", 0);' 'user_pref("keep", 1);' > "$MINE/prefs.js"
+cp "$MINE/prefs.js" "$TEST_ROOT/original-mine-prefs.js"
+printf '\n[Profile9]\nName=mine\nIsRelative=1\nPath=mine.default\n' >> "$FF_ROOT/profiles.ini"
 : > "$TEST_ROOT/systemctl.log"
 chmod 311 "$PLAIN/chrome/omafire"   # and remove finishes such a payload too
 out=$("$OMAFIRE_BIN" remove 2>&1)
 [[ $out == *"Removed Firefox profile bridge: $LIVE"* ]]
 [[ $out == *"Asked profile-sync-daemon"* ]]
 cmp "$TEST_ROOT/original-live-user.js" "$LIVE_TMPFS/user.js"
+cmp "$TEST_ROOT/original-mine-prefs.js" "$MINE/prefs.js"
+[[ $out != *"$MINE"* ]]
 [[ ! -e "$LIVE_TMPFS/chrome/omafire" && ! -e "$PLAIN/chrome/omafire" ]]
 [[ ! -e "$TEST_HOME/.local/state/omafire/lock" ]]
 [[ -d "$TEST_HOME/.local/state/omafire/backups" ]]

@@ -46,6 +46,26 @@ func TestClearOwnedFFPrefs(t *testing.T) {
 	}
 }
 
+// A profile omafire never managed (no omafire.managed in prefs.js, so
+// Firefox never applied the bridge) keeps the same prefs as the user's own.
+func TestClearOwnedFFPrefsLeavesUnmanagedProfile(t *testing.T) {
+	dir := t.TempDir()
+	const own = `// Mozilla User Preferences
+user_pref("browser.anchor_color", "#ff8800");
+user_pref("layout.css.prefers-color-scheme.content-override", 0);
+user_pref("ui.highlight", "#334455");
+`
+	if err := os.WriteFile(dir+"/prefs.js", []byte(own), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if cleared, pending := clearOwnedFFPrefs(dir); cleared || pending {
+		t.Errorf("cleared=%v pending=%v, want nothing to do", cleared, pending)
+	}
+	if got, _ := os.ReadFile(dir + "/prefs.js"); string(got) != own {
+		t.Errorf("prefs.js changed:\n%s", got)
+	}
+}
+
 // A running Firefox rewrites prefs.js on exit: the edit is deferred, the file
 // untouched.
 func TestClearOwnedFFPrefsWaitsForRunningFirefox(t *testing.T) {
