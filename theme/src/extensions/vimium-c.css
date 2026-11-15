@@ -36,4 +36,12 @@
     outline: 1px solid var(--oc-focus) !important;
     outline-offset: -1px !important;
   }
+  /* The options' help column hangs each note from its row in a box of
+   * height 0, sized for Vimium's own sans: monospace wraps it to more
+   * lines, and one row's note ran over the next's. Given its height, the
+   * note makes its row as tall as it needs. */
+  .help-inner {
+    height: auto !important;
+    top: 0 !important;
+  }
 }
