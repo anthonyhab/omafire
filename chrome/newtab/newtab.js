@@ -1174,6 +1174,19 @@
     if (def.header) weatherLine.textContent = def.header(data);
   }
 
+  /* Draws an answer, or says why not: one this version can't draw (an
+   * older cache shape, a damaged file, a feed that changed) must not take
+   * the other widgets down with it. */
+  function tryFill(block, def, entry, data) {
+    try {
+      fillWidget(block, def, entry, data);
+      return true;
+    } catch (error) {
+      console.error(`[omafire:newtab] ${entry.type}: can't draw its answer:`, error);
+      return false;
+    }
+  }
+
   let widgetsRequest = 0;
   let widgetTimer = null;
   let waitingForCache = false;
@@ -1199,16 +1212,23 @@
       const def = WIDGETS[entry.type];
       const block = widgetBlock(entry);
       const key = `${entry.type}:${entry.option}:${def.key ? def.key() : ""}`;
-      const cached = widgetCache[key];
+      let cached = widgetCache[key];
       if (!def.local) keep.add(key);
-      if (cached && !def.local) fillWidget(block, def, entry, cached.data);
+      /* A cached answer it can't draw is dropped and fetched again. */
+      if (cached && !def.local && !tryFill(block, def, entry, cached.data)) {
+        delete widgetCache[key];
+        cached = undefined;
+      }
       const fresh = cached && !def.local && Date.now() - cached.at < FEED_TTL;
       if (!fresh) {
         Promise.resolve()
           .then(() => def.load(entry.option))
           .then((data) => {
             if (request !== widgetsRequest) return;
-            fillWidget(block, def, entry, data);
+            if (!tryFill(block, def, entry, data)) {
+              fillWidget(block, def, entry, null, true);
+              return;
+            }
             if (!def.local) {
               widgetCache[key] = { at: Date.now(), data };
               storeWidgetCache(keep);
