@@ -1,0 +1,36 @@
+/* ScriptCat's popup and options (Arco Design). Forced colours repaint its
+ * switches' blue track as a grey a step off the page and its knob as the
+ * canvas, so on and off looked alike and the header's switch all but
+ * vanished (1.4:1). The switches are drawn here as the theme's: a field
+ * box on its hairline with a text-dim knob, and on, the accent with a
+ * canvas knob. Held to ScriptCat's own pages by Arco's switch class. */
+@-moz-document regexp("moz-extension://[^/]+/src/(popup|options|install|confirm|import)\\.html.*") {
+  .arco-switch,
+  .arco-switch .arco-switch-dot {
+    forced-color-adjust: none !important;
+  }
+  .arco-switch {
+    background-color: var(--oc-field-rest) !important;
+    box-shadow: inset 0 0 0 1px var(--oc-line-strong) !important;
+  }
+  .arco-switch .arco-switch-dot {
+    background-color: var(--oc-text-dim) !important;
+  }
+  .arco-switch.arco-switch-checked {
+    background-color: var(--oc-accent) !important;
+    box-shadow: none !important;
+  }
+  .arco-switch.arco-switch-checked .arco-switch-dot {
+    background-color: var(--oc-canvas) !important;
+  }
+  .arco-switch:hover:not(.arco-switch-disabled) {
+    box-shadow: inset 0 0 0 1px var(--oc-text-dim) !important;
+  }
+  .arco-switch.arco-switch-checked:hover:not(.arco-switch-disabled) {
+    box-shadow: none !important;
+  }
+  .arco-switch:focus-visible {
+    outline: 1px solid var(--oc-focus) !important;
+    outline-offset: 1px !important;
+  }
+}

@@ -19,7 +19,9 @@
   regexp("moz-extension://[^/]+/(popup|sidebar|options)/index\\.html.*"),
   regexp("moz-extension://[^/]+/src/browser/monkey-menu\\.html.*"),
   regexp("moz-extension://[^/]+/options/popup\\.html.*"),
-  regexp("moz-extension://[^/]+/options/(options|options_custom|options_excluded)\\.html.*") {
+  regexp("moz-extension://[^/]+/options/(options|options_custom|options_excluded)\\.html.*"),
+  regexp("moz-extension://[^/]+/src/(popup|options|install|confirm|import)\\.html.*"),
+  regexp("moz-extension://[^/]+/html/options\\.html.*") {
   :root {
     /* ---- geometry and type ------------------------------------------ */
 

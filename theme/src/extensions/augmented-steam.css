@@ -1,0 +1,12 @@
+/* Augmented Steam's options. Its toggles are icons (a track outlined for
+ * off, filled for on) whose on state was its highlight blue; forced
+ * colours paint both in the text colour, so on and off differed only by
+ * shape. On takes the accent back, out of forced colours so it keeps it.
+ * Held to its page, and to the icon that carries the on state (more than
+ * one component draws toggles). */
+@-moz-document regexp("moz-extension://[^/]+/html/options\\.html.*") {
+  i.is-on:has(> svg) {
+    forced-color-adjust: none !important;
+    color: var(--oc-accent) !important;
+  }
+}
