@@ -244,6 +244,12 @@ func cmdWatch(args []string) {
 				for _, w := range warnings {
 					fmt.Fprintf(os.Stderr, "%s: %s: %s\n", programName, configFile, w)
 				}
+				if joined == "" {
+					// Fixed: the line goes out again even if the
+					// settings came back the same, so a reader showing
+					// the complaint knows it is over.
+					last = ""
+				}
 				lastWarnings = joined
 			}
 			file = f

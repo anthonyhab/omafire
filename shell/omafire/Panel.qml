@@ -84,7 +84,9 @@ Panel {
       return
     }
     var row = rows[Model.rowIndex(rows, key)]
-    if (!row) return
+    // Before the first settings line every value is unknown: a toggle
+    // would write the opposite of a value nobody read.
+    if (!row || !omafire.ready) return
     var value = config[row.key]
     if (row.type === "toggle") omafire.set(row.key, delta === 0 ? !value : delta > 0)
     else if (row.type === "choice") omafire.set(row.key, Model.stepChoice(row.options, value, delta === 0 ? 1 : delta, delta === 0))
@@ -114,7 +116,9 @@ Panel {
     // The urgent colour when a profile or the hook needs setup.
     active: root.needsRepair
     onPressed: function(buttonCode) {
-      if (buttonCode === Qt.RightButton) omafire.set("glass", !(root.config.glass === true))
+      if (buttonCode === Qt.RightButton) {
+        if (omafire.ready) omafire.set("glass", !(root.config.glass === true))
+      }
       else root.toggle()
     }
   }
@@ -220,11 +224,14 @@ Panel {
 
         Text {
           textFormat: Text.PlainText
-          visible: omafire.lastError !== ""
+          visible: text !== ""
           width: parent.width
           bottomPadding: Style.space(4)
-          text: omafire.lastError
-          color: root.urgent
+          // An error first; else, until the first settings line, why the
+          // rows below are dimmed.
+          text: omafire.lastError || (omafire.ready ? "" : "Reading settings…")
+          color: omafire.lastError ? root.urgent : root.foreground
+          opacity: omafire.lastError ? 1 : 0.6
           font.family: root.fontFamily
           font.pixelSize: Style.font.caption
           wrapMode: Text.WordWrap
@@ -246,6 +253,9 @@ Panel {
 
             width: layout.width
             spacing: Style.space(2)
+            // nothing to show or change until the settings are read
+            enabled: omafire.ready
+            opacity: omafire.ready ? 1 : 0.4
 
             PanelSeparator {
               visible: rowRoot.firstOfSection && rowRoot.index > 0

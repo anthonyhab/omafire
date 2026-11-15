@@ -124,19 +124,24 @@ lines 1
 "$OMAFIRE_BIN" set glass on
 lines 2
 "$OMAFIRE_BIN" set glass on             # no change, no line
+cp "$CONFIG" "$TEST_ROOT/good.json"
 printf 'broken' > "$CONFIG"
 sleep 0.2
+[[ $(wc -l < "$TEST_ROOT/out") == 2 && -s "$TEST_ROOT/err" ]]
+cp "$TEST_ROOT/good.json" "$CONFIG"     # fixed, same settings: the line again,
+lines 3                                 # so a reader showing the error clears it
+[[ $(sed -n 3p "$TEST_ROOT/out") == "$(sed -n 2p "$TEST_ROOT/out")" ]]
 printf '{"glass": true, "opacity": 0.9}\n' > "$CONFIG"
-lines 3
-rm -r "$HOME/.config/omafire"           # gone: defaults
 lines 4
-"$OMAFIRE_BIN" set tabs vertical        # a new directory is still watched
+rm -r "$HOME/.config/omafire"           # gone: defaults
 lines 5
+"$OMAFIRE_BIN" set tabs vertical        # a new directory is still watched
+lines 6
 printf '{}\n' > "$TEST_ROOT/theme.json"
 mv "$TEST_ROOT/theme.json" "$HOME/.local/state/omafire/theme.json"
-lines 6
-ln -sfn "$TEST_ROOT/in" "$HOME/.local/state/omarchy/current/background"
 lines 7
+ln -sfn "$TEST_ROOT/in" "$HOME/.local/state/omarchy/current/background"
+lines 8
 exec 3>&-
 for _ in $(seq 50); do
   kill -0 "$WATCH_PID" 2>/dev/null || break
@@ -154,7 +159,7 @@ lines = open(sys.argv[1]).read().splitlines()
 assert lines[-2:] == ["palette", "wallpaper"], lines
 del lines[-2:]
 got = [json.loads(l) for l in lines]
-want = [(False, 0.85, "horizontal"), (True, 0.85, "horizontal"), (True, 0.9, "horizontal"),
+want = [(False, 0.85, "horizontal"), (True, 0.85, "horizontal"), (True, 0.85, "horizontal"), (True, 0.9, "horizontal"),
         (False, 0.85, "horizontal"), (False, 0.85, "vertical")]
 assert [(g["glass"], g["opacity"], g["tabs"]) for g in got] == want, got
 PY

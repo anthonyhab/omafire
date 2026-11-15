@@ -25,7 +25,17 @@ QtObject {
   readonly property bool ready: Object.keys(watched).length > 0
 
   property var status: null
-  property string lastError: ""
+  // `command` could not be started at all (missing, not executable): the
+  // panel has nothing to read or write until it can.
+  property bool unreachable: false
+  // One message per source, each cleared by that source's next success, so
+  // a banner says what is wrong now, not what once was.
+  property string watchError: ""
+  property string setError: ""
+  property string repairError: ""
+  readonly property string lastError: unreachable
+    ? command + " could not be started: is omafire installed?"
+    : repairError || setError || watchError
   readonly property bool repairing: repairProcess.running
 
   property var _queue: []   // keys waiting for `set`, oldest first
@@ -56,31 +66,44 @@ QtObject {
 
   function repair() {
     if (repairProcess.running) return
-    lastError = ""
+    repairError = ""
     repairProcess.running = true
   }
 
   function _takeLine(line) {
     var text = String(line || "").trim()
     if (text.charAt(0) !== "{") {
-      if (text !== "") lastError = text   // the CLI's warning about the file
+      if (text !== "") watchError = text   // the CLI's warning about the file
       return
     }
     try {
       watched = JSON.parse(text)
-      if (lastError.indexOf("config.json") !== -1) lastError = ""
+      // (watch sends the line again once a broken file is fixed)
+      watchError = ""
     } catch (e) {
       console.warn("omafire: unreadable watch line: " + text)
     }
   }
 
   property Process watchProcess: Process {
+    // A process that can't start goes back to not running with neither
+    // started nor exited (Quickshell 0.3).
+    property bool started: false
     command: [root.command, "watch"]
     running: false
     stdout: SplitParser { onRead: function(data) { root._takeLine(data) } }
     stderr: SplitParser { onRead: function(data) { root._takeLine(data) } }
+    onStarted: {
+      started = true
+      root.unreachable = false
+      root.watchError = ""
+    }
+    onRunningChanged: {
+      if (!running && !started) root.unreachable = true
+      if (!running) started = false
+    }
     onExited: function(exitCode) {
-      if (exitCode !== 0) root.lastError = "omafire watch stopped (" + exitCode + "); retrying"
+      if (exitCode !== 0) root.watchError = "omafire watch stopped (" + exitCode + "); retrying"
     }
   }
 
@@ -111,7 +134,7 @@ QtObject {
     running: false
     stderr: StdioCollector { id: setStderr; waitForEnd: true }
     onExited: function(exitCode) {
-      if (exitCode !== 0) root.lastError = setStderr.text.trim() || ("omafire set failed (" + exitCode + ")")
+      root.setError = exitCode === 0 ? "" : setStderr.text.trim() || ("omafire set failed (" + exitCode + ")")
       // A newer value for the same key stays pending for its own run.
       if (root._queue.indexOf(key) === -1 && root.pending[key] === value) {
         var next = Object.assign({}, root.pending)
@@ -141,7 +164,7 @@ QtObject {
     running: false
     stderr: StdioCollector { id: repairStderr; waitForEnd: true }
     onExited: function(exitCode) {
-      if (exitCode !== 0) root.lastError = repairStderr.text.trim() || ("omafire setup failed (" + exitCode + ")")
+      root.repairError = exitCode === 0 ? "" : repairStderr.text.trim() || ("omafire setup failed (" + exitCode + ")")
       root.refreshStatus()
     }
   }
