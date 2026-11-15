@@ -1,9 +1,9 @@
 # omafire: agent notes
 
-This repo lives inside the bundle checkout (`~/Projects/omarchy-firefox-bundle`). Its AGENTS.md
-holds the project rules (design bar, fxlab, live profile, release); read it first. Beads are the
-bundle's (prefix `omafire`); `.beads/redirect` here points at them, and that works from a worktree
-too.
+This repo lives inside the bundle checkout (`~/agent-home/firefox/omarchy-firefox-bundle`). Its AGENTS.md
+holds the project rules (design bar, fxlab, live profile, release); read it first. Work items are
+the bundle's, in muster repo `omarchy-firefox-bundle` (`.git/muster-repo` says so, so `muster add`
+here files there; old `omafire-…` ids still work).
 
 ## Gate
 
