@@ -15,8 +15,9 @@
  * icon. Always on, expanded rows carry the digit at their trailing end, as
  * horizontal tabs do; the rail stays clean.
  *
- * Horizontal tabs: the digit sits at the trailing end, before the close
- * button, as dim text. */
+ * Horizontal tabs: always on, the digit sits at the trailing end, before
+ * the close button, as dim text; held, it takes the favicon's place as on
+ * vertical tabs, pinned tabs included. */
 
 @counter-style oc-alt-key {
   system: fixed;
@@ -49,7 +50,7 @@
 
   /* Rows: before the close button, in the strip's dim text. Vertical rows
    * only while the numbers are always on; held, they go on the icon. */
-  #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab:not([pinned]),
+  :root:not([omafire-tab-numbers-hold]) #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab:not([pinned]),
   :root:not([omafire-tab-numbers-hold]) #tabbrowser-tabs[orient="vertical"][expanded] .tabbrowser-tab:not([pinned]) {
     & .tab-content::after {
       content: counter(oc-tab, oc-alt-key) !important;
@@ -89,9 +90,34 @@
     }
   }
 
+  /* Held, horizontal: the strip keeps Firefox's own tab geometry, so the
+   * digit goes in the icon stack's single grid cell (a XUL stack) rather
+   * than at an offset: it lands on the favicon whatever the tab's padding.
+   * A tab with no favicon (a blank one) has an empty stack, so its label
+   * steps over by the digit while Alt is down: better than a digit drawn
+   * over the label's first letter. */
+  :root[omafire-numbers-held] #tabbrowser-tabs[orient="horizontal"] .tabbrowser-tab {
+    & .tab-icon-stack > * {
+      visibility: hidden !important;
+    }
+
+    & .tab-icon-stack::after {
+      content: counter(oc-tab, oc-held-key) !important;
+      grid-area: 1 / 1 !important;
+      place-self: center !important;
+      font-family: var(--oc-font) !important;
+      font-variant-numeric: tabular-nums !important;
+      font-size: var(--oc-label-size) !important;
+      font-weight: 700 !important;
+      line-height: 1 !important;
+      color: var(--oc-text) !important;
+      pointer-events: none !important;
+    }
+  }
+
   /* The tab the typed digits point at: its digit in the accent hue, at
    * full weight. */
-  :root[omafire-numbers-held] #tabbrowser-tabs .tabbrowser-tab[omafire-num-lit] .tab-content::after {
+  :root[omafire-numbers-held] #tabbrowser-tabs .tabbrowser-tab[omafire-num-lit] :is(.tab-content, .tab-icon-stack)::after {
     color: var(--oc-accent-mark) !important;
   }
 }
