@@ -39,7 +39,7 @@ carried its name until 0.3.0.
 ## Requirements
 
 - Omarchy 4 (Quattro) or newer.
-- Firefox 156 or newer. Zen Browser is not supported.
+- Firefox 159 or newer (the oldest release the layout matrix passes on). Zen Browser is not supported.
 
 What is tested, what is not, and the limits are in [docs/SUPPORT.md](docs/SUPPORT.md).
 

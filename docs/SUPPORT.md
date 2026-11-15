@@ -7,7 +7,7 @@ source.
 
 | | |
 |---|---|
-| **Firefox** | 156 or newer, with Nova (`browser.nova.enabled`, the default from Firefox 157; setup turns it on in the profiles it manages). The layout matrix baseline is Firefox 157 (156 was the original target). Later versions are allowed and untested until the matrix passes on them; there is no maximum-version check, so a new Firefox is never blocked, only unverified. |
+| **Firefox** | 159 or newer, with Nova (`browser.nova.enabled`, the default from Firefox 157; setup turns it on in the profiles it manages). 159 is the oldest release the layout matrix (`tools/fxlab matrix run`) passes on; it passes on 159.0.1 and 160.0. 156 to 158 may work but are unverified. Later versions are allowed and untested until the matrix passes on them; there is no maximum-version check, so a new Firefox is never blocked, only unverified. |
 | **Zen Browser** | Not supported: omafire leaves Zen profiles alone. |
 | **Omarchy** | 4 (Quattro) or newer, with Hyprland. Omafire reads the current theme's `colors.toml`. |
 | **Packaging** | The Arch package `omafire` (from a release, or `makepkg` on the repository's `PKGBUILD`). Not tested: other distributions, Snap or Flatpak Firefox. |
@@ -53,8 +53,8 @@ read (`Quattro palette not found`, `no colour omafire can read`, `Omarchy is
 not installed`). `omafire status` shows each profile as `configured`,
 `outdated`, `incomplete`, `not configured`, `conflict` (an unrelated
 `chrome/omafire` directory) or `theme checkout`. It does not check the Firefox
-version or whether Nova is on: on a Firefox older than 156 the chrome theme
-simply does not apply, and the browser keeps its own look. If the theme does
+version or whether Nova is on: on a Firefox older than 159 the chrome theme may
+not apply, and the browser keeps its own look. If the theme does
 not appear, check the version in `about:support` first.
 
 ## Troubleshooting
