@@ -52,6 +52,10 @@ const opacity = Model.ROWS.find(r => r.key === "opacity");
 assert.equal(Model.stepSlider(opacity, 0.82, 1), 0.87);
 assert.equal(Model.stepSlider(opacity, 0.98, 1), 1);
 assert.equal(Model.stepSlider(opacity, 0.52, -1), 0.5);
+// the glass floor raises the minimum, and a value below it steps up to it
+assert.equal(Model.stepSlider(opacity, 0.72, -1, 0.7), 0.7);
+assert.equal(Model.stepSlider(opacity, 0.6, 1, 0.7), 0.7);
+assert.equal(Model.stepSlider(opacity, 0.52, -1, 0), 0.5);
 const toolbar = Model.ROWS.find(r => r.key === "toolbar");
 assert.equal(Model.stepChoice(toolbar.options, "top", 1, true), "sidebar");
 assert.equal(Model.stepChoice(toolbar.options, "sidebar", 1, true), "line");

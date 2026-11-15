@@ -86,12 +86,14 @@ function stepChoice(options, value, delta, wrap) {
   return options[next].value
 }
 
-// Two decimals, the precision Firefox's pref keeps.
-function stepSlider(row, value, delta) {
+// Two decimals, the precision Firefox's pref keeps. floor raises the row's
+// minimum (opacity: the theme's glass floor).
+function stepSlider(row, value, delta, floor) {
+  var min = Math.max(row.min, Number(floor) || 0)
   var n = Number(value)
-  if (!isFinite(n)) n = row.min
+  if (!isFinite(n)) n = min
   n = Math.round((n + delta * 0.05) * 100) / 100
-  return Math.max(row.min, Math.min(row.max, n))
+  return Math.max(min, Math.min(row.max, n))
 }
 
 function wordFor(value) {

@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Quickshell
 import qs.Commons
 import qs.Ui
 import "Model.js" as Model
@@ -10,7 +11,7 @@ import "Model.js" as Model
 // goes through the omafire CLI; Firefox follows the file live.
 //
 // Keyboard: j/k or arrows move, h/l or left/right change the value, Enter or
-// Space toggles or cycles, r repairs, Esc closes.
+// Space toggles or cycles, r repairs (when something needs it), Esc closes.
 Panel {
   id: root
   moduleName: "omafire"
@@ -26,6 +27,10 @@ Panel {
   readonly property var rows: Model.visibleRows(config)
   readonly property var summary: Model.summary(omafire.status)
   readonly property bool needsRepair: summary.broken.length > 0
+  // Glass is raised to this opacity where text would be hard to read (the
+  // theme's floor, measured by sync), so the slider starts there.
+  readonly property real glassFloor: Math.max(0.5,
+    Number(omafire.status && omafire.status.glassFloor) || 0)
 
   // The cursor tracks a row key ("repair" for the button): rows come and
   // go as settings change.
@@ -47,6 +52,7 @@ Panel {
 
   onOpenedChanged: if (opened) {
     cursorActive = false
+    pointerGate.reset()
     select(cursorKeys.length > 0 ? cursorKeys[0] : "")
     omafire.refreshStatus()
     Qt.callLater(function() { keys.forceActiveFocus() })
@@ -62,9 +68,17 @@ Panel {
     if (index !== -1) lastIndex = index
   }
 
-  function hover(key) {
+  // Only a pointer that moved takes the cursor: rows appearing or shifting
+  // under a still one (a toggle shows or hides others) must not.
+  function hover(key, item, point) {
+    if (!pointerGate.moved(item, point)) return
     cursorActive = true
     select(key)
+  }
+
+  PointerMoveGate {
+    id: pointerGate
+    referenceItem: flick
   }
 
   function moveCursor(delta) {
@@ -90,7 +104,7 @@ Panel {
     var value = config[row.key]
     if (row.type === "toggle") omafire.set(row.key, delta === 0 ? !value : delta > 0)
     else if (row.type === "choice") omafire.set(row.key, Model.stepChoice(row.options, value, delta === 0 ? 1 : delta, delta === 0))
-    else if (row.type === "slider" && delta !== 0) omafire.set(row.key, Model.stepSlider(row, value, delta))
+    else if (row.type === "slider" && delta !== 0) omafire.set(row.key, Model.stepSlider(row, value, delta, row.key === "opacity" ? glassFloor : 0))
     else if (row.type === "chord" && delta === 0) {
       recordHint = ""
       recording = row.key
@@ -151,7 +165,8 @@ Panel {
         root.adjust(root.selectedKey, 0)
       }
       onTextKey: function(t) {
-        if (t === "r" || t === "R") omafire.repair()
+        // the Repair button is hidden then; a stray r must not rewrite profiles
+        if ((t === "r" || t === "R") && root.needsRepair) omafire.repair()
       }
 
       // Takes the keys while a chord row records: a chord is a modifier
@@ -238,7 +253,9 @@ Panel {
         }
 
         Repeater {
-          model: root.rows
+          // by identity: the rows are Model.js's constant objects, so a
+          // config change keeps each delegate (and the cursor on it)
+          model: ScriptModel { values: root.rows }
 
           Column {
             id: rowRoot
@@ -247,7 +264,9 @@ Panel {
             required property int index
 
             readonly property var row: modelData
-            readonly property bool firstOfSection: index === 0 || root.rows[index - 1].section !== row.section
+            // (mid-update, index can briefly outrun the new rows)
+            readonly property bool firstOfSection: index === 0 || !root.rows[index - 1]
+              || root.rows[index - 1].section !== row.section
             readonly property bool current: root.cursorActive && root.selectedKey === row.key
             readonly property var value: root.config[row.key]
 
@@ -272,6 +291,7 @@ Panel {
             }
 
             CursorSurface {
+              id: rowSurface
               width: parent.width
               height: rowBody.implicitHeight + Style.space(12)
               hasCursor: rowRoot.current
@@ -279,7 +299,8 @@ Panel {
               accent: root.accent
 
               HoverHandler {
-                onHoveredChanged: if (hovered) root.hover(rowRoot.row.key)
+                id: rowHover
+                onPointChanged: if (hovered) root.hover(rowRoot.row.key, rowSurface, rowHover.point.position)
               }
 
               // A toggle row is one click target; choices and the slider
@@ -323,6 +344,20 @@ Panel {
                       elide: Text.ElideRight
                     }
 
+                    Text {
+                      textFormat: Text.PlainText
+                      visible: text !== ""
+                      width: parent.width
+                      text: rowRoot.row.type === "slider" && rowRoot.row.key === "opacity"
+                          && root.glassFloor > (rowRoot.row.min || 0)
+                        ? "This theme stays readable from " + Math.round(root.glassFloor * 100) + "%."
+                        : rowRoot.row.hint || ""
+                      color: root.foreground
+                      opacity: 0.6
+                      font.family: root.fontFamily
+                      font.pixelSize: Style.font.caption
+                      wrapMode: Text.WordWrap
+                    }
                   }
 
                   Row {
@@ -380,7 +415,8 @@ Panel {
                     Text {
                       textFormat: Text.PlainText
                       visible: rowRoot.row.type === "slider"
-                      text: Math.round(Number(rowRoot.value) * 100) + "%"
+                      // follows a drag, not only the saved value
+                      text: Math.round(Number(slider.liveValue) * 100) + "%"
                       color: root.foreground
                       font.family: root.fontFamily
                       font.pixelSize: Style.font.body
@@ -391,10 +427,12 @@ Panel {
                 }
 
                 PanelSlider {
+                  id: slider
                   visible: rowRoot.row.type === "slider"
                   width: parent.width
                   bar: root.bar
-                  minimum: rowRoot.row.min || 0
+                  minimum: rowRoot.row.key === "opacity"
+                    ? Math.max(rowRoot.row.min || 0, root.glassFloor) : (rowRoot.row.min || 0)
                   maximum: rowRoot.row.max || 1
                   step: rowRoot.row.step || 0.01
                   value: Number(rowRoot.value)

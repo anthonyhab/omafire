@@ -329,7 +329,12 @@ func formatPayload(p *palette, escapedTheme string) string {
 	for _, key := range colorKeys {
 		fmt.Fprintf(&out, `,"%s":"%s"`, key, p.get(key))
 	}
-	out.WriteString("}}\n")
+	out.WriteString("}")
+	// Measured by sync; the shell panel's opacity slider starts there.
+	if p.floor > 0 {
+		fmt.Fprintf(&out, `,"glassFloor":%.2f`, p.floor)
+	}
+	out.WriteString("}\n")
 	return out.String()
 }
 

@@ -37,6 +37,19 @@ type statusReport struct {
 	// Chords the browser already uses, as keys.uc.js last reported them from a
 	// running window: setting name ("key-glass") -> chord and owner.
 	KeyConflicts map[string]keyConflict `json:"keyConflicts"`
+	// The opacity below which glass is raised to stay readable, as the last
+	// sync measured it (theme.json); absent before one.
+	GlassFloor float64 `json:"glassFloor,omitempty"`
+}
+
+func syncedGlassFloor() float64 {
+	var state struct {
+		GlassFloor float64 `json:"glassFloor"`
+	}
+	if data, err := os.ReadFile(stateFile); err == nil {
+		json.Unmarshal(data, &state)
+	}
+	return state.GlassFloor
 }
 
 type keyConflict struct {
@@ -109,6 +122,7 @@ func collectStatus() statusReport {
 		ShellPlugin:  fileState{shellPluginLink, shellPluginLinked()},
 		Firefox:      ff,
 		KeyConflicts: keyConflicts(ff),
+		GlassFloor:   syncedGlassFloor(),
 	}
 }
 

@@ -1,0 +1,19 @@
+#!/bin/bash
+# The omafire CLI as the panel probe needs it: settings in $FAKE_STATE/config.json,
+# every call logged to $FAKE_STATE/calls. status is the real one's shape with a
+# 0.7 glass floor; FAKE_HEALTHY=1 marks every profile configured.
+D=$FAKE_STATE
+echo "$*" >> "$D/calls"
+case $1 in
+  watch) last=""; while :; do c=$(cat "$D/config.json"); [[ $c != "$last" ]] && echo "$c" && last=$c; sleep 0.1; done ;;
+  set) shift; python3 - "$D/config.json" "$@" <<'PY'
+import json, sys
+p = sys.argv[1]; c = json.load(open(p)); a = sys.argv[2:]
+for k, v in zip(a[::2], a[1::2]):
+    c[k] = {"true": True, "false": False}.get(v, v)
+    if k == "opacity": c[k] = float(v)
+open(p, "w").write(json.dumps(c, separators=(",", ":")))
+PY
+  ;;
+  status) cat "$D/status.json" ;;
+esac

@@ -142,6 +142,7 @@ func failSkipped(skipped int, command string) {
 func syncPalette() int {
 	requireQuattro()
 	p := readPalette()
+	p.floor = glassFloor(p) // for the profiles' CSS and theme.json alike
 	payload := formatPayload(p, jsonEscape(currentThemeName()))
 	// Profile files first: the same palette for the first painted frame, and
 	// ready before theme.json below, whose change `omafire watch` reports

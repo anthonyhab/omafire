@@ -174,7 +174,11 @@ assert message["version"] == 1
 assert message["action"] == "theme-set"
 assert message["theme"] == "osaka-jade"
 assert message["palette"]["mode"] == "light"
+# sync's glass floor, which the shell panel's opacity slider starts from
+assert 0.5 <= message["glassFloor"] <= 1, message.get("glassFloor")
 PY
+[[ $("$OMAFIRE_BIN" status --json | python3 -c 'import json,sys; print(json.load(sys.stdin)["glassFloor"])') \
+   == $(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["glassFloor"])' "$STATE_FILE") ]]
 
 export OMAFIRE_HOOK_SOURCE="$TEST_ROOT/missing/omafire-hook"
 if setup_error=$("$OMAFIRE_BIN" setup 2>&1); then
