@@ -7,21 +7,26 @@ source.
 
 | | |
 |---|---|
-| **Firefox** | 159 or newer, with Nova (`browser.nova.enabled`, the default from Firefox 157; setup turns it on in the profiles it manages). 159 is the oldest release the layout matrix (`tools/fxlab matrix run`) passes on; it passes on 159.0.1 and 160.0. 156 to 158 may work but are unverified. Later versions are allowed and untested until the matrix passes on them; there is no maximum-version check, so a new Firefox is never blocked, only unverified. |
+| **Firefox** | 159 or newer, with Nova (`browser.nova.enabled`; setup turns it on in the profiles it manages). 159 is the oldest release the layout matrix (`tools/fxlab matrix run`) passes on; it passes on 159.0.1 and 160.0. 156 to 158 may work but are unverified. Later versions are allowed and untested until the matrix passes on them; there is no maximum-version check, so a new Firefox is never blocked, only unverified. |
 | **Zen Browser** | Not supported: omafire leaves Zen profiles alone. |
 | **Omarchy** | 4 (Quattro) or newer, with Hyprland. Omafire reads the current theme's `colors.toml`. |
 | **Packaging** | The Arch package `omafire` (from a release, or `makepkg` on the repository's `PKGBUILD`). Not tested: other distributions, Snap or Flatpak Firefox. |
 
 ### Layouts and options
 
-The layout matrix measures 17 cells: both `density` values (0 and 1) x top or
-sidebar toolbar x sidebar on the left or right x expanded or collapsed to the
-icon rail, plus the compact sidebar. Beyond those cells, these options are
-exercised on their own (launcher at 900 x 700 and at 125% text scale in each
-layout, split view, fullscreen, glass), not in every combination with each
-other:
+The layout matrix measures 17 cells, all with vertical tabs: both `density`
+values (0 and 1) x top or sidebar toolbar x sidebar on the left or right x
+expanded or collapsed to the icon rail, plus the compact sidebar. The line
+toolbar and horizontal tabs are not in the matrix. Beyond those cells, these
+options are exercised on their own (launcher at 900 x 700 and at 125% text
+scale in each layout, split view, fullscreen, glass), not in every
+combination with each other:
 
-- **Toolbar:** top, or sidebar (with horizontal or vertical tabs).
+- **Toolbar:** top (horizontal or vertical tabs), sidebar (vertical tabs) or
+  line (horizontal tabs). The CLI and the panel keep that pairing; a profile
+  set by hand to `omafire.layout` = line with vertical tabs gets the top
+  layout's docked row, and sidebar with horizontal tabs Firefox's own
+  toolbars.
 - **Launcher:** drop, or centred.
 - **Sidebar side:** left or right.
 - **Zen** (the sidebar layout with the sidebar hidden until reached for).

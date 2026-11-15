@@ -9,8 +9,8 @@ disappear entirely, a centred launcher, glass chrome or a floating content
 card. Colors follow the current Omarchy theme live through
 [Omafire](https://github.com/cover/omafox).
 
-Requires **Firefox 159 or newer with Nova** (`browser.nova.enabled`, the
-default from Firefox 157). The test matrix passes on 159.0.1 and 160.0; later
+Requires **Firefox 159 or newer with Nova** (`browser.nova.enabled`, which
+omafire setup turns on). The test matrix passes on 159.0.1 and 160.0; later
 versions install but are untested until the matrix passes on them. Older layouts are not
 supported.
 
@@ -30,7 +30,7 @@ Then set these in `about:config`:
 | Preference | Value | |
 |---|---|---|
 | `toolkit.legacyUserProfileCustomizations.stylesheets` | `true` | load userChrome (omafire sets it) |
-| `browser.nova.enabled` | `true` | Nova design (already the default from Firefox 157) |
+| `browser.nova.enabled` | `true` | Nova design (omafire sets it) |
 | `sidebar.revamp` | `true` | the sidebar the layout is built on |
 | `sidebar.verticalTabs` | `true` | vertical tabs |
 

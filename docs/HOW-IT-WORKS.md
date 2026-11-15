@@ -54,14 +54,15 @@ own root-owned files: nothing is loaded from the profile.
 
 - **Settings panel.** *Omafire* in the app menu (or Ctrl+Alt+O):
   toolbar and tab layout, sidebar side, launcher, density, zen, floating
-  page, glass and its opacity, tab numbers, the new tab, site colours and
-  extension glyphs. Layout changes apply without a restart.
+  page, glass and its opacity, tab numbers (and showing them only while a
+  key is held), the new tab, site colours, extension glyphs and the four
+  shortcuts. Layout changes apply without a restart.
 - **Keybindings.** Ctrl+Alt+H toggles zen (the sidebar layout with
-  the sidebar hidden), Ctrl+Alt+S switches the toolbar, Ctrl+Alt+G toggles
-  glass. Rebind with `omafire.keys.<zen|layout|glass|settings>` in
+  the sidebar hidden), Ctrl+Alt+S moves the toolbar on (top, sidebar,
+  line), Ctrl+Alt+G toggles glass, Ctrl+Alt+O opens the settings panel. Rebind with `omafire.keys.<zen|layout|glass|settings>` in
   `about:config` (a chord like `Ctrl+Alt+J`; empty to unbind). A chord
   Firefox already uses is left to Firefox. Holding Alt shows the menu bar
-  over the head band until Alt is released; a bare tap no longer pins it.
+  over the head band until Alt is released.
 - **Live palette.** A theme change reaches the whole chrome, window
   rounding and Firefox's own pages (settings, add-ons) without a restart.
 - **New tab.** `chrome://omafire/content/newtab.html` (`chrome/newtab/`):
@@ -102,12 +103,12 @@ are unrelated). `VERSION` is the one version source: make links it into the
 CLI, and the PKGBUILD's `pkgver` must match it (`tests/run.sh` checks).
 
 A release is a `v$(cat VERSION)` tag pushed to Forgejo (`git push forgejo
-v0.1.0`, never `--tags`). Forgejo CI re-runs the full gate on the tagged
+"v$(cat VERSION)"`, never `--tags`). Forgejo CI re-runs the full gate on the tagged
 commit, builds the package with makepkg, and publishes a Forgejo release
 with the package, PKGBUILD and checksums. Local `makepkg` builds are for
 development only.
 
-The CLI is Go (`cmd/omafire`; standard library plus `golang.org/x/sys`),
+The CLI is Go (`cmd/omafire`; standard library plus `golang.org/x/sys` and `golang.org/x/image`),
 built by `make`. The theme lives in `theme/` (its own [README](../theme/README.md) covers its code and
 design language). The Firefox payload the package installs is built from it on
 every `make` (`scripts/build-payload.sh`, into `build/firefox/chrome/`), so

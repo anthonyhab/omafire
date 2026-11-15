@@ -16,9 +16,30 @@ The sidebar layout and compact column owe a lot to
 under glass was learned from Zia. They are credited for the ideas; the theme is written
 here.
 
-## Go modules (linked into the `omafire` binary)
+## Artwork
 
-`golang.org/x/sys` and `golang.org/x/image`, BSD 3-Clause:
+The extension glyphs (`theme/src/icons/extensions/`) are monochrome marks
+that identify other projects' add-ons in the toolbar. The marks belong to
+their owners and are used only to name those add-ons; Omafire is not
+affiliated with any of them.
+
+- From [Simple Icons](https://simpleicons.org/) (CC0 1.0): 1Password, Steam
+  (Augmented Steam), Dark Reader, Rakuten, Reddit (Reddit Enhancement Suite),
+  uBlock Origin.
+- Traced from the add-on's own icon, under that project's licence:
+  SponsorBlock and DeArrow (GPL-3.0), Greasemonkey and Redirector (MIT),
+  Bypass Paywalls Clean (its project states no licence).
+- Multi-Account Containers: Mozilla's own glyph (MPL-2.0).
+- Drawn for Omafire: Tether, Vimium C.
+
+The new tab's shortcut editor can search Simple Icons for a brand icon; the
+list and the marks are fetched from jsDelivr when you search, not bundled
+(see [PRIVACY.md](PRIVACY.md#network)).
+
+## Go (linked into the `omafire` binary)
+
+The Go standard library, `golang.org/x/sys` and `golang.org/x/image`, all
+BSD 3-Clause under this notice:
 
 ```text
 Copyright 2009 The Go Authors.

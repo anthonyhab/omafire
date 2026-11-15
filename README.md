@@ -34,12 +34,18 @@ carried its name until 0.3.0.
   the Omarchy bar. All of them stay in step.
 - **Safe.** Works with profile-sync-daemon, backs up your own files before
   touching them, writes atomically, and removes cleanly.
-- **Local.** No account, network request, telemetry or background service.
+- **Local.** No account, telemetry or background service, and no network
+  request unless you add a feed widget to the new tab or search for a
+  shortcut icon ([Privacy](#privacy)).
 
 ## Requirements
 
-- Omarchy 4 (Quattro) or newer.
-- Firefox 159 or newer (the oldest release the layout matrix passes on). Zen Browser is not supported.
+- Omarchy 4 (Quattro) or newer, on Hyprland: the window rounding, borders
+  and glass blur are read from it. The bar icon needs the Omarchy shell's
+  plugins (`omarchy plugin`).
+- Firefox 159 or newer (the oldest release the layout matrix passes on),
+  with Nova, which setup turns on in the profiles it manages. On an older
+  Firefox the theme may not apply. Zen Browser is not supported.
 
 What is tested, what is not, and the limits are in [docs/SUPPORT.md](docs/SUPPORT.md).
 
@@ -79,13 +85,14 @@ To build it yourself instead: `makepkg -si` with this repository's
 `PKGBUILD` (it builds the Forgejo tag), or `make && sudo make install` for
 the working tree.
 
-Setup registers the Omarchy theme-change hook and immediately sends your
-current palette to every connected browser. For each profile in Firefox's
-`profiles.ini` (`~/.mozilla/firefox` where that exists, else
-`~/.config/mozilla/firefox`, where Firefox 147 and later create new profiles) it installs the theme, small marked blocks
-in `user.js`, `userChrome.css` and `userContent.css`, and the stylesheets that
-keep the first paint on your palette. Restart Firefox once after setup. Run setup once for each
-desktop user, and rerun it after creating a new browser profile. How each
+Setup registers the Omarchy theme-change hook and applies your current
+palette. For each profile in Firefox's `profiles.ini` (`~/.mozilla/firefox`
+where that exists, else `~/.config/mozilla/firefox`, where Firefox 147 and
+later create new profiles) it installs the theme, small marked blocks in
+`user.js`, `userChrome.css` and `userContent.css`, and the stylesheets that
+keep the first paint on your palette. Restart Firefox once after setup. Run
+setup once for each desktop user, and rerun it after creating a new browser
+profile. How each
 file is written, and what is left alone, is in
 [docs/SUPPORT.md](docs/SUPPORT.md#profile-safety).
 
@@ -98,22 +105,23 @@ omarchy theme set catppuccin
 ```
 
 Open the Omafire panel from Firefox's app menu (or Ctrl+Alt+O) to change the
-layout and look, or click the Omafire button in either browser to see the
-active theme, last sync and connection status. The command-line helper:
+layout and look, or click the Omafire icon in the Omarchy bar to see the
+theme and each profile's state. The command-line helper:
 
 ```bash
 omafire status    # Show the current theme and integration state
-omafire sync      # Queue the current palette for connected browsers
-omafire payload   # Print the current normalized theme message
-omafire setup     # Reconfigure the integration for this user
-omafire remove    # Remove this user's hook and saved theme state
-omafire get/set   # Read and change settings (see Settings)
+omafire sync      # Apply the current palette to Firefox
+omafire payload   # Print the theme state sync records (theme.json)
+omafire setup     # Set up or repair the integration for this user
+omafire remove    # Take Omafire out of this user's profiles, hook and bar
+omafire restore   # Put back files a setup or remove changed
+omafire get/set   # Read and change settings (also reset, watch; see Settings)
 omafire version   # Show the installed version
 ```
 
 Keybindings: Ctrl+Alt+H toggles zen (the sidebar layout with the sidebar
-hidden), Ctrl+Alt+S switches the toolbar, Ctrl+Alt+G toggles glass. They can
-be rebound; see [docs/HOW-IT-WORKS.md](docs/HOW-IT-WORKS.md#firefox-chrome-scripts).
+hidden), Ctrl+Alt+S moves the toolbar on (top, sidebar, line), Ctrl+Alt+G
+toggles glass, Ctrl+Alt+O opens the settings panel. They can be rebound; see [docs/HOW-IT-WORKS.md](docs/HOW-IT-WORKS.md#firefox-chrome-scripts).
 Holding Alt shows the menu bar until you let go.
 
 ## Settings
@@ -135,7 +143,7 @@ omafire watch                # a JSON line now and after every change
 
 | Setting | Values | Default |
 |---|---|---|
-| `toolbar` | `top`, `sidebar`, `line` (one row with horizontal tabs) | `top` |
+| `toolbar` | `top`, `sidebar` (vertical tabs), `line` (one row with horizontal tabs) | `top` |
 | `tabs` | `horizontal`, `vertical` | `horizontal` |
 | `side` | `left`, `right` (vertical tabs) | `left` |
 | `launcher` | `drop`, `center` (sidebar layout) | `drop` |
@@ -155,6 +163,11 @@ omafire watch                # a JSON line now and after every change
 | `key-glass` | a shortcut, or empty | `Ctrl+Alt+G` |
 | `key-settings` | a shortcut, or empty | `Ctrl+Alt+O` |
 
+The sidebar toolbar holds vertical tabs and the line toolbar horizontal
+ones, so the two settings move together: `omafire set toolbar sidebar` also
+makes the tabs vertical, `toolbar line` horizontal, and changing `tabs`
+afterwards puts the toolbar back on top. The top toolbar takes either.
+
 The first Firefox to start without a file creates it from that profile's
 settings. A value the file gets wrong is reported and its default used; a
 file that is not JSON is left alone, and Firefox keeps its current settings
@@ -172,7 +185,6 @@ r repairs.
 
 Setup enables it once. Disable it with `omarchy plugin disable omafire` and
 later setups leave it off; `omafire remove` takes it out.
-
 
 ## Troubleshooting
 
@@ -193,9 +205,11 @@ sudo pacman -Rns omafire
 ```
 
 `omafire remove` also deletes the preferences that mark a Firefox profile as
-Omafire's from `prefs.js` (`omafire.managed`, the forced page colours,
-the accent colours): Firefox copies `user.js`
-values there, and the loader keeps running while `omafire.managed` is set.
+Omafire's from `prefs.js` (`omafire.managed`, every other `omafire.*` pref but
+the script switches, the forced page colours, the accent colours), and the
+new tab's picked image and caches from the profile: Firefox copies `user.js`
+values into `prefs.js`, and the loader keeps running while `omafire.managed`
+is set.
 It only edits `prefs.js` while Firefox is closed, because a running Firefox
 rewrites the file on exit; if Firefox is running it says so, and you run
 `omafire remove` again after closing it. Feature toggles from the block
@@ -207,9 +221,11 @@ forced colours stay until you close it and run `omafire remove` again.
 
 ## Privacy
 
-Omafire makes no network requests and does not collect or transmit data. It
-reads your local Omarchy palette and wallpaper and writes the managed local
-profile files described above. See the [privacy statement](PRIVACY.md).
+Omafire collects and transmits no data. It reads your local Omarchy palette
+and wallpaper and writes the managed local profile files described above. It
+opens a network connection only for what you add yourself: a feed widget on
+the new tab (Hacker News, a subreddit, an RSS feed, the weather) and the
+brand-icon search in the shortcut editor. See the [privacy statement](PRIVACY.md).
 
 ## More
 
