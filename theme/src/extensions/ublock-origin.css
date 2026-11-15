@@ -2,9 +2,11 @@
  *. Its pages read a ladder of custom properties; the ones that take a
  * whole colour are pointed at the --oc-* tokens, the surfaces and ink it paints through are set
  * directly, and the state colours (allow green, block red, the logger's rows) are left alone:
- * they carry meaning. The extension's UUID is per install, so the match is the page path. */
+ * they carry meaning. The extension's UUID is per install, so the match is the page path,
+ * which any extension's settings.html or about.html shares: every rule is held to pages that
+ * load uBlock's own theme sheet (css/themes/default.css). */
 @-moz-document regexp("moz-extension://[^/]+/(popup-fenix|dashboard|settings|3p-filters|1p-filters|dyna-rules|whitelist|support|about|advanced-settings|logger-ui|devtools|document-blocked)\\.html.*") {
-  :root {
+  :root:has(link[href="css/themes/default.css"]) {
     --font-family: var(--oc-font) !important;
     --button-border-radius: 0 !important;
     --button-border-size: 1px !important;
@@ -38,28 +40,29 @@
     --cm-gutter-border: var(--oc-line) !important;
     --cm-active-line: var(--oc-hover) !important;
     accent-color: var(--oc-accent) !important;
-  }
-  html, body {
-    background-color: var(--oc-canvas) !important;
-    color: var(--oc-text) !important;
-    font-family: var(--oc-font) !important;
-  }
-  button, select, input, textarea {
-    font-family: inherit !important;
-    border-radius: 0 !important;
-  }
-  button:not(.tabButton), select, input:not([type=checkbox], [type=radio], [type=range], [type=color]), textarea {
-    border: 1px solid var(--oc-line) !important;
-  }
-  #sticky {
-    background-color: var(--oc-frame) !important;
-  }
-  button:not(.tabButton):hover, select:hover {
-    background-color: var(--oc-field-hover) !important;
-    border-color: var(--oc-line-strong) !important;
-  }
-  :focus-visible {
-    outline: 1px solid var(--oc-focus) !important;
-    outline-offset: -1px !important;
+
+    &, & > body {
+      background-color: var(--oc-canvas) !important;
+      color: var(--oc-text) !important;
+      font-family: var(--oc-font) !important;
+    }
+    & :is(button, select, input, textarea) {
+      font-family: inherit !important;
+      border-radius: 0 !important;
+    }
+    & :is(button:not(.tabButton), select, input:not([type=checkbox], [type=radio], [type=range], [type=color]), textarea) {
+      border: 1px solid var(--oc-line) !important;
+    }
+    & #sticky {
+      background-color: var(--oc-frame) !important;
+    }
+    & :is(button:not(.tabButton), select):hover {
+      background-color: var(--oc-field-hover) !important;
+      border-color: var(--oc-line-strong) !important;
+    }
+    & :focus-visible {
+      outline: 1px solid var(--oc-focus) !important;
+      outline-offset: -1px !important;
+    }
   }
 }
