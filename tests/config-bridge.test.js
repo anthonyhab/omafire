@@ -5,7 +5,9 @@
 //   - a setting changed back while its `omafire set` is still running is
 //     written again, not dropped;
 //   - a `omafire set` that fails (nonzero exit, or no process) puts the prefs
-//     back to the file's value instead of leaving them ahead of it.
+//     back to the file's value instead of leaving them ahead of it;
+//   - a sync that lands while no watcher runs (before the first is armed,
+//     or between one's exit and the next) still refreshes the palette.
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const os = require("node:os");
@@ -23,8 +25,37 @@ const source = fs.readFileSync(path.join(root, "chrome", "config.sys.mjs"), "utf
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-async function session(name, onSet) {
+// A scripted `omafire watch`: lines are fed with say(); end() exits it.
+function scriptedWatch() {
+  const queue = [];
+  let wake = null;
+  const push = chunk => { queue.push(chunk); wake?.(); };
+  return {
+    say: line => push(`${line}\n`),
+    end: () => push(""),
+    process: {
+      stdout: {readString: async () => {
+        while (!queue.length) {
+          await new Promise(resolve => { wake = resolve; });
+        }
+        return queue.shift();
+      }},
+      wait: async () => ({exitCode: 0}),
+      kill() {},
+    },
+  };
+}
+
+const chromeDir = path.join(dir, "chrome");
+fs.mkdirSync(chromeDir);
+const palette = path.join(chromeDir, "omafire-palette.css");
+let clock = 1700000000;
+const sync = () => { fs.writeFileSync(palette, ":root {}"); fs.utimesSync(palette, ++clock, clock); };
+sync();
+
+async function session(name, onSet, watchers = []) {
   const calls = [];
+  const notified = [];
   const values = new Map();
   const observers = [];
   const prefs = {
@@ -49,9 +80,11 @@ async function session(name, onSet) {
   globalThis.Services = {
     prefs,
     env: {get: n => (n === "OMAFIRE_CONFIG" ? configFile : n === "OMAFIRE_BIN" ? "/bin/omafire" : "")},
-    obs: {addObserver() {}},
+    obs: {addObserver() {}, notifyObservers: (_s, topic) => notified.push(topic)},
+    dirsvc: {get: () => ({path: chromeDir})},
   };
   globalThis.PathUtils = {join: (...p) => p.join("/")};
+  globalThis.IOUtils = {stat: async p => ({lastModified: fs.statSync(p).mtimeMs})};
   globalThis.Cc = {
     "@mozilla.org/file/local;1": {createInstance: () => ({initWithPath(p) { this.p = p; }})},
     "@mozilla.org/network/file-input-stream;1": {createInstance: () => ({
@@ -69,7 +102,9 @@ async function session(name, onSet) {
     Subprocess: {
       async call({arguments: args}) {
         if (args[0] === "watch") {
-          return {stdout: {readString: () => new Promise(() => {})}, wait: () => new Promise(() => {}), kill() {}};
+          const next = watchers.shift();
+          return next ? next.process
+            : {stdout: {readString: () => new Promise(() => {})}, wait: () => new Promise(() => {}), kill() {}};
         }
         calls.push(args.slice(1).join(" "));
         const result = await onSet(calls.length);
@@ -83,7 +118,7 @@ async function session(name, onSet) {
   const {OmafireConfig} = await import(file);
   OmafireConfig.start();
   await sleep(20);
-  return {calls, prefs, values};
+  return {calls, prefs, values, notified};
 }
 
 (async () => {
@@ -115,6 +150,40 @@ async function session(name, onSet) {
     s.prefs.setBoolPref("omafire.translucency", true);
     await sleep(450);
     assert.equal(s.values.get("omafire.translucency"), false);
+  }
+  // 7n3/S8: nothing changed by the time the watcher arms: no refresh.
+  {
+    const w = scriptedWatch();
+    const s = await session("quiet", async () => 0, [w]);
+    w.say("{}");
+    await sleep(30);
+    assert.deepEqual(s.notified, []);
+    w.say("palette");     // a sync while it watches, as before
+    await sleep(30);
+    assert.deepEqual(s.notified, ["omafire-palette-changed"]);
+  }
+  // A sync before the first watcher is armed is caught when it arms.
+  {
+    const w = scriptedWatch();
+    const s = await session("early", async () => 0, [w]);
+    sync();
+    w.say("{}");
+    await sleep(30);
+    assert.deepEqual(s.notified, ["omafire-palette-changed"]);
+  }
+  // A sync in the gap between a watcher's exit and the next one.
+  {
+    const [first, second] = [scriptedWatch(), scriptedWatch()];
+    const s = await session("gap", async () => 0, [first, second]);
+    first.say("{}");
+    await sleep(30);
+    first.end();
+    await sleep(100);
+    sync();
+    await sleep(1000);    // the restart delay
+    second.say("{}");
+    await sleep(30);
+    assert.deepEqual(s.notified, ["omafire-palette-changed"]);
   }
   fs.rmSync(dir, {recursive: true});
   console.log("config-bridge.test.js: ok");

@@ -293,6 +293,30 @@ const observer = {
   },
 };
 
+// `omafire watch` reports a sync only while it runs: one that lands before
+// the first watcher is armed, or between a watcher's exit and the next,
+// goes unseen. So the palette files live-palette reads are stamped (their
+// mtimes) when the session starts and at each palette line, and a watcher
+// that has just armed (its first line) has the windows refresh if the
+// stamp moved. A refresh is idempotent; an unchanged stamp costs nothing.
+const PALETTE_FILES = ["omafire-palette.css", "omafire-content-palette.css", "omafire-radius.css"];
+let paletteSeen = null;
+function paletteStamp() {
+  const chrome = Services.dirsvc.get("UChrm", Ci.nsIFile).path;
+  return Promise.all(PALETTE_FILES.map(name => IOUtils.stat(PathUtils.join(chrome, name))
+    .then(info => info.lastModified, () => 0))).then(times => times.join(" "));
+}
+function paletteChanged() {
+  paletteSeen = paletteStamp().catch(() => "");
+  Services.obs.notifyObservers(null, "omafire-palette-changed");
+}
+async function catchUp() {
+  const [seen, now] = await Promise.all([paletteSeen, paletteStamp()]);
+  if (now !== seen) {
+    paletteChanged();
+  }
+}
+
 async function watch() {
   let delay = 1000;
   while (!stopping) {
@@ -300,6 +324,7 @@ async function watch() {
       watcher = await Subprocess.call({
         command: await findBinary(), arguments: ["watch"], stdin: "pipe", stderr: "stdout",
       });
+      let armed = false;
       let buffer = "";
       for (;;) {
         const chunk = await watcher.stdout.readString();
@@ -311,8 +336,16 @@ async function watch() {
         while ((nl = buffer.indexOf("\n")) >= 0) {
           const line = buffer.slice(0, nl);
           buffer = buffer.slice(nl + 1);
-          if (line === "palette" || line === "wallpaper") {
-            Services.obs.notifyObservers(null, `omafire-${line}-changed`);
+          if (!armed) {
+            armed = true;
+            catchUp().catch(error => console.error(LOG, "palette:", error));
+          }
+          if (line === "palette") {
+            paletteChanged();
+            continue;
+          }
+          if (line === "wallpaper") {
+            Services.obs.notifyObservers(null, "omafire-wallpaper-changed");
             continue;
           }
           if (!line.startsWith("{")) {
@@ -370,6 +403,8 @@ export const OmafireConfig = {
       return;
     }
     started = true;
+    // before the first window reads the palette files
+    paletteSeen = (async () => paletteStamp())().catch(() => "");
 
     let text = null;
     try {
