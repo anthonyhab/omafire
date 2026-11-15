@@ -98,7 +98,7 @@
   font-family: var(--oc-font) !important;
   font-size: var(--toolbarbutton-badge-font-size, 10px) !important;
   background-color: var(--oc-accent) !important;
-  color: oklch(from var(--oc-accent) clamp(0, (0.62 - l) * 1000, 1) 0 0) !important;
+  color: var(--oc-on-accent) !important;
   box-shadow: none !important;
 }
 

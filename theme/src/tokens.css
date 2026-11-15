@@ -147,6 +147,9 @@
   --oc-field-rest: color-mix(in srgb, var(--oc-text) 5%, transparent);
   --oc-field-hover: color-mix(in srgb, var(--oc-text) 10%, transparent);
   --oc-accent-wash: color-mix(in srgb, var(--oc-accent) 22%, transparent);
+  /* Text on an accent fill (badges): black or white by the accent's own
+   * lightness, so it reads on a pale accent as on a deep one. */
+  --oc-on-accent: oklch(from var(--oc-accent) clamp(0, (0.62 - l) * 1000, 1) 0 0);
   /* The active tab's light: strong at its active edge, soft by the middle,
    * clear past three quarters. A hovered tab gets a hint of the same. Use
    * as linear-gradient(<direction>, var(--oc-glow-falloff)). */
