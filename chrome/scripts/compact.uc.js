@@ -127,26 +127,12 @@
     sidebarMain.requestUpdate();
   }
 
-  function withSidebarMain(fn) {
-    const find = () => document.querySelector("sidebar-main");
-    const el = find();
-    if (el) {
-      fn(el);
-      return;
-    }
-    const topic = "browser-delayed-startup-finished";
-    const observer = {
-      observe(subject) {
-        if (subject === window) {
-          Services.obs.removeObserver(observer, topic);
-          const late = find();
-          if (late) {
-            fn(late);
-          }
-        }
-      },
-    };
-    Services.obs.addObserver(observer, topic);
+  /* sidebar-main is browser.xhtml markup, there before the loader runs
+   * this at browser-delayed-startup-finished. A window without one (none
+   * in Firefox 160) gets nothing: waiting for that topic again would only
+   * keep the window alive, since it has already fired for this window. */
+  const sidebarMain = document.querySelector("sidebar-main");
+  if (sidebarMain) {
+    guardToolsObserver(sidebarMain);
   }
-  withSidebarMain(guardToolsObserver);
 })();
