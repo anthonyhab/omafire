@@ -79,6 +79,16 @@ own root-owned files: nothing is loaded from the profile.
   (a tab's or the toolbar's context menu, the new-tab container menu,
   Back's history) is open, or while the keyboard is on a sidebar tool.
   Without it those menus open over a column that has already hidden.
+- **Light sites.** A site set to Light in Cinder's panel gets the light
+  colour scheme from its first paint, frames included
+  (`site-scheme.sys.mjs`). It reads two keys of Cinder's extension storage,
+  `modes` (site to Light, Dark or Off) and `enabled`, when Cinder starts and
+  whenever Cinder writes them; nothing else of Cinder's.
+- **Pseudo-state** (off unless `omafire.pseudo-state` is true). Lets
+  Cinder's inspector lock `:hover`, `:focus` and the like on a page's own
+  elements, through a window actor any http(s) page can message. A page
+  could use the reply to tell that omafire is installed, so it stays off
+  outside profiles that audit pages.
 
 Turn them all off with `omafire.scripts` = false, or some with
 `omafire.scripts.disabled` (e.g. `keys, live-palette`). `config` in that list

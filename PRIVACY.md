@@ -14,8 +14,13 @@ nothing in it sends data to any server.
 - **Firefox's `profiles.ini`, and the files setup manages in each
   profile** (`user.js`, `userChrome.css`, `userContent.css`, and `prefs.js` on
   removal, to clear the preferences Omafire set).
+- **Cinder's per-site choices**, if the Cinder add-on is installed: the
+  `modes` (each site you set to Light, Dark or Off) and `enabled` keys of its
+  storage, read inside the browser so a site you set to Light also gets the
+  light colour scheme. Nothing else of Cinder's is read, and the choices go
+  nowhere.
 
-It does not read browsing history, bookmarks, cookies, passwords, page
+Apart from those, it does not read browsing history, bookmarks, cookies, passwords, page
 contents or any other browser data. The new-tab page lists your most visited
 sites from Firefox's own top sites; that list stays in the browser and
 is not stored or sent anywhere by Omafire.
@@ -42,6 +47,11 @@ them only to theme the browser and Omafire's new-tab page. To colour a tab's
 glow (the `site-colors` setting) they read the icon Firefox already shows for
 that tab; the colour is computed in the browser and kept in memory. A
 private window's new tab shows no history.
+
+Web pages can't detect Omafire through it. The one hook a page can
+message, the pseudo-state actor Cinder's inspector uses to lock a page's
+hover and focus states, is off unless you set `omafire.pseudo-state` to true
+in `about:config`.
 
 ## Network
 
