@@ -13,11 +13,14 @@ depends=('glibc')
 makedepends=('git' 'go')
 # tests/run.sh: syntax checks, the node suites.
 checkdepends=('nodejs' 'python' 'shellcheck')
-# Replaces its earlier names; /usr/bin/omafox stays as a forwarding shim
-# so omafox's theme hook keeps working until `omafire setup` replaces it.
+# Stands in for omafox, which it grew from (/usr/bin/omafox stays as a
+# forwarding shim so omafox's theme hook keeps working until `omafire setup`
+# replaces it), and replaces only its own earlier name: omafox is upstream's
+# package, and replaces= would have pacman swap it out on any system that
+# syncs a repo carrying this one. Installing omafire over omafox asks.
 provides=('omafox' 'omarchy-firefox')
 conflicts=('omafox' 'omarchy-firefox')
-replaces=('omafox' 'omarchy-firefox')
+replaces=('omarchy-firefox')
 # Guarded removal of an older unpackaged loader; setup instructions.
 install=omafire.install
 # No separate -debug package in releases.

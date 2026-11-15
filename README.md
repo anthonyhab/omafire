@@ -55,7 +55,8 @@ page](https://git.hab.rip/habibe/omafire/releases).
    sudo pacman -U omafire-<version>-1-x86_64.pkg.tar.zst
    ```
 
-   It replaces the `omafox` and `omarchy-firefox` packages. An older,
+   It replaces the `omarchy-firefox` package, and pacman offers to remove
+   `omafox` if that is installed (the two conflict). An older,
    unpackaged Omarchy Firefox loader (`/usr/lib/firefox/mozilla.cfg` and
    friends) is removed if it is byte for byte a known version, and
    reported otherwise.

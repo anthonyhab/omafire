@@ -18,6 +18,15 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# replaces= only names this project's own earlier packages: pacman swaps out
+# whatever it lists on any system syncing a repo that carries omafire, and
+# omafox is upstream's.
+replaces=$(bash -c 'source "$1"; printf "%s\n" "${replaces[@]}"' _ "$PROJECT_DIR/PKGBUILD")
+if [[ "$replaces" != "omarchy-firefox" ]]; then
+  echo "PKGBUILD replaces= names a package omafire doesn't own: $replaces" >&2
+  exit 1
+fi
+
 mkdir -p "$TEST_HOME" "$MOCK_BIN" "$THEME_DIR"
 install -m 755 "$TEST_DIR/fixtures/bin/omarchy" "$MOCK_BIN/omarchy"
 cp "$TEST_DIR/fixtures/colors.toml" "$THEME_DIR/colors.toml"
