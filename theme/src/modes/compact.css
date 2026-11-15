@@ -105,9 +105,14 @@
       clip-path: inset(0 -40px -40px -40px) !important;
     }
 
+    /* Open, the field's card is frosted (backdrop-filter), and an
+     * ancestor below full opacity is a group its blur can't see past: the
+     * toolbox is opaque at once and only slides in. */
     &:has(#urlbar:is([popover-open], [focused])) #navigator-toolbox {
       translate: none !important;
       clip-path: none !important;
+      opacity: 1 !important;
+      transition: translate var(--oc-slow) var(--oc-ease) !important;
     }
 
     /* Sidebar on the right (sidebar.position_start = false): the same card
