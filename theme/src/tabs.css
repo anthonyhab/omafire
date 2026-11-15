@@ -587,12 +587,22 @@
     box-shadow: inset 0 0 0 1px var(--oc-line-strong) !important;
   }
 
+  /* Firefox pulls each half out over the strip's inset; the pair's own
+   * margin is the inset here. */
   & .tabbrowser-tab {
+    margin-inline: 0 !important;
     padding: 0 !important;
+    border: none !important;
     --oc-tick-end: 0px;
     /* Nova shrinks split halves to 24px in compact density. */
     --tab-min-height: var(--oc-row) !important;
     --tab-collapsed-background-width: var(--oc-button) !important;
+  }
+
+  /* Nova's divider is a border on a half's stack (the first half's end
+   * in the rail, the second's start beside it); ours are below. */
+  & .tabbrowser-tab > .tab-stack {
+    border: none !important;
   }
 
   & .tabbrowser-tab:not([pinned]) .tab-background {
@@ -611,10 +621,11 @@
 }
 
 #tabbrowser-tabs[orient="vertical"][expanded] tab-split-view-wrapper {
-  /* Nova draws its own divider, a light border on the second half of an
-   * inactive pair; the halves' hairline below is the divider here. */
-  & .tabbrowser-tab {
-    border: none !important;
+  /* Expanded, a tab's content box is one label line tall (contain: size,
+   * 1lh, about 25px), which a row's margins hide but a half, with none,
+   * would grow to: a half is one row, --oc-row. */
+  & .tabbrowser-tab .tab-content {
+    contain-intrinsic-block-size: var(--oc-row) !important;
   }
 
   & .tabbrowser-tab + .tabbrowser-tab .tab-background {
@@ -652,7 +663,6 @@
   & .tabbrowser-tab {
     width: var(--oc-button) !important;
     min-width: 0 !important;
-    border: none !important;
   }
 
   & .tabbrowser-tab:not([pinned]) .tab-content {
