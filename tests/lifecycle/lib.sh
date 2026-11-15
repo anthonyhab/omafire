@@ -18,9 +18,13 @@ sandbox() {
   local extra=()
   # A browser start: the staged package's Firefox loader replaces the
   # host's (SB_LOADER=none: no loader, as after pacman -R), and the display
-  # is test-launch's private headless sway.
+  # is test-launch's private headless sway. SB_WAYLAND is its socket, the
+  # only thing of the user's runtime dir the sandbox gets (/run/user is a
+  # tmpfs in it): bound into a runtime dir of the sandbox's own, on that
+  # tmpfs so the socket path stays within sun_path's 108 bytes.
   if [[ -n ${SB_WAYLAND:-} ]]; then
-    extra+=(--setenv XDG_RUNTIME_DIR "$SB_WAYLAND" --setenv WAYLAND_DISPLAY wayland-1
+    extra+=(--perms 0700 --dir /run/user/lc --bind "$SB_WAYLAND" "/run/user/lc/${SB_WAYLAND##*/}"
+      --setenv XDG_RUNTIME_DIR /run/user/lc --setenv WAYLAND_DISPLAY "${SB_WAYLAND##*/}"
       --setenv MOZ_ENABLE_WAYLAND 1)
   fi
   if [[ ${SB_LOADER:-} == none ]]; then
@@ -40,7 +44,18 @@ sandbox() {
   if [[ -e $pkg/$host ]]; then
     extra+=(--ro-bind "$pkg/$host" "/$host")
   fi
-  bwrap --ro-bind / / --dev /dev --proc /proc \
+  # bwrap binds only onto paths the read-only host root has, and can't
+  # create one under root-owned /usr. On a host whose own package no longer
+  # has those, /usr is an overlay (before any bind under it) whose upper
+  # layer, ours, already holds the mount points.
+  local root=(--ro-bind / /)
+  if [[ -e $pkg/usr/lib/omafire && ! -d /usr/lib/omafire ]] || [[ -e $pkg/$host && ! -e /$host ]]; then
+    local ovl=$SCR/usr-overlay up=${host#usr/}
+    rm -rf "$ovl" && mkdir -p "$ovl/upper/lib/omafire" "$ovl/upper/${up%/*}" "$ovl/work"
+    : > "$ovl/upper/$up"
+    root+=(--overlay-src /usr --overlay "$ovl/upper" "$ovl/work" /usr)
+  fi
+  bwrap "${root[@]}" --dev /dev --proc /proc \
     --tmpfs /run/user --tmpfs /home \
     --bind "$SCR" "$SCR" \
     --ro-bind "$pkg/usr/bin/omafire" /usr/bin/omafire \
@@ -100,14 +115,26 @@ note() { mkdir -p "$EVID/$1"; printf '%s\n' "$2" >> "$EVID/$1/log.md"; }
 # sandbox, shown on test-launch's headless output; screenshot after it
 # settles, then a TERM quit. Records whether it stayed up, whether the
 # packaged loader installed the Omafire extension, and the screenshot.
-LC_RT=/tmp/test-launch-rt-$UID
-lc_sway() { swaymsg -s "$(ls "$LC_RT"/sway-ipc.*.sock | head -1)" "$@"; }
+# test-launch's headless display, from the record it keeps of it; refused
+# when it names the desktop's Wayland socket.
+LC_ENV=${XDG_STATE_HOME:-$HOME/.local/state}/test-launch/display/env.json
+lc_display() {
+  python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[sys.argv[2]])' "$LC_ENV" "$1"
+}
+lc_sway() { swaymsg -s "$(lc_display SWAYSOCK)" "$@"; }
+lc_wayland() {
+  local wl; wl=$(lc_display WAYLAND_DISPLAY) || return 1
+  if [[ $wl == "${WAYLAND_DISPLAY:-}" && ${SWAYSOCK:-} != "$(lc_display SWAYSOCK)" ]]; then
+    echo "refusing: test-launch's display is the desktop's ($wl)" >&2; return 1
+  fi
+  printf '%s\n' "$wl"
+}
 
 # lc_output: a headless output of our own in test-launch's sway (as fxlab
 # does), so no other session's window lands in our screenshots.
 lc_output() {
   [[ -n ${LC_OUTPUT:-} ]] && return
-  test-launch true >/dev/null 2>&1 || true   # starts the session if needed
+  test-launch -- true >/dev/null 2>&1 || true   # starts the display if needed
   local before
   before=$(lc_sway -t get_outputs | python3 -c 'import json,sys; print(" ".join(o["name"] for o in json.load(sys.stdin)))')
   lc_sway create_output >/dev/null
@@ -119,11 +146,12 @@ lc_output_done() { [[ -n ${LC_OUTPUT:-} ]] && lc_sway "output $LC_OUTPUT unplug"
 
 ffstart() {
   local scenario=$1 label=$2 pkg=$3 profile=$4 dir=$EVID/$1
-  local rt=$LC_RT pidfile=$SCR/ff.pid alive=no
+  local pidfile=$SCR/ff.pid alive=no wl
   mkdir -p "$dir"
   rm -f "$pidfile"
   lc_output
-  SB_WAYLAND=$rt sandbox "$pkg" sh -c 'firefox --no-remote --profile "$1" about:blank & echo $! > "$2"; wait' \
+  wl=$(lc_wayland) || return 1
+  SB_WAYLAND=$XDG_RUNTIME_DIR/$wl sandbox "$pkg" sh -c 'firefox --no-remote --profile "$1" about:blank & echo $! > "$2"; wait' \
     sh "$profile" "$pidfile" > "$dir/ff-$label.log" 2>&1 &
   local runner=$!
   for _ in $(seq 50); do [[ -s $pidfile ]] && break; sleep 0.1; done
@@ -132,7 +160,7 @@ ffstart() {
   [[ -s $pidfile ]] && lc_sway "[pid=$(cat "$pidfile")] move container to workspace $LC_WORKSPACE" >/dev/null 2>&1 || true
   sleep "${FF_SETTLE:-12}"
   if [[ -f $pidfile ]] && kill -0 "$(cat "$pidfile")" 2>/dev/null; then alive=yes; fi
-  XDG_RUNTIME_DIR=$rt WAYLAND_DISPLAY=wayland-1 grim -o "$LC_OUTPUT" "$dir/ff-$label.png" 2>/dev/null || true
+  WAYLAND_DISPLAY=$wl grim -o "$LC_OUTPUT" "$dir/ff-$label.png" 2>/dev/null || true
   [[ -f $pidfile ]] && kill -TERM "$(cat "$pidfile")" 2>/dev/null || true
   wait "$runner" 2>/dev/null || true
   local addon=no
@@ -141,11 +169,13 @@ ffstart() {
   # Personal CSS markers: #ff00ff from userChrome.css, #00ff00 from
   # customChrome.css (the personal fixture's sentinel rules).
   local marks
-  marks=$(python3 -c 'import sys; from PIL import Image
-im = Image.open(sys.argv[1]).convert("RGB"); px = list(im.getdata())
+  # (raw RGB from ImageMagick: no Python imaging library needed)
+  marks=$(magick "$dir/ff-$label.png" -depth 8 rgb:- 2>/dev/null | python3 -c 'import sys
+b = sys.stdin.buffer.read(); px = list(zip(b[0::3], b[1::3], b[2::3]))
+if not px: sys.exit(1)
 m = sum(1 for r, g, b in px if r > 180 and g < 70 and b > 180)
 gr = sum(1 for r, g, b in px if r < 70 and g > 120 and b < 70)
-print("magenta(userChrome)=%d green(customChrome)=%d" % (m, gr))' "$dir/ff-$label.png" 2>/dev/null)
+print("magenta(userChrome)=%d green(customChrome)=%d" % (m, gr))') || marks="(no screenshot)"
   FF_MARKS=$marks
   {
     printf '\n#### fresh Firefox: %s\n\n' "$label"
