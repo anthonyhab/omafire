@@ -2,7 +2,12 @@
 # Exits 0 only if Forgejo ran CI on exactly SHA and every run passed. Ask it
 # before fast-forwarding main or installing a tag.
 #   scripts/ci-status SHA
+# (forgejo-cli 0.7 lists tasks as "#N (sha10) status name ...", newest
+# first, 20 a page; a commit's runs sit in the first few pages)
 set -eu
 sha=$(git rev-parse "${1:?usage: scripts/ci-status SHA}^{commit}")
-fj runs --sha "$sha" -R habibe/omafire --json |
-  jq -e --arg s "$sha" '[.[] | select(.commit_sha == $s)] | length > 0 and all(.status == "success")' >/dev/null
+short=$(printf %.10s "$sha")
+tasks=$(for p in 1 2 3; do fj -H git.hab.rip actions tasks -r habibe/omafire -p "$p"; done |
+  grep -F "($short) " || true)
+[ -n "$tasks" ] || exit 1
+! printf '%s\n' "$tasks" | awk '$3 != "success"' | grep -q .

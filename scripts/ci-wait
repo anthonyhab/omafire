@@ -2,4 +2,19 @@
 # Waits for Forgejo CI on a pushed commit and exits 0 only if it passed.
 #   scripts/ci-wait SHA
 set -eu
-exec fj watch --sha "${1:?usage: scripts/ci-wait SHA}" -R habibe/omafire
+sha=$(git rev-parse "${1:?usage: scripts/ci-wait SHA}^{commit}")
+short=$(printf %.10s "$sha")
+here=$(dirname "$0")
+# (until the commit has runs and none is still queued or running; 30 min)
+i=0
+while [ "$i" -lt 180 ]; do
+  tasks=$(fj -H git.hab.rip actions tasks -r habibe/omafire | grep -F "($short) " || true)
+  if [ -n "$tasks" ] && ! printf '%s\n' "$tasks" | awk '$3 == "running" || $3 == "waiting" || $3 == "blocked"' | grep -q .; then
+    printf '%s\n' "$tasks"
+    exec "$here/ci-status" "$sha"
+  fi
+  i=$((i + 1))
+  timeout 10 tail -f /dev/null || true
+done
+echo "ci-wait: no finished CI on $short after 30 minutes" >&2
+exit 1
